@@ -72,7 +72,7 @@
                     </div>
                     <div class="form-field">
                         <label for="rfc">RFC</label>
-                        <input type="text" placeholder="" v-model="form.rfc" style="text-transform: uppercase;"
+                        <input type="text" placeholder="" minlength="13" maxlength="13" v-model="form.rfc" style="text-transform: uppercase;"
                             required />
 
                     </div>
@@ -80,12 +80,12 @@
                 <div class="form-row">
                     <div class="form-field">
                         <label for="numtrabajador">Num. Trabajador</label>
-                        <input type="number" placeholder="" v-model="form.numTrabajador" required />
+                        <input type="number" placeholder="" min="0" v-model="form.numTrabajador" required />
 
                     </div>
                     <div class="form-field">
                         <label for="curp">CURP</label>
-                        <input type="text" placeholder="" v-model="form.curp" required
+                        <input type="text" placeholder="" minlength="16" maxlength="16" v-model="form.curp" required
                             style="text-transform: uppercase;" />
                     </div>
 
