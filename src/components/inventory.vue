@@ -1,5 +1,7 @@
 <template>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+
 
     <div class="container">
         <!-- Menú de navegación -->
@@ -10,7 +12,7 @@
                     height="auto" />
             </div>
             <div class="navbar-center">
-                <h1>Nueva Contraseña</h1>
+                <h1>Control de Inventario</h1>
                 <p>Sistema inventario y Almacén de Radio y Televisión de Hidalgo</p>
             </div>
             <div class="navbar-right">
@@ -52,66 +54,54 @@
                     <button @click="navigateTo('users')">Ver proveedores</button>
                 </div>
             </div>
+        </div>
+        <div class="menu">
+            <!-- Fila 1 -->
+            <div class="button-card" @click="navigateTo2('login')">
+                <i class="fa fa-arrow-down"></i>
+                <span>Historial de bajas</span>
+            </div>
 
+            <div class="button-card" @click="navigateTo2('gestion-usuarios')">
+                <i class="fa fa-arrow-circle-up"></i>
+                <span>Alta de Bienes</span>
+            </div>
+
+            <div class="button-card" @click="navigateTo2('almacen')">
+                <i class="fa fa-arrow-circle-down"></i>
+                <span>Baja de Bienes</span>
+            </div>
         </div>
 
-        <!-- Formulario -->
-        <div class="form-container">
-            <form @submit.prevent="registerUser">
+        <!-- Nueva fila de botones -->
+        <div class="menu">
+            <div class="button-card" @click="navigateTo2('mi-resguardo')">
+                <i class="fas fa-clipboard"></i>
+                <span>Mi Resguardo</span>
+            </div>
 
+            <div class="button-card" @click="navigateTo2('facturas')">
+                <i class="fas fa-file-invoice"></i>
+                <span>Facturas</span>
+            </div>
 
-
-                <div class="form-field">
-                    <label for="actualpassword">Contraseña</label>
-                    <div class="input-wrapper">
-                        <input :type="showPassword ? 'text' : 'password'" v-model="form.password" required />
-                        <i :class="showPassword ? 'fa fa-eye-slash' : 'fa fa-eye'"
-                            @click="showPassword = !showPassword"></i>
-                    </div>
-                </div>
-                <div class="form-field">
-                    <label for="newpassword">Contraseña Nueva</label>
-                    <div class="input-wrapper">
-                        <input :type="shownewPassword ? 'text' : 'password'" v-model="form.newpassword" required />
-                        <i :class="shownewPassword ? 'fa fa-eye-slash' : 'fa fa-eye'"
-                            @click="shownewPassword = !shownewPassword"></i>
-                    </div>
-                </div>
-
-                <div class="form-field">
-                    <label for="confirmPassword">Confirmar Nueva Contraseña</label>
-                    <div class="input-wrapper">
-                        <input :type="showConfirmPassword ? 'text' : 'password'" v-model="form.confirmPassword"
-                            required />
-                        <i :class="showConfirmPassword ? 'fa fa-eye-slash' : 'fa fa-eye'"
-                            @click="showConfirmPassword = !showConfirmPassword"></i>
-                    </div>
-                </div>
-                <button class="boton" type="submit">Guardar</button>
-            </form>
+            <div class="button-card" @click="navigateTo2('polizas')">
+                <i class="fas fa-file-contract"></i>
+                <span>Pólizas</span>
+            </div>
         </div>
+
+
+
+
     </div>
 </template>
 
 <script>
 export default {
-    name: "changePassword",
+    name: "inventoryPage",
     data() {
         return {
-            form: {
-                nombre: "",
-                apellidos: "",
-                rfc: "",
-                numTrabajador: "",
-                curp: "",
-                direccion: "",
-                departamento: "",
-                password: "",
-                confirmPassword: "",
-            },
-            showPassword: false,
-            showConfirmPassword: false,
-            shownewPassword: false,
             menus: {
                 homeMenu: false,
                 usersMenu: false,
@@ -123,13 +113,7 @@ export default {
         goBack() {
             console.log("Regresar a la página anterior");
         },
-        registerUser() {
-            if (this.form.password !== this.form.confirmPassword) {
-                alert("Las contraseñas no coinciden");
-                return;
-            }
-            console.log("Usuario registrado:", this.form);
-        },
+
         navigateTo(page) {
             console.log(`Navegando a ${page}`);
         },
@@ -139,6 +123,9 @@ export default {
         hideMenu(menu) {
             this.menus[menu] = false;
         },
+        navigateTo2(route) {
+            this.$router.push({ name: route });
+        }
     },
 };
 </script>
@@ -147,6 +134,12 @@ export default {
 /* Aplicar Montserrat a todo el contenido */
 * {
     font-family: 'Montserrat', sans-serif;
+}
+
+.titulo {
+    font-size: 30px;
+    font-weight: 100;
+    text-align: center;
 }
 
 .container {
@@ -258,6 +251,7 @@ export default {
     border-radius: 5px;
     width: 150px;
     z-index: 1000;
+
     /* Asegurar que esté encima */
 }
 
@@ -269,6 +263,7 @@ export default {
     color: white;
     text-align: left;
     font-size: 14px;
+
 }
 
 .dropdown-menu button:hover {
@@ -279,49 +274,10 @@ export default {
     display: block;
 }
 
-/* Formulario */
-.form-container {
-    flex: 1;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 100%;
-    height: 100%;
 
 
-}
 
-form {
-    background: white;
-    padding: 30px;
-    border-radius: 10px;
-    width: 500px;
-    height: 350px;
-    max-width: 800px;
-    color: black;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
 
-}
-
-.form-row {
-    display: flex;
-    justify-content: center;
-    margin-bottom: 25px;
-    padding-bottom: 15px;
-
-}
-
-input {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    font-size: 14px;
-}
 
 button {
     width: 60%;
@@ -369,14 +325,59 @@ label {
     cursor: pointer;
 }
 
-.form-field {
-    padding-left: 3%;
-    padding-right: 6%;
-    padding-bottom: 30px;
-    width: 80%;
-}
 
 a {
     text-decoration: none;
+}
+
+.menu {
+
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    /* Espacio entre los botones */
+    margin-top: 4%;
+}
+
+.button-card {
+    width: 260px;
+    height: 140px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: #ffffff;
+    color: #691B31;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    position: relative;
+}
+
+
+.button-card i {
+    font-size: 50px;
+    margin-bottom: 10px;
+}
+
+.button-card span {
+    font-size: 20px;
+    font-weight: bold;
+    text-align: center;
+}
+
+.badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: #870f33;
+    color: white;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
 }
 </style>

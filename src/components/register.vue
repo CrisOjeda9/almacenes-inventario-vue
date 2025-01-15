@@ -27,30 +27,30 @@
 
         <!-- Barra de navegación amarilla -->
         <div class="sub-navbar">
-            <a href="" class="nav-item">Inicio</a>
-            <a href="" class="nav-item">Usuarios</a>
+            <a href="/home" class="nav-item">Inicio</a>
+            <a href="users" class="nav-item">Usuarios</a>
             <div class="nav-item" @mouseenter="showMenu('homeMenu')" @mouseleave="hideMenu('homeMenu')">
                 Inventario
                 <div class="dropdown-menu" v-show="menus.homeMenu">
-                    <button @click="navigateTo('home')">Historial de bajas</button>
-                    <button @click="navigateTo('home')">Alta de bienes</button>
-                    <button @click="navigateTo('home')">Baja de bienes</button>
-                    <button @click="navigateTo('home')">Mi resguardo</button>
-                    <button @click="navigateTo('home')">Facturas</button>
-                    <button @click="navigateTo('home')">Polizas</button>
+                    <button @click="navigateTo('bajas')">Historial de bajas</button>
+                    <button @click="navigateTo('altabienes')">Alta de bienes</button>
+                    <button @click="navigateTo('bajabienes')">Baja de bienes</button>
+                    <button @click="navigateTo('resguardo')">Mi resguardo</button>
+                    <button @click="navigateTo('facturas')">Facturas</button>
+                    <button @click="navigateTo('polizas')">Polizas</button>
                 </div>
 
             </div>
             <div class="nav-item" @mouseenter="showMenu('usersMenu')" @mouseleave="hideMenu('usersMenu')">
                 Almacen
                 <div class="dropdown-menu" v-show="menus.usersMenu">
-                    <button @click="navigateTo('users')">Solicitud de material</button>
-                    <button @click="navigateTo('users')">Agregar un bien para inventario</button>
-                    <button @click="navigateTo('users')">Salida de existencias</button>
-                    <button @click="navigateTo('users')">Entrada de existencias</button>
-                    <button @click="navigateTo('users')">Recepcion de solicitudes</button>
-                    <button @click="navigateTo('users')">Asignar un bien a un usuario</button>
-                    <button @click="navigateTo('users')">Ver proveedores</button>
+                    <button @click="navigateTo('material')">Solicitud de material</button>
+                    <button @click="navigateTo('inventario')">Agregar un bien para inventario</button>
+                    <button @click="navigateTo('salidaexistencias')">Salida de existencias</button>
+                    <button @click="navigateTo('entradaexistencias')">Entrada de existencias</button>
+                    <button @click="navigateTo('solicitudes')">Recepcion de solicitudes</button>
+                    <button @click="navigateTo('usuario')">Asignar un bien a un usuario</button>
+                    <button @click="navigateTo('proveedores')">Ver proveedores</button>
                 </div>
             </div>
 
@@ -72,8 +72,8 @@
                     </div>
                     <div class="form-field">
                         <label for="rfc">RFC</label>
-                        <input type="text" placeholder="" minlength="13" maxlength="13" v-model="form.rfc" style="text-transform: uppercase;"
-                            required />
+                        <input type="text" placeholder="" minlength="13" maxlength="13" v-model="form.rfc"
+                            style="text-transform: uppercase;" required />
 
                     </div>
                 </div>
@@ -85,7 +85,7 @@
                     </div>
                     <div class="form-field">
                         <label for="curp">CURP</label>
-                        <input type="text" placeholder="" minlength="16" maxlength="16" v-model="form.curp" required
+                        <input type="text" placeholder="" minlength="18" maxlength="18" v-model="form.curp" required
                             style="text-transform: uppercase;" />
                     </div>
 
@@ -178,6 +178,11 @@ export default {
 </script>
 
 <style scoped>
+/* Aplicar Montserrat a todo el contenido */
+* {
+    font-family: 'Montserrat', sans-serif;
+}
+
 .container {
     width: 99vw;
     height: 97.5vh;
@@ -185,7 +190,6 @@ export default {
     flex-direction: column;
     background: linear-gradient(to bottom, #000000, #691B31);
     color: white;
-    font-family: 'Arial', sans-serif;
     overflow: hidden;
 }
 

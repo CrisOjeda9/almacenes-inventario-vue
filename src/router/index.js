@@ -3,6 +3,11 @@ import LoginPage from '@/components/login.vue'; // Cambia el nombre aquí
 import RegistroPage from '@/components/register.vue';
 import ProfilePage from '@/components/profile.vue';
 import changePassword from '@/components/changePassword.vue';
+import homePage from '@/components/home.vue';
+import inventoryPage from '@/components/inventory.vue';
+import almacenPage from '@/components/almacen.vue';
+import usersPage from '@/components/users.vue';
+
 
 
 const router = createRouter({
@@ -27,6 +32,27 @@ const router = createRouter({
       path:'/newpassword',
       name: 'newpassword',
       component: changePassword, // Cambia el nombre aquí
+    },
+    {
+      path: '/home',
+      name: 'home',
+      component: homePage, // Cambia el nombre aquí
+    },
+    {
+      path: '/inventory',
+      name: 'inventory',
+      component: inventoryPage, // Cambia el nombre aquí
+    },
+    {
+      path: '/almacen',
+      name: 'almacen',
+      component: almacenPage, // Cambia el nombre aquí
+    }
+    ,
+    {
+      path: '/users',
+      name: 'users',
+      component: usersPage, // Cambia el nombre aquí
     }
   ],
 });

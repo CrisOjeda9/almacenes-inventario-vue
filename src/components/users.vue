@@ -1,16 +1,16 @@
 <template>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
 
     <div class="container">
         <!-- Menú de navegación -->
         <nav class="navbar">
             <div class="navbar-left">
-                <!-- Ícono local -->
-                <img src="../assets/LOGOS DORADOS-02.png" alt="Icono" class="navbar-icon" @click="goBack" width="50%px"
+                <img src="../assets/LOGOS DORADOS-02.png" alt="Icono" class="navbar-icon" @click="goBack" width="50%"
                     height="auto" />
             </div>
             <div class="navbar-center">
-                <h1>Nueva Contraseña</h1>
+                <h1>Gestion de usuarios</h1>
                 <p>Sistema inventario y Almacén de Radio y Televisión de Hidalgo</p>
             </div>
             <div class="navbar-right">
@@ -23,7 +23,6 @@
                 </div>
             </div>
         </nav>
-
 
         <!-- Barra de navegación amarilla -->
         <div class="sub-navbar">
@@ -39,7 +38,6 @@
                     <button @click="navigateTo('home')">Facturas</button>
                     <button @click="navigateTo('home')">Polizas</button>
                 </div>
-
             </div>
             <div class="nav-item" @mouseenter="showMenu('usersMenu')" @mouseleave="hideMenu('usersMenu')">
                 Almacen
@@ -52,83 +50,62 @@
                     <button @click="navigateTo('users')">Ver proveedores</button>
                 </div>
             </div>
-
+        </div>
+        <div class="contenedor-tabla">
+            <table class="user-table">
+                <thead>
+                    <tr>
+                        <th>Nombre(s)</th>
+                        <th>Apellidos</th>
+                        <th>RFC</th>
+                        <th>Curp</th>
+                        <th>Num. Trabajador</th>
+                        <th>Direc. Pertenencia</th>
+                        <th>Departamento</th>
+                        <th>Fecha de registro</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="user in users" :key="user.id">
+                        <td>{{ user.name }}</td>
+                        <td>{{ user.apellido }}</td>
+                        <td>{{ user.rfc }}</td>
+                        <td>{{ user.curp }}</td>
+                        <td>{{ user.numtrabajador }}</td>
+                        <td>{{ user.direcpertenencia }}</td>
+                        <td>{{ user.departamento }}</td>
+                        <td>{{ user.registrationDate }}</td>
+                        <td>
+                            <button @click="editUser(user.id)" class="btn-edit">Editar</button>
+                            <button @click="deleteUser(user.id)" class="btn-delete">Eliminar</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
 
-        <!-- Formulario -->
-        <div class="form-container">
-            <form @submit.prevent="registerUser">
-
-
-
-                <div class="form-field">
-                    <label for="actualpassword">Contraseña</label>
-                    <div class="input-wrapper">
-                        <input :type="showPassword ? 'text' : 'password'" v-model="form.password" required />
-                        <i :class="showPassword ? 'fa fa-eye-slash' : 'fa fa-eye'"
-                            @click="showPassword = !showPassword"></i>
-                    </div>
-                </div>
-                <div class="form-field">
-                    <label for="newpassword">Contraseña Nueva</label>
-                    <div class="input-wrapper">
-                        <input :type="shownewPassword ? 'text' : 'password'" v-model="form.newpassword" required />
-                        <i :class="shownewPassword ? 'fa fa-eye-slash' : 'fa fa-eye'"
-                            @click="shownewPassword = !shownewPassword"></i>
-                    </div>
-                </div>
-
-                <div class="form-field">
-                    <label for="confirmPassword">Confirmar Nueva Contraseña</label>
-                    <div class="input-wrapper">
-                        <input :type="showConfirmPassword ? 'text' : 'password'" v-model="form.confirmPassword"
-                            required />
-                        <i :class="showConfirmPassword ? 'fa fa-eye-slash' : 'fa fa-eye'"
-                            @click="showConfirmPassword = !showConfirmPassword"></i>
-                    </div>
-                </div>
-                <button class="boton" type="submit">Guardar</button>
-            </form>
-        </div>
     </div>
 </template>
 
 <script>
 export default {
-    name: "changePassword",
+    name: "usersPage",
     data() {
         return {
-            form: {
-                nombre: "",
-                apellidos: "",
-                rfc: "",
-                numTrabajador: "",
-                curp: "",
-                direccion: "",
-                departamento: "",
-                password: "",
-                confirmPassword: "",
-            },
-            showPassword: false,
-            showConfirmPassword: false,
-            shownewPassword: false,
             menus: {
                 homeMenu: false,
                 usersMenu: false,
                 settingsMenu: false,
             },
+            users: [
+                { id: 1, name: "Juan Pérez", apellido: "Perez",rfc:"jhasbdjabjsdbjas",curp:"asdadadad",numtrabajador:"10",direcpertenencia:"adadda",departamento:"jkasbdjasjvd", registrationDate: "2024-01-15" },
+            ],
         };
     },
     methods: {
         goBack() {
             console.log("Regresar a la página anterior");
-        },
-        registerUser() {
-            if (this.form.password !== this.form.confirmPassword) {
-                alert("Las contraseñas no coinciden");
-                return;
-            }
-            console.log("Usuario registrado:", this.form);
         },
         navigateTo(page) {
             console.log(`Navegando a ${page}`);
@@ -139,6 +116,12 @@ export default {
         hideMenu(menu) {
             this.menus[menu] = false;
         },
+        editUser(id) {
+            console.log(`Editando usuario con ID: ${id}`);
+        },
+        deleteUser(id) {
+            console.log(`Eliminando usuario con ID: ${id}`);
+        },
     },
 };
 </script>
@@ -147,6 +130,12 @@ export default {
 /* Aplicar Montserrat a todo el contenido */
 * {
     font-family: 'Montserrat', sans-serif;
+}
+
+.titulo {
+    font-size: 30px;
+    font-weight: 100;
+    text-align: center;
 }
 
 .container {
@@ -258,6 +247,7 @@ export default {
     border-radius: 5px;
     width: 150px;
     z-index: 1000;
+
     /* Asegurar que esté encima */
 }
 
@@ -269,6 +259,7 @@ export default {
     color: white;
     text-align: left;
     font-size: 14px;
+
 }
 
 .dropdown-menu button:hover {
@@ -279,49 +270,10 @@ export default {
     display: block;
 }
 
-/* Formulario */
-.form-container {
-    flex: 1;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 100%;
-    height: 100%;
 
 
-}
 
-form {
-    background: white;
-    padding: 30px;
-    border-radius: 10px;
-    width: 500px;
-    height: 350px;
-    max-width: 800px;
-    color: black;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
 
-}
-
-.form-row {
-    display: flex;
-    justify-content: center;
-    margin-bottom: 25px;
-    padding-bottom: 15px;
-
-}
-
-input {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    font-size: 14px;
-}
 
 button {
     width: 60%;
@@ -369,14 +321,71 @@ label {
     cursor: pointer;
 }
 
-.form-field {
-    padding-left: 3%;
-    padding-right: 6%;
-    padding-bottom: 30px;
-    width: 80%;
-}
 
 a {
     text-decoration: none;
 }
+
+.user-table {
+    width: 80%;
+    margin-top: 20px;
+    border-collapse: separate;
+    border-spacing: 0;
+    background-color: white;
+    color: #691B31;
+    border-radius: 15px; /* Redondear las esquinas de la tabla */
+    overflow: hidden; /* Para que los bordes no sobresalgan */
+}
+
+.user-table th,
+.user-table td {
+    padding: 10px;
+    text-align: center;
+}
+
+.user-table th {
+    background-color: #BC955B;
+    color: white;
+}
+
+.user-table tr:hover {
+    background-color: #70727265;
+    color: #A02142;
+    transition: background-color 0.3s ease;
+}
+
+.btn-edit,
+.btn-delete {
+    padding: 2px;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-edit {
+    background-color: #4CAF50;
+    color: white;
+    margin-bottom: 4px;
+}
+
+.btn-delete {
+    background-color: #f44336;
+    color: white;
+}
+
+.btn-edit:hover {
+    background-color: #45a049;
+}
+
+.btn-delete:hover {
+    background-color: #e41f1f;
+}
+
+.contenedor-tabla {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+
 </style>

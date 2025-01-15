@@ -27,8 +27,8 @@
 
         <!-- Barra de navegación amarilla -->
         <div class="sub-navbar">
-            <a href="" class="nav-item">Inicio</a>
-            <a href="" class="nav-item">Usuarios</a>
+            <a href="/home" class="nav-item">Inicio</a>
+            <a href="users" class="nav-item">Usuarios</a>
             <div class="nav-item" @mouseenter="showMenu('homeMenu')" @mouseleave="hideMenu('homeMenu')">
                 Inventario
                 <div class="dropdown-menu" v-show="menus.homeMenu">
@@ -49,7 +49,6 @@
                     <button @click="navigateTo('users')">Salida de existencias</button>
                     <button @click="navigateTo('users')">Entrada de existencias</button>
                     <button @click="navigateTo('users')">Recepcion de solicitudes</button>
-                    <button @click="navigateTo('users')">Asignar un bien a un usuario</button>
                     <button @click="navigateTo('users')">Ver proveedores</button>
                 </div>
             </div>
@@ -178,6 +177,11 @@ export default {
 </script>
 
 <style scoped>
+/* Aplicar Montserrat a todo el contenido */
+* {
+    font-family: 'Montserrat', sans-serif;
+}
+
 .container {
     width: 99vw;
     height: 97.5vh;
@@ -185,7 +189,6 @@ export default {
     flex-direction: column;
     background: linear-gradient(to bottom, #000000, #691B31);
     color: white;
-    font-family: 'Arial', sans-serif;
     overflow: hidden;
 }
 
