@@ -51,6 +51,20 @@
                 </div>
             </div>
         </div>
+
+        <div class="search-bar">
+            <div class="input-wrapper">
+                <input type="text" v-model="searchQuery" placeholder="Buscar..." />
+                <i class="fas fa-search"></i> <!-- Icono de la lupa -->
+            </div>
+
+            <!-- Botón para agregar nuevo usuario -->
+            <button class="add-user-btn" @click="redirectToAddUser">
+                <i class="fas fa-user-plus"></i> <!-- Ícono de usuario -->
+            </button>
+
+        </div>
+
         <div class="contenedor-tabla">
             <table class="user-table">
                 <thead>
@@ -67,7 +81,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr v-for="user in users" :key="user.id">
+                    <tr v-for="user in filteredUsers" :key="user.id">
                         <td>{{ user.name }}</td>
                         <td>{{ user.apellido }}</td>
                         <td>{{ user.rfc }}</td>
@@ -98,10 +112,27 @@ export default {
                 usersMenu: false,
                 settingsMenu: false,
             },
+            searchQuery: '',
             users: [
-                { id: 1, name: "Juan Pérez", apellido: "Perez",rfc:"jhasbdjabjsdbjas",curp:"asdadadad",numtrabajador:"10",direcpertenencia:"adadda",departamento:"jkasbdjasjvd", registrationDate: "2024-01-15" },
+                { id: 1, name: "Juan Pérez", apellido: "Perez", rfc: "jhasbdjabjsdbjas", curp: "asdadadad", numtrabajador: "10", direcpertenencia: "adadda", departamento: "jkasbdjasjvd", registrationDate: "2024-01-15" },
+                { id: 2, name: "Ana Gómez", apellido: "Gomez", rfc: "ghsljkdgksgjs", curp: "sdasdadad", numtrabajador: "11", direcpertenencia: "abdhhsd", departamento: "kjsbvkjs", registrationDate: "2024-01-12" },
+                // Agrega más usuarios si es necesario
             ],
         };
+    },
+    computed: {
+        filteredUsers() {
+            return this.users.filter(user => {
+                const query = this.searchQuery.toLowerCase();
+                return user.name.toLowerCase().includes(query) ||
+                    user.apellido.toLowerCase().includes(query) ||
+                    user.rfc.toLowerCase().includes(query) ||
+                    user.curp.toLowerCase().includes(query) ||
+                    user.numtrabajador.toLowerCase().includes(query) ||
+                    user.direcpertenencia.toLowerCase().includes(query) ||
+                    user.departamento.toLowerCase().includes(query);
+            });
+        }
     },
     methods: {
         goBack() {
@@ -122,6 +153,10 @@ export default {
         deleteUser(id) {
             console.log(`Eliminando usuario con ID: ${id}`);
         },
+        redirectToAddUser() {
+            // Aquí defines la ruta a la que quieres redirigir al hacer clic en el botón
+            this.$router.push('/register');
+        }
     },
 };
 </script>
@@ -333,8 +368,10 @@ a {
     border-spacing: 0;
     background-color: white;
     color: #691B31;
-    border-radius: 15px; /* Redondear las esquinas de la tabla */
-    overflow: hidden; /* Para que los bordes no sobresalgan */
+    border-radius: 15px;
+    /* Redondear las esquinas de la tabla */
+    overflow: hidden;
+    /* Para que los bordes no sobresalgan */
 }
 
 .user-table th,
@@ -387,5 +424,56 @@ a {
     justify-content: center;
 }
 
+/* Barra de búsqueda */
+.search-bar {
+    margin: 20px 0;
+    text-align: center;
+}
 
+.input-wrapper {
+    position: relative;
+    width: 60%;
+    display: inline-block;
+}
+
+.input-wrapper input {
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+    border-radius: 25px;
+    border: 1px solid #BC955B;
+    background-color: #fff;
+}
+
+.input-wrapper i {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 18px;
+    color: #691B31;
+    pointer-events: none;
+}
+
+.input-wrapper input::placeholder {
+    color: #691B31;
+}
+
+
+
+.add-user-btn {
+    margin-left: 50px;
+    width: 2.7%;
+    background-color: #bc955b;
+    color: white;
+    border: none;
+    padding: 8px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 18px;
+}
+
+.add-user-btn:hover {
+    background-color: #a4733a;
+}
 </style>

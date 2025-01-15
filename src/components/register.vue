@@ -91,9 +91,28 @@
 
                     <div class="form-field">
                         <label for="pertenencia">Direc. Pertenencia</label>
-                        <input type="text" placeholder="" v-model="form.direccion" required />
-
+                        
+                        <select v-model="form.direccion" required>
+                            <option value="">Selecciona una opción</option>
+                            <option value="direccion_general">Dirección General</option>
+                            <option value="direccion_coordinacion_financiera">Dirección de coordinación financiera y
+                                planeación</option>
+                            <option value="direccion_television">Dirección de televisión</option>
+                            <option value="direccion_noticias">Dirección de noticias</option>
+                            <option value="direccion_radio">Dirección de radio</option>
+                            <option value="direccion_ingenieria">Dirección de ingeniería</option>
+                            <option value="direccion_proyectos_estrategicos">Dirección de proyectos estratégicos
+                            </option>
+                            <option value="organo_interno_control">Órgano interno de control</option>
+                            <option value="direccion_promocion_intercambio">Dirección de promoción e intercambio
+                            </option>
+                            <option value="direccion_juridica">Dirección jurídica</option>
+                            <option value="direccion_vinculacion">Dirección de vinculación</option>
+                            <option value="estaciones_radio">Estaciones de radio</option>
+                        </select>
                     </div>
+
+
                 </div>
                 <div class="form-row">
                     <div class="form-field">
@@ -399,7 +418,22 @@ label {
     padding-right: 6%;
 }
 
+
 a {
     text-decoration: none;
+}
+
+
+
+.form-field select {
+    width: 111%;
+    font-size: 8px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-sizing: border-box;
+    background-color: white;
+    color: #333;
+    height: 40px;
+    /* Asegura que tenga la misma altura que los inputs */
 }
 </style>
