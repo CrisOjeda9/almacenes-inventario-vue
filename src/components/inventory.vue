@@ -350,24 +350,70 @@ a {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    background-color: #ffffff;
+    background: #FFFFFF;
+    /* Gradiente suave */
     color: #691B31;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    /* Sombra sutil */
     cursor: pointer;
     position: relative;
+    overflow: hidden;
+    transition: all 0.4s ease;
+    /* Transición suave */
 }
 
+.button-card:hover {
+    transform: translateY(-10px);
+    /* Desplazamiento suave hacia arriba */
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+    /* Sombra más profunda */
+}
 
 .button-card i {
     font-size: 50px;
-    margin-bottom: 10px;
+    margin-bottom: 15px;
+    transition: transform 0.3s ease, color 0.3s ease;
+    /* Efecto de cambio suave */
+}
+
+.button-card:hover i {
+    transform: scale(1.2);
+    /* Escala suave */
+    color: #bc955b;
+    /* Color dorado en hover */
 }
 
 .button-card span {
     font-size: 20px;
     font-weight: bold;
     text-align: center;
+    transition: color 0.3s ease;
+    /* Cambio de color en hover */
+}
+
+.button-card:hover span {
+    color: #bc955b;
+    /* Color dorado en hover */
+}
+
+.button-card:before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.2);
+    transform: scaleX(0);
+    transform-origin: 100% 100%;
+    transition: transform 0.4s ease;
+    /* Efecto de barra sutil */
+}
+
+.button-card:hover:before {
+    transform: scaleX(1);
+    /* Expande la capa al hacer hover */
 }
 
 .badge {
