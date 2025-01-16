@@ -71,13 +71,11 @@
         </div>
         <!-- Botones de descarga -->
         <div class="download-buttons">
-            <button @click="downloadPDF"
-                style="background-color: red;">
+            <button @click="downloadPDF" style="background-color: red;">
                 <i class="fas fa-file-pdf" style="margin-right: 8px;"></i>
                 Descargar PDF
             </button>
-            <button @click="downloadExcel"
-                style="background-color: green;">
+            <button @click="downloadExcel" style="background-color: green;">
                 <i class="fas fa-file-excel" style="margin-right: 8px;"></i>
                 Descargar Excel
             </button>
@@ -88,27 +86,31 @@
             <table class="user-table">
                 <thead>
                     <tr>
-                        <th>No. Bien</th>
-                        <th>Cuenta Bancaria</th>
-                        <th>No. Poliza</th>
-                        <th>Persona</th>
-                        <th>Costo Unitario</th>
-                        <th>RFC</th>
-                        <th>Dirección</th>
-                        <th>Tipo de Compra</th>
-                        <th>Fecha de compra</th>
+                        <th>No. Inventario</th>
+                        <th>Descripción</th>
+                        <th>Color</th>
+                        <th>Material</th>
+                        <th>Modelo</th>
+                        <th>Marca</th>
+                        <th>Foto</th>
+                        <th>Serie</th>
+                        <th>Fecha de Registro</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr v-for="user in paginatedBajas" :key="user.id">
-                        <td>{{ user.numerobien }}</td>
-                        <td>{{ user.cuentabancaria }}</td>
-                        <td>{{ user.poliza }}</td>
-                        <td>{{ user.persona }}</td>
-                        <td>{{ user.costounitario }}</td>
-                        <td>{{ user.rfc }}</td>
-                        <td>{{ user.direccion }}</td>
-                        <td>{{ user.tipocompra }}</td>
+                    <tr v-for="user in paginatedresguardo" :key="user.id">
+                        <td>{{ user.noinventario }}</td>
+                        <td>{{ user.descripcion }}</td>
+                        <td>{{ user.color }}</td>
+                        <td>{{ user.material }}</td>
+                        <td>{{ user.modelo }}</td>
+                        <td>{{ user.marca }}</td>
+                        <td>
+                            <img :src="require(`@/assets/logo.png`)" alt="Imagen de Inventario" width="20%"
+                                height="auto" />
+                        </td>
+
+                        <td>{{ user.serie }}</td>
                         <td>{{ user.registrationDate }}</td>
 
                     </tr>
@@ -142,19 +144,25 @@ export default {
             },
             searchQuery: '',
             users: [
-                { numerobien: "15051", cuentabancaria: "526452658758985785", poliza: "adasd4654", persona: "Moral", costounitario: "100.00", rfc: "hsadjhasd4", direccion: "asdad456564", tipocompra: "Presupuestal", registrationDate: "2024-01-15" },
-                { numerobien: "45661", cuentabancaria: "757586867478932473", poliza: "asd66ddd", persona: "Fisica", costounitario: "200.00", rfc: "jghfgddjgdk4", direccion: "asdad5456", tipocompra: "Estatal", registrationDate: "2024-01-15" },
-                { numerobien: "45661", cuentabancaria: "757586867478932473", poliza: "asd66ddd", persona: "Fisica", costounitario: "200.00", rfc: "jghfgddjgdk4", direccion: "asdad5456", tipocompra: "Estatal", registrationDate: "2024-01-15" },
-                { numerobien: "45661", cuentabancaria: "757586867478932473", poliza: "asd66ddd", persona: "Fisica", costounitario: "200.00", rfc: "jghfgddjgdk4", direccion: "asdad5456", tipocompra: "Estatal", registrationDate: "2024-01-15" },
-                { numerobien: "45661", cuentabancaria: "757586867478932473", poliza: "asd66ddd", persona: "Fisica", costounitario: "200.00", rfc: "jghfgddjgdk4", direccion: "asdad5456", tipocompra: "Estatal", registrationDate: "2024-01-15" },
-                { numerobien: "45661", cuentabancaria: "757586867478932473", poliza: "asd66ddd", persona: "Fisica", costounitario: "200.00", rfc: "jghfgddjgdk4", direccion: "asdad5456", tipocompra: "Estatal", registrationDate: "2024-01-15" },
-                { numerobien: "0", cuentabancaria: "757586867478932473", poliza: "asd66ddd", persona: "hola", costounitario: "200.00", rfc: "jghfgddjgdk4", direccion: "asdad5456", tipocompra: "Estatal", registrationDate: "2024-01-15" },
-                { numerobien: "0", cuentabancaria: "757586867478932473", poliza: "asd66ddd", persona: "hola", costounitario: "200.00", rfc: "jghfgddjgdk4", direccion: "asdad5456", tipocompra: "Estatal", registrationDate: "2024-01-15" },
-                { numerobien: "0", cuentabancaria: "757586867478932473", poliza: "asd66ddd", persona: "hola", costounitario: "200.00", rfc: "jghfgddjgdk4", direccion: "asdad5456", tipocompra: "Estatal", registrationDate: "2024-01-15" },
-                { numerobien: "0", cuentabancaria: "757586867478932473", poliza: "asd66ddd", persona: "hola", costounitario: "200.00", rfc: "jghfgddjgdk4", direccion: "asdad5456", tipocompra: "Estatal", registrationDate: "2024-01-15" },
-                { numerobien: "0", cuentabancaria: "757586867478932473", poliza: "asd66ddd", persona: "hola", costounitario: "200.00", rfc: "jghfgddjgdk4", direccion: "asdad5456", tipocompra: "Estatal", registrationDate: "2024-01-15" },
-                { numerobien: "0", cuentabancaria: "757586867478932473", poliza: "asd66ddd", persona: "hola", costounitario: "200.00", rfc: "jghfgddjgdk4", direccion: "asdad5456", tipocompra: "Estatal", registrationDate: "2024-01-15" },
-                // Agrega más usuarios aquí...
+                { noinventario: "15051", descripcion: "es grande", color: "Rojo", material: "Marmol", modelo: "pro", marca: "apple", foto: "asdad456564", serie: "pro", registrationDate: "2024-01-15" },
+                { noinventario: "15052", descripcion: "compacto", color: "Azul", material: "Aluminio", modelo: "mini", marca: "samsung", foto: "asd1234567", serie: "mini", registrationDate: "2024-01-16" },
+                { noinventario: "15053", descripcion: "elegante", color: "Negro", material: "Vidrio", modelo: "elegant", marca: "sony", foto: "sdgfdfg1345", serie: "elegant", registrationDate: "2024-01-17" },
+                { noinventario: "15054", descripcion: "resistente", color: "Gris", material: "Acero", modelo: "strong", marca: "dell", foto: "ertyu564321", serie: "strong", registrationDate: "2024-01-18" },
+                { noinventario: "15055", descripcion: "ligero", color: "Blanco", material: "Plástico", modelo: "light", marca: "lg", foto: "wertyuqwo123", serie: "light", registrationDate: "2024-01-19" },
+                { noinventario: "15056", descripcion: "fino", color: "Oro", material: "Madera", modelo: "fine", marca: "bose", foto: "yugfdg6543", serie: "fine", registrationDate: "2024-01-20" },
+                { noinventario: "15057", descripcion: "práctico", color: "Verde", material: "Silicona", modelo: "basic", marca: "xiaomi", foto: "fghj12453", serie: "basic", registrationDate: "2024-01-21" },
+                { noinventario: "15058", descripcion: "pequeño", color: "Amarillo", material: "Cerámica", modelo: "small", marca: "samsung", foto: "3456dfg789", serie: "small", registrationDate: "2024-01-22" },
+                { noinventario: "15059", descripcion: "potente", color: "Rojo", material: "Acero", modelo: "power", marca: "apple", foto: "hgfghg654", serie: "power", registrationDate: "2024-01-23" },
+                { noinventario: "15060", descripcion: "sofisticado", color: "Negro", material: "Cristal", modelo: "sophisticated", marca: "lg", foto: "kljoi6745", serie: "sophisticated", registrationDate: "2024-01-24" },
+                { noinventario: "15061", descripcion: "grande", color: "Gris", material: "Acero", modelo: "big", marca: "sony", foto: "wertyui987", serie: "big", registrationDate: "2024-01-25" },
+                { noinventario: "15062", descripcion: "de lujo", color: "Plata", material: "Cuero", modelo: "luxury", marca: "samsung", foto: "yuio87645", serie: "luxury", registrationDate: "2024-01-26" },
+                { noinventario: "15063", descripcion: "moderno", color: "Negro", material: "Plástico", modelo: "modern", marca: "lg", foto: "poiu6543", serie: "modern", registrationDate: "2024-01-27" },
+                { noinventario: "15064", descripcion: "clásico", color: "Marrón", material: "Madera", modelo: "classic", marca: "bose", foto: "ghjb6541", serie: "classic", registrationDate: "2024-01-28" },
+                { noinventario: "15065", descripcion: "grande", color: "Blanco", material: "Plástico", modelo: "large", marca: "xiaomi", foto: "cvbn12345", serie: "large", registrationDate: "2024-01-29" },
+                { noinventario: "15066", descripcion: "elegante", color: "Azul", material: "Vidrio", modelo: "elegance", marca: "sony", foto: "ertyyu876", serie: "elegance", registrationDate: "2024-01-30" },
+                { noinventario: "15067", descripcion: "práctico", color: "Verde", material: "Silicona", modelo: "practical", marca: "dell", foto: "vbfdg4532", serie: "practical", registrationDate: "2024-01-31" },
+                { noinventario: "15068", descripcion: "compacto", color: "Amarillo", material: "Cerámica", modelo: "compact", marca: "lg", foto: "ikmnb5678", serie: "compact", registrationDate: "2024-02-01" },
+                { noinventario: "15069", descripcion: "de lujo", color: "Plata", material: "Cristal", modelo: "luxury", marca: "apple", foto: "mnbvcx123", serie: "luxury", registrationDate: "2024-02-02" }
             ],
             itemsPerPage: 10, // Cantidad de elementos por página
             currentPage: 1, // Página actual
@@ -164,18 +172,18 @@ export default {
         filteredBajas() {
             const query = this.searchQuery.toLowerCase();
             return this.users.filter(user =>
-                user.numerobien.toLowerCase().includes(query) ||
-                user.cuentabancaria.toLowerCase().includes(query) ||
-                user.poliza.toLowerCase().includes(query) ||
-                user.persona.toLowerCase().includes(query) ||
-                user.costounitario.toLowerCase().includes(query) ||
-                user.rfc.toLowerCase().includes(query) ||
-                user.direccion.toLowerCase().includes(query) ||
-                user.tipocompra.toLowerCase().includes(query) ||
+                user.noinventario.toLowerCase().includes(query) ||
+                user.descripcion.toLowerCase().includes(query) ||
+                user.color.toLowerCase().includes(query) ||
+                user.material.toLowerCase().includes(query) ||
+                user.modelo.toLowerCase().includes(query) ||
+                user.marca.toLowerCase().includes(query) ||
+                user.serie.toLowerCase().includes(query) ||
                 user.registrationDate.toLowerCase().includes(query)
             );
         },
-        paginatedBajas() {
+
+        paginatedresguardo() {
             const start = (this.currentPage - 1) * this.itemsPerPage;
             const end = start + this.itemsPerPage;
             return this.filteredBajas.slice(start, end);
@@ -209,40 +217,56 @@ export default {
                 head: [
                     [
                         "No. Bien",
-                        "Cuenta Bancaria",
-                        "No. Poliza",
-                        "Persona",
-                        "Costo Unitario",
-                        "RFC",
-                        "Dirección",
-                        "Tipo de Compra",
-                        "Fecha de compra"
+                        "Descripción",
+                        "Color",
+                        "Material",
+                        "Modelo",
+                        "Marca",
+                        "Foto",  // Esto se mantendrá como nombre, pero la imagen se incluye
+                        "Serie",
+                        "Fecha de Registro"
                     ]
                 ],
-                body: this.filteredBajas.map(user => [
-                    user.numerobien,
-                    user.cuentabancaria,
-                    user.poliza,
-                    user.persona,
-                    user.costounitario,
-                    user.rfc,
-                    user.direccion,
-                    user.tipocompra,
-                    user.registrationDate
-                ]),
+                body: this.filteredBajas.map(user => {
+                    // Si user.foto contiene una URL o base64 de la imagen
+                    const photo = user.foto; // Asegúrate de que user.foto contenga la URL o base64 de la imagen
+                    doc.addImage(photo, 'JPEG', 150, 20, 30, 30); // Agrega la foto en la posición especificada
+                    return [
+                        user.noinventario,
+                        user.descripcion,
+                        user.color,
+                        user.material,
+                        user.modelo,
+                        user.marca,
+                        "Foto",  // Puedes seguir mostrando el texto "Foto" o nombre
+                        user.serie,
+                        user.registrationDate
+                    ];
+                }),
                 headStyles: {
-                    fillColor: "691B31" // Color rojo para la primera fila
+                    fillColor: "691B31"  // Color rojo para la primera fila
                 }
             });
             doc.save("Tabla_resguardo.pdf");
         },
 
         downloadExcel() {
-            const ws = XLSX.utils.json_to_sheet(this.users);
+            const ws = XLSX.utils.json_to_sheet(this.filteredBajas.map(user => ({
+                noinventario: user.noinventario,
+                descripcion: user.descripcion,
+                color: user.color,
+                material: user.material,
+                modelo: user.modelo,
+                marca: user.marca,
+                foto: user.foto,
+                serie: user.serie,
+                registrationDate: user.registrationDate
+            })));
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, 'Resguardo');
             XLSX.writeFile(wb, 'Tabla_resguardo.xlsx');
         }
+
     },
 
     goBack() {

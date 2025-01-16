@@ -78,7 +78,7 @@
 
         <!-- Nueva fila de botones -->
         <div class="menu">
-            <div class="button-card" @click="navigateTo2('mi-resguardo')">
+            <div class="button-card" @click="navigateTo2('resguardo')">
                 <i class="fas fa-clipboard"></i>
                 <span>Mi Resguardo</span>
             </div>
