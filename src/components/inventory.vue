@@ -33,18 +33,20 @@
             <a href="users" class="nav-item">Usuarios</a>
             <div class="nav-item" @mouseenter="showMenu('homeMenu')" @mouseleave="hideMenu('homeMenu')">
                 Inventario
+                <span class="menu-icon">▼</span>
                 <div class="dropdown-menu" v-show="menus.homeMenu">
-                    <button @click="navigateTo('home')">Historial de bajas</button>
+                    <button @click="navigateTo('bajas')">Historial de bajas</button>
                     <button @click="navigateTo('home')">Alta de bienes</button>
                     <button @click="navigateTo('home')">Baja de bienes</button>
-                    <button @click="navigateTo('home')">Mi resguardo</button>
+                    <button @click="navigateTo('resguardo')">Mi resguardo</button>
                     <button @click="navigateTo('home')">Facturas</button>
                     <button @click="navigateTo('home')">Polizas</button>
                 </div>
-
             </div>
+
             <div class="nav-item" @mouseenter="showMenu('usersMenu')" @mouseleave="hideMenu('usersMenu')">
                 Almacen
+                <span class="menu-icon">▼</span>
                 <div class="dropdown-menu" v-show="menus.usersMenu">
                     <button @click="navigateTo('users')">Solicitud de material</button>
                     <button @click="navigateTo('users')">Agregar un bien para inventario</button>
@@ -54,10 +56,11 @@
                     <button @click="navigateTo('users')">Ver proveedores</button>
                 </div>
             </div>
+
         </div>
         <div class="menu">
             <!-- Fila 1 -->
-            <div class="button-card" @click="navigateTo2('login')">
+            <div class="button-card" @click="navigateTo2('bajas')">
                 <i class="fa fa-arrow-down"></i>
                 <span>Historial de bajas</span>
             </div>
@@ -116,6 +119,7 @@ export default {
 
         navigateTo(page) {
             console.log(`Navegando a ${page}`);
+            this.$router.push({ name: page }); // Asegúrate de que las rutas estén definidas con `name`.
         },
         showMenu(menu) {
             this.menus[menu] = true;

@@ -1,4 +1,8 @@
 <template>
+
+    <body>
+
+    </body>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
 
@@ -10,7 +14,7 @@
                     height="auto" />
             </div>
             <div class="navbar-center">
-                <h1>Gestion de usuarios</h1>
+                <h1>Resguardo</h1>
                 <p>Sistema inventario y Almacén de Radio y Televisión de Hidalgo</p>
             </div>
             <div class="navbar-right">
@@ -62,61 +66,64 @@
                 <i class="fas fa-search"></i> <!-- Icono de la lupa -->
             </div>
 
-            <!-- Botón para agregar nuevo usuario -->
-            <button class="add-user-btn" @click="redirectToAddUser">
-                <i class="fas fa-user-plus"></i> <!-- Ícono de usuario -->
-            </button>
 
+
+        </div>
+        <!-- Botones de descarga -->
+        <div class="download-buttons">
+            <button @click="downloadPDF" style="background-color: red;">PDF</button>
+            <button @click="downloadExcel" style="background-color: green;">Excel</button>
         </div>
 
         <div class="contenedor-tabla">
             <table class="user-table">
                 <thead>
                     <tr>
-                        <th>Nombre(s)</th>
-                        <th>Apellidos</th>
+                        <th>No. Bien</th>
+                        <th>Cuenta Bancaria</th>
+                        <th>No. Poliza</th>
+                        <th>Persona</th>
+                        <th>Costo Unitario</th>
                         <th>RFC</th>
-                        <th>Curp</th>
-                        <th>Num. Trabajador</th>
-                        <th>Direc. Pertenencia</th>
-                        <th>Departamento</th>
-                        <th>Fecha de registro</th>
-                        <th>Acciones</th>
+                        <th>Dirección</th>
+                        <th>Tipo de Compra</th>
+                        <th>Fecha de compra</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr v-for="user in paginatedUsers" :key="user.id">
-                        <td>{{ user.name }}</td>
-                        <td>{{ user.apellido }}</td>
+                    <tr v-for="user in paginatedBajas" :key="user.id">
+                        <td>{{ user.numerobien }}</td>
+                        <td>{{ user.cuentabancaria }}</td>
+                        <td>{{ user.poliza }}</td>
+                        <td>{{ user.persona }}</td>
+                        <td>{{ user.costounitario }}</td>
                         <td>{{ user.rfc }}</td>
-                        <td>{{ user.curp }}</td>
-                        <td>{{ user.numtrabajador }}</td>
-                        <td>{{ user.direcpertenencia }}</td>
-                        <td>{{ user.departamento }}</td>
+                        <td>{{ user.direccion }}</td>
+                        <td>{{ user.tipocompra }}</td>
                         <td>{{ user.registrationDate }}</td>
-                        <td>
-                            <button @click="editUser(user.id)" class="btn-edit">Editar</button>
-                            <button @click="deleteUser(user.id)" class="btn-delete">Eliminar</button>
-                        </td>
+
                     </tr>
                 </tbody>
+
             </table>
-            <!-- Paginación -->
+            <!-- Paginador -->
             <div class="pagination">
-                <button @click="prevPage" :disabled="currentPage === 1">Anterior</button>
-                <span>Pagina {{ currentPage }} de {{ totalPages }}</span>
-                <button @click="nextPage" :disabled="currentPage === totalPages">Siguiente</button>
+                <button :disabled="currentPage === 1" @click="changePage(currentPage - 1)">Anterior</button>
+                <span>Página {{ currentPage }} de {{ totalPages }}</span>
+                <button :disabled="currentPage === totalPages" @click="changePage(currentPage + 1)">Siguiente</button>
             </div>
         </div>
-
-
 
     </div>
 </template>
 
 <script>
+import jsPDF from "jspdf";
+import "jspdf-autotable";
+import * as XLSX from "xlsx";
+
 export default {
-    name: "usersPage",
+    name: "resguardoPage",
     data() {
         return {
             menus: {
@@ -125,53 +132,54 @@ export default {
                 settingsMenu: false,
             },
             searchQuery: '',
-            currentPage: 1,
-            usersPerPage: 10,
             users: [
-                { id: 1, name: "Juan Pérez", apellido: "Perez", rfc: "jhasbdjabjsdbjas", curp: "asdadadad", numtrabajador: "10", direcpertenencia: "adadda", departamento: "jkasbdjasjvd", registrationDate: "2024-01-15" },
-                { id: 2, name: "Ana Gómez", apellido: "Gomez", rfc: "ghsljkdgksgjs", curp: "sdasdadad", numtrabajador: "11", direcpertenencia: "abdhhsd", departamento: "kjsbvkjs", registrationDate: "2024-01-12" },
-                { id: 3, name: "Carlos Pérez", apellido: "Pérez", rfc: "ghdjkwqldjwl", curp: "qwdsdqw", numtrabajador: "12", direcpertenencia: "gghds", departamento: "gggg", registrationDate: "2024-01-14" },
-                { id: 4, name: "Lucía Torres", apellido: "Torres", rfc: "sdksjldjlsjd", curp: "asdqwdd", numtrabajador: "13", direcpertenencia: "sdadas", departamento: "sdsdsd", registrationDate: "2024-01-13" },
-                { id: 5, name: "Pedro González", apellido: "Gonzalez", rfc: "yadsjdksd", curp: "sdadqw", numtrabajador: "14", direcpertenencia: "qwdqwds", departamento: "cvzcxv", registrationDate: "2024-01-11" },
-                { id: 6, name: "María López", apellido: "López", rfc: "jkqwdjlk", curp: "asdqwqw", numtrabajador: "15", direcpertenencia: "sdsdsd", departamento: "scvsds", registrationDate: "2024-01-10" },
-                { id: 6, name: "María López", apellido: "López", rfc: "jkqwdjlk", curp: "asdqwqw", numtrabajador: "15", direcpertenencia: "sdsdsd", departamento: "scvsds", registrationDate: "2024-01-10" },
-                { id: 6, name: "María López", apellido: "López", rfc: "jkqwdjlk", curp: "asdqwqw", numtrabajador: "15", direcpertenencia: "sdsdsd", departamento: "scvsds", registrationDate: "2024-01-10" },
-                { id: 6, name: "María López", apellido: "López", rfc: "jkqwdjlk", curp: "asdqwqw", numtrabajador: "15", direcpertenencia: "sdsdsd", departamento: "scvsds", registrationDate: "2024-01-10" },
-                { id: 6, name: "María López", apellido: "López", rfc: "jkqwdjlk", curp: "asdqwqw", numtrabajador: "15", direcpertenencia: "sdsdsd", departamento: "scvsds", registrationDate: "2024-01-10" },
-                { id: 6, name: "María López", apellido: "López", rfc: "jkqwdjlk", curp: "asdqwqw", numtrabajador: "15", direcpertenencia: "sdsdsd", departamento: "scvsds", registrationDate: "2024-01-10" },
-                // Agrega más usuarios si es necesario
+                { numerobien: "15051", cuentabancaria: "526452658758985785", poliza: "adasd4654", persona: "Moral", costounitario: "100.00", rfc: "hsadjhasd4", direccion: "asdad456564", tipocompra: "Presupuestal", registrationDate: "2024-01-15" },
+                { numerobien: "45661", cuentabancaria: "757586867478932473", poliza: "asd66ddd", persona: "Fisica", costounitario: "200.00", rfc: "jghfgddjgdk4", direccion: "asdad5456", tipocompra: "Estatal", registrationDate: "2024-01-15" },
+                { numerobien: "45661", cuentabancaria: "757586867478932473", poliza: "asd66ddd", persona: "Fisica", costounitario: "200.00", rfc: "jghfgddjgdk4", direccion: "asdad5456", tipocompra: "Estatal", registrationDate: "2024-01-15" },
+                { numerobien: "45661", cuentabancaria: "757586867478932473", poliza: "asd66ddd", persona: "Fisica", costounitario: "200.00", rfc: "jghfgddjgdk4", direccion: "asdad5456", tipocompra: "Estatal", registrationDate: "2024-01-15" },
+                { numerobien: "45661", cuentabancaria: "757586867478932473", poliza: "asd66ddd", persona: "Fisica", costounitario: "200.00", rfc: "jghfgddjgdk4", direccion: "asdad5456", tipocompra: "Estatal", registrationDate: "2024-01-15" },
+                { numerobien: "45661", cuentabancaria: "757586867478932473", poliza: "asd66ddd", persona: "Fisica", costounitario: "200.00", rfc: "jghfgddjgdk4", direccion: "asdad5456", tipocompra: "Estatal", registrationDate: "2024-01-15" },
+                { numerobien: "0", cuentabancaria: "757586867478932473", poliza: "asd66ddd", persona: "hola", costounitario: "200.00", rfc: "jghfgddjgdk4", direccion: "asdad5456", tipocompra: "Estatal", registrationDate: "2024-01-15" },
+                { numerobien: "0", cuentabancaria: "757586867478932473", poliza: "asd66ddd", persona: "hola", costounitario: "200.00", rfc: "jghfgddjgdk4", direccion: "asdad5456", tipocompra: "Estatal", registrationDate: "2024-01-15" },
+                { numerobien: "0", cuentabancaria: "757586867478932473", poliza: "asd66ddd", persona: "hola", costounitario: "200.00", rfc: "jghfgddjgdk4", direccion: "asdad5456", tipocompra: "Estatal", registrationDate: "2024-01-15" },
+                { numerobien: "0", cuentabancaria: "757586867478932473", poliza: "asd66ddd", persona: "hola", costounitario: "200.00", rfc: "jghfgddjgdk4", direccion: "asdad5456", tipocompra: "Estatal", registrationDate: "2024-01-15" },
+                { numerobien: "0", cuentabancaria: "757586867478932473", poliza: "asd66ddd", persona: "hola", costounitario: "200.00", rfc: "jghfgddjgdk4", direccion: "asdad5456", tipocompra: "Estatal", registrationDate: "2024-01-15" },
+                { numerobien: "0", cuentabancaria: "757586867478932473", poliza: "asd66ddd", persona: "hola", costounitario: "200.00", rfc: "jghfgddjgdk4", direccion: "asdad5456", tipocompra: "Estatal", registrationDate: "2024-01-15" },
+                // Agrega más usuarios aquí...
             ],
+            itemsPerPage: 10, // Cantidad de elementos por página
+            currentPage: 1, // Página actual
         };
     },
     computed: {
-        filteredUsers() {
-            return this.users.filter(user => {
-                const query = this.searchQuery.toLowerCase();
-                return user.name.toLowerCase().includes(query) ||
-                    user.apellido.toLowerCase().includes(query) ||
-                    user.rfc.toLowerCase().includes(query) ||
-                    user.curp.toLowerCase().includes(query) ||
-                    user.numtrabajador.toLowerCase().includes(query) ||
-                    user.direcpertenencia.toLowerCase().includes(query) ||
-                    user.departamento.toLowerCase().includes(query);
-            });
+        filteredBajas() {
+            const query = this.searchQuery.toLowerCase();
+            return this.users.filter(user =>
+                user.numerobien.toLowerCase().includes(query) ||
+                user.cuentabancaria.toLowerCase().includes(query) ||
+                user.poliza.toLowerCase().includes(query) ||
+                user.persona.toLowerCase().includes(query) ||
+                user.costounitario.toLowerCase().includes(query) ||
+                user.rfc.toLowerCase().includes(query) ||
+                user.direccion.toLowerCase().includes(query) ||
+                user.tipocompra.toLowerCase().includes(query) ||
+                user.registrationDate.toLowerCase().includes(query)
+            );
+        },
+        paginatedBajas() {
+            const start = (this.currentPage - 1) * this.itemsPerPage;
+            const end = start + this.itemsPerPage;
+            return this.filteredBajas.slice(start, end);
         },
         totalPages() {
-            return Math.ceil(this.filteredUsers.length / this.usersPerPage);
-        },
-        paginatedUsers() {
-            const start = (this.currentPage - 1) * this.usersPerPage;
-            const end = start + this.usersPerPage;
-            return this.filteredUsers.slice(start, end);
+            return Math.ceil(this.filteredBajas.length / this.itemsPerPage);
         }
     },
     methods: {
-        goBack() {
-            console.log("Regresar a la página anterior");
-        },
-        navigateTo(page) {
-            console.log(`Navegando a ${page}`);
-            this.$router.push({ name: page }); // Asegúrate de que las rutas estén definidas con `name`.
+        changePage(page) {
+            if (page > 0 && page <= this.totalPages) {
+                this.currentPage = page;
+            }
         },
         showMenu(menu) {
             this.menus[menu] = true;
@@ -179,33 +187,100 @@ export default {
         hideMenu(menu) {
             this.menus[menu] = false;
         },
-        editUser(id) {
-            console.log(`Editando usuario con ID: ${id}`);
+        navigateTo(route) {
+            this.$router.push({ name: route });
         },
-        deleteUser(id) {
-            console.log(`Eliminando usuario con ID: ${id}`);
+        goBack() {
+            window.history.back();
         },
-        redirectToAddUser() {
-            // Aquí defines la ruta a la que quieres redirigir al hacer clic en el botón
-            this.$router.push('/register');
-        }, prevPage() {
-            if (this.currentPage > 1) {
-                this.currentPage--;
-            }
+        downloadPDF() {
+            const doc = new jsPDF();
+            doc.text("Tabla de Resguardo", 14, 10);
+            doc.autoTable({
+                head: [
+                    [
+                        "No. Bien",
+                        "Cuenta Bancaria",
+                        "No. Poliza",
+                        "Persona",
+                        "Costo Unitario",
+                        "RFC",
+                        "Dirección",
+                        "Tipo de Compra",
+                        "Fecha de compra"
+                    ]
+                ],
+                body: this.filteredBajas.map(user => [
+                    user.numerobien,
+                    user.cuentabancaria,
+                    user.poliza,
+                    user.persona,
+                    user.costounitario,
+                    user.rfc,
+                    user.direccion,
+                    user.tipocompra,
+                    user.registrationDate
+                ]),
+                headStyles: {
+                    fillColor: "691B31" // Color rojo para la primera fila
+                }
+            });
+            doc.save("Tabla_resguardo.pdf");
         },
-        nextPage() {
-            if (this.currentPage < this.totalPages) {
-                this.currentPage++;
-            }
-        },
-    }
+
+        downloadExcel() {
+            const ws = XLSX.utils.json_to_sheet(this.users);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Resguardo');
+            XLSX.writeFile(wb, 'Tabla_resguardo.xlsx');
+        }
+    },
+
+    goBack() {
+        console.log("Regresar a la página anterior");
+    },
+    navigateTo(page) {
+        console.log(`Navegando a ${page}`);
+        this.$router.push({ name: page }); // Asegúrate de que las rutas estén definidas con `name`.
+    },
+    showMenu(menu) {
+        this.menus[menu] = true;
+    },
+    hideMenu(menu) {
+        this.menus[menu] = false;
+    },
+    redirectToAddUser() {
+        // Aquí defines la ruta a la que quieres redirigir al hacer clic en el botón
+        this.$router.push('/register');
+    },
+    changePage(page) {
+        if (page >= 1 && page <= this.totalPages) {
+            this.currentPage = page;
+        }
+    },
 };
+
 </script>
 
 <style scoped>
 /* Aplicar Montserrat a todo el contenido */
 * {
     font-family: 'Montserrat', sans-serif;
+}
+
+
+
+.pagination {
+    display: flex;
+    text-align: center;
+    margin-top: 10px;
+    margin-bottom: 10px;
+
+}
+
+.pagination button {
+    margin-left: 20px;
+    margin-right: 20px;
 }
 
 .titulo {
@@ -464,12 +539,12 @@ a {
 }
 
 .contenedor-tabla {
+    display: flex;
+    flex-direction: column;
     width: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
-    display: flex;
-    flex-direction: column;
 }
 
 /* Barra de búsqueda */
@@ -507,35 +582,25 @@ a {
     color: #691B31;
 }
 
-
-
-.add-user-btn {
-    margin-left: 50px;
-    width: 2.7%;
-    background-color: #bc955b;
-    color: white;
-    border: none;
-    padding: 8px;
-    border-radius: 50%;
-    cursor: pointer;
-    font-size: 18px;
-}
-
-.add-user-btn:hover {
-    background-color: #a4733a;
-}
-
-
-.pagination {
-    display: flex;
+.download-buttons {
+    margin: 20px 0;
     text-align: center;
-    margin-top: 10px;
-    margin-bottom: 10px;
-
 }
 
-.pagination button {
-    margin-left: 20px;
-    margin-right: 20px;
+.download-buttons button {
+    width: 150px;
+    margin: 0 10px;
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #f8c102;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-family: 'Montserrat', sans-serif;
+}
+
+.download-buttons button:hover {
+    background-color: #e0a800;
 }
 </style>

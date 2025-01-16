@@ -31,26 +31,27 @@
             <a href="users" class="nav-item">Usuarios</a>
             <div class="nav-item" @mouseenter="showMenu('homeMenu')" @mouseleave="hideMenu('homeMenu')">
                 Inventario
+                <span class="menu-icon">▼</span>
                 <div class="dropdown-menu" v-show="menus.homeMenu">
                     <button @click="navigateTo('bajas')">Historial de bajas</button>
-                    <button @click="navigateTo('altabienes')">Alta de bienes</button>
-                    <button @click="navigateTo('bajabienes')">Baja de bienes</button>
+                    <button @click="navigateTo('home')">Alta de bienes</button>
+                    <button @click="navigateTo('home')">Baja de bienes</button>
                     <button @click="navigateTo('resguardo')">Mi resguardo</button>
-                    <button @click="navigateTo('facturas')">Facturas</button>
-                    <button @click="navigateTo('polizas')">Polizas</button>
+                    <button @click="navigateTo('home')">Facturas</button>
+                    <button @click="navigateTo('home')">Polizas</button>
                 </div>
-
             </div>
+
             <div class="nav-item" @mouseenter="showMenu('usersMenu')" @mouseleave="hideMenu('usersMenu')">
                 Almacen
+                <span class="menu-icon">▼</span>
                 <div class="dropdown-menu" v-show="menus.usersMenu">
-                    <button @click="navigateTo('material')">Solicitud de material</button>
-                    <button @click="navigateTo('inventario')">Agregar un bien para inventario</button>
-                    <button @click="navigateTo('salidaexistencias')">Salida de existencias</button>
-                    <button @click="navigateTo('entradaexistencias')">Entrada de existencias</button>
-                    <button @click="navigateTo('solicitudes')">Recepcion de solicitudes</button>
-                    <button @click="navigateTo('usuario')">Asignar un bien a un usuario</button>
-                    <button @click="navigateTo('proveedores')">Ver proveedores</button>
+                    <button @click="navigateTo('users')">Solicitud de material</button>
+                    <button @click="navigateTo('users')">Agregar un bien para inventario</button>
+                    <button @click="navigateTo('users')">Salida de existencias</button>
+                    <button @click="navigateTo('users')">Entrada de existencias</button>
+                    <button @click="navigateTo('users')">Recepcion de solicitudes</button>
+                    <button @click="navigateTo('users')">Ver proveedores</button>
                 </div>
             </div>
 
@@ -91,7 +92,7 @@
 
                     <div class="form-field">
                         <label for="pertenencia">Direc. Pertenencia</label>
-                        
+
                         <select v-model="form.direccion" required>
                             <option value="">Selecciona una opción</option>
                             <option value="direccion_general">Dirección General</option>
@@ -185,6 +186,7 @@ export default {
         },
         navigateTo(page) {
             console.log(`Navegando a ${page}`);
+            this.$router.push({ name: page }); // Asegúrate de que las rutas estén definidas con `name`.
         },
         showMenu(menu) {
             this.menus[menu] = true;
@@ -426,8 +428,10 @@ a {
 
 
 .form-field select {
-    width: 111%;
-    font-size: 8px;
+    width: 100%;
+    max-width: 200px;
+    position: relative;
+    font-size: 15px;
     border: 1px solid #ccc;
     border-radius: 5px;
     box-sizing: border-box;

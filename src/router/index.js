@@ -7,6 +7,8 @@ import homePage from '@/components/home.vue';
 import inventoryPage from '@/components/inventory.vue';
 import almacenPage from '@/components/almacen.vue';
 import usersPage from '@/components/users.vue';
+import bajasPage from '@/components/bajas.vue';
+import resguardoPage from '@/components/resguardo.vue';
 
 
 
@@ -53,6 +55,16 @@ const router = createRouter({
       path: '/users',
       name: 'users',
       component: usersPage, // Cambia el nombre aquí
+    },
+    {
+      path: '/bajas',
+      name: 'bajas',
+      component: bajasPage, // Cambia el nombre aquí
+    },
+    {
+      path: '/resguardo',
+      name:'resguardo',
+      component: resguardoPage, // Cambia el nombre aquí
     }
   ],
 });
