@@ -71,9 +71,18 @@
         </div>
         <!-- Botones de descarga -->
         <div class="download-buttons">
-            <button @click="downloadPDF" style="background-color: red;">PDF</button>
-            <button @click="downloadExcel" style="background-color: green;">Excel</button>
+            <button @click="downloadPDF"
+                style="background-color: red;">
+                <i class="fas fa-file-pdf" style="margin-right: 8px;"></i>
+                Descargar PDF
+            </button>
+            <button @click="downloadExcel"
+                style="background-color: green;">
+                <i class="fas fa-file-excel" style="margin-right: 8px;"></i>
+                Descargar Excel
+            </button>
         </div>
+
 
         <div class="contenedor-tabla">
             <table class="user-table">
