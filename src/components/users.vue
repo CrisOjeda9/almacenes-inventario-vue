@@ -6,8 +6,8 @@
         <!-- Menú de navegación -->
         <nav class="navbar">
             <div class="navbar-left">
-                <img src="../assets/LOGOS DORADOS-02.png" alt="Icono" class="navbar-icon" @click="goBack" width="50%"
-                    height="auto" />
+                <img src="../assets/LOGOS DORADOS-02.png" alt="Icono" class="navbar-icon" @click="goHome" width="50%"
+                    height="auto" style="cursor: pointer;" />
             </div>
             <div class="navbar-center">
                 <h1>Gestion de usuarios</h1>
@@ -27,7 +27,7 @@
         <!-- Barra de navegación amarilla -->
         <div class="sub-navbar">
             <a href="/home" class="nav-item">Inicio</a>
-            <a href="users" class="nav-item">Usuarios</a>
+            <a href="users" class="nav-item" style="color: #6f7271;">Usuarios</a>
             <div class="nav-item" @mouseenter="showMenu('homeMenu')" @mouseleave="hideMenu('homeMenu')">
                 Inventario
                 <span class="menu-icon">▼</span>
@@ -36,8 +36,11 @@
                     <button @click="navigateTo('home')">Alta de bienes</button>
                     <button @click="navigateTo('home')">Baja de bienes</button>
                     <button @click="navigateTo('resguardo')">Mi resguardo</button>
-                    <button @click="navigateTo('home')">Facturas</button>
-                    <button @click="navigateTo('home')">Polizas</button>
+                    <button @click="navigateTo('factura')">Facturas</button>
+
+                    <button @click="navigateTo('poliza')">Polizas</button>
+
+
                 </div>
             </div>
 
@@ -166,6 +169,9 @@ export default {
         }
     },
     methods: {
+        goHome() {
+            this.$router.push('home'); // Redirige a la página principal ("/"). Cambia el path si es necesario.
+        },
         goBack() {
             console.log("Regresar a la página anterior");
         },

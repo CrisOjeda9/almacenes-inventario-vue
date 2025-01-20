@@ -1,6 +1,7 @@
 <template>
+
     <body>
-        
+
     </body>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
@@ -9,8 +10,8 @@
         <!-- Menú de navegación -->
         <nav class="navbar">
             <div class="navbar-left">
-                <img src="../assets/LOGOS DORADOS-02.png" alt="Icono" class="navbar-icon" @click="goBack" width="50%"
-                    height="auto" />
+                <img src="../assets/LOGOS DORADOS-02.png" alt="Icono" class="navbar-icon" @click="goHome" width="50%"
+                    height="auto" style="cursor: pointer;" />
             </div>
             <div class="navbar-center">
                 <h1>Historial de Bajas</h1>
@@ -30,36 +31,48 @@
         <!-- Barra de navegación amarilla -->
         <div class="sub-navbar">
             <a href="/home" class="nav-item">Inicio</a>
-            <a href="users" class="nav-item">Usuarios</a>
+            <a href="bajas" class="nav-item">Usuarios</a>
             <div class="nav-item" @mouseenter="showMenu('homeMenu')" @mouseleave="hideMenu('homeMenu')">
                 Inventario
                 <span class="menu-icon">▼</span>
                 <div class="dropdown-menu" v-show="menus.homeMenu">
-                    <button @click="navigateTo('bajas')">Historial de bajas</button>
+                    <button @click="navigateTo('bajas')" style="background-color: #ddc9a3; color: #691b31; border-radius: 4px;">Historial de bajas</button>
                     <button @click="navigateTo('home')">Alta de bienes</button>
                     <button @click="navigateTo('home')">Baja de bienes</button>
                     <button @click="navigateTo('resguardo')">Mi resguardo</button>
-                    <button @click="navigateTo('home')">Facturas</button>
-                    <button @click="navigateTo('home')">Polizas</button>
+                    <button @click="navigateTo('factura')">Facturas</button>
+
+                    <button @click="navigateTo('poliza')">Polizas</button>
+
+
                 </div>
             </div>
 
-            <div class="nav-item" @mouseenter="showMenu('usersMenu')" @mouseleave="hideMenu('usersMenu')">
+            <div class="nav-item" @mouseenter="showMenu('bajasMenu')" @mouseleave="hideMenu('bajasMenu')">
                 Almacen
                 <span class="menu-icon">▼</span>
-                <div class="dropdown-menu" v-show="menus.usersMenu">
-                    <button @click="navigateTo('users')">Solicitud de material</button>
-                    <button @click="navigateTo('users')">Agregar un bien para inventario</button>
-                    <button @click="navigateTo('users')">Salida de existencias</button>
-                    <button @click="navigateTo('users')">Entrada de existencias</button>
-                    <button @click="navigateTo('users')">Recepcion de solicitudes</button>
-                    <button @click="navigateTo('users')">Ver proveedores</button>
+                <div class="dropdown-menu" v-show="menus.bajasMenu">
+                    <button @click="navigateTo('bajas')">Solicitud de material</button>
+                    <button @click="navigateTo('bajas')">Agregar un bien para inventario</button>
+                    <button @click="navigateTo('bajas')">Salida de existencias</button>
+                    <button @click="navigateTo('bajas')">Entrada de existencias</button>
+                    <button @click="navigateTo('bajas')">Recepcion de solicitudes</button>
+                    <button @click="navigateTo('bajas')">Ver proveedores</button>
                 </div>
             </div>
 
         </div>
 
         <div class="search-bar">
+            <!-- Caja de selección para el filtro -->
+            <select v-model="filterTerm">
+                <option value="">Tipo de Procedencia</option>
+                <option value="RTH">RTH</option>
+                <option value="GA">GA</option>
+                <option value="NT">NT</option>
+                <option value="DON">DON</option>
+                <option value="PG">PG</option>
+            </select>
             <div class="input-wrapper">
                 <input type="text" v-model="searchQuery" placeholder="Buscar..." />
                 <i class="fas fa-search"></i> <!-- Icono de la lupa -->
@@ -95,7 +108,7 @@
                         <td>{{ user.direccion }}</td>
                         <td>{{ user.tipocompra }}</td>
                         <td>{{ user.registrationDate }}</td>
-                       
+
                     </tr>
                 </tbody>
 
@@ -118,11 +131,11 @@ export default {
         return {
             menus: {
                 homeMenu: false,
-                usersMenu: false,
+                bajasMenu: false,
                 settingsMenu: false,
             },
             searchQuery: '',
-            users: [
+            bajas: [
                 { numerobien: "15051", cuentabancaria: "526452658758985785", poliza: "adasd4654", persona: "Moral", costounitario: "100.00", rfc: "hsadjhasd4", direccion: "asdad456564", tipocompra: "Presupuestal", registrationDate: "2024-01-15" },
                 { numerobien: "45661", cuentabancaria: "757586867478932473", poliza: "asd66ddd", persona: "Fisica", costounitario: "200.00", rfc: "jghfgddjgdk4", direccion: "asdad5456", tipocompra: "Estatal", registrationDate: "2024-01-15" },
                 { numerobien: "45661", cuentabancaria: "757586867478932473", poliza: "asd66ddd", persona: "Fisica", costounitario: "200.00", rfc: "jghfgddjgdk4", direccion: "asdad5456", tipocompra: "Estatal", registrationDate: "2024-01-15" },
@@ -134,25 +147,36 @@ export default {
                 { numerobien: "0", cuentabancaria: "757586867478932473", poliza: "asd66ddd", persona: "hola", costounitario: "200.00", rfc: "jghfgddjgdk4", direccion: "asdad5456", tipocompra: "Estatal", registrationDate: "2024-01-15" },
                 { numerobien: "0", cuentabancaria: "757586867478932473", poliza: "asd66ddd", persona: "hola", costounitario: "200.00", rfc: "jghfgddjgdk4", direccion: "asdad5456", tipocompra: "Estatal", registrationDate: "2024-01-15" },
                 { numerobien: "0", cuentabancaria: "757586867478932473", poliza: "asd66ddd", persona: "hola", costounitario: "200.00", rfc: "jghfgddjgdk4", direccion: "asdad5456", tipocompra: "Estatal", registrationDate: "2024-01-15" },
-                { numerobien: "0", cuentabancaria: "757586867478932473", poliza: "asd66ddd", persona: "hola", costounitario: "200.00", rfc: "jghfgddjgdk4", direccion: "asdad5456", tipocompra: "Estatal", registrationDate: "2024-01-15" },
+                { numerobien: "RTH-0", cuentabancaria: "757586867478932473", poliza: "asd66ddd", persona: "hola", costounitario: "200.00", rfc: "jghfgddjgdk4", direccion: "asdad5456", tipocompra: "Estatal", registrationDate: "2024-01-15" },
                 // Agrega más usuarios aquí...
             ],
             itemsPerPage: 10, // Cantidad de elementos por página
             currentPage: 1, // Página actual
+            filterTerm: '', // Variable para filtrar por término específico
+
         };
     },
     computed: {
         filteredBajas() {
-            return this.users.filter(user => {
+            return this.bajas.filter(user => {
                 const query = this.searchQuery.toLowerCase();
-                return user.numerobien.toLowerCase().includes(query) ||
+                const filter = this.filterTerm.toLowerCase();
+                return (user.numerobien.toLowerCase().includes(query) ||
                     user.cuentabancaria.toLowerCase().includes(query) ||
                     user.poliza.toLowerCase().includes(query) ||
                     user.persona.toLowerCase().includes(query) ||
                     user.costounitario.toLowerCase().includes(query) ||
                     user.rfc.toLowerCase().includes(query) ||
                     user.tipocompra.toLowerCase().includes(query) ||
-                    user.direccion.toLowerCase().includes(query);
+                    user.direccion.toLowerCase().includes(query)) &&
+                    (this.filterTerm === '' || user.tipocompra.toLowerCase().includes(filter) ||
+                        user.numerobien.toLowerCase().includes(filter) ||
+                        user.cuentabancaria.toLowerCase().includes(filter) ||
+                        user.persona.toLowerCase().includes(filter) ||
+                        user.costounitario.toLowerCase().includes(filter) ||
+                        user.rfc.toLowerCase().includes(filter) ||
+                        user.direccion.toLowerCase().includes(filter) ||
+                        user.tipocompra.toLowerCase().includes(filter));
             });
         },
         // Número total de páginas
@@ -166,6 +190,9 @@ export default {
         },
     },
     methods: {
+        goHome() {
+            this.$router.push('home'); // Redirige a la página principal ("/"). Cambia el path si es necesario.
+        },
         goBack() {
             console.log("Regresar a la página anterior");
         },
@@ -200,14 +227,15 @@ export default {
 
 
 
-.pagination{
+.pagination {
     display: flex;
     text-align: center;
     margin-top: 10px;
     margin-bottom: 10px;
-    
+
 }
-.pagination button{
+
+.pagination button {
     margin-left: 20px;
     margin-right: 20px;
 }
@@ -511,5 +539,10 @@ a {
     color: #691B31;
 }
 
-
+.search-bar select {
+    padding: 10px;
+    border-radius: 10px;
+    justify-content: space-between;
+    margin-right: 15px;
+}
 </style>

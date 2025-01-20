@@ -10,8 +10,8 @@
         <!-- Menú de navegación -->
         <nav class="navbar">
             <div class="navbar-left">
-                <img src="../assets/LOGOS DORADOS-02.png" alt="Icono" class="navbar-icon" @click="goBack" width="50%"
-                    height="auto" />
+                <img src="../assets/LOGOS DORADOS-02.png" alt="Icono" class="navbar-icon" @click="goHome" width="50%"
+                    height="auto" style="cursor: pointer;" />
             </div>
             <div class="navbar-center">
                 <h1>Resguardo</h1>
@@ -31,7 +31,7 @@
         <!-- Barra de navegación amarilla -->
         <div class="sub-navbar">
             <a href="/home" class="nav-item">Inicio</a>
-            <a href="users" class="nav-item">Usuarios</a>
+            <a href="resguardo" class="nav-item">Usuarios</a>
             <div class="nav-item" @mouseenter="showMenu('homeMenu')" @mouseleave="hideMenu('homeMenu')">
                 Inventario
                 <span class="menu-icon">▼</span>
@@ -39,22 +39,25 @@
                     <button @click="navigateTo('bajas')">Historial de bajas</button>
                     <button @click="navigateTo('home')">Alta de bienes</button>
                     <button @click="navigateTo('home')">Baja de bienes</button>
-                    <button @click="navigateTo('resguardo')">Mi resguardo</button>
-                    <button @click="navigateTo('home')">Facturas</button>
-                    <button @click="navigateTo('home')">Polizas</button>
+                    <button @click="navigateTo('resguardo')" style="background-color: #ddc9a3; color: #691b31; border-radius: 4px;">Mi resguardo</button>
+                    <button @click="navigateTo('factura')">Facturas</button>
+
+                    <button @click="navigateTo('poliza')">Polizas</button>
+
+
                 </div>
             </div>
 
-            <div class="nav-item" @mouseenter="showMenu('usersMenu')" @mouseleave="hideMenu('usersMenu')">
+            <div class="nav-item" @mouseenter="showMenu('resguardoMenu')" @mouseleave="hideMenu('resguardoMenu')">
                 Almacen
                 <span class="menu-icon">▼</span>
-                <div class="dropdown-menu" v-show="menus.usersMenu">
-                    <button @click="navigateTo('users')">Solicitud de material</button>
-                    <button @click="navigateTo('users')">Agregar un bien para inventario</button>
-                    <button @click="navigateTo('users')">Salida de existencias</button>
-                    <button @click="navigateTo('users')">Entrada de existencias</button>
-                    <button @click="navigateTo('users')">Recepcion de solicitudes</button>
-                    <button @click="navigateTo('users')">Ver proveedores</button>
+                <div class="dropdown-menu" v-show="menus.resguardoMenu">
+                    <button @click="navigateTo('resguardo')">Solicitud de material</button>
+                    <button @click="navigateTo('resguardo')">Agregar un bien para inventario</button>
+                    <button @click="navigateTo('resguardo')">Salida de existencias</button>
+                    <button @click="navigateTo('resguardo')">Entrada de existencias</button>
+                    <button @click="navigateTo('resguardo')">Recepcion de solicitudes</button>
+                    <button @click="navigateTo('resguardo')">Ver proveedores</button>
                 </div>
             </div>
 
@@ -139,11 +142,11 @@ export default {
         return {
             menus: {
                 homeMenu: false,
-                usersMenu: false,
+                resguardoMenu: false,
                 settingsMenu: false,
             },
             searchQuery: '',
-            users: [
+            resguardo: [
                 { noinventario: "15051", descripcion: "es grande", color: "Rojo", material: "Marmol", modelo: "pro", marca: "apple", foto: "asdad456564", serie: "pro", registrationDate: "2024-01-15" },
                 { noinventario: "15052", descripcion: "compacto", color: "Azul", material: "Aluminio", modelo: "mini", marca: "samsung", foto: "asd1234567", serie: "mini", registrationDate: "2024-01-16" },
                 { noinventario: "15053", descripcion: "elegante", color: "Negro", material: "Vidrio", modelo: "elegant", marca: "sony", foto: "sdgfdfg1345", serie: "elegant", registrationDate: "2024-01-17" },
@@ -171,7 +174,7 @@ export default {
     computed: {
         filteredBajas() {
             const query = this.searchQuery.toLowerCase();
-            return this.users.filter(user =>
+            return this.resguardo.filter(user =>
                 user.noinventario.toLowerCase().includes(query) ||
                 user.descripcion.toLowerCase().includes(query) ||
                 user.color.toLowerCase().includes(query) ||
@@ -193,6 +196,9 @@ export default {
         }
     },
     methods: {
+        goHome() {
+            this.$router.push('home'); // Redirige a la página principal ("/"). Cambia el path si es necesario.
+        },
         changePage(page) {
             if (page > 0 && page <= this.totalPages) {
                 this.currentPage = page;

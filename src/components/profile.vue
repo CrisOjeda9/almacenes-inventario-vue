@@ -5,9 +5,8 @@
         <!-- Menú de navegación -->
         <nav class="navbar">
             <div class="navbar-left">
-                <!-- Ícono local -->
-                <img src="../assets/LOGOS DORADOS-02.png" alt="Icono" class="navbar-icon" @click="goBack" width="50%px"
-                    height="auto" />
+                <img src="../assets/LOGOS DORADOS-02.png" alt="Icono" class="navbar-icon" @click="goHome" width="50%"
+                    height="auto" style="cursor: pointer;" />
             </div>
             <div class="navbar-center">
                 <h1>Perfil</h1>
@@ -150,6 +149,9 @@ export default {
         };
     },
     methods: {
+        goHome() {
+            this.$router.push('home'); // Redirige a la página principal ("/"). Cambia el path si es necesario.
+        },
         goBack() {
             console.log("Regresar a la página anterior");
         },

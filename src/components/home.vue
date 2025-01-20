@@ -7,9 +7,8 @@
         <!-- Menú de navegación -->
         <nav class="navbar">
             <div class="navbar-left">
-                <!-- Ícono local -->
-                <img src="../assets/LOGOS DORADOS-02.png" alt="Icono" class="navbar-icon" @click="goBack" width="50%px"
-                    height="auto" />
+                <img src="../assets/LOGOS DORADOS-02.png" alt="Icono" class="navbar-icon" @click="goHome" width="50%"
+                    height="auto" style="cursor: pointer;" />
             </div>
             <div class="navbar-center">
                 <h1>Bienvenido</h1>
@@ -29,7 +28,7 @@
 
         <!-- Barra de navegación amarilla -->
         <div class="sub-navbar">
-            <a href="/home" class="nav-item">Inicio</a>
+            <a href="/home" class="nav-item" style="color: #6f7271;">Inicio</a>
             <a href="users" class="nav-item">Usuarios</a>
             <div class="nav-item" @mouseenter="showMenu('homeMenu')" @mouseleave="hideMenu('homeMenu')">
                 Inventario
@@ -39,8 +38,10 @@
                     <button @click="navigateTo('home')">Alta de bienes</button>
                     <button @click="navigateTo('home')">Baja de bienes</button>
                     <button @click="navigateTo('resguardo')">Mi resguardo</button>
-                    <button @click="navigateTo('home')">Facturas</button>
-                    <button @click="navigateTo('home')">Polizas</button>
+                    <button @click="navigateTo('factura')">Facturas</button>
+                    <button @click="navigateTo('poliza')">Polizas</button>
+
+
                 </div>
             </div>
 
@@ -333,41 +334,51 @@ a {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    background: #FFFFFF; /* Gradiente suave */
+    background: #FFFFFF;
+    /* Gradiente suave */
     color: #691B31;
     border-radius: 15px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15); /* Sombra sutil */
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    /* Sombra sutil */
     cursor: pointer;
     position: relative;
     overflow: hidden;
-    transition: all 0.4s ease; /* Transición suave */
+    transition: all 0.4s ease;
+    /* Transición suave */
 }
 
 .button-card:hover {
-    transform: translateY(-10px); /* Desplazamiento suave hacia arriba */
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2); /* Sombra más profunda */
+    transform: translateY(-10px);
+    /* Desplazamiento suave hacia arriba */
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+    /* Sombra más profunda */
 }
 
 .button-card i {
     font-size: 50px;
     margin-bottom: 15px;
-    transition: transform 0.3s ease, color 0.3s ease; /* Efecto de cambio suave */
+    transition: transform 0.3s ease, color 0.3s ease;
+    /* Efecto de cambio suave */
 }
 
 .button-card:hover i {
-    transform: scale(1.2); /* Escala suave */
-    color: #bc955b; /* Color dorado en hover */
+    transform: scale(1.2);
+    /* Escala suave */
+    color: #bc955b;
+    /* Color dorado en hover */
 }
 
 .button-card span {
     font-size: 20px;
     font-weight: bold;
     text-align: center;
-    transition: color 0.3s ease; /* Cambio de color en hover */
+    transition: color 0.3s ease;
+    /* Cambio de color en hover */
 }
 
 .button-card:hover span {
-    color: #bc955b; /* Color dorado en hover */
+    color: #bc955b;
+    /* Color dorado en hover */
 }
 
 .button-card:before {
@@ -380,11 +391,13 @@ a {
     background: rgba(255, 255, 255, 0.2);
     transform: scaleX(0);
     transform-origin: 100% 100%;
-    transition: transform 0.4s ease; /* Efecto de barra sutil */
+    transition: transform 0.4s ease;
+    /* Efecto de barra sutil */
 }
 
 .button-card:hover:before {
-    transform: scaleX(1); /* Expande la capa al hacer hover */
+    transform: scaleX(1);
+    /* Expande la capa al hacer hover */
 }
 
 

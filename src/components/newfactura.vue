@@ -9,7 +9,7 @@
                     height="auto" style="cursor: pointer;" />
             </div>
             <div class="navbar-center">
-                <h1>Nuevo Usuario</h1>
+                <h1>Nueva Factura</h1>
                 <p>Sistema inventario y Almacén de Radio y Televisión de Hidalgo</p>
             </div>
             <div class="navbar-right">
@@ -22,7 +22,6 @@
                 </div>
             </div>
         </nav>
-
 
         <!-- Barra de navegación amarilla -->
         <div class="sub-navbar">
@@ -37,7 +36,6 @@
                     <button @click="navigateTo('home')">Baja de bienes</button>
                     <button @click="navigateTo('resguardo')">Mi resguardo</button>
                     <button @click="navigateTo('factura')">Facturas</button>
-
                     <button @click="navigateTo('poliza')">Polizas</button>
 
 
@@ -56,116 +54,133 @@
                     <button @click="navigateTo('users')">Ver proveedores</button>
                 </div>
             </div>
-
         </div>
 
         <!-- Formulario -->
         <div class="form-container">
-            <form @submit.prevent="registerUser">
+            <form @submit.prevent="registerFactura">
                 <div class="form-row">
+                    <!-- No. Factura -->
                     <div class="form-field">
-                        <label for="nombre">Nombre(s)</label>
-                        <input type="text" placeholder="" v-model="form.nombre" required />
-
-                    </div>
-                    <div class="form-field">
-                        <label for="apellido">Apellidos</label>
-                        <input type="text" placeholder="" v-model="form.apellidos" required />
-
-                    </div>
-                    <div class="form-field">
-                        <label for="rfc">RFC</label>
-                        <input type="text" placeholder="" minlength="13" maxlength="13" v-model="form.rfc"
-                            style="text-transform: uppercase;" required />
-
-                    </div>
-                </div>
-                <div class="form-row">
-                    <div class="form-field">
-                        <label for="numtrabajador">Num. Trabajador</label>
-                        <input type="number" placeholder="" min="0" v-model="form.numTrabajador" required />
-
-                    </div>
-                    <div class="form-field">
-                        <label for="curp">CURP</label>
-                        <input type="text" placeholder="" minlength="18" maxlength="18" v-model="form.curp" required
-                            style="text-transform: uppercase;" />
+                        <label for="numfactura">No. Factura</label>
+                        <input type="text" id="numfactura" placeholder="Ej. F123456" v-model="form.numFactura"
+                            required />
                     </div>
 
+                    <!-- Tipo de Compra -->
                     <div class="form-field">
-                        <label for="pertenencia">Direc. Pertenencia</label>
-
-                        <select v-model="form.direccion" required>
+                        <label for="tipoCompra">Tipo de compra</label>
+                        <select id="tipoCompra" v-model="form.tipoCompra" required>
                             <option value="">Selecciona una opción</option>
-                            <option value="direccion_general">Dirección General</option>
-                            <option value="direccion_coordinacion_financiera">Dirección de coordinación financiera y
-                                planeación</option>
-                            <option value="direccion_television">Dirección de televisión</option>
-                            <option value="direccion_noticias">Dirección de noticias</option>
-                            <option value="direccion_radio">Dirección de radio</option>
-                            <option value="direccion_ingenieria">Dirección de ingeniería</option>
-                            <option value="direccion_proyectos_estrategicos">Dirección de proyectos estratégicos
-                            </option>
-                            <option value="organo_interno_control">Órgano interno de control</option>
-                            <option value="direccion_promocion_intercambio">Dirección de promoción e intercambio
-                            </option>
-                            <option value="direccion_juridica">Dirección jurídica</option>
-                            <option value="direccion_vinculacion">Dirección de vinculación</option>
-                            <option value="estaciones_radio">Estaciones de radio</option>
+                            <option value="estatal">Estatal</option>
+                            <option value="presupuestal">Presupuestal</option>
                         </select>
                     </div>
 
+                    <!-- Concepto -->
+                    <div class="form-field">
+                        <label for="concepto">Concepto</label>
+                        <input type="text" id="concepto" placeholder="Ej. Compra de material" v-model="form.concepto"
+                            minlength="3" maxlength="100" style="text-transform: uppercase;" required />
+                    </div>
 
+                    <!-- Fecha de Factura -->
+                    <div class="form-field">
+                        <label for="fechaFactura">Fecha de Factura</label>
+                        <input type="date" id="fechaFactura" v-model="form.fechaFactura" required />
+                    </div>
                 </div>
+
                 <div class="form-row">
+                    <!-- Proveedor -->
                     <div class="form-field">
-                        <label for="departamento">Departamento</label>
-                        <input type="text" placeholder="" v-model="form.departamento" required />
-
-                    </div>
-                    <div class="form-field">
-                        <label for="password">Contraseña</label>
-                        <div class="input-wrapper">
-                            <input :type="showPassword ? 'text' : 'password'" v-model="form.password" required />
-                            <i :class="showPassword ? 'fa fa-eye-slash' : 'fa fa-eye'"
-                                @click="showPassword = !showPassword"></i>
-                        </div>
+                        <label for="proveedor">Proveedor</label>
+                        <select id="proveedor" v-model="form.proveedor" required>
+                            <option value="">Selecciona una opción</option>
+                            <option value="carlos">Carlos</option>
+                            <option value="martin">Martin</option>
+                        </select>
                     </div>
 
+                    <!-- Cantidad -->
                     <div class="form-field">
-                        <label for="confirmPassword">Confirmar Contraseña</label>
-                        <div class="input-wrapper">
-                            <input :type="showConfirmPassword ? 'text' : 'password'" v-model="form.confirmPassword"
-                                required />
-                            <i :class="showConfirmPassword ? 'fa fa-eye-slash' : 'fa fa-eye'"
-                                @click="showConfirmPassword = !showConfirmPassword"></i>
+                        <label for="cantidad">Cantidad</label>
+                        <input type="number" min="0" id="cantidad" placeholder="Ej. 100" v-model="form.cantidad"
+                            required />
+                    </div>
+
+                    <!-- Precio Unitario -->
+                    <div class="form-field">
+                        <label for="precioUnitario">Precio Unitario</label>
+                        <input type="number" id="precioUnitario" step="0.01" placeholder="Ej. 50.00"
+                            v-model="form.precioUnitario" min="0" required />
+                    </div>
+
+                    <!-- Precio Total sin IVA -->
+                    <div class="form-field">
+                        <label for="precioTotalSinIVA">Precio total sin IVA</label>
+                        <input type="number" id="precioTotalSinIVA" step="0.01" placeholder="Ej. 5000.00"
+                            v-model="form.precioTotalSinIVA" min="0" required />
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <!-- IVA -->
+                    <div class="form-field">
+                        <label for="iva">IVA</label>
+                        <input type="number" id="iva" step="0.01" placeholder="Ej. 800.00" v-model="form.iva" min="0"
+                            required />
+                    </div>
+
+                    <!-- Precio Total con IVA -->
+                    <div class="form-field">
+                        <label for="precioTotalConIVA">Precio total con IVA</label>
+                        <input type="number" id="precioTotalConIVA" step="0.01" placeholder="Ej. 5800.00"
+                            v-model="form.precioTotalConIVA" min="0" required />
+                    </div>
+                    <!-- Documento de Factura -->
+                    <div class="form-field">
+                        <label for="documentofactura">Documento de factura</label>
+                        <div class="dropzone" @drop.prevent="handleDrop" @dragover.prevent @click="triggerFileInput">
+                            <input type="file" id="documentofactura" ref="fileInput" @change="handleFileUpload"
+                                accept=".pdf,.jpg,.png" />
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <span v-if="!form.documentofactura">Arrastra o selecciona un archivo (PDF, JPG, PNG)</span>
+                            <span v-else>{{ form.documentofactura.name }}</span>
                         </div>
                     </div>
                 </div>
+
                 <div class="button-container">
-                    <button class="boton" type="submit">Registrar</button>
+                    <button class="boton" type="submit">
+                        <i class="fas fa-plus"></i> Agregar Factura
+                    </button>
                 </div>
             </form>
         </div>
+
     </div>
 </template>
 
 <script>
 export default {
-    name: "RegisterPage",
+    name: "newFacturaPage",
     data() {
         return {
             form: {
-                nombre: "",
-                apellidos: "",
-                rfc: "",
-                numTrabajador: "",
-                curp: "",
-                direccion: "",
-                departamento: "",
-                password: "",
-                confirmPassword: "",
+                numfactura: "",           // No. Factura
+                tipoCompra: "", // Asegúrate de que esté vacío por defecto
+                concepto: "",             // Concepto
+                fechafactura: "",         // Fecha de Factura
+                proveedor: "",            // Proveedor
+                cantidad: 0,              // Cantidad
+                preciounitario: 0.0,      // Precio Unitario
+                preciosiniva: 0.0,        // Precio total sin IVA
+                iva: 0.0,                 // IVA
+                precioconiva: 0.0,        // Precio total con IVA
+                documentofactura: null, // Almacena el archivo seleccionado
             },
+
             showPassword: false,
             showConfirmPassword: false,
             menus: {
@@ -179,15 +194,26 @@ export default {
         goHome() {
             this.$router.push('home'); // Redirige a la página principal ("/"). Cambia el path si es necesario.
         },
+        handleFileUpload(event) {
+            const file = event.target.files[0];
+            this.form.documentofactura = file; // Almacena el archivo en el formulario
+        },
+        handleDrop(event) {
+            const file = event.dataTransfer.files[0];
+            this.form.documentofactura = file; // Almacena el archivo en el formulario
+        },
+        triggerFileInput() {
+            this.$refs.fileInput.click(); // Trigger el input file cuando se hace click en la dropzone
+        },
         goBack() {
             console.log("Regresar a la página anterior");
         },
-        registerUser() {
+        registerFactura() {
             if (this.form.password !== this.form.confirmPassword) {
                 alert("Las contraseñas no coinciden");
                 return;
             }
-            console.log("Usuario registrado:", this.form);
+            console.log("Factura registrada:", this.form);
         },
         navigateTo(page) {
             console.log(`Navegando a ${page}`);
@@ -202,6 +228,7 @@ export default {
     },
 };
 </script>
+
 
 <style scoped>
 /* Aplicar Montserrat a todo el contenido */
@@ -350,7 +377,8 @@ export default {
 
 form {
     background: white;
-    padding: 30px;
+    padding: 40px;
+    padding-bottom: 80px;
     border-radius: 10px;
     width: 800px;
     height: 350px;
@@ -444,5 +472,59 @@ a {
     color: #333;
     height: 40px;
     /* Asegura que tenga la misma altura que los inputs */
+}
+
+
+/* Estilos del Dropzone */
+.dropzone {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border: 2px dashed #98989A;
+    padding: 10px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    cursor: pointer;
+    text-align: center;
+    transition: background-color 0.3s ease;
+    min-width: 300px;
+    /* Ocupa todo el ancho disponible */
+    max-width: 300px;
+    /* Ocupa todo el ancho disponible */
+    min-height: 100px;
+    /* Mantiene una altura mínima */
+    max-height: 100px;
+    /* Mantiene una altura mínima */
+    box-sizing: border-box;
+    /* El padding no afectará el tamaño */
+    overflow: hidden;
+    /* Evita que el contenido sobrepase los límites del contenedor */
+    word-wrap: break-word;
+    /* Asegura que el texto largo se ajuste al contenedor */
+}
+
+.dropzone:hover {
+    background-color: #ecf6fc;
+}
+
+.dropzone i {
+    font-size: 30px;
+    color: #6F7271;
+}
+
+.dropzone span {
+    font-size: 12px;
+    color: #6F7271;
+    overflow: hidden;
+    /* Evita que el texto de la etiqueta ocupe más espacio del necesario */
+    text-overflow: ellipsis;
+    /* Muestra "..." si el texto es demasiado largo */
+    white-space: nowrap;
+    /* Evita que el texto se divida en varias líneas */
+}
+
+.dropzone input[type="file"] {
+    display: none;
 }
 </style>

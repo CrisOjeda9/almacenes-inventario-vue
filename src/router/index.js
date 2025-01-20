@@ -9,6 +9,10 @@ import almacenPage from '@/components/almacen.vue';
 import usersPage from '@/components/users.vue';
 import bajasPage from '@/components/bajas.vue';
 import resguardoPage from '@/components/resguardo.vue';
+import facturaPage from '@/components/factura.vue';
+import newFacturaPage from '@/components/newfactura.vue';
+import polizasPage from '@/components/poliza.vue';
+import newPolizaPage from '@/components/newpoliza.vue';
 
 
 
@@ -22,7 +26,7 @@ const router = createRouter({
     },
     {
       path: '/register',
-      name:'register',
+      name: 'register',
       component: RegistroPage, // Cambia el nombre aquí
     },
     {
@@ -31,7 +35,7 @@ const router = createRouter({
       component: ProfilePage, // Cambia el nombre aquí
     },
     {
-      path:'/newpassword',
+      path: '/newpassword',
       name: 'newpassword',
       component: changePassword, // Cambia el nombre aquí
     },
@@ -63,8 +67,28 @@ const router = createRouter({
     },
     {
       path: '/resguardo',
-      name:'resguardo',
+      name: 'resguardo',
       component: resguardoPage, // Cambia el nombre aquí
+    },
+    {
+      path: '/factura',
+      name: 'factura',
+      component: facturaPage, // Cambia el nombre aquí
+    },
+    {
+      path: '/newfactura',
+      name: 'newfactura',
+      component: newFacturaPage, // Cambia el nombre aquí
+    },
+    {
+      path: '/poliza',
+      name: 'poliza',
+      component: polizasPage, // Cambia el nombre aquí
+    },
+    {
+      path: '/newpoliza',
+      name: 'newpoliza',
+      component: newPolizaPage, // Cambia el nombre aquí
     }
   ],
 });

@@ -7,9 +7,8 @@
         <!-- Menú de navegación -->
         <nav class="navbar">
             <div class="navbar-left">
-                <!-- Ícono local -->
-                <img src="../assets/LOGOS DORADOS-02.png" alt="Icono" class="navbar-icon" @click="goBack" width="50%px"
-                    height="auto" />
+                <img src="../assets/LOGOS DORADOS-02.png" alt="Icono" class="navbar-icon" @click="goHome" width="50%"
+                    height="auto" style="cursor: pointer;" />
             </div>
             <div class="navbar-center">
                 <h1>Control de Inventario</h1>
@@ -39,8 +38,11 @@
                     <button @click="navigateTo('home')">Alta de bienes</button>
                     <button @click="navigateTo('home')">Baja de bienes</button>
                     <button @click="navigateTo('resguardo')">Mi resguardo</button>
-                    <button @click="navigateTo('home')">Facturas</button>
-                    <button @click="navigateTo('home')">Polizas</button>
+                    <button @click="navigateTo('factura')">Facturas</button>
+
+                    <button @click="navigateTo('poliza')">Polizas</button>
+
+
                 </div>
             </div>
 
@@ -83,12 +85,12 @@
                 <span>Mi Resguardo</span>
             </div>
 
-            <div class="button-card" @click="navigateTo2('facturas')">
+            <div class="button-card" @click="navigateTo2('factura')">
                 <i class="fas fa-file-invoice"></i>
                 <span>Facturas</span>
             </div>
 
-            <div class="button-card" @click="navigateTo2('polizas')">
+            <div class="button-card" @click="navigateTo2('poliza')">
                 <i class="fas fa-file-contract"></i>
                 <span>Pólizas</span>
             </div>
@@ -113,6 +115,9 @@ export default {
         };
     },
     methods: {
+        goHome() {
+            this.$router.push('home'); // Redirige a la página principal ("/"). Cambia el path si es necesario.
+        },
         goBack() {
             console.log("Regresar a la página anterior");
         },

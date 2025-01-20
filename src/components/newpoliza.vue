@@ -9,7 +9,7 @@
                     height="auto" style="cursor: pointer;" />
             </div>
             <div class="navbar-center">
-                <h1>Nuevo Usuario</h1>
+                <h1>Nueva Poliza</h1>
                 <p>Sistema inventario y Almacén de Radio y Televisión de Hidalgo</p>
             </div>
             <div class="navbar-right">
@@ -22,7 +22,6 @@
                 </div>
             </div>
         </nav>
-
 
         <!-- Barra de navegación amarilla -->
         <div class="sub-navbar">
@@ -37,7 +36,6 @@
                     <button @click="navigateTo('home')">Baja de bienes</button>
                     <button @click="navigateTo('resguardo')">Mi resguardo</button>
                     <button @click="navigateTo('factura')">Facturas</button>
-
                     <button @click="navigateTo('poliza')">Polizas</button>
 
 
@@ -56,116 +54,124 @@
                     <button @click="navigateTo('users')">Ver proveedores</button>
                 </div>
             </div>
-
         </div>
 
         <!-- Formulario -->
         <div class="form-container">
-            <form @submit.prevent="registerUser">
+            <form @submit.prevent="registerPoliza">
                 <div class="form-row">
+                    <!-- Descripción -->
                     <div class="form-field">
-                        <label for="nombre">Nombre(s)</label>
-                        <input type="text" placeholder="" v-model="form.nombre" required />
-
+                        <label for="descripcion">Descripción</label>
+                        <input type="text" id="descripcion" placeholder="Ej. Póliza de seguro"
+                            v-model="form.descripcion" required />
                     </div>
-                    <div class="form-field">
-                        <label for="apellido">Apellidos</label>
-                        <input type="text" placeholder="" v-model="form.apellidos" required />
 
+                    <!-- Cobertura -->
+                    <div class="form-field">
+                        <label for="cobertura">Cobertura</label>
+                        <input type="text" id="cobertura" placeholder="Ej. Total" v-model="form.cobertura" required />
                     </div>
-                    <div class="form-field">
-                        <label for="rfc">RFC</label>
-                        <input type="text" placeholder="" minlength="13" maxlength="13" v-model="form.rfc"
-                            style="text-transform: uppercase;" required />
 
+                    <!-- Tipo de Póliza -->
+                    <div class="form-field">
+                        <label for="tipopoliza">Tipo de Póliza</label>
+                        <input type="text" id="tipopoliza" placeholder="Ej. Póliza de vida" v-model="form.tipopoliza"
+                            required />
+                    </div>
+
+                    <!-- Calidad -->
+                    <div class="form-field">
+                        <label for="calidad">Calidad</label>
+                        <input type="text" id="calidad" placeholder="Ej. Premium" v-model="form.calidad" required />
                     </div>
                 </div>
+
                 <div class="form-row">
+                    <!-- Deducible -->
                     <div class="form-field">
-                        <label for="numtrabajador">Num. Trabajador</label>
-                        <input type="number" placeholder="" min="0" v-model="form.numTrabajador" required />
-
-                    </div>
-                    <div class="form-field">
-                        <label for="curp">CURP</label>
-                        <input type="text" placeholder="" minlength="18" maxlength="18" v-model="form.curp" required
-                            style="text-transform: uppercase;" />
+                        <label for="deducible">Deducible</label>
+                        <input type="number" step="0.01" id="deducible" placeholder="Ej. 5000" v-model="form.deducible"
+                            min="0" required />
                     </div>
 
+                    <!-- Limite de indemnización -->
                     <div class="form-field">
-                        <label for="pertenencia">Direc. Pertenencia</label>
-
-                        <select v-model="form.direccion" required>
-                            <option value="">Selecciona una opción</option>
-                            <option value="direccion_general">Dirección General</option>
-                            <option value="direccion_coordinacion_financiera">Dirección de coordinación financiera y
-                                planeación</option>
-                            <option value="direccion_television">Dirección de televisión</option>
-                            <option value="direccion_noticias">Dirección de noticias</option>
-                            <option value="direccion_radio">Dirección de radio</option>
-                            <option value="direccion_ingenieria">Dirección de ingeniería</option>
-                            <option value="direccion_proyectos_estrategicos">Dirección de proyectos estratégicos
-                            </option>
-                            <option value="organo_interno_control">Órgano interno de control</option>
-                            <option value="direccion_promocion_intercambio">Dirección de promoción e intercambio
-                            </option>
-                            <option value="direccion_juridica">Dirección jurídica</option>
-                            <option value="direccion_vinculacion">Dirección de vinculación</option>
-                            <option value="estaciones_radio">Estaciones de radio</option>
-                        </select>
+                        <label for="indemnizacion">Límite de indemnización</label>
+                        <input type="number" step="0.01" id="indemnizacion" placeholder="Ej. 100000"
+                            v-model="form.indemnizacion" min="0" required />
                     </div>
 
+                    <!-- Periodo de Validación -->
+                    <div class="form-field">
+                        <label for="validacion">Periodo de Validación</label>
+                        <input type="number" min="0" id="validacion" placeholder="Ej. 1 año" v-model="form.validacion"
+                            required />
+                    </div>
 
+                    <!-- Clausulas de Exclusion -->
+                    <div class="form-field">
+                        <label for="exclusion">Cláusulas de Exclusion</label>
+                        <input type="text" id="exclusion" placeholder="Ej. No aplica en caso de... "
+                            v-model="form.exclusion" required />
+                    </div>
                 </div>
+
                 <div class="form-row">
+                    <!-- Fecha de Póliza -->
                     <div class="form-field">
-                        <label for="departamento">Departamento</label>
-                        <input type="text" placeholder="" v-model="form.departamento" required />
-
-                    </div>
-                    <div class="form-field">
-                        <label for="password">Contraseña</label>
-                        <div class="input-wrapper">
-                            <input :type="showPassword ? 'text' : 'password'" v-model="form.password" required />
-                            <i :class="showPassword ? 'fa fa-eye-slash' : 'fa fa-eye'"
-                                @click="showPassword = !showPassword"></i>
-                        </div>
+                        <label for="fechapoliza">Fecha de Póliza</label>
+                        <input type="date" id="fechapoliza" v-model="form.fechapoliza" required />
                     </div>
 
+                    <!-- Fecha de Registro -->
                     <div class="form-field">
-                        <label for="confirmPassword">Confirmar Contraseña</label>
-                        <div class="input-wrapper">
-                            <input :type="showConfirmPassword ? 'text' : 'password'" v-model="form.confirmPassword"
-                                required />
-                            <i :class="showConfirmPassword ? 'fa fa-eye-slash' : 'fa fa-eye'"
-                                @click="showConfirmPassword = !showConfirmPassword"></i>
+                        <label for="registrationDate">Fecha de Registro</label>
+                        <input type="date" id="registrationDate" v-model="form.registrationDate" required />
+                    </div>
+
+                    <!-- Documento de Poliza -->
+                    <div class="form-field">
+                        <label for="documentopoliza">Documento de factura</label>
+                        <div class="dropzone" @drop.prevent="handleDrop" @dragover.prevent @click="triggerFileInput">
+                            <input type="file" id="documentopoliza" ref="fileInput" @change="handleFileUpload"
+                                accept=".pdf,.jpg,.png" />
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <span v-if="!form.documentopoliza">Arrastra o selecciona un archivo (PDF, JPG, PNG)</span>
+                            <span v-else>{{ form.documentopoliza.name }}</span>
                         </div>
                     </div>
                 </div>
                 <div class="button-container">
-                    <button class="boton" type="submit">Registrar</button>
+                    <button class="boton" type="submit">
+                        <i class="fas fa-plus"></i> Agregar Póliza
+                    </button>
                 </div>
             </form>
         </div>
+
     </div>
 </template>
 
 <script>
 export default {
-    name: "RegisterPage",
+    name: "newPolizaPage",
     data() {
         return {
             form: {
-                nombre: "",
-                apellidos: "",
-                rfc: "",
-                numTrabajador: "",
-                curp: "",
-                direccion: "",
-                departamento: "",
-                password: "",
-                confirmPassword: "",
+                numfactura: "",           // No. Factura
+                tipoCompra: "", // Asegúrate de que esté vacío por defecto
+                concepto: "",             // Concepto
+                fechafactura: "",         // Fecha de Factura
+                proveedor: "",            // Proveedor
+                cantidad: 0,              // Cantidad
+                preciounitario: 0.0,      // Precio Unitario
+                preciosiniva: 0.0,        // Precio total sin IVA
+                iva: 0.0,                 // IVA
+                precioconiva: 0.0,        // Precio total con IVA
+                documentopoliza: null, // Almacena el archivo seleccionado
             },
+
             showPassword: false,
             showConfirmPassword: false,
             menus: {
@@ -179,15 +185,26 @@ export default {
         goHome() {
             this.$router.push('home'); // Redirige a la página principal ("/"). Cambia el path si es necesario.
         },
+        handleFileUpload(event) {
+            const file = event.target.files[0];
+            this.form.documentopoliza = file; // Almacena el archivo en el formulario
+        },
+        handleDrop(event) {
+            const file = event.dataTransfer.files[0];
+            this.form.documentopoliza = file; // Almacena el archivo en el formulario
+        },
+        triggerFileInput() {
+            this.$refs.fileInput.click(); // Trigger el input file cuando se hace click en la dropzone
+        },
         goBack() {
             console.log("Regresar a la página anterior");
         },
-        registerUser() {
+        registerFactura() {
             if (this.form.password !== this.form.confirmPassword) {
                 alert("Las contraseñas no coinciden");
                 return;
             }
-            console.log("Usuario registrado:", this.form);
+            console.log("Factura registrada:", this.form);
         },
         navigateTo(page) {
             console.log(`Navegando a ${page}`);
@@ -202,6 +219,7 @@ export default {
     },
 };
 </script>
+
 
 <style scoped>
 /* Aplicar Montserrat a todo el contenido */
@@ -350,7 +368,8 @@ export default {
 
 form {
     background: white;
-    padding: 30px;
+    padding: 40px;
+    padding-bottom: 90px;
     border-radius: 10px;
     width: 800px;
     height: 350px;
@@ -444,5 +463,59 @@ a {
     color: #333;
     height: 40px;
     /* Asegura que tenga la misma altura que los inputs */
+}
+
+
+/* Estilos del Dropzone */
+.dropzone {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border: 2px dashed #98989A;
+    padding: 10px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    cursor: pointer;
+    text-align: center;
+    transition: background-color 0.3s ease;
+    min-width: 300px;
+    /* Ocupa todo el ancho disponible */
+    max-width: 300px;
+    /* Ocupa todo el ancho disponible */
+    min-height: 100px;
+    /* Mantiene una altura mínima */
+    max-height: 100px;
+    /* Mantiene una altura mínima */
+    box-sizing: border-box;
+    /* El padding no afectará el tamaño */
+    overflow: hidden;
+    /* Evita que el contenido sobrepase los límites del contenedor */
+    word-wrap: break-word;
+    /* Asegura que el texto largo se ajuste al contenedor */
+}
+
+.dropzone:hover {
+    background-color: #ecf6fc;
+}
+
+.dropzone i {
+    font-size: 30px;
+    color: #6F7271;
+}
+
+.dropzone span {
+    font-size: 12px;
+    color: #6F7271;
+    overflow: hidden;
+    /* Evita que el texto de la etiqueta ocupe más espacio del necesario */
+    text-overflow: ellipsis;
+    /* Muestra "..." si el texto es demasiado largo */
+    white-space: nowrap;
+    /* Evita que el texto se divida en varias líneas */
+}
+
+.dropzone input[type="file"] {
+    display: none;
 }
 </style>
