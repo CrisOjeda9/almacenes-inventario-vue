@@ -36,7 +36,8 @@
                     <button @click="navigateTo('home')">Alta de bienes</button>
                     <button @click="navigateTo('home')">Baja de bienes</button>
                     <button @click="navigateTo('resguardo')">Mi resguardo</button>
-                    <button @click="navigateTo('proveedor')" style="background-color: #ddc9a3; color: #691b31; border-radius: 4px;">proveedors</button>
+                    <button @click="navigateTo('proveedor')"
+                        style="background-color: #ddc9a3; color: #691b31; border-radius: 4px;">proveedors</button>
                     <button @click="navigateTo('poliza')">Polizas</button>
                 </div>
             </div>
@@ -104,66 +105,66 @@
 
             <!-- Modal de Edición -->
             <!-- Modal de Edición de Proveedor -->
-<div v-if="isEditing" class="edit-modal">
-    <div class="modal-content">
-        <h3>Editar Proveedor</h3>
-        <form @submit.prevent="saveChanges" class="edit-form">
-            <div class="contenedorformulario">
-                <div class="form-column">
-                    <div>
-                        <label>Nombre:</label>
-                        <input v-model="currentProveedor.nombre" type="text" />
-                    </div>
-                    <div>
-                        <label>Apellidos:</label>
-                        <input v-model="currentProveedor.apellidos" type="text" />
-                    </div>
-                    <div>
-                        <label>Tipo de Proveedor:</label>
-                        <select v-model="currentProveedor.tipoProveedor" class="form-input">
-                            <option value="" disabled>Selecciona el tipo de proveedor</option>
-                    <option value="fisico">Físico</option>
-                    <option value="moral">Moral</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label>RFC:</label>
-                        <input v-model="currentProveedor.rfc" type="text" />
-                    </div>
-                    <div>
-                        <label>Dirección:</label>
-                        <input v-model="currentProveedor.direccion" type="text" />
-                    </div>
-                </div>
+            <div v-if="isEditing" class="edit-modal">
+                <div class="modal-content">
+                    <h3>Editar Proveedor</h3>
+                    <form @submit.prevent="saveChanges" class="edit-form">
+                        <div class="contenedorformulario">
+                            <div class="form-column">
+                                <div>
+                                    <label>Nombre:</label>
+                                    <input v-model="currentProveedor.nombre" type="text" />
+                                </div>
+                                <div>
+                                    <label>Apellidos:</label>
+                                    <input v-model="currentProveedor.apellidos" type="text" />
+                                </div>
+                                <div style="width: 85%; margin-left: 0px;">
+                                    <label>Tipo de Proveedor:</label>
+                                    <select v-model="currentProveedor.tipoProveedor" class="form-input">
+                                        <option value="" disabled>Selecciona el tipo de proveedor</option>
+                                        <option value="fisico">Físico</option>
+                                        <option value="moral">Moral</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label>RFC:</label>
+                                    <input v-model="currentProveedor.rfc" type="text" />
+                                </div>
+                                <div>
+                                    <label>Dirección:</label>
+                                    <input v-model="currentProveedor.direccion" type="text" />
+                                </div>
+                            </div>
 
-                <div class="form-column">
-                    <div>
-                        <label>Teléfono:</label>
-                        <input v-model="currentProveedor.telefono" type="text" />
-                    </div>
-                    <div>
-                        <label>Correo Electrónico:</label>
-                        <input v-model="currentProveedor.correo" type="email" class='email'/>
-                    </div>
-                    <div>
-                        <label>Cuenta Bancaria:</label>
-                        <input v-model="currentProveedor.cuentaBancaria" type="text" />
-                    </div>
-                    <div>
-                        <label>Fecha de Registro:</label>
-                        <input v-model="currentProveedor.fechaRegistro" type="date" />
-                    </div>
+                            <div class="form-column">
+                                <div>
+                                    <label>Teléfono:</label>
+                                    <input v-model="currentProveedor.telefono" type="text" />
+                                </div>
+                                <div>
+                                    <label>Correo Electrónico:</label>
+                                    <input v-model="currentProveedor.correo" type="email" class='email' />
+                                </div>
+                                <div>
+                                    <label>Cuenta Bancaria:</label>
+                                    <input v-model="currentProveedor.cuentaBancaria" type="text" />
+                                </div>
+                                <div>
+                                    <label>Fecha de Registro:</label>
+                                    <input v-model="currentProveedor.fechaRegistro" type="date" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Botones debajo del formulario -->
+                        <div class="form-buttons">
+                            <button type="submit" class="save-btn">Guardar cambios</button>
+                            <button @click="cancelEdit" type="button" class="cancel-btn">Cancelar</button>
+                        </div>
+                    </form>
                 </div>
             </div>
-
-            <!-- Botones debajo del formulario -->
-            <div class="form-buttons">
-                <button type="submit" class="save-btn">Guardar cambios</button>
-                <button @click="cancelEdit" type="button" class="cancel-btn">Cancelar</button>
-            </div>
-        </form>
-    </div>
-</div>
 
             <!-- Paginación -->
             <div class="pagination">
@@ -561,6 +562,7 @@ a {
     padding-right: 15px;
     border: none;
     cursor: pointer;
+    width: 100px;
 }
 
 .btn-edit {
@@ -583,6 +585,7 @@ a {
 .btn-delete:hover {
     background-color: #e41f1f;
 }
+
 .contenedor-tabla {
     width: 100%;
     display: flex;
@@ -814,7 +817,7 @@ button[type="button"]:hover {
 
 
 .form-input {
-    width: 85%;
+    width: 100%;
     padding: 10px;
     border: 1px solid #ccc;
     border-radius: 25px;
@@ -822,18 +825,19 @@ button[type="button"]:hover {
     background-color: #dcdcdc;
 }
 
-.email{
+.form-input select {
+    
+    width: 100%;
+    height: 35px;
+    border-radius: 25px;
+    background-color: #dcdcdc;
+}
+
+.email {
     width: 90%;
     height: 35px;
     border-radius: 25px;
     background-color: #dcdcdc;
 
-}
-
-.form-column select{
-    width: 100%;
-    height: 35px;
-    border-radius: 25px;
-    background-color: #dcdcdc;
 }
 </style>
