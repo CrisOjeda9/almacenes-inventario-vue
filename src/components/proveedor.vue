@@ -86,7 +86,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr v-for="proveedor in paginatedproveedors" :key="proveedor.id">
+                    <tr v-for="proveedor in paginatedproveedor" :key="proveedor.id">
                         <td>{{ proveedor.nombre }}</td>
                         <td>{{ proveedor.apellidos }}</td>
                         <td>{{ proveedor.tipoProveedor }}</td>
@@ -140,13 +140,14 @@
                                     <label>RFC:</label>
                                     <input v-model="currentProveedor.rfc" type="text" />
                                 </div>
+                                
+                            </div>
+
+                            <div class="form-column">
                                 <div>
                                     <label>Dirección:</label>
                                     <input v-model="currentProveedor.direccion" type="text" />
                                 </div>
-                            </div>
-
-                            <div class="form-column">
                                 <div>
                                     <label>Teléfono:</label>
                                     <input v-model="currentProveedor.telefono" type="text" />
@@ -159,10 +160,7 @@
                                     <label>Cuenta Bancaria:</label>
                                     <input v-model="currentProveedor.cuentaBancaria" type="text" />
                                 </div>
-                                <div>
-                                    <label>Fecha de Registro:</label>
-                                    <input v-model="currentProveedor.fechaRegistro" type="date" />
-                                </div>
+                                
                             </div>
                         </div>
 
@@ -208,7 +206,7 @@ export default {
             },
             searchQuery: '',
             currentPage: 1,
-            proveedorsPerPage: 10,
+            proveedorPerPage: 10,
             isEditing: false, // Controla si estamos en modo de edición
             currentProveedor: {
                 nombre: "",
@@ -221,7 +219,7 @@ export default {
                 cuentaBancaria: "",
                 fechaRegistro: "",
             }, // Objeto para almacenar el proveedor que se está editando
-            proveedors: [
+            proveedor: [
                 {
                     id: 1,
                     nombre: "Juan",
@@ -237,8 +235,8 @@ export default {
                 },
                 {
                     id: 2,
-                    nombre: "Empresa XYZ",
-                    apellidos: "",
+                    nombre: "Jose",
+                    apellidos: "Ramos",
                     tipoProveedor: "moral",
                     rfc: "XYZ123456DEF",
                     direccion: "Av. Secundaria 456, Ciudad",
@@ -252,9 +250,9 @@ export default {
         };
     },
     computed: {
-        filteredproveedors() {
+        filteredproveedor() {
             const query = this.searchQuery.toLowerCase();
-            return this.proveedors.filter(proveedor => {
+            return this.proveedor.filter(proveedor => {
                 return proveedor.nombre.toLowerCase().includes(query) ||
                     proveedor.apellidos.toLowerCase().includes(query) ||
                     proveedor.tipoProveedor.toLowerCase().includes(query) ||
@@ -267,12 +265,12 @@ export default {
         },
 
         totalPages() {
-            return Math.ceil(this.filteredproveedors.length / this.proveedorsPerPage);
+            return Math.ceil(this.filteredproveedor.length / this.proveedorPerPage);
         },
-        paginatedproveedors() {
-            const start = (this.currentPage - 1) * this.proveedorsPerPage;
-            const end = start + this.proveedorsPerPage;
-            return this.filteredproveedors.slice(start, end);
+        paginatedproveedor() {
+            const start = (this.currentPage - 1) * this.proveedorPerPage;
+            const end = start + this.proveedorPerPage;
+            return this.filteredproveedor.slice(start, end);
         }
     },
     methods: {
@@ -307,9 +305,9 @@ export default {
             this.isEditing = true;
         },
         saveChanges() {
-            const index = this.proveedors.findIndex(proveedor => proveedor.id === this.currentProveedor.id);
+            const index = this.proveedor.findIndex(proveedor => proveedor.id === this.currentProveedor.id);
             if (index !== -1) {
-                this.proveedors[index] = { ...this.currentProveedor };
+                this.proveedor[index] = { ...this.currentProveedor };
                 this.isEditing = false;
                 this.currentProveedor = {}; // Limpiar el objeto
             }
@@ -324,9 +322,9 @@ export default {
             this.isDeleteModalVisible = true;
         },
         confirmDelete() {
-            const index = this.proveedors.findIndex(proveedor => proveedor.id === this.deleteId);
+            const index = this.proveedor.findIndex(proveedor => proveedor.id === this.deleteId);
             if (index !== -1) {
-                this.proveedors.splice(index, 1);
+                this.proveedor.splice(index, 1);
             }
             this.isDeleteModalVisible = false;
             this.deleteId = null;
