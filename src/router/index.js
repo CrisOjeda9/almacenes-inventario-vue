@@ -13,6 +13,8 @@ import facturaPage from '@/components/factura.vue';
 import newFacturaPage from '@/components/newfactura.vue';
 import polizasPage from '@/components/poliza.vue';
 import newPolizaPage from '@/components/newpoliza.vue';
+import newProveedorPage from '@/components/newproveedor.vue';
+import proveedorPage from '@/components/proveedor.vue';
 
 
 
@@ -89,6 +91,16 @@ const router = createRouter({
       path: '/newpoliza',
       name: 'newpoliza',
       component: newPolizaPage, // Cambia el nombre aquí
+    },
+    {
+      path: '/proveedor',
+      name: 'proveedor',
+      component: proveedorPage,
+    },
+    {
+      path: '/newproveedor',
+      name: 'newproveedor',
+      component:newProveedorPage,
     }
   ],
 });
