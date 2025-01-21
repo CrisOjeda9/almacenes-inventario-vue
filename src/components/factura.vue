@@ -27,7 +27,7 @@
         <!-- Barra de navegación amarilla -->
         <div class="sub-navbar">
             <a href="/home" class="nav-item">Inicio</a>
-            <a href="factura" class="nav-item">Usuarios</a>
+            <a href="users" class="nav-item">Usuarios</a>
             <div class="nav-item" @mouseenter="showMenu('homeMenu')" @mouseleave="hideMenu('homeMenu')">
                 Inventario
                 <span class="menu-icon">▼</span>

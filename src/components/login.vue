@@ -33,8 +33,10 @@ export default {
   methods: {
     login() {
       if (this.usuario && this.contrasena) {
-        alert(`Usuario: ${this.usuario}, Contraseña: ${this.contrasena}`);
-        // Aquí iría la lógica para validar el inicio de sesión
+       
+
+        // Redirigir a otra vista
+        this.$router.push('/home'); // Cambia '/dashboard' por la ruta de tu vista destino
       } else {
         alert('Por favor, complete todos los campos.');
       }

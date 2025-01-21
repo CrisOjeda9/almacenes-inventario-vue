@@ -10,7 +10,7 @@
                     height="auto" style="cursor: pointer;" />
             </div>
             <div class="navbar-center">
-                <h1>Gestion de usuarios</h1>
+                <h1>Gestión de Usuarios</h1>
                 <p>Sistema inventario y Almacén de Radio y Televisión de Hidalgo</p>
             </div>
             <div class="navbar-right">
@@ -27,7 +27,7 @@
         <!-- Barra de navegación amarilla -->
         <div class="sub-navbar">
             <a href="/home" class="nav-item">Inicio</a>
-            <a href="users" class="nav-item" style="color: #6f7271;">Usuarios</a>
+            <a href="users" class="nav-item" style="color: #6F7271; ">Usuarios</a>
             <div class="nav-item" @mouseenter="showMenu('homeMenu')" @mouseleave="hideMenu('homeMenu')">
                 Inventario
                 <span class="menu-icon">▼</span>
@@ -36,27 +36,23 @@
                     <button @click="navigateTo('home')">Alta de bienes</button>
                     <button @click="navigateTo('home')">Baja de bienes</button>
                     <button @click="navigateTo('resguardo')">Mi resguardo</button>
-                    <button @click="navigateTo('factura')">Facturas</button>
-
+                    <button @click="navigateTo('user')">users</button>
                     <button @click="navigateTo('poliza')">Polizas</button>
-
-
                 </div>
             </div>
 
-            <div class="nav-item" @mouseenter="showMenu('usersMenu')" @mouseleave="hideMenu('usersMenu')">
+            <div class="nav-item" @mouseenter="showMenu('userMenu')" @mouseleave="hideMenu('userMenu')">
                 Almacen
                 <span class="menu-icon">▼</span>
-                <div class="dropdown-menu" v-show="menus.usersMenu">
-                    <button @click="navigateTo('users')">Solicitud de material</button>
-                    <button @click="navigateTo('users')">Agregar un bien para inventario</button>
-                    <button @click="navigateTo('users')">Salida de existencias</button>
-                    <button @click="navigateTo('users')">Entrada de existencias</button>
-                    <button @click="navigateTo('users')">Recepcion de solicitudes</button>
-                    <button @click="navigateTo('users')">Ver proveedores</button>
+                <div class="dropdown-menu" v-show="menus.userMenu">
+                    <button @click="navigateTo('user')">Solicitud de material</button>
+                    <button @click="navigateTo('user')">Agregar un bien para inventario</button>
+                    <button @click="navigateTo('user')">Baja de bienes</button>
+                    <button @click="navigateTo('user')">Entrada de existencias</button>
+                    <button @click="navigateTo('user')">Recepcion de solicitudes</button>
+                    <button @click="navigateTo('user')">Ver proveedores</button>
                 </div>
             </div>
-
         </div>
 
         <div class="search-bar">
@@ -66,10 +62,9 @@
             </div>
 
             <!-- Botón para agregar nuevo usuario -->
-            <button class="add-user-btn" @click="redirectToAddUser">
-                <i class="fas fa-user-plus"></i> <!-- Ícono de usuario -->
+            <button class="add-user-btn" @click="redirectToAdduser">
+                <i class="fas fa-user"></i> <i class="fas fa-plus"></i>
             </button>
-
         </div>
 
         <div class="contenedor-tabla">
@@ -79,31 +74,106 @@
                         <th>Nombre(s)</th>
                         <th>Apellidos</th>
                         <th>RFC</th>
-                        <th>Curp</th>
-                        <th>Num. Trabajador</th>
-                        <th>Direc. Pertenencia</th>
+                        <th>CURP</th>
+                        <th>Num. trabajador</th>
+                        <th>Direc. pertenencia</th>
                         <th>Departamento</th>
                         <th>Fecha de registro</th>
                         <th>Acciones</th>
+
                     </tr>
                 </thead>
                 <tbody>
-                    <tr v-for="user in paginatedUsers" :key="user.id">
-                        <td>{{ user.name }}</td>
-                        <td>{{ user.apellido }}</td>
+                    <tr v-for="user in paginateduser" :key="user.id">
+                        <td>{{ user.nombre }}</td>
+                        <td>{{ user.apellidos }}</td>
                         <td>{{ user.rfc }}</td>
                         <td>{{ user.curp }}</td>
-                        <td>{{ user.numtrabajador }}</td>
-                        <td>{{ user.direcpertenencia }}</td>
+                        <td>{{ user.numTrabajador }}</td>
+                        <td> {{ getDireccionText(user.direccionPertenencia) }}
+                        </td>
                         <td>{{ user.departamento }}</td>
                         <td>{{ user.registrationDate }}</td>
                         <td>
-                            <button @click="editUser(user.id)" class="btn-edit">Editar</button>
-                            <button @click="deleteUser(user.id)" class="btn-delete">Eliminar</button>
+                            <button @click="editUser(user)" class="btn-edit">Editar</button>
+                            <button @click="showDeleteModal(user.id)" class="btn-delete">Eliminar</button>
                         </td>
                     </tr>
                 </tbody>
             </table>
+
+            <!-- Modal de Edición -->
+            <div v-if="isEditing" class="edit-modal">
+                <div class="modal-content">
+                    <h3>Editar Usuario</h3>
+                    <form @submit.prevent="saveChanges" class="edit-form">
+                        <div class="contenedorformulario">
+                            <div class="form-column">
+                                <div>
+                                    <label>Nombre(s):</label>
+                                    <input v-model="currentUser.nombre" type="text" />
+                                </div>
+                                <div>
+                                    <label>Apellidos:</label>
+                                    <input v-model="currentUser.apellidos" type="text" />
+                                </div>
+                                <div>
+                                    <label>RFC:</label>
+                                    <input v-model="currentUser.rfc" type="text" />
+                                </div>
+                                <div>
+                                    <label>CURP:</label>
+                                    <input v-model="currentUser.curp" type="text" />
+                                </div>
+                                <div>
+                                    <label>Número de trabajador:</label>
+                                    <input v-model="currentUser.numTrabajador" type="text" />
+                                </div>
+                            </div>
+
+                            <div class="form-column">
+                                <div>
+                                    <label>Dirección de pertenencia:</label>
+                                    <select v-model="currentUser.direccionPertenencia" required>
+                                        <option value="">Selecciona una opción</option>
+                                        <option v-for="direccion in direcciones" :value="direccion.value"
+                                            :key="direccion.value">
+                                            {{ direccion.text }}
+                                        </option>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label>Departamento:</label>
+                                    <input v-model="currentUser.departamento" type="text" />
+                                </div>
+                                <div>
+                                    <label>Fecha de registro:</label>
+                                    <input v-model="currentUser.registrationDate" type="date" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Botones debajo del formulario -->
+                        <div class="form-buttons">
+                            <button type="submit" class="save-btn">Guardar cambios</button>
+                            <button @click="cancelEdit" type="button" class="cancel-btn">Cancelar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+
+            <!-- Modal de Confirmación de Eliminación -->
+            <div v-if="isDeleteModalVisible" class="modal-overlay">
+                <div class="modal-content-delete">
+                    <h3>¿Estás seguro de eliminar esta póliza?</h3>
+                    <div class="modal-buttons">
+                        <button @click="confirmDelete" class="btn-confirm">Confirmar</button>
+                        <button @click="cancelDelete" class="btn-cancel">Cancelar</button>
+                    </div>
+                </div>
+            </div>
             <!-- Paginación -->
             <div class="pagination">
                 <button @click="prevPage" :disabled="currentPage === 1">Anterior</button>
@@ -111,73 +181,145 @@
                 <button @click="nextPage" :disabled="currentPage === totalPages">Siguiente</button>
             </div>
         </div>
-
-
-
     </div>
 </template>
 
 <script>
 export default {
-    name: "usersPage",
+    name: "userPage",
     data() {
         return {
+            direcciones: [
+                { value: 'direccion_general', text: 'Dirección General' },
+                { value: 'direccion_coordinacion_financiera', text: 'Dirección de coordinación financiera y planeación' },
+                { value: 'direccion_television', text: 'Dirección de televisión' },
+                { value: 'direccion_noticias', text: 'Dirección de noticias' },
+                { value: 'direccion_radio', text: 'Dirección de radio' },
+                { value: 'direccion_ingenieria', text: 'Dirección de ingeniería' },
+                { value: 'direccion_proyectos_estrategicos', text: 'Dirección de proyectos estratégicos' },
+                { value: 'organo_interno_control', text: 'Órgano interno de control' },
+                { value: 'direccion_promocion_intercambio', text: 'Dirección de promoción e intercambio' },
+                { value: 'direccion_juridica', text: 'Dirección jurídica' },
+                { value: 'direccion_vinculacion', text: 'Dirección de vinculación' },
+                { value: 'estaciones_radio', text: 'Estaciones de radio' }
+            ],
+            isDeleteModalVisible: false,
             menus: {
                 homeMenu: false,
-                usersMenu: false,
+                userMenu: false,
                 settingsMenu: false,
             },
             searchQuery: '',
             currentPage: 1,
-            usersPerPage: 10,
-            users: [
-                { id: 1, name: "Juan Pérez", apellido: "Perez", rfc: "jhasbdjabjsdbjas", curp: "asdadadad", numtrabajador: "10", direcpertenencia: "adadda", departamento: "jkasbdjasjvd", registrationDate: "2024-01-15" },
-                { id: 2, name: "Ana Gómez", apellido: "Gomez", rfc: "ghsljkdgksgjs", curp: "sdasdadad", numtrabajador: "11", direcpertenencia: "abdhhsd", departamento: "kjsbvkjs", registrationDate: "2024-01-12" },
-                { id: 3, name: "Carlos Pérez", apellido: "Pérez", rfc: "ghdjkwqldjwl", curp: "qwdsdqw", numtrabajador: "12", direcpertenencia: "gghds", departamento: "gggg", registrationDate: "2024-01-14" },
-                { id: 4, name: "Lucía Torres", apellido: "Torres", rfc: "sdksjldjlsjd", curp: "asdqwdd", numtrabajador: "13", direcpertenencia: "sdadas", departamento: "sdsdsd", registrationDate: "2024-01-13" },
-                { id: 5, name: "Pedro González", apellido: "Gonzalez", rfc: "yadsjdksd", curp: "sdadqw", numtrabajador: "14", direcpertenencia: "qwdqwds", departamento: "cvzcxv", registrationDate: "2024-01-11" },
-                { id: 6, name: "María López", apellido: "López", rfc: "jkqwdjlk", curp: "asdqwqw", numtrabajador: "15", direcpertenencia: "sdsdsd", departamento: "scvsds", registrationDate: "2024-01-10" },
-                { id: 6, name: "María López", apellido: "López", rfc: "jkqwdjlk", curp: "asdqwqw", numtrabajador: "15", direcpertenencia: "sdsdsd", departamento: "scvsds", registrationDate: "2024-01-10" },
-                { id: 6, name: "María López", apellido: "López", rfc: "jkqwdjlk", curp: "asdqwqw", numtrabajador: "15", direcpertenencia: "sdsdsd", departamento: "scvsds", registrationDate: "2024-01-10" },
-                { id: 6, name: "María López", apellido: "López", rfc: "jkqwdjlk", curp: "asdqwqw", numtrabajador: "15", direcpertenencia: "sdsdsd", departamento: "scvsds", registrationDate: "2024-01-10" },
-                { id: 6, name: "María López", apellido: "López", rfc: "jkqwdjlk", curp: "asdqwqw", numtrabajador: "15", direcpertenencia: "sdsdsd", departamento: "scvsds", registrationDate: "2024-01-10" },
-                { id: 6, name: "María López", apellido: "López", rfc: "jkqwdjlk", curp: "asdqwqw", numtrabajador: "15", direcpertenencia: "sdsdsd", departamento: "scvsds", registrationDate: "2024-01-10" },
-                // Agrega más usuarios si es necesario
-            ],
+            userPerPage: 10,
+            isEditing: false, // Para controlar si estamos en modo de edición
+            user: [
+                {
+                    id: 1,
+                    nombre: "Cristian",
+                    apellidos: "Ojeda Gayosso",
+                    rfc: "asdadadasda",
+                    curp: "sadhkasldlafsasf",
+                    numTrabajador: "10",
+                    direccionPertenencia: "Area ",
+                    departamento: "asdasdadsd",
+                    registrationDate: "2024-01-15"
+                },
+                {
+                    id: 2,
+                    nombre: "Mariana",
+                    apellidos: "Torres López",
+                    rfc: "MKJ9237JNK",
+                    curp: "TOLM920413HJCLPS05",
+                    numTrabajador: "11",
+                    direccionPertenencia: "Recursos Humanos",
+                    departamento: "Administración",
+                    registrationDate: "2024-01-16"
+                },
+                {
+                    id: 3,
+                    nombre: "Juan",
+                    apellidos: "Pérez Sánchez",
+                    rfc: "PZSJ800912KJH",
+                    curp: "PEJS800912HDFRZN03",
+                    numTrabajador: "12",
+                    direccionPertenencia: "Logística",
+                    departamento: "Operaciones",
+                    registrationDate: "2024-01-17"
+                },
+                {
+                    id: 4,
+                    nombre: "Laura",
+                    apellidos: "García Martínez",
+                    rfc: "LGM123456NQR",
+                    curp: "GMLA870609MDFLRR01",
+                    numTrabajador: "13",
+                    direccionPertenencia: "Finanzas",
+                    departamento: "Contabilidad",
+                    registrationDate: "2024-01-18"
+                },
+                {
+                    id: 5,
+                    nombre: "Eduardo",
+                    apellidos: "Hernández Romero",
+                    rfc: "EHRO456789OPQ",
+                    curp: "HREL891201HDFRMD03",
+                    numTrabajador: "14",
+                    direccionPertenencia: "Ingeniería",
+                    departamento: "Proyectos",
+                    registrationDate: "2024-01-19"
+                },
+                {
+                    id: 6,
+                    nombre: "Sofía",
+                    apellidos: "Ramírez Gómez",
+                    rfc: "SRGM567890DFL",
+                    curp: "RGSF900502MDFRMF02",
+                    numTrabajador: "15",
+                    direccionPertenencia: "Marketing",
+                    departamento: "Publicidad",
+                    registrationDate: "2024-01-20"
+                }
+
+
+            ]
+
         };
     },
     computed: {
-        filteredUsers() {
-            return this.users.filter(user => {
-                const query = this.searchQuery.toLowerCase();
-                return user.name.toLowerCase().includes(query) ||
-                    user.apellido.toLowerCase().includes(query) ||
-                    user.rfc.toLowerCase().includes(query) ||
-                    user.curp.toLowerCase().includes(query) ||
-                    user.numtrabajador.toLowerCase().includes(query) ||
-                    user.direcpertenencia.toLowerCase().includes(query) ||
+        filtereduser() {
+            const query = this.searchQuery.toLowerCase();
+            return this.user.filter(user => {
+                return user.nombre.toString().toLowerCase().includes(query) ||
+                    user.apellidos.toString().toLowerCase().includes(query) ||
+                    user.rfc.toString().toLowerCase().includes(query) ||
+                    user.curp.toString().toLowerCase().includes(query) ||
+                    user.numTrabajador.toString().toLowerCase().includes(query) ||
+                    user.direccionPertenencia.toString().toLowerCase().includes(query) ||
                     user.departamento.toLowerCase().includes(query);
             });
         },
+
+
         totalPages() {
-            return Math.ceil(this.filteredUsers.length / this.usersPerPage);
+            return Math.ceil(this.filtereduser.length / this.userPerPage);
         },
-        paginatedUsers() {
-            const start = (this.currentPage - 1) * this.usersPerPage;
-            const end = start + this.usersPerPage;
-            return this.filteredUsers.slice(start, end);
+        paginateduser() {
+            const start = (this.currentPage - 1) * this.userPerPage;
+            const end = start + this.userPerPage;
+            return this.filtereduser.slice(start, end);
+        },
+        // Función que convierte el value en su texto correspondiente
+        direccionText() {
+            return (value) => {
+                const found = this.direcciones.find(direccion => direccion.value === value);
+                return found ? found.text : value;
+            };
         }
     },
     methods: {
         goHome() {
-            this.$router.push('home'); // Redirige a la página principal ("/"). Cambia el path si es necesario.
-        },
-        goBack() {
-            console.log("Regresar a la página anterior");
-        },
-        navigateTo(page) {
-            console.log(`Navegando a ${page}`);
-            this.$router.push({ name: page }); // Asegúrate de que las rutas estén definidas con `name`.
+            this.$router.push('home');
         },
         showMenu(menu) {
             this.menus[menu] = true;
@@ -185,16 +327,14 @@ export default {
         hideMenu(menu) {
             this.menus[menu] = false;
         },
-        editUser(id) {
-            console.log(`Editando usuario con ID: ${id}`);
+        navigateTo(page) {
+            this.$router.push({ name: page });
         },
-        deleteUser(id) {
-            console.log(`Eliminando usuario con ID: ${id}`);
+        goBack() {
+            window.history.back();
         },
-        redirectToAddUser() {
-            // Aquí defines la ruta a la que quieres redirigir al hacer clic en el botón
-            this.$router.push('/register');
-        }, prevPage() {
+
+        prevPage() {
             if (this.currentPage > 1) {
                 this.currentPage--;
             }
@@ -204,7 +344,55 @@ export default {
                 this.currentPage++;
             }
         },
+        editUser(user) {
+            this.currentUser = { ...user };  // Usar "currentUser" en lugar de "currentuser"
+            this.isEditing = true;
+        },
+        saveChanges() {
+            const index = this.user.findIndex(user => user.id === this.currentUser.id);
+            if (index !== -1) {
+                this.user[index] = { ...this.currentUser };
+                this.isEditing = false;
+                this.currentUser = {}; // Limpiar el objeto
+            }
+        },
+        cancelEdit() {
+            this.isEditing = false;
+            this.currentUser = {}; // Limpiar el objeto
+        },
+
+        // Método para mostrar el modal de eliminación
+        showDeleteModal(id) {
+            this.deleteId = id;  // Guardamos el ID del usuario a eliminar
+            this.isDeleteModalVisible = true;  // Mostramos el modal
+        },
+
+        // Método para confirmar la eliminación
+        confirmDelete() {
+            const index = this.user.findIndex(user => user.id === this.deleteId);
+            if (index !== -1) {
+                this.user.splice(index, 1); // Eliminamos el usuario de la lista
+                this.isDeleteModalVisible = false;  // Cerramos el modal
+                this.deleteId = null;  // Limpiamos el ID de eliminación
+            }
+        },
+
+        // Método para cancelar la eliminación
+        cancelDelete() {
+            this.isDeleteModalVisible = false;
+            this.deleteId = null; // Limpiamos el ID de eliminación
+        },
+
+        redirectToAdduser() {
+            // Aquí defines la ruta a la que quieres redirigir al hacer clic en el botón
+            this.$router.push('/register');
+        },
+        getDireccionText(direccionValue) {
+            const direccion = this.direcciones.find(d => d.value === direccionValue);
+            return direccion ? direccion.text : direccionValue; // Devuelve el texto si lo encuentra, o el valor si no lo encuentra
+        }
     }
+
 };
 </script>
 
@@ -392,6 +580,7 @@ label {
 
 .input-wrapper input {
     width: 100%;
+
     /* Espacio para el ícono */
 }
 
@@ -409,7 +598,7 @@ a {
 }
 
 .user-table {
-    width: 80%;
+    width: 95%;
     border-collapse: separate;
     border-spacing: 0;
     background-color: white;
@@ -457,7 +646,7 @@ a {
 .btn-delete {
     background-color: #f44336;
     color: white;
-    padding-right: 60px;
+    padding-right: 40px;
 
 }
 
@@ -482,6 +671,7 @@ a {
 .search-bar {
     margin: 20px 0;
     text-align: center;
+
 }
 
 .input-wrapper {
@@ -517,7 +707,8 @@ a {
 
 .add-user-btn {
     margin-left: 50px;
-    width: 2.7%;
+    width: 60px;
+    height: 60px;
     background-color: #bc955b;
     color: white;
     border: none;
@@ -543,5 +734,176 @@ a {
 .pagination button {
     margin-left: 20px;
     margin-right: 20px;
+}
+
+/* Estilos generales */
+.edit-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    color: white;
+    text-align: center;
+    font-size: 30px;
+    background: #691B31;
+    padding: 10px;
+    border-radius: 25px;
+    width: 80%;
+    max-width: 800px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+
+.contenedorformulario {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+form .form-column {
+    align-items: center;
+
+}
+
+
+
+.form-column {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 48%;
+
+
+}
+
+.form-column select {
+    width: 90%;
+    height: 35px;
+    border-radius: 25px;
+    background-color: #dcdcdc;
+
+
+}
+
+.form-column input {
+    background-color: #dcdcdc;
+    color: #691B31;
+    width: 300px;
+}
+
+.form-column label {
+    color: white;
+}
+
+input[type="text"],
+input[type="date"] {
+    padding: 8px;
+    border-radius: 25px;
+    border: 1px solid #ccc;
+}
+
+
+
+button[type="submit"] {
+    background-color: #4CAF50;
+}
+
+button[type="button"] {
+    background-color: #f44336;
+}
+
+.form-buttons button:hover {
+    background-color: #45a049;
+}
+
+button[type="button"]:hover {
+    background-color: #d32f2f;
+}
+
+.form-buttons {
+    margin-top: 30px;
+    margin-bottom: 10px;
+    display: flex;
+    height: 50px;
+    width: 100%;
+    justify-content: center;
+    gap: 20px;
+
+}
+
+.form-buttons button {
+    width: 30%;
+}
+
+/* Estilos del modal */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 999;
+}
+
+.modal-content-delete {
+    font-size: 25px;
+    background: #691B31;
+    padding: 20px;
+    border-radius: 10px;
+    width: 300px;
+    text-align: center;
+    padding-bottom: 40px;
+}
+
+.modal-buttons {
+    margin-top: 20px;
+}
+
+.btn-confirm,
+.btn-cancel {
+    padding: 10px;
+    margin: 5px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.btn-confirm {
+    background-color: green;
+    color: white;
+}
+
+.btn-cancel {
+    background-color: red;
+    color: white;
+}
+
+
+.form-input {
+    width: 85%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 25px;
+    box-sizing: border-box;
+    background-color: #dcdcdc;
 }
 </style>
