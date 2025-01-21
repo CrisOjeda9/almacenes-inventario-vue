@@ -31,7 +31,7 @@
         <!-- Barra de navegación amarilla -->
         <div class="sub-navbar">
             <a href="/home" class="nav-item">Inicio</a>
-            <a href="bajas" class="nav-item">Usuarios</a>
+            <a href="users" class="nav-item">Usuarios</a>
             <div class="nav-item" @mouseenter="showMenu('homeMenu')" @mouseleave="hideMenu('homeMenu')">
                 Inventario
                 <span class="menu-icon">▼</span>
@@ -57,7 +57,7 @@
                     <button @click="navigateTo('bajas')">Salida de existencias</button>
                     <button @click="navigateTo('bajas')">Entrada de existencias</button>
                     <button @click="navigateTo('bajas')">Recepcion de solicitudes</button>
-                    <button @click="navigateTo('bajas')">Ver proveedores</button>
+                    <button @click="navigateTo('proveedor')">Ver proveedores</button>
                 </div>
             </div>
 

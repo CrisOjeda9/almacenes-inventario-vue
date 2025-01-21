@@ -36,7 +36,7 @@
                     <button @click="navigateTo('home')">Alta de bienes</button>
                     <button @click="navigateTo('home')">Baja de bienes</button>
                     <button @click="navigateTo('resguardo')">Mi resguardo</button>
-                    <button @click="navigateTo('user')">users</button>
+                    <button @click="navigateTo('factura')">Facturas</button>
                     <button @click="navigateTo('poliza')">Polizas</button>
                 </div>
             </div>

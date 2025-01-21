@@ -85,7 +85,7 @@
                 <span>Recepción de solicitudes</span>
             </div>
 
-            <div class="button-card" @click="navigateTo2('polizas')">
+            <div class="button-card" @click="navigateTo2('proveedor')">
                 <i class="fas fa-handshake"></i> <!-- Ícono de ver proveedores -->
                 <span>Ver proveedores</span>
             </div>
