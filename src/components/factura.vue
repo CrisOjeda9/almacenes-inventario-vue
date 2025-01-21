@@ -50,7 +50,7 @@
                     <button @click="navigateTo('factura')">Baja de bienes</button>
                     <button @click="navigateTo('factura')">Entrada de existencias</button>
                     <button @click="navigateTo('factura')">Recepcion de solicitudes</button>
-                    <button @click="navigateTo('factura')">Ver proveedores</button>
+                    <button @click="navigateTo('proveedor')">Ver proveedores</button>
                 </div>
             </div>
         </div>

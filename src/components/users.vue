@@ -50,7 +50,7 @@
                     <button @click="navigateTo('user')">Baja de bienes</button>
                     <button @click="navigateTo('user')">Entrada de existencias</button>
                     <button @click="navigateTo('user')">Recepcion de solicitudes</button>
-                    <button @click="navigateTo('user')">Ver proveedores</button>
+                    <button @click="navigateTo('proveedor')">Ver proveedores</button>
                 </div>
             </div>
         </div>

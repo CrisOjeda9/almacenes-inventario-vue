@@ -57,7 +57,7 @@
                     <button @click="navigateTo('resguardo')">Salida de existencias</button>
                     <button @click="navigateTo('resguardo')">Entrada de existencias</button>
                     <button @click="navigateTo('resguardo')">Recepcion de solicitudes</button>
-                    <button @click="navigateTo('resguardo')">Ver proveedores</button>
+                    <button @click="navigateTo('proveedor')">Ver proveedores</button>
                 </div>
             </div>
 

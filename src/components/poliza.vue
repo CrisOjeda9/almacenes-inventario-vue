@@ -52,7 +52,7 @@
                     <button @click="navigateTo('poliza')">Baja de bienes</button>
                     <button @click="navigateTo('poliza')">Entrada de existencias</button>
                     <button @click="navigateTo('poliza')">Recepcion de solicitudes</button>
-                    <button @click="navigateTo('poliza')">Ver proveedores</button>
+                    <button @click="navigateTo('proveedor')">Ver proveedores</button>
                 </div>
             </div>
         </div>

@@ -53,7 +53,7 @@
                     <button @click="navigateTo('users')">Salida de existencias</button>
                     <button @click="navigateTo('users')">Entrada de existencias</button>
                     <button @click="navigateTo('users')">Recepcion de solicitudes</button>
-                    <button @click="navigateTo('users')">Ver proveedores</button>
+                    <button @click="navigateTo('proveedor')">Ver proveedores</button>
                 </div>
             </div>
 
