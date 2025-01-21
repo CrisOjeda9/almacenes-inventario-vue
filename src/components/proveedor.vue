@@ -50,7 +50,8 @@
                     <button @click="navigateTo('proveedor')">Baja de bienes</button>
                     <button @click="navigateTo('proveedor')">Entrada de existencias</button>
                     <button @click="navigateTo('proveedor')">Recepcion de solicitudes</button>
-                    <button @click="navigateTo('proveedor')" style="background-color: #ddc9a3; color: #691b31; border-radius: 4px;">Ver proveedores</button>
+                    <button @click="navigateTo('proveedor')"
+                        style="background-color: #ddc9a3; color: #691b31; border-radius: 4px;">Ver proveedores</button>
                 </div>
             </div>
         </div>
@@ -79,6 +80,7 @@
                         <th>Teléfono</th>
                         <th>Correo Electronico</th>
                         <th>Cuenta Bancaria</th>
+                        <th>Documento</th>
                         <th>Fecha de registro</th>
                         <th>Acciones</th>
                     </tr>
@@ -93,6 +95,14 @@
                         <td>{{ proveedor.telefono }}</td>
                         <td>{{ proveedor.correo }}</td>
                         <td>{{ proveedor.cuentaBancaria }}</td>
+                        <td>
+                            <!-- Botón de descarga por cada documento -->
+                            <a :href="'/ruta/del/archivo/' + proveedor.documento" download>
+                                <button class="btn-download">
+                                    <i class="fas fa-download"></i>
+                                </button>
+                            </a>
+                        </td>
                         <td>{{ proveedor.fechaRegistro }}</td>
                         <td>
                             <button @click="editproveedor(proveedor)" class="btn-edit">Editar</button>
@@ -222,6 +232,7 @@ export default {
                     telefono: "555-123-4567",
                     correo: "juan.perez@example.com",
                     cuentaBancaria: "1234567890",
+                    documento: "asdasdad",
                     fechaRegistro: "2024-01-15",
                 },
                 {
@@ -234,6 +245,7 @@ export default {
                     telefono: "555-987-6543",
                     correo: "contacto@xyz.com",
                     cuentaBancaria: "0987654321",
+                    documento: "asdasdad",  
                     fechaRegistro: "2024-01-20",
                 }
             ]
@@ -834,7 +846,7 @@ button[type="button"]:hover {
 }
 
 .form-input select {
-    
+
     width: 100%;
     height: 35px;
     border-radius: 25px;
