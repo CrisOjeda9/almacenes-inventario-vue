@@ -32,12 +32,12 @@
     Inventario
     <span class="menu-icon">▼</span>
     <div class="dropdown-menu" v-show="menus.homeMenu">
-        <button @click="navigateTo('home')">Historial de bajas</button>
+        <button @click="navigateTo('bajas')">Historial de bajas</button>
         <button @click="navigateTo('home')">Alta de bienes</button>
         <button @click="navigateTo('home')">Baja de bienes</button>
-        <button @click="navigateTo('home')">Mi resguardo</button>
-        <button @click="navigateTo('home')">Facturas</button>
-        <button @click="navigateTo('home')">Polizas</button>
+        <button @click="navigateTo('resguardo')">Mi resguardo</button>
+        <button @click="navigateTo('factura')">Facturas</button>
+        <button @click="navigateTo('poliza')">Polizas</button>
     </div>
 </div>
 
@@ -50,7 +50,7 @@
         <button @click="navigateTo('users')">Salida de existencias</button>
         <button @click="navigateTo('users')">Entrada de existencias</button>
         <button @click="navigateTo('users')">Recepcion de solicitudes</button>
-        <button @click="navigateTo('users')">Ver proveedores</button>
+        <button @click="navigateTo('proveedor')">Ver proveedores</button>
     </div>
 </div>
 
