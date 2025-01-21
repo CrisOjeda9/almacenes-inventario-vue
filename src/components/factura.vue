@@ -188,7 +188,7 @@
             <!-- Modal de Confirmación de Eliminación -->
             <div v-if="isDeleteModalVisible" class="modal-overlay">
                 <div class="modal-content-delete">
-                    <h3>¿Estás seguro de eliminar esta póliza?</h3>
+                    <h3>¿Estás seguro de eliminar esta factura?</h3>
                     <div class="modal-buttons">
                         <button @click="confirmDelete" class="btn-confirm">Confirmar</button>
                         <button @click="cancelDelete" class="btn-cancel">Cancelar</button>

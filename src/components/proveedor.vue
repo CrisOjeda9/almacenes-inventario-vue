@@ -10,7 +10,7 @@
                     height="auto" style="cursor: pointer;" />
             </div>
             <div class="navbar-center">
-                <h1>Proveedor</h1>
+                <h1>Proveedores</h1>
                 <p>Sistema inventario y Almacén de Radio y Televisión de Hidalgo</p>
             </div>
             <div class="navbar-right">
@@ -175,7 +175,7 @@
 
             <div v-if="isDeleteModalVisible" class="modal-overlay">
                 <div class="modal-content-delete">
-                    <h3>¿Estás seguro de eliminar al proveedor?</h3>
+                    <h3>¿Estás seguro de eliminar este proveedor?</h3>
                     <div class="modal-buttons">
                         <button @click="confirmDelete" class="btn-confirm">Confirmar</button>
                         <button @click="cancelDelete" class="btn-cancel">Cancelar</button>
