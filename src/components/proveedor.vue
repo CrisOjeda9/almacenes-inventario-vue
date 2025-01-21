@@ -64,7 +64,7 @@
 
             <!-- Botón para agregar nuevo usuario -->
             <button class="add-proveedor-btn" @click="redirectToAddproveedor">
-                <i class="fas fa-file-invoice"></i> <i class="fas fa-plus"></i>
+                <i class="fas fa-user"></i> <i class="fas fa-plus"></i>
             </button>
         </div>
 
@@ -85,19 +85,19 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr v-for="provider in paginatedProviders" :key="provider.id">
-                        <td>{{ provider.nombre }}</td>
-                        <td>{{ provider.apellidos }}</td>
-                        <td>{{ provider.tipoProveedor }}</td>
-                        <td>{{ provider.rfc }}</td>
-                        <td>{{ provider.direccion }}</td>
-                        <td>{{ provider.telefono }}</td>
-                        <td>{{ provider.correo }}</td>
-                        <td>{{ provider.cuentaBancaria }}</td>
-                        <td>{{ provider.fechaRegistro }}</td>
+                    <tr v-for="proveedor in paginatedproveedors" :key="proveedor.id">
+                        <td>{{ proveedor.nombre }}</td>
+                        <td>{{ proveedor.apellidos }}</td>
+                        <td>{{ proveedor.tipoProveedor }}</td>
+                        <td>{{ proveedor.rfc }}</td>
+                        <td>{{ proveedor.direccion }}</td>
+                        <td>{{ proveedor.telefono }}</td>
+                        <td>{{ proveedor.correo }}</td>
+                        <td>{{ proveedor.cuentaBancaria }}</td>
+                        <td>{{ proveedor.fechaRegistro }}</td>
                         <td>
-                            <button @click="editProvider(provider)" class="btn-edit">Editar</button>
-                            <button @click="showDeleteModal(provider.id)" class="btn-delete">Eliminar</button>
+                            <button @click="editproveedor(proveedor)" class="btn-edit">Editar</button>
+                            <button @click="showDeleteModal(proveedor.id)" class="btn-delete">Eliminar</button>
                         </td>
                     </tr>
                 </tbody>
@@ -166,6 +166,16 @@
                 </div>
             </div>
 
+            <div v-if="isDeleteModalVisible" class="modal-overlay">
+                <div class="modal-content-delete">
+                    <h3>¿Estás seguro de eliminar al proveedor?</h3>
+                    <div class="modal-buttons">
+                        <button @click="confirmDelete" class="btn-confirm">Confirmar</button>
+                        <button @click="cancelDelete" class="btn-cancel">Cancelar</button>
+                    </div>
+                </div>
+            </div>
+
             <!-- Paginación -->
             <div class="pagination">
                 <button @click="prevPage" :disabled="currentPage === 1">Anterior</button>
@@ -189,7 +199,7 @@ export default {
             },
             searchQuery: '',
             currentPage: 1,
-            providersPerPage: 10,
+            proveedorsPerPage: 10,
             isEditing: false, // Controla si estamos en modo de edición
             currentProveedor: {
                 nombre: "",
@@ -202,7 +212,7 @@ export default {
                 cuentaBancaria: "",
                 fechaRegistro: "",
             }, // Objeto para almacenar el proveedor que se está editando
-            providers: [
+            proveedors: [
                 {
                     id: 1,
                     nombre: "Juan",
@@ -231,27 +241,27 @@ export default {
         };
     },
     computed: {
-        filteredProviders() {
+        filteredproveedors() {
             const query = this.searchQuery.toLowerCase();
-            return this.providers.filter(provider => {
-                return provider.nombre.toLowerCase().includes(query) ||
-                    provider.apellidos.toLowerCase().includes(query) ||
-                    provider.tipoProveedor.toLowerCase().includes(query) ||
-                    provider.rfc.toLowerCase().includes(query) ||
-                    provider.direccion.toLowerCase().includes(query) ||
-                    provider.telefono.toLowerCase().includes(query) ||
-                    provider.correo.toLowerCase().includes(query) ||
-                    provider.cuentaBancaria.toLowerCase().includes(query);
+            return this.proveedors.filter(proveedor => {
+                return proveedor.nombre.toLowerCase().includes(query) ||
+                    proveedor.apellidos.toLowerCase().includes(query) ||
+                    proveedor.tipoProveedor.toLowerCase().includes(query) ||
+                    proveedor.rfc.toLowerCase().includes(query) ||
+                    proveedor.direccion.toLowerCase().includes(query) ||
+                    proveedor.telefono.toLowerCase().includes(query) ||
+                    proveedor.correo.toLowerCase().includes(query) ||
+                    proveedor.cuentaBancaria.toLowerCase().includes(query);
             });
         },
 
         totalPages() {
-            return Math.ceil(this.filteredProviders.length / this.providersPerPage);
+            return Math.ceil(this.filteredproveedors.length / this.proveedorsPerPage);
         },
-        paginatedProviders() {
-            const start = (this.currentPage - 1) * this.providersPerPage;
-            const end = start + this.providersPerPage;
-            return this.filteredProviders.slice(start, end);
+        paginatedproveedors() {
+            const start = (this.currentPage - 1) * this.proveedorsPerPage;
+            const end = start + this.proveedorsPerPage;
+            return this.filteredproveedors.slice(start, end);
         }
     },
     methods: {
@@ -281,14 +291,14 @@ export default {
                 this.currentPage++;
             }
         },
-        editProvider(provider) {
-            this.currentProveedor = { ...provider };
+        editproveedor(proveedor) {
+            this.currentProveedor = { ...proveedor };
             this.isEditing = true;
         },
         saveChanges() {
-            const index = this.providers.findIndex(provider => provider.id === this.currentProveedor.id);
+            const index = this.proveedors.findIndex(proveedor => proveedor.id === this.currentProveedor.id);
             if (index !== -1) {
-                this.providers[index] = { ...this.currentProveedor };
+                this.proveedors[index] = { ...this.currentProveedor };
                 this.isEditing = false;
                 this.currentProveedor = {}; // Limpiar el objeto
             }
@@ -303,9 +313,9 @@ export default {
             this.isDeleteModalVisible = true;
         },
         confirmDelete() {
-            const index = this.providers.findIndex(provider => provider.id === this.deleteId);
+            const index = this.proveedors.findIndex(proveedor => proveedor.id === this.deleteId);
             if (index !== -1) {
-                this.providers.splice(index, 1);
+                this.proveedors.splice(index, 1);
             }
             this.isDeleteModalVisible = false;
             this.deleteId = null;
@@ -314,8 +324,7 @@ export default {
             this.isDeleteModalVisible = false;
             this.deleteId = null;
         },
-        redirectToAddProvider() {
-            // Aquí defines la ruta a la que quieres redirigir al hacer clic en el botón
+        redirectToAddproveedor() {
             this.$router.push('/newproveedor');
         },
     }
