@@ -125,13 +125,14 @@
                                     <label>CURP:</label>
                                     <input v-model="currentUser.curp" type="text" />
                                 </div>
+                               
+                            </div>
+
+                            <div class="form-column">
                                 <div>
                                     <label>Número de trabajador:</label>
                                     <input v-model="currentUser.numTrabajador" type="text" />
                                 </div>
-                            </div>
-
-                            <div class="form-column">
                                 <div>
                                     <label>Dirección de pertenencia:</label>
                                     <select v-model="currentUser.direccionPertenencia" required>
