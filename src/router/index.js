@@ -16,6 +16,7 @@ import newPolizaPage from '@/components/newpoliza.vue';
 import newProveedorPage from '@/components/newproveedor.vue';
 import proveedorPage from '@/components/proveedor.vue';
 import newExistenciaPage from '@/components/newexistencia.vue'
+import existenciaPage from '@/components/existencia.vue';
 
 
 
@@ -107,6 +108,11 @@ const router = createRouter({
       path: '/newexistencia',
       name: 'newexistencia',
       component: newExistenciaPage, // Cambia el nombre aquí
+    },
+    {
+      path: '/existencia',
+      name: 'existencia',
+      component: existenciaPage, // Cambia el nombre aquí
     }
   ],
 });

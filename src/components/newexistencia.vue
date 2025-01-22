@@ -49,7 +49,7 @@
                     <button @click="navigateTo('users')">Solicitud de material</button>
                     <button @click="navigateTo('users')">Agregar un bien para inventario</button>
                     <button @click="navigateTo('users')">Salida de existencias</button>
-                    <button @click="navigateTo('users')">Entrada de existencias</button>
+                    <button @click="navigateTo('existencia')">Entrada de existencias</button>
                     <button @click="navigateTo('users')">Recepcion de solicitudes</button>
                     <button @click="navigateTo('proveedor')">Ver proveedores</button>
                 </div>
@@ -58,77 +58,115 @@
 
         <!-- Formulario -->
         <div class="form-container">
-    <form @submit.prevent="registerProveedor">
-        <div class="form-row">
-            <!-- Nombre -->
-            <div class="form-field">
-                <label for="nombre">Nombre</label>
-                <input type="text" id="nombre" placeholder="Ej. Juan" v-model="form.nombre" required />
-            </div>
+            <form @submit.prevent="registerProveedor">
+                <div class="form-row">
+                    <!-- ID -->
+                    <div class="form-field">
+                        <label for="id">ID</label>
+                        <input type="number" min="0" id="id" placeholder="Ej. 1" v-model="form.id" required />
+                    </div>
 
-            <!-- Apellidos -->
-            <div class="form-field">
-                <label for="apellidos">Apellidos</label>
-                <input type="text" id="apellidos" placeholder="Ej. Pérez López" v-model="form.apellidos" required />
-            </div>
+                    <!-- Número de factura -->
+                    <div class="form-field">
+                        <label for="numerofactura">Número de factura</label>
+                        <input type="number" min="0" id="numerofactura" placeholder="Ej. 10"
+                            v-model="form.numeroFactura" required />
+                    </div>
 
-            <!-- Tipo de Proveedor -->
-            <div class="form-field">
-                <label for="tipoProveedor">Tipo de proveedor</label>
-                <select id="tipoProveedor" v-model="form.tipoProveedor" required>
-                    <option value="">Selecciona una opción</option>
-                    <option value="fisico">Físico</option>
-                    <option value="moral">Moral</option>
-                </select>
-            </div>
+                    <!-- Proveedor -->
+                    <div class="form-field">
+                        <label for="tipoProveedor">Proveedor</label>
+                        <select id="tipoProveedor" v-model="form.proveedor" required>
+                            <option value="">Selecciona una opción</option>
+                            <option value="carlos">Carlos</option>
+                            <option value="cristian">Cristian</option>
+                        </select>
+                    </div>
 
-            <!-- RFC -->
-            <div class="form-field">
-                <label for="rfc">RFC</label>
-                <input type="text" id="rfc" placeholder="Ej. ABC1234567Z9" v-model="form.rfc" required />
-            </div>
-        </div>
-
-        <div class="form-row">
-            <!-- Dirección -->
-            <div class="form-field">
-                <label for="direccion">Dirección</label>
-                <input type="text" id="direccion" placeholder="Ej. Calle 123, Ciudad, Estado" v-model="form.direccion" required />
-            </div>
-
-            <!-- Correo Electrónico -->
-            <div class="form-field">
-                <label for="correo">Correo electrónico</label>
-                <input type="email" id="correo" placeholder="Ej. ejemplo@correo.com" v-model="form.correo" required />
-            </div>
-
-            <!-- Cuenta Bancaria -->
-            <div class="form-field">
-                <label for="cuentaBancaria">Cuenta bancaria</label>
-                <input type="text" id="cuentaBancaria" placeholder="Ej. 1234567890123456" v-model="form.cuentaBancaria" required />
-            </div>
-        </div>
-
-        <div class="form-row">
-            <!-- Documento relacionado -->
-            <div class="form-field">
-                <label for="documentoProveedor">Documento de acuerdo al proveedor</label>
-                <div class="dropzone" @drop.prevent="handleDrop" @dragover.prevent @click="triggerFileInput">
-                    <input type="file" id="documentoProveedor" ref="fileInput" @change="handleFileUpload" accept=".pdf,.jpg,.png" />
-                    <i class="fas fa-cloud-upload-alt"></i>
-                    <span v-if="!form.documentoProveedor">Arrastra o selecciona un archivo (PDF, JPG, PNG)</span>
-                    <span v-else>{{ form.documentoProveedor.name }}</span>
+                    <!-- Número de partida -->
+                    <div class="form-field">
+                        <label for="numeroPartida">Número de partida</label>
+                        <select id="numeroPartida" v-model="form.numeroPartida" required>
+                            <option value="">Selecciona una opción</option>
+                            <option value="fisico">Físico</option>
+                            <option value="moral">Moral</option>
+                        </select>
+                    </div>
                 </div>
-            </div>
+
+                <div class="form-row">
+                    <!-- Nombre -->
+                    <div class="form-field">
+                        <label for="nombre">Nombre</label>
+                        <input type="text" id="nombre" placeholder="Ej. Nombre completo" v-model="form.nombre"
+                            required />
+                    </div>
+
+                    <!-- Importe sin IVA -->
+                    <div class="form-field">
+                        <label for="importeSinIVA">Importe sin IVA</label>
+                        <input type="number" step="0.01" id="importeSinIVA" placeholder="Ej. 1000.00"
+                            v-model="form.importeSinIVA" required />
+                    </div>
+
+                    <!-- IVA -->
+                    <div class="form-field">
+                        <label for="iva">IVA</label>
+                        <input type="number" step="0.01" id="iva" placeholder="Ej. 160.00" v-model="form.iva"
+                            required />
+                    </div>
+
+                    <!-- Importe con IVA -->
+                    <div class="form-field">
+                        <label for="importeConIVA">Importe con IVA</label>
+                        <input type="number" step="0.01" id="importeConIVA" placeholder="Ej. 1160.00"
+                            v-model="form.importeConIVA" required />
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <!-- Cantidad -->
+                    <div class="form-field">
+                        <label for="cantidad">Cantidad</label>
+                        <input type="number" min="0" id="cantidad" placeholder="Ej. 50" v-model="form.cantidad"
+                            required />
+                    </div>
+
+                    <!-- Ubicación en almacén -->
+                    <div class="form-field">
+                        <label for="ubicacionAlmacen">Ubic. almacén</label>
+                        <input type="text" id="ubicacionAlmacen" placeholder="Ej. Pasillo A3"
+                            v-model="form.ubicacionAlmacen" required />
+                    </div>
+
+                    <!-- Total de ingreso -->
+                    <div class="form-field">
+                        <label for="totalIngreso">Total de ingreso</label>
+                        <input type="number" step="0.01" id="totalIngreso" placeholder="Ej. 5000.00"
+                            v-model="form.totalIngreso" required />
+                    </div>
+
+                    <!-- Foto artículo -->
+                    <div class="form-field">
+                        <label for="fotoArticulo">Foto artículo</label>
+                        <div class="dropzone" @drop.prevent="handleDrop" @dragover.prevent @click="triggerFileInput">
+                            <input type="file" id="fotoArticulo" ref="fileInput" @change="handleFileUpload"
+                                accept=".pdf,.jpg,.png" />
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <span v-if="!form.fotoArticulo">Arrastra o selecciona un archivo (PDF, JPG, PNG)</span>
+                            <span v-else>{{ form.fotoArticulo.name }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="button-container">
+                    <button class="boton" type="submit">
+                        <i class="fas fa-plus"></i> Agregar Existencia
+                    </button>
+                </div>
+            </form>
         </div>
 
-        <div class="button-container">
-            <button class="boton" type="submit">
-                <i class="fas fa-plus"></i> Agregar Proveedor
-            </button>
-        </div>
-    </form>
-</div>
 
 
     </div>
@@ -140,15 +178,20 @@ export default {
     data() {
         return {
             form: {
-                nombre: "",               // Nombre del proveedor
-                apellidos: "",            // Apellidos del proveedor
-                tipoProveedor: "",        // Tipo de proveedor (físico/moral)
-                rfc: "",                  // RFC del proveedor
-                direccion: "",            // Dirección
-                correo: "",               // Correo electrónico
-                cuentaBancaria: "",       // Cuenta bancaria
-                documentoProveedor: null, // Documento relacionado (archivo)
+                id: "",                     // ID del registro
+                numeroFactura: "",          // Número de factura
+                proveedor: "",              // Proveedor (Carlos/Cristian)
+                numeroPartida: "",          // Número de partida (físico/moral)
+                nombre: "",                 // Nombre del artículo
+                importeSinIVA: "",          // Importe sin IVA
+                iva: "",                    // IVA
+                importeConIVA: "",          // Importe con IVA
+                cantidad: "",               // Cantidad
+                ubicacionAlmacen: "",       // Ubicación en almacén
+                totalIngreso: "",           // Total de ingreso
+                fotoArticulo: null          // Foto del artículo (archivo)
             },
+
             menus: {
                 homeMenu: false,
                 usersMenu: false,
@@ -173,19 +216,33 @@ export default {
         },
         registerProveedor() {
             // Valida los campos necesarios
-            if (!this.form.nombre || !this.form.apellidos || !this.form.tipoProveedor || !this.form.rfc || !this.form.direccion || !this.form.correo || !this.form.cuentaBancaria) {
+            if (
+                !this.form.id ||
+                !this.form.numeroFactura ||
+                !this.form.proveedor ||
+                !this.form.numeroPartida ||
+                !this.form.nombre ||
+                !this.form.importeSinIVA ||
+                !this.form.iva ||
+                !this.form.importeConIVA ||
+                !this.form.cantidad ||
+                !this.form.ubicacionAlmacen ||
+                !this.form.totalIngreso
+            ) {
                 alert("Por favor, completa todos los campos obligatorios.");
                 return;
             }
-            if (!this.form.documentoProveedor) {
-                alert("Por favor, agrega un documento relacionado.");
+
+            if (!this.form.fotoArticulo) {
+                alert("Por favor, agrega una foto del artículo.");
                 return;
             }
 
-            // Procesa el registro del proveedor
-            console.log("Proveedor registrado:", this.form);
-            alert("Proveedor registrado exitosamente.");
+            // Procesa el registro
+            console.log("Datos registrados:", this.form);
+            alert("Datos registrados exitosamente.");
         },
+
         navigateTo(page) {
             console.log(`Navegando a ${page}`);
             this.$router.push({ name: page }); // Asegúrate de que las rutas estén definidas con `name`.
@@ -293,8 +350,10 @@ export default {
     /* Degradado de izquierda a derecha */
     padding: 10px 0;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    position: relative; /* Asegura que z-index funcione */
-    z-index: 10; /* Asegura que la barra de navegación esté por encima */
+    position: relative;
+    /* Asegura que z-index funcione */
+    z-index: 10;
+    /* Asegura que la barra de navegación esté por encima */
 }
 
 .nav-item {
@@ -356,9 +415,9 @@ form {
     padding: 40px;
     padding-bottom: 80px;
     border-radius: 10px;
-    width: 800px;
+    width: 100%;
     height: 350px;
-    max-width: 800px;
+    max-width: 950px;
     color: black;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
@@ -447,7 +506,8 @@ a {
     background-color: white;
     color: #333;
     height: 40px;
-    z-index: 1; /* Asegura que el select no esté encima de la barra de navegación */
+    z-index: 1;
+    /* Asegura que el select no esté encima de la barra de navegación */
     position: relative;
     /* Asegura que tenga la misma altura que los inputs */
 }
@@ -505,8 +565,10 @@ a {
 .dropzone input[type="file"] {
     display: none;
 }
+
 select {
-    z-index: 1; /* Aparece correctamente dentro del formulario */
+    z-index: 1;
+    /* Aparece correctamente dentro del formulario */
     position: relative;
 }
 </style>
