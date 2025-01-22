@@ -15,6 +15,7 @@ import polizasPage from '@/components/poliza.vue';
 import newPolizaPage from '@/components/newpoliza.vue';
 import newProveedorPage from '@/components/newproveedor.vue';
 import proveedorPage from '@/components/proveedor.vue';
+import newExistenciaPage from '@/components/newexistencia.vue'
 
 
 
@@ -101,6 +102,11 @@ const router = createRouter({
       path: '/newproveedor',
       name: 'newproveedor',
       component:newProveedorPage,
+    },
+    {
+      path: '/newexistencia',
+      name: 'newexistencia',
+      component: newExistenciaPage, // Cambia el nombre aquí
     }
   ],
 });
