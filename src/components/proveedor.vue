@@ -36,8 +36,7 @@
                     <button @click="navigateTo('home')">Alta de bienes</button>
                     <button @click="navigateTo('home')">Baja de bienes</button>
                     <button @click="navigateTo('resguardo')">Mi resguardo</button>
-                    <button @click="navigateTo('factura')">Facturas</button>
-                    <button @click="navigateTo('poliza')">Polizas</button>
+                    <button @click="navigateTo('factura')">Asignar un bien</button>
                 </div>
             </div>
 
@@ -52,6 +51,8 @@
                     <button @click="navigateTo('proveedor')">Recepcion de solicitudes</button>
                     <button @click="navigateTo('proveedor')"
                         style="background-color: #ddc9a3; color: #691b31; border-radius: 4px;">Ver proveedores</button>
+                    <button @click="navigateTo('factura')">Facturas</button>
+                    <button @click="navigateTo('poliza')">Polizas</button>
                 </div>
             </div>
         </div>
@@ -140,7 +141,7 @@
                                     <label>RFC:</label>
                                     <input v-model="currentProveedor.rfc" type="text" />
                                 </div>
-                                
+
                             </div>
 
                             <div class="form-column">
@@ -160,7 +161,7 @@
                                     <label>Cuenta Bancaria:</label>
                                     <input v-model="currentProveedor.cuentaBancaria" type="text" />
                                 </div>
-                                
+
                             </div>
                         </div>
 
@@ -243,7 +244,7 @@ export default {
                     telefono: "555-987-6543",
                     correo: "contacto@xyz.com",
                     cuentaBancaria: "0987654321",
-                    documento: "asdasdad",  
+                    documento: "asdasdad",
                     fechaRegistro: "2024-01-20",
                 }
             ]

@@ -37,9 +37,9 @@
                     <button @click="navigateTo('home')">Alta de bienes</button>
                     <button @click="navigateTo('home')">Baja de bienes</button>
                     <button @click="navigateTo('resguardo')">Mi resguardo</button>
-                    <button @click="navigateTo('factura')">Facturas</button>
+                    <button @click="navigateTo('factura')">Asignar un bien</button>
 
-                    <button @click="navigateTo('poliza')">Polizas</button>
+
 
 
                 </div>
@@ -55,6 +55,8 @@
                     <button @click="navigateTo('bajas')">Entrada de existencias</button>
                     <button @click="navigateTo('bajas')">Recepcion de solicitudes</button>
                     <button @click="navigateTo('proveedor')">Ver proveedores</button>
+                    <button @click="navigateTo('factura')">Facturas</button>
+                    <button @click="navigateTo('poliza')">Polizas</button>
                 </div>
             </div>
 
@@ -133,7 +135,7 @@ export default {
             },
             searchQuery: '',
             bajas: [
-                { numerobien: "15051", cuentabancaria: "526452658758985785", poliza: "adasd4654", persona: "Moral", costounitario: "100.00", rfc: "hsadjhasd4", direccion: "asdad456564", tipocompra: "Presupuestal", registrationDate: "2024-01-15" },
+                { numerobien: "15051", cuentabancaria: "526452658758985785", poliza: "adasd4654", persona: "Moral", costounitario: "100.00", rfc: "hsadjhasd4", direccion: "asdasdada", tipocompra: "Presupuestal", registrationDate: "2024-01-15" },
                 { numerobien: "45661", cuentabancaria: "757586867478932473", poliza: "asd66ddd", persona: "Fisica", costounitario: "200.00", rfc: "jghfgddjgdk4", direccion: "asdad5456", tipocompra: "Estatal", registrationDate: "2024-01-15" },
                 { numerobien: "45661", cuentabancaria: "757586867478932473", poliza: "asd66ddd", persona: "Fisica", costounitario: "200.00", rfc: "jghfgddjgdk4", direccion: "asdad5456", tipocompra: "Estatal", registrationDate: "2024-01-15" },
                 { numerobien: "45661", cuentabancaria: "757586867478932473", poliza: "asd66ddd", persona: "Fisica", costounitario: "200.00", rfc: "jghfgddjgdk4", direccion: "asdad5456", tipocompra: "Estatal", registrationDate: "2024-01-15" },
@@ -253,6 +255,7 @@ export default {
     background: linear-gradient(to bottom, #000000, #691B31);
     flex-direction: column;
     color: white;
+    overflow-x: hidden;
 }
 
 /* Menú de navegación */

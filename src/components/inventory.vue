@@ -38,9 +38,7 @@
                     <button @click="navigateTo('home')">Alta de bienes</button>
                     <button @click="navigateTo('home')">Baja de bienes</button>
                     <button @click="navigateTo('resguardo')">Mi resguardo</button>
-                    <button @click="navigateTo('factura')">Facturas</button>
-
-                    <button @click="navigateTo('poliza')">Polizas</button>
+                    <button @click="navigateTo('factura')">Asignar un bien</button>
 
 
                 </div>
@@ -56,6 +54,8 @@
                     <button @click="navigateTo('users')">Entrada de existencias</button>
                     <button @click="navigateTo('users')">Recepcion de solicitudes</button>
                     <button @click="navigateTo('proveedor')">Ver proveedores</button>
+                    <button @click="navigateTo('factura')">Facturas</button>
+                    <button @click="navigateTo('poliza')">Polizas</button>
                 </div>
             </div>
 
@@ -63,7 +63,7 @@
         <div class="menu">
             <!-- Fila 1 -->
             <div class="button-card" @click="navigateTo2('bajas')">
-                <i class="fa fa-arrow-down"></i>
+                <i class="fa fa-history"></i>
                 <span>Historial de bajas</span>
             </div>
 
@@ -86,14 +86,11 @@
             </div>
 
             <div class="button-card" @click="navigateTo2('factura')">
-                <i class="fas fa-file-invoice"></i>
-                <span>Facturas</span>
+                <i class="fas fa-user"></i>
+                <span>Asignar un bien a un usuario</span>
             </div>
 
-            <div class="button-card" @click="navigateTo2('poliza')">
-                <i class="fas fa-file-contract"></i>
-                <span>Pólizas</span>
-            </div>
+            
         </div>
 
 

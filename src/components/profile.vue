@@ -30,30 +30,31 @@
             <a href="/home" class="nav-item">Inicio</a>
             <a href="users" class="nav-item">Usuarios</a>
             <div class="nav-item" @mouseenter="showMenu('homeMenu')" @mouseleave="hideMenu('homeMenu')">
-    Inventario
-    <span class="menu-icon">▼</span>
-    <div class="dropdown-menu" v-show="menus.homeMenu">
-        <button @click="navigateTo('bajas')">Historial de bajas</button>
-        <button @click="navigateTo('home')">Alta de bienes</button>
-        <button @click="navigateTo('home')">Baja de bienes</button>
-        <button @click="navigateTo('resguardo')">Mi resguardo</button>
-        <button @click="navigateTo('factura')">Facturas</button>
-        <button @click="navigateTo('poliza')">Polizas</button>
-    </div>
-</div>
+                Inventario
+                <span class="menu-icon">▼</span>
+                <div class="dropdown-menu" v-show="menus.homeMenu">
+                    <button @click="navigateTo('bajas')">Historial de bajas</button>
+                    <button @click="navigateTo('home')">Alta de bienes</button>
+                    <button @click="navigateTo('home')">Baja de bienes</button>
+                    <button @click="navigateTo('resguardo')">Mi resguardo</button>
+                    <button @click="navigateTo('factura')">Asignar un bien</button>
+                </div>
+            </div>
 
-<div class="nav-item" @mouseenter="showMenu('usersMenu')" @mouseleave="hideMenu('usersMenu')">
-    Almacen
-    <span class="menu-icon">▼</span>
-    <div class="dropdown-menu" v-show="menus.usersMenu">
-        <button @click="navigateTo('users')">Solicitud de material</button>
-        <button @click="navigateTo('users')">Agregar un bien para inventario</button>
-        <button @click="navigateTo('users')">Salida de existencias</button>
-        <button @click="navigateTo('users')">Entrada de existencias</button>
-        <button @click="navigateTo('users')">Recepcion de solicitudes</button>
-        <button @click="navigateTo('proveedor')">Ver proveedores</button>
-    </div>
-</div>
+            <div class="nav-item" @mouseenter="showMenu('usersMenu')" @mouseleave="hideMenu('usersMenu')">
+                Almacen
+                <span class="menu-icon">▼</span>
+                <div class="dropdown-menu" v-show="menus.usersMenu">
+                    <button @click="navigateTo('users')">Solicitud de material</button>
+                    <button @click="navigateTo('users')">Agregar un bien para inventario</button>
+                    <button @click="navigateTo('users')">Salida de existencias</button>
+                    <button @click="navigateTo('users')">Entrada de existencias</button>
+                    <button @click="navigateTo('users')">Recepcion de solicitudes</button>
+                    <button @click="navigateTo('proveedor')">Ver proveedores</button>
+                    <button @click="navigateTo('factura')">Facturas</button>
+                    <button @click="navigateTo('poliza')">Polizas</button>
+                </div>
+            </div>
 
 
         </div>

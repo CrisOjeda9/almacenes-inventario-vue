@@ -38,9 +38,8 @@
                     <button @click="navigateTo('home')">Baja de bienes</button>
                     <button @click="navigateTo('resguardo')"
                         style="background-color: #ddc9a3; color: #691b31; border-radius: 4px;">Mi resguardo</button>
-                    <button @click="navigateTo('factura')">Facturas</button>
+                    <button @click="navigateTo('factura')">Asignar un bien</button>
 
-                    <button @click="navigateTo('poliza')">Polizas</button>
 
 
                 </div>
@@ -56,6 +55,8 @@
                     <button @click="navigateTo('resguardo')">Entrada de existencias</button>
                     <button @click="navigateTo('resguardo')">Recepcion de solicitudes</button>
                     <button @click="navigateTo('proveedor')">Ver proveedores</button>
+                    <button @click="navigateTo('factura')">Facturas</button>
+                    <button @click="navigateTo('poliza')">Polizas</button>
                 </div>
             </div>
 
