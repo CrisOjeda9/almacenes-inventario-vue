@@ -117,19 +117,7 @@ export default {
     },
 };
 </script>
-<style>
-body {
-    margin: 0;
-    padding: 0;
-    background-size: cover;
-    /* Asegura que la imagen ocupe toda la pantalla */
-    font-family: Arial, sans-serif;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-}
-</style>
+
 <style scoped>
 /* Aplicar Montserrat a todo el contenido */
 * {
@@ -149,6 +137,7 @@ body {
     width: 100%;
     height: 100%;
     display: flex;
+    background: linear-gradient(to bottom, #000000, #691B31);
     flex-direction: column;
     color: white;
 }

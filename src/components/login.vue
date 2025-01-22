@@ -1,4 +1,6 @@
 <template>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+
   <div class="login-container">
     <div class="login-card">
       <div class="logo">
@@ -45,17 +47,16 @@ export default {
 };
 </script>
 <style>
-  body {
-    margin: 0;
-    background: url('../assets/radio-y-television-de-hidalgo.jpg') no-repeat center center;
-    background-size: cover;
-    /* Asegura que la imagen ocupe toda la pantalla */
-    font-family: Arial, sans-serif;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-  }
+body {
+  margin: 0;
+  background: url('../assets/radio-y-television-de-hidalgo.jpg') no-repeat center center;
+  background-size: cover;
+  /* Asegura que la imagen ocupe toda la pantalla */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
 </style>
 <style scoped>
 /* Aplicar Montserrat a todo el contenido */

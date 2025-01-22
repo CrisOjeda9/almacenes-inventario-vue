@@ -23,7 +23,7 @@
                 </div>
             </div>
         </nav>
-
+ 
         <!-- Barra de navegación amarilla -->
         <div class="sub-navbar">
             <a href="/home" class="nav-item">Inicio</a>
@@ -125,7 +125,7 @@
                                     <label>CURP:</label>
                                     <input v-model="currentUser.curp" type="text" />
                                 </div>
-                               
+
                             </div>
 
                             <div class="form-column">
@@ -409,18 +409,24 @@ export default {
     text-align: center;
 }
 
+
+
 .container {
-    width: 99vw;
-    height: 97.5vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
     display: flex;
-    flex-direction: column;
     background: linear-gradient(to bottom, #000000, #691B31);
+    flex-direction: column;
     color: white;
     overflow-x: hidden;
 }
 
 /* Menú de navegación */
 .navbar {
+    position: 0;
     display: flex;
     align-items: center;
     justify-content: space-between;

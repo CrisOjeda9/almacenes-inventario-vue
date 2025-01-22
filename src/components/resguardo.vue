@@ -1,8 +1,5 @@
 <template>
 
-    <body>
-
-    </body>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
 
@@ -31,7 +28,7 @@
         <!-- Barra de navegación amarilla -->
         <div class="sub-navbar">
             <a href="/home" class="nav-item">Inicio</a>
-            <a href="resguardo" class="nav-item">Usuarios</a>
+            <a href="users" class="nav-item">Usuarios</a>
             <div class="nav-item" @mouseenter="showMenu('homeMenu')" @mouseleave="hideMenu('homeMenu')">
                 Inventario
                 <span class="menu-icon">▼</span>
@@ -39,7 +36,8 @@
                     <button @click="navigateTo('bajas')">Historial de bajas</button>
                     <button @click="navigateTo('home')">Alta de bienes</button>
                     <button @click="navigateTo('home')">Baja de bienes</button>
-                    <button @click="navigateTo('resguardo')" style="background-color: #ddc9a3; color: #691b31; border-radius: 4px;">Mi resguardo</button>
+                    <button @click="navigateTo('resguardo')"
+                        style="background-color: #ddc9a3; color: #691b31; border-radius: 4px;">Mi resguardo</button>
                     <button @click="navigateTo('factura')">Facturas</button>
 
                     <button @click="navigateTo('poliza')">Polizas</button>
@@ -329,17 +327,21 @@ export default {
 }
 
 .container {
-    width: 99vw;
-    height: 97.5vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
     display: flex;
-    flex-direction: column;
     background: linear-gradient(to bottom, #000000, #691B31);
+    flex-direction: column;
     color: white;
     overflow-x: hidden;
 }
 
 /* Menú de navegación */
 .navbar {
+    position: 0;
     display: flex;
     align-items: center;
     justify-content: space-between;

@@ -1,5 +1,6 @@
 <template>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
 
     <div class="container">
         <!-- Menú de navegación -->
@@ -210,17 +211,20 @@ export default {
 }
 
 .container {
-    width: 99vw;
-    height: 97.5vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
     display: flex;
-    flex-direction: column;
     background: linear-gradient(to bottom, #000000, #691B31);
+    flex-direction: column;
     color: white;
-    overflow: hidden;
 }
 
 /* Menú de navegación */
 .navbar {
+    position: 0;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -228,7 +232,6 @@ export default {
     background: #691B31;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
-
 .navbar-left {
     flex: 1;
     display: flex;

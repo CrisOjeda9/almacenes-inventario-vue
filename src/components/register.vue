@@ -1,5 +1,6 @@
 <template>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
 
     <div class="container">
         <!-- Menú de navegación -->
@@ -27,7 +28,7 @@
         <!-- Barra de navegación amarilla -->
         <div class="sub-navbar">
             <a href="/home" class="nav-item">Inicio</a>
-            <a href="users" class="nav-item">Usuarios</a>
+            <a href="users" class="nav-item" style="color: #6F7271; ">Usuarios</a>
             <div class="nav-item" @mouseenter="showMenu('homeMenu')" @mouseleave="hideMenu('homeMenu')">
                 Inventario
                 <span class="menu-icon">▼</span>
@@ -209,18 +210,23 @@ export default {
     font-family: 'Montserrat', sans-serif;
 }
 
+
+
 .container {
-    width: 99vw;
-    height: 97.5vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
     display: flex;
-    flex-direction: column;
     background: linear-gradient(to bottom, #000000, #691B31);
+    flex-direction: column;
     color: white;
-    overflow: hidden;
 }
 
 /* Menú de navegación */
 .navbar {
+    position: 0;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -242,6 +248,7 @@ export default {
     color: white;
 }
 
+
 .navbar-center {
     flex: 3;
     text-align: center;
@@ -257,11 +264,13 @@ export default {
     font-size: 14px;
 }
 
+
 .navbar-right {
     flex: 1;
     display: flex;
     justify-content: flex-end;
 }
+
 
 .user-profile {
     display: flex;
@@ -316,7 +325,10 @@ export default {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     border-radius: 5px;
     width: 150px;
+    z-index: 10;
+    /* Añadido para asegurarse de que el menú esté por encima de otros elementos */
 }
+
 
 .dropdown-menu button {
     width: 100%;
