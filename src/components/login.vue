@@ -33,7 +33,7 @@ export default {
   methods: {
     login() {
       if (this.usuario && this.contrasena) {
-       
+
 
         // Redirigir a otra vista
         this.$router.push('/home'); // Cambia '/dashboard' por la ruta de tu vista destino
@@ -44,22 +44,26 @@ export default {
   }
 };
 </script>
+<style>
+  body {
+    margin: 0;
+    background: url('../assets/radio-y-television-de-hidalgo.jpg') no-repeat center center;
+    background-size: cover;
+    /* Asegura que la imagen ocupe toda la pantalla */
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+  }
+</style>
 <style scoped>
 /* Aplicar Montserrat a todo el contenido */
 * {
   font-family: 'Montserrat', sans-serif;
 }
 
-/* Asegurar que el body y html ocupen toda la pantalla */
-html,
-body {
-  margin: 0;
-  padding: 0;
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-  box-sizing: border-box;
-}
+
 
 .login-container {
   display: flex;
@@ -69,7 +73,6 @@ body {
   /* Asegura que ocupe todo el ancho de la ventana */
   height: 97.7vh;
   /* Asegura que ocupe todo el alto de la ventana */
-  background: url('../assets/radio-y-television-de-hidalgo.jpg') no-repeat center center;
   background-size: cover;
 }
 
@@ -116,13 +119,13 @@ p {
   width: 95%;
   padding: 0.5rem;
   border: 1px solid #ccc;
-  border-radius: 5px;
+  border-radius: 25px;
 }
 
 .login-button {
   width: 100%;
   padding: 0.75rem;
-  background: #8b0000;
+  background-color: #8b0000;
   color: white;
   border: none;
   border-radius: 25px;

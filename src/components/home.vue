@@ -117,7 +117,19 @@ export default {
     },
 };
 </script>
-
+<style>
+body {
+    margin: 0;
+    padding: 0;
+    background-size: cover;
+    /* Asegura que la imagen ocupe toda la pantalla */
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+</style>
 <style scoped>
 /* Aplicar Montserrat a todo el contenido */
 * {
@@ -131,17 +143,19 @@ export default {
 }
 
 .container {
-    width: 99vw;
-    height: 97.5vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
     display: flex;
     flex-direction: column;
-    background: linear-gradient(to bottom, #000000, #691B31);
     color: white;
-    overflow: hidden;
 }
 
 /* Menú de navegación */
 .navbar {
+    position: 0;
     display: flex;
     align-items: center;
     justify-content: space-between;
