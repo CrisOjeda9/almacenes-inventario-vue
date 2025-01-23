@@ -80,13 +80,14 @@
                             style="text-transform: uppercase;" required />
 
                     </div>
-                </div>
-                <div class="form-row">
                     <div class="form-field">
                         <label for="numtrabajador">Num. Trabajador</label>
                         <input type="number" placeholder="" min="0" v-model="form.numTrabajador" required />
 
                     </div>
+                </div>
+                <div class="form-row">
+
                     <div class="form-field">
                         <label for="curp">CURP</label>
                         <input type="text" placeholder="" minlength="18" maxlength="18" v-model="form.curp" required
@@ -115,14 +116,27 @@
                             <option value="estaciones_radio">Estaciones de radio</option>
                         </select>
                     </div>
-
-
-                </div>
-                <div class="form-row">
                     <div class="form-field">
                         <label for="departamento">Departamento</label>
                         <input type="text" placeholder="" v-model="form.departamento" required />
 
+                    </div>
+                    <div class="form-field">
+                        <label for="organosuperior">Organo Superior</label>
+                        <input type="text" placeholder="" v-model="form.organosuperior" required />
+
+                    </div>
+
+                </div>
+                <div class="form-row">
+                    <div class="form-field">
+                        <label for="areapresupuestal">Área Presupuestal</label>
+                        <input type="text" value="Radio y Televisión de Hidalgo"
+                            placeholder="Radio y Televisión de Hidalgo" v-model="form.areapresupuestal" readonly />
+                    </div>
+                    <div class="form-field">
+                        <label for="email">Email</label>
+                        <input type="email" v-model="form.email" />
                     </div>
                     <div class="form-field">
                         <label for="password">Contraseña</label>
@@ -134,7 +148,7 @@
                     </div>
 
                     <div class="form-field">
-                        <label for="confirmPassword">Confirmar Contraseña</label>
+                        <label for="confirmPassword" style="font-size: 11px;">Confirmar Contraseña</label>
                         <div class="input-wrapper">
                             <input :type="showConfirmPassword ? 'text' : 'password'" v-model="form.confirmPassword"
                                 required />
@@ -142,9 +156,42 @@
                                 @click="showConfirmPassword = !showConfirmPassword"></i>
                         </div>
                     </div>
+
+                </div>
+
+
+                <div class="form-row">
+                    <!-- Campo INE -->
+                    <div class="form-field">
+                        <label for="documentoINE">INE</label>
+                        <div class="dropzone" @drop.prevent="handleDrop('INE')" @dragover.prevent
+                            @click="triggerFileInput('INE')">
+                            <input type="file" id="documentoINE" ref="fileInputINE" @change="handleFileUpload('INE')"
+                                accept=".pdf,.jpg,.png" />
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <span v-if="!form.documentoINE">Arrastra o selecciona un archivo (PDF, JPG, PNG)</span>
+                            <span v-else>{{ form.documentoINE.name }}</span>
+                        </div>
+                    </div>
+
+                    <!-- Campo Foto -->
+                    <div class="form-field">
+                        <label for="documentoFoto">Foto</label>
+                        <div class="dropzone" @drop.prevent="handleDrop('Foto')" @dragover.prevent
+                            @click="triggerFileInput('Foto')">
+                            <input type="file" id="documentoFoto" ref="fileInputFoto" @change="handleFileUpload('Foto')"
+                                accept=".jpg,.png" />
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <span v-if="!form.documentoFoto">Arrastra o selecciona un archivo (JPG, PNG)</span>
+                            <span v-else>{{ form.documentoFoto.name }}</span>
+                        </div>
+                    </div>
+
                 </div>
                 <div class="button-container">
-                    <button class="boton" type="submit">Registrar</button>
+                    <button class="boton" type="submit">
+                        <i class="fas fa-user"></i> Registrar
+                    </button>
                 </div>
             </form>
         </div>
@@ -164,8 +211,12 @@ export default {
                 curp: "",
                 direccion: "",
                 departamento: "",
+                areapresupuestal: "",
+                email: "",
                 password: "",
                 confirmPassword: "",
+                documentoINE: null, // Almacena el archivo INE
+                documentoFoto: null, // Almacena el archivo Foto
             },
             showPassword: false,
             showConfirmPassword: false,
@@ -199,6 +250,18 @@ export default {
         },
         hideMenu(menu) {
             this.menus[menu] = false;
+        },
+        triggerFileInput(type) {
+            if (type === "INE") this.$refs.fileInputINE.click();
+            if (type === "Foto") this.$refs.fileInputFoto.click();
+        },
+        handleFileUpload(type) {
+            const input = type === "INE" ? this.$refs.fileInputINE : this.$refs.fileInputFoto;
+            const file = input.files[0];
+            if (file) {
+                if (type === "INE") this.form.documentoINE = file;
+                if (type === "Foto") this.form.documentoFoto = file;
+            }
         },
     },
 };
@@ -365,7 +428,7 @@ form {
     padding: 30px;
     border-radius: 10px;
     width: 800px;
-    height: 350px;
+    height: 450px;
     max-width: 800px;
     color: black;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
@@ -374,7 +437,7 @@ form {
 .form-row {
     display: flex;
     justify-content: center;
-    margin-bottom: 25px;
+    margin-bottom: 10px;
     padding-bottom: 15px;
 }
 
@@ -456,5 +519,58 @@ a {
     color: #333;
     height: 40px;
     /* Asegura que tenga la misma altura que los inputs */
+}
+
+/* Estilos del Dropzone */
+.dropzone {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border: 2px dashed #98989A;
+    padding: 10px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    cursor: pointer;
+    text-align: center;
+    transition: background-color 0.3s ease;
+    min-width: 300px;
+    /* Ocupa todo el ancho disponible */
+    max-width: 300px;
+    /* Ocupa todo el ancho disponible */
+    min-height: 100px;
+    /* Mantiene una altura mínima */
+    max-height: 100px;
+    /* Mantiene una altura mínima */
+    box-sizing: border-box;
+    /* El padding no afectará el tamaño */
+    overflow: hidden;
+    /* Evita que el contenido sobrepase los límites del contenedor */
+    word-wrap: break-word;
+    /* Asegura que el texto largo se ajuste al contenedor */
+}
+
+.dropzone:hover {
+    background-color: #ecf6fc;
+}
+
+.dropzone i {
+    font-size: 30px;
+    color: #6F7271;
+}
+
+.dropzone span {
+    font-size: 12px;
+    color: #6F7271;
+    overflow: hidden;
+    /* Evita que el texto de la etiqueta ocupe más espacio del necesario */
+    text-overflow: ellipsis;
+    /* Muestra "..." si el texto es demasiado largo */
+    white-space: nowrap;
+    /* Evita que el texto se divida en varias líneas */
+}
+
+.dropzone input[type="file"] {
+    display: none;
 }
 </style>
