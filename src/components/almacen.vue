@@ -51,7 +51,7 @@
                     <button @click="navigateTo('users')">Solicitud de material</button>
                     <button @click="navigateTo('users')">Agregar un bien para inventario</button>
                     <button @click="navigateTo('users')">Salida de existencias</button>
-                    <button @click="navigateTo('users')">Entrada de existencias</button>
+                    <button @click="navigateTo('existencia')">Entrada de existencias</button>
                     <button @click="navigateTo('users')">Recepcion de solicitudes</button>
                     <button @click="navigateTo('proveedor')">Ver proveedores</button>
                     <button @click="navigateTo('factura')">Facturas</button>
@@ -66,7 +66,7 @@
                 <i class="fas fa-cart-plus"></i> <!-- Ícono de solicitud de materiales -->
                 <span>Solicitud de Materiales</span>
             </div>
-            <div class="button-card" @click="navigateTo2('almacen')">
+            <div class="button-card" @click="navigateTo2('existencia')">
                 <i class="fas fa-arrow-circle-down"></i> <!-- Ícono de entrada de existencias -->
                 <span>Entrada de existencias</span>
             </div>

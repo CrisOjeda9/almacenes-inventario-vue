@@ -49,7 +49,7 @@
                     <button @click="navigateTo('users')">Solicitud de material</button>
                     <button @click="navigateTo('users')">Agregar un bien para inventario</button>
                     <button @click="navigateTo('users')">Salida de existencias</button>
-                    <button @click="navigateTo('users')">Entrada de existencias</button>
+                    <button @click="navigateTo('existencia')">Entrada de existencias</button>
                     <button @click="navigateTo('users')">Recepcion de solicitudes</button>
                     <button @click="navigateTo('proveedor')">Ver proveedores</button>
                     <button @click="navigateTo('factura')">Facturas</button>
