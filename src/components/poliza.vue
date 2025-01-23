@@ -48,7 +48,7 @@
                     <button @click="navigateTo('poliza')">Solicitud de material</button>
                     <button @click="navigateTo('poliza')">Agregar un bien para inventario</button>
                     <button @click="navigateTo('poliza')">Baja de bienes</button>
-                    <button @click="navigateTo('poliza')">Entrada de existencias</button>
+                    <button @click="navigateTo('existencia')">Entrada de existencias</button>
                     <button @click="navigateTo('poliza')">Recepcion de solicitudes</button>
                     <button @click="navigateTo('proveedor')">Ver proveedores</button>
                     <button @click="navigateTo('factura')">Facturas</button>
