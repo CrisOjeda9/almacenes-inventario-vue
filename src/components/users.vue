@@ -137,7 +137,7 @@
                                 <div>
                                     <label>Dirección de pertenencia:</label>
                                     <select v-model="currentUser.direccionPertenencia" required>
-                                        <option value="">Selecciona una opción</option>
+                                        <option value="" disabled>Selecciona una opción</option>
                                         <option v-for="direccion in direcciones" :value="direccion.value"
                                             :key="direccion.value">
                                             {{ direccion.text }}

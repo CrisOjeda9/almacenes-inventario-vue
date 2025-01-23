@@ -73,7 +73,7 @@
                     <div class="form-field">
                         <label for="tipoCompra">Tipo de compra</label>
                         <select id="tipoCompra" v-model="form.tipoCompra" required>
-                            <option value="">Selecciona una opción</option>
+                            <option value="" disabled>Selecciona una opción</option>
                             <option value="estatal">Estatal</option>
                             <option value="presupuestal">Presupuestal</option>
                         </select>
@@ -98,7 +98,7 @@
                     <div class="form-field">
                         <label for="proveedor">Proveedor</label>
                         <select id="proveedor" v-model="form.proveedor" required>
-                            <option value="">Selecciona una opción</option>
+                            <option value="" disabled>Selecciona una opción</option>
                             <option value="carlos">Carlos</option>
                             <option value="martin">Martin</option>
                         </select>

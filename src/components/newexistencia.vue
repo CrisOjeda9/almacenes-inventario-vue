@@ -79,7 +79,7 @@
                     <div class="form-field">
                         <label for="tipoProveedor">Proveedor</label>
                         <select id="tipoProveedor" v-model="form.proveedor" required>
-                            <option value="">Selecciona una opción</option>
+                            <option value="" disabled>Selecciona una opción</option>
                             <option value="carlos">Carlos</option>
                             <option value="cristian">Cristian</option>
                         </select>
@@ -89,7 +89,7 @@
                     <div class="form-field">
                         <label for="numeroPartida">Número de partida</label>
                         <select id="numeroPartida" v-model="form.numeroPartida" required>
-                            <option value="">Selecciona una opción</option>
+                            <option value="" disabled>Selecciona una opción</option>
                             <option value="fisico">Físico</option>
                             <option value="moral">Moral</option>
                         </select>

@@ -78,7 +78,7 @@
             <div class="form-field">
                 <label for="tipoProveedor">Tipo de proveedor</label>
                 <select id="tipoProveedor" v-model="form.tipoProveedor" required>
-                    <option value="">Selecciona una opción</option>
+                    <option value="" disabled>Selecciona una opción</option>
                     <option value="fisico">Físico</option>
                     <option value="moral">Moral</option>
                 </select>

@@ -97,7 +97,7 @@
                         <label for="pertenencia">Direc. Pertenencia</label>
 
                         <select v-model="form.direccion" required>
-                            <option value="">Selecciona una opción</option>
+                            <option value="" disabled>Selecciona una opción</option>
                             <option value="direccion_general">Dirección General</option>
                             <option value="direccion_coordinacion_financiera">Dirección de coordinación financiera y
                                 planeación</option>
