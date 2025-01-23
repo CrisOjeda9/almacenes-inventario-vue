@@ -66,119 +66,162 @@
             </div>
 
             <!-- Botón para agregar nuevo usuario -->
-            <button class="add-factura-btn" @click="redirectToAddPoliza">
+            <button class="add-factura-btn" @click="redirectToAddExistencia">
                 <i class="fas fa-file-invoice"></i> <i class="fas fa-plus"></i>
             </button>
         </div>
 
         <div class="contenedor-tabla">
             <table class="user-table">
-                <thead>
-                    <tr>
-                        <th>Descripcion</th>
-                        <th>Cobertura</th>
-                        <th>Tipo de poliza</th>
-                        <th>Calidad</th>
-                        <th>Deducible</th>
-                        <th>Limite de indemnización</th>
-                        <th>Periodo de validacion</th>
-                        <th>Clausulas de exclusion</th>
-                        <th>Fecha de poliza</th>
-                        <th>Documento</th>
-                        <th>Fecha de registro</th>
-                        <th>Acciones</th>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Número de factura</th>
+            <th>Proveedor</th>
+            <th>Número de partida</th>
+            <th>Nombre</th>
+            <th>Importe sin IVA</th>
+            <th>IVA</th>
+            <th>Importe con IVA</th>
+            <th>Cantidad</th>
+            <th>Unidad de medida</th>
+            <th>Ubicación en almacén</th>
+            <th>Total de ingreso</th>
+            <th>Foto artículo</th>
+            <th>Fecha de registro</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr v-for="existencia in paginatedExistencias" :key="existencia.id">
+            <td>{{ existencia.id }}</td>
+            <td>{{ existencia.numeroFactura }}</td>
+            <td>{{ existencia.proveedor }}</td>
+            <td>{{ existencia.numeroPartida }}</td>
+            <td>{{ existencia.nombre }}</td>
+            <td>{{ existencia.importeSinIVA }}</td>
+            <td>{{ existencia.iva }}</td>
+            <td>{{ existencia.importeConIVA }}</td>
+            <td>{{ existencia.cantidad }}</td>
+            <td>{{ existencia.unidadmedida }}</td>
+            <td>{{ existencia.ubicacionAlmacen }}</td>
+            <td>{{ existencia.totalIngreso }}</td>
+            <td>
+                <a :href="'/ruta/del/archivo/' + existencia.fotoArticulo" download>
+                    <button class="btn-download">
+                        <i class="fas fa-download"></i>
+                    </button>
+                </a>
+            </td>
+            <td>{{ existencia.fechaRegistro }}</td>
+            <td>
+                <button @click="editExistencia(existencia)" class="btn-edit">Editar</button>
+                <button @click="showDeleteModal(existencia.id)" class="btn-delete">Eliminar</button>
+            </td>
+        </tr>
+    </tbody>
+</table>
 
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr v-for="user in paginatedpoliza" :key="user.id">
-                        <td>{{ user.descripcion }}</td>
-                        <td>{{ user.cobertura }}</td>
-                        <td>{{ user.tipopoliza }}</td>
-                        <td>{{ user.calidad }}</td>
-                        <td>{{ user.deducible }}</td>
-                        <td>{{ user.indemnizacion }}</td>
-                        <td>{{ user.validacion }}</td>
-                        <td>{{ user.exclusion }}</td>
-                        <td>{{ user.fechapoliza }}</td>
-                        <td>
-                            <!-- Botón de descarga por cada documento -->
-                            <a :href="'/ruta/del/archivo/' + user.documento" download>
-                                <button class="btn-download">
-                                    <i class="fas fa-download"></i>
-                                </button>
-                            </a>
-                        </td>
-                        <td>{{ user.registrationDate }}</td>
-                        <td>
-                            <button @click="editUser(user)" class="btn-edit">Editar</button>
-                            <button @click="showDeleteModal(user.id)" class="btn-delete">Eliminar</button>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
 
             <!-- Modal de Edición -->
-            <div v-if="isEditing" class="edit-modal">
-                <div class="modal-content">
-                    <h3>Editar Póliza</h3>
-                    <form @submit.prevent="saveChanges" class="edit-form">
-                        <div class="contenedorformulario">
-                            <div class="form-column">
-                                <div>
-                                    <label>Descripción:</label>
-                                    <input v-model="currentPoliza.descripcion" type="text" />
-                                </div>
-                                <div>
-                                    <label>Cobertura:</label>
-                                    <input v-model="currentPoliza.cobertura" type="text" />
-                                </div>
-                                <div>
-                                    <label>Tipo de póliza:</label>
-                                    <input v-model="currentPoliza.tipopoliza" type="text" />
-                                </div>
-                                <div>
-                                    <label>Calidad:</label>
-                                    <input v-model="currentPoliza.calidad" type="text" />
-                                </div>
-                                <div>
-                                    <label>Deducible:</label>
-                                    <input v-model="currentPoliza.deducible" type="text" />
-                                </div>
-                            </div>
+            <!-- Modal de Edición -->
+<div v-if="isEditing" class="edit-modal">
+    <div class="modal-content">
+        <h3>Editar Existencia</h3>
+        <form @submit.prevent="saveChanges" class="edit-form">
+            <div class="contenedorformulario">
+                <!-- Primera columna -->
+                <div class="form-column">
+                    <div>
+                        <label>ID:</label>
+                        <input v-model="currentExistencia.id" type="text" disabled />
+                    </div>
+                    <div>
+                        <label>Número de factura:</label>
+                        <input v-model="currentExistencia.numeroFactura" type="text" />
+                    </div>
+                    <div>
+                        <label>Proveedor:</label>
+                        <input v-model="currentExistencia.proveedor" type="text" />
+                    </div>
+                    <div>
+                        <label>Número de partida:</label>
+                        <input v-model="currentExistencia.numeroPartida" type="text" />
+                    </div>
+                    <div>
+                        <label>Nombre:</label>
+                        <input v-model="currentExistencia.nombre" type="text" />
+                    </div>
+                </div>
 
-                            <div class="form-column">
-                                <div>
-                                    <label>Límite de indemnización:</label>
-                                    <input v-model="currentPoliza.indemnizacion" type="text" />
+                <!-- Segunda columna -->
+                <div class="form-column">
+                    <div>
+                        <label>Importe sin IVA:</label>
+                        <input v-model="currentExistencia.importeSinIVA" type="text" />
+                    </div>
+                    <div>
+                        <label>IVA:</label>
+                        <input v-model="currentExistencia.iva" type="text" />
+                    </div>
+                    <div>
+                        <label>Importe con IVA:</label>
+                        <input v-model="currentExistencia.importeConIVA" type="text" />
+                    </div>
+                    <div>
+                        <label>Cantidad:</label>
+                        <input v-model="currentExistencia.cantidad" type="text" />
+                    </div>
+                    
+                    <div >
+                                    <label>Unidad de medida:</label>
+                                    <select v-model="currentExistencia.unidadmedida" class="form-input">
+                                        <option value="" disabled>Selecciona una opción</option>
+                            <option value="piezas">Piezas</option>
+                            <option value="paquetes">Paquetes</option>
+                            <option value="cajas">Cajas</option>
+                            <option value="kilogramos">Kilogramos</option>
+                            <option value="litros">Litros</option>
+                            <option value="metros">Metros</option>
+                            <option value="rollos">Rollos</option>
+                            <option value="bultos">Bultos</option>
+                                    </select>
                                 </div>
-                                <div>
-                                    <label>Periodo de validación:</label>
-                                    <input v-model="currentPoliza.validacion" type="text" />
-                                </div>
-                                <div>
-                                    <label>Cláusulas de exclusión:</label>
-                                    <input v-model="currentPoliza.exclusion" type="text" />
-                                </div>
-                                <div>
-                                    <label>Fecha de póliza:</label>
-                                    <input v-model="currentPoliza.fechapoliza" type="date" />
-                                </div>
-                            </div>
-                        </div>
-                        <!-- Botones debajo del formulario -->
-                        <div class="form-buttons">
-                            <button type="submit" class="save-btn">Guardar cambios</button>
-                            <button @click="cancelEdit" type="button" class="cancel-btn">Cancelar</button>
-                        </div>
-                    </form>
+                </div>
+
+                <!-- Tercera columna -->
+                <div class="form-column">
+                    
+                    <div>
+                        <label>Ubicación en almacén:</label>
+                        <input v-model="currentExistencia.ubicacionAlmacen" type="text" />
+                    </div>
+                    <div>
+                        <label>Total de ingreso:</label>
+                        <input v-model="currentExistencia.totalIngreso" type="text" />
+                    </div>
+                    <div>
+                        <label>Foto artículo:</label>
+                        <input type="file" @change="updateFotoArticulo" />
+                    </div>
+                    
                 </div>
             </div>
+
+            <!-- Botones debajo del formulario -->
+            <div class="form-buttons">
+                <button type="submit" class="save-btn">Guardar cambios</button>
+                <button @click="cancelEdit" type="button" class="cancel-btn">Cancelar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 
             <!-- Modal de Confirmación de Eliminación -->
             <div v-if="isDeleteModalVisible" class="modal-overlay">
                 <div class="modal-content-delete">
-                    <h3>¿Estás seguro de eliminar esta póliza?</h3>
+                    <h3>¿Estás seguro de eliminar esta existencia?</h3>
                     <div class="modal-buttons">
                         <button @click="confirmDelete" class="btn-confirm">Confirmar</button>
                         <button @click="cancelDelete" class="btn-cancel">Cancelar</button>
@@ -203,63 +246,69 @@ export default {
             isDeleteModalVisible: false,
             menus: {
                 homeMenu: false,
-                polizaMenu: false,
+                existenciaMenu: false,
                 settingsMenu: false,
             },
             searchQuery: '',
             currentPage: 1,
-            polizaPerPage: 10,
+            existenciasPerPage: 10,
             isEditing: false, // Para controlar si estamos en modo de edición
-            currentPoliza: {}, // Objeto para almacenar la póliza que se está editando
-            poliza: [
+            currentExistencia: {}, // Objeto para almacenar la existencia que se está editando
+            existencias: [
                 {
                     id: 1,
-                    descripcion: "Seguro contra incendios",
-                    cobertura: "Edificio principal",
-                    tipopoliza: "Anual",
-                    calidad: "Premium",
-                    deducible: "$5,000",
-                    indemnizacion: "$1,000,000",
-                    validacion: "30 días",
-                    exclusion: "Daños preexistentes",
-                    fechapoliza: "2024-01-01",
-                    documento: "asdadasda",
-                    registrationDate: "2024-01-15"
+                    numeroFactura: "FAC-202301",
+                    proveedor: "Proveedor A",
+                    numeroPartida: "12345",
+                    nombre: "Producto A",
+                    importeSinIVA: "$10,000",
+                    iva: "$1,600",
+                    importeConIVA: "$11,600",
+                    cantidad: "100",
+                    unidadMedida: "Piezas",
+                    ubicacionAlmacen: "Almacén 1 - Estante 3",
+                    totalIngreso: "100",
+                    fotoArticulo: "imagen_a.jpg",
+                    fechaRegistro: "2024-01-01"
                 },
                 {
                     id: 2,
-                    descripcion: "Seguro de vehículos",
-                    cobertura: "Flotilla corporativa",
-                    tipopoliza: "Semestral",
-                    calidad: "Económica",
-                    deducible: "$2,000",
-                    indemnizacion: "$500,000",
-                    validacion: "15 días",
-                    exclusion: "Uso no autorizado",
-                    fechapoliza: "2024-01-10",
-                    documento: "asdadasda",
-                    registrationDate: "2024-01-16"
+                    numeroFactura: "FAC-202302",
+                    proveedor: "Proveedor B",
+                    numeroPartida: "67890",
+                    nombre: "Producto B",
+                    importeSinIVA: "$5,000",
+                    iva: "$800",
+                    importeConIVA: "$5,800",
+                    cantidad: "50",
+                    unidadMedida: "Cajas",
+                    ubicacionAlmacen: "Almacén 2 - Estante 5",
+                    totalIngreso: "50",
+                    fotoArticulo: "imagen_b.jpg",
+                    fechaRegistro: "2024-01-02"
                 }
             ]
         };
     },
     computed: {
-        filteredpoliza() {
+        filteredExistencias() {
             const query = this.searchQuery.toLowerCase();
-            return this.poliza.filter(user => {
-                return user.descripcion.toLowerCase().includes(query) ||
-                    user.cobertura.toLowerCase().includes(query) ||
-                    user.tipopoliza.toLowerCase().includes(query) ||
-                    user.calidad.toLowerCase().includes(query);
+            return this.existencias.filter(existencia => {
+                return (
+                    existencia.numeroFactura.toLowerCase().includes(query) ||
+                    existencia.proveedor.toLowerCase().includes(query) ||
+                    existencia.nombre.toLowerCase().includes(query) ||
+                    existencia.ubicacionAlmacen.toLowerCase().includes(query)
+                );
             });
         },
         totalPages() {
-            return Math.ceil(this.filteredpoliza.length / this.polizaPerPage);
+            return Math.ceil(this.filteredExistencias.length / this.existenciasPerPage);
         },
-        paginatedpoliza() {
-            const start = (this.currentPage - 1) * this.polizaPerPage;
-            const end = start + this.polizaPerPage;
-            return this.filteredpoliza.slice(start, end);
+        paginatedExistencias() {
+            const start = (this.currentPage - 1) * this.existenciasPerPage;
+            const end = start + this.existenciasPerPage;
+            return this.filteredExistencias.slice(start, end);
         }
     },
     methods: {
@@ -289,21 +338,23 @@ export default {
                 this.currentPage++;
             }
         },
-        editUser(user) {
-            this.currentPoliza = { ...user };
+        editExistencia(existencia) {
+            this.currentExistencia = { ...existencia };
             this.isEditing = true;
         },
         saveChanges() {
-            const index = this.poliza.findIndex(user => user.id === this.currentPoliza.id);
+            const index = this.existencias.findIndex(
+                existencia => existencia.id === this.currentExistencia.id
+            );
             if (index !== -1) {
-                this.poliza[index] = { ...this.currentPoliza };
+                this.existencias[index] = { ...this.currentExistencia };
                 this.isEditing = false;
-                this.currentPoliza = {}; // Limpiar el objeto
+                this.currentExistencia = {}; // Limpiar el objeto
             }
         },
         cancelEdit() {
             this.isEditing = false;
-            this.currentPoliza = {}; // Limpiar el objeto
+            this.currentExistencia = {}; // Limpiar el objeto
         },
 
         showDeleteModal(id) {
@@ -311,9 +362,11 @@ export default {
             this.isDeleteModalVisible = true;
         },
         confirmDelete() {
-            const index = this.poliza.findIndex(user => user.id === this.deleteId);
+            const index = this.existencias.findIndex(
+                existencia => existencia.id === this.deleteId
+            );
             if (index !== -1) {
-                this.poliza.splice(index, 1);
+                this.existencias.splice(index, 1);
             }
             this.isDeleteModalVisible = false;
             this.deleteId = null;
@@ -322,16 +375,15 @@ export default {
             this.isDeleteModalVisible = false;
             this.deleteId = null;
         },
-        redirectToAddPoliza() {
+        redirectToAddExistencia() {
             // Aquí defines la ruta a la que quieres redirigir al hacer clic en el botón
             this.$router.push('/newexistencia');
-        },
-
-
-
+        }
     }
 };
 </script>
+
+
 
 <style scoped>
 /* Aplicar Montserrat a todo el contenido */
