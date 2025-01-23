@@ -643,6 +643,7 @@ a {
     padding-right: 15px;
     border: none;
     cursor: pointer;
+    
 }
 
 .btn-edit {
@@ -654,7 +655,6 @@ a {
 .btn-delete {
     background-color: #f44336;
     color: white;
-    padding-right: 40px;
 
 }
 
