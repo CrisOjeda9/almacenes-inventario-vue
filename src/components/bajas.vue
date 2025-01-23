@@ -485,7 +485,6 @@ a {
 .btn-delete {
     background-color: #f44336;
     color: white;
-    padding-right: 60px;
 
 }
 

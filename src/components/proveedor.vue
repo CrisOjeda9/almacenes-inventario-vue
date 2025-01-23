@@ -597,7 +597,6 @@ a {
 .btn-delete {
     background-color: #f44336;
     color: white;
-    padding-left: 10px;
 
 }
 

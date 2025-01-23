@@ -662,18 +662,20 @@ a {
     padding-right: 15px;
     border: none;
     cursor: pointer;
+    max-width: 90px;
 }
 
 .btn-edit {
     background-color: #4CAF50;
     color: white;
     margin-bottom: 4px;
+    width: 100%;
 }
 
 .btn-delete {
     background-color: #f44336;
     color: white;
-    padding-right: 80px;
+    width: 100%;
 
 }
 
