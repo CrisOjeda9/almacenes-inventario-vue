@@ -134,6 +134,24 @@
                             required />
                     </div>
 
+
+                    <!-- Unidad de medida -->
+                    <div class="form-field">
+                        <label for="unidadmedida">Unidad de medida</label>
+                        <select id="unidadmedida" v-model="form.unidadmedida" required>
+                            <option value="" disabled>Selecciona una opción</option>
+                            <option value="piezas">Piezas</option>
+                            <option value="paquetes">Paquetes</option>
+                            <option value="cajas">Cajas</option>
+                            <option value="kilogramos">Kilogramos</option>
+                            <option value="litros">Litros</option>
+                            <option value="metros">Metros</option>
+                            <option value="rollos">Rollos</option>
+                            <option value="bultos">Bultos</option>
+                        </select>
+                    </div>
+
+
                     <!-- Ubicación en almacén -->
                     <div class="form-field">
                         <label for="ubicacionAlmacen">Ubic. almacén</label>
@@ -148,6 +166,9 @@
                             v-model="form.totalIngreso" required />
                     </div>
 
+
+                </div>
+                <div class="form-row">
                     <!-- Foto artículo -->
                     <div class="form-field">
                         <label for="fotoArticulo">Foto artículo</label>
@@ -188,7 +209,8 @@ export default {
                 importeSinIVA: "",          // Importe sin IVA
                 iva: "",                    // IVA
                 importeConIVA: "",          // Importe con IVA
-                cantidad: "",               // Cantidad
+                cantidad: "",
+                unidadmedida:"",               // Cantidad
                 ubicacionAlmacen: "",       // Ubicación en almacén
                 totalIngreso: "",           // Total de ingreso
                 fotoArticulo: null          // Foto del artículo (archivo)
@@ -278,6 +300,7 @@ export default {
     background: linear-gradient(to bottom, #000000, #691B31);
     flex-direction: column;
     color: white;
+    overflow-x: hidden;
 }
 
 /* Menú de navegación */
@@ -417,11 +440,11 @@ export default {
 
 form {
     background: white;
-    padding: 40px;
+    padding: 25px;
     padding-bottom: 80px;
     border-radius: 10px;
     width: 100%;
-    height: 350px;
+    height: 450px;
     max-width: 950px;
     color: black;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);

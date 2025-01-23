@@ -324,7 +324,7 @@ export default {
         },
         redirectToAddPoliza() {
             // Aquí defines la ruta a la que quieres redirigir al hacer clic en el botón
-            this.$router.push('/newpoliza');
+            this.$router.push('/newexistencia');
         },
 
 
