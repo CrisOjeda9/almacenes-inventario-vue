@@ -49,12 +49,11 @@
                     <button @click="navigateTo('poliza')">Solicitud de material</button>
                     <button @click="navigateTo('poliza')">Agregar un bien para inventario</button>
                     <button @click="navigateTo('poliza')">Baja de bienes</button>
-                    <button @click="navigateTo('existencia')">Entrada de existencias</button>
+                    <button @click="navigateTo('existencia')" style="background-color: #ddc9a3; color: #691b31; border-radius: 4px;">Entrada de existencias</button>
                     <button @click="navigateTo('poliza')">Recepcion de solicitudes</button>
                     <button @click="navigateTo('proveedor')">Ver proveedores</button>
                     <button @click="navigateTo('factura')">Facturas</button>
-                    <button @click="navigateTo('poliza')"
-                        style="background-color: #ddc9a3; color: #691b31; border-radius: 4px;">Polizas</button>
+                    <button @click="navigateTo('poliza')">Polizas</button>
                 </div>
             </div>
         </div>
@@ -978,7 +977,7 @@ button[type="button"]:hover {
     display: none;
 }
 
-.btn-download{
+.btn-download {
     width: 80%;
 }
 </style>

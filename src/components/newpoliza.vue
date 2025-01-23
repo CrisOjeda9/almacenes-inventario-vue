@@ -53,7 +53,7 @@
                     <button @click="navigateTo('users')">Recepcion de solicitudes</button>
                     <button @click="navigateTo('proveedor')">Ver proveedores</button>
                     <button @click="navigateTo('factura')">Facturas</button>
-                    <button @click="navigateTo('poliza')">Polizas</button>
+                    <button @click="navigateTo('poliza')" style="background-color: #ddc9a3; color: #691b31; border-radius: 4px;">Polizas</button>
                 </div>
             </div>
         </div>
