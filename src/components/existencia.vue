@@ -38,7 +38,7 @@
                     <button @click="navigateTo('home')">Baja de bienes</button>
                     <button @click="navigateTo('resguardo')">Mi resguardo</button>
                     <button @click="navigateTo('factura')">Asignar un bien</button>
-                    
+
                 </div>
             </div>
 
@@ -73,149 +73,162 @@
 
         <div class="contenedor-tabla">
             <table class="user-table">
-    <thead>
-        <tr>
-            <th>ID</th>
-            <th>Número de factura</th>
-            <th>Proveedor</th>
-            <th>Número de partida</th>
-            <th>Nombre</th>
-            <th>Importe sin IVA</th>
-            <th>IVA</th>
-            <th>Importe con IVA</th>
-            <th>Cantidad</th>
-            <th>Unidad de medida</th>
-            <th>Ubicación en almacén</th>
-            <th>Total de ingreso</th>
-            <th>Foto artículo</th>
-            <th>Fecha de registro</th>
-            <th>Acciones</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr v-for="existencia in paginatedExistencias" :key="existencia.id">
-            <td>{{ existencia.id }}</td>
-            <td>{{ existencia.numeroFactura }}</td>
-            <td>{{ existencia.proveedor }}</td>
-            <td>{{ existencia.numeroPartida }}</td>
-            <td>{{ existencia.nombre }}</td>
-            <td>{{ existencia.importeSinIVA }}</td>
-            <td>{{ existencia.iva }}</td>
-            <td>{{ existencia.importeConIVA }}</td>
-            <td>{{ existencia.cantidad }}</td>
-            <td>{{ existencia.unidadmedida }}</td>
-            <td>{{ existencia.ubicacionAlmacen }}</td>
-            <td>{{ existencia.totalIngreso }}</td>
-            <td>
-                <a :href="'/ruta/del/archivo/' + existencia.fotoArticulo" download>
-                    <button class="btn-download">
-                        <i class="fas fa-download"></i>
-                    </button>
-                </a>
-            </td>
-            <td>{{ existencia.fechaRegistro }}</td>
-            <td>
-                <button @click="editExistencia(existencia)" class="btn-edit">Editar</button>
-                <button @click="showDeleteModal(existencia.id)" class="btn-delete">Eliminar</button>
-            </td>
-        </tr>
-    </tbody>
-</table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Número de factura</th>
+                        <th>Proveedor</th>
+                        <th>Número de partida</th>
+                        <th>Nombre</th>
+                        <th>Importe sin IVA</th>
+                        <th>IVA</th>
+                        <th>Importe con IVA</th>
+                        <th>Cantidad</th>
+                        <th>Unidad de medida</th>
+                        <th>Ubicación en almacén</th>
+                        <th>Total de ingreso</th>
+                        <th>Foto artículo</th>
+                        <th>Fecha de registro</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="existencia in paginatedExistencias" :key="existencia.id">
+                        <td>{{ existencia.id }}</td>
+                        <td>{{ existencia.numeroFactura }}</td>
+                        <td>{{ existencia.proveedor }}</td>
+                        <td>{{ existencia.numeroPartida }}</td>
+                        <td>{{ existencia.nombre }}</td>
+                        <td>{{ existencia.importeSinIVA }}</td>
+                        <td>{{ existencia.iva }}</td>
+                        <td>{{ existencia.importeConIVA }}</td>
+                        <td>{{ existencia.cantidad }}</td>
+                        <td>{{ existencia.unidadMedida }}</td>
+                        <td>{{ existencia.ubicacionAlmacen }}</td>
+                        <td>{{ existencia.totalIngreso }}</td>
+                        <td>
+                            <a :href="'/ruta/del/archivo/' + existencia.fotoArticulo" download>
+                                <button class="btn-download">
+                                    <i class="fas fa-download"></i>
+                                </button>
+                            </a>
+                        </td>
+                        <td>{{ existencia.fechaRegistro }}</td>
+                        <td>
+                            <button @click="editExistencia(existencia)" class="btn-edit">Editar</button>
+                            <button @click="showDeleteModal(existencia.id)" class="btn-delete">Eliminar</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
 
 
             <!-- Modal de Edición -->
-            <!-- Modal de Edición -->
-<div v-if="isEditing" class="edit-modal">
-    <div class="modal-content">
-        <h3>Editar Existencia</h3>
-        <form @submit.prevent="saveChanges" class="edit-form">
-            <div class="contenedorformulario">
-                <!-- Primera columna -->
-                <div class="form-column">
-                    <div>
-                        <label>ID:</label>
-                        <input v-model="currentExistencia.id" type="text" disabled />
-                    </div>
-                    <div>
-                        <label>Número de factura:</label>
-                        <input v-model="currentExistencia.numeroFactura" type="text" />
-                    </div>
-                    <div>
-                        <label>Proveedor:</label>
-                        <input v-model="currentExistencia.proveedor" type="text" />
-                    </div>
-                    <div>
-                        <label>Número de partida:</label>
-                        <input v-model="currentExistencia.numeroPartida" type="text" />
-                    </div>
-                    <div>
-                        <label>Nombre:</label>
-                        <input v-model="currentExistencia.nombre" type="text" />
-                    </div>
-                </div>
+            <div v-if="isEditing" class="edit-modal">
+                <div class="modal-content">
+                    <h3>Editar Existencia</h3>
+                    <form @submit.prevent="saveChanges" class="edit-form">
+                        <div class="contenedorformulario">
+                            <!-- Primera columna -->
+                            <div class="form-column">
+                                <div>
+                                    <label>ID:</label>
+                                    <input v-model="currentExistencia.id" type="text" disabled />
+                                </div>
+                                <div>
+                                    <label>Número de factura:</label>
+                                    <input v-model="currentExistencia.numeroFactura" type="text" />
+                                </div>
+                                <div>
+                                    <label>Proveedor:</label>
+                                    <input v-model="currentExistencia.proveedor" type="text" />
+                                </div>
+                                <div>
+                                    <label>Número de partida:</label>
+                                    <input v-model="currentExistencia.numeroPartida" type="text" />
+                                </div>
 
-                <!-- Segunda columna -->
-                <div class="form-column">
-                    <div>
-                        <label>Importe sin IVA:</label>
-                        <input v-model="currentExistencia.importeSinIVA" type="text" />
-                    </div>
-                    <div>
-                        <label>IVA:</label>
-                        <input v-model="currentExistencia.iva" type="text" />
-                    </div>
-                    <div>
-                        <label>Importe con IVA:</label>
-                        <input v-model="currentExistencia.importeConIVA" type="text" />
-                    </div>
-                    <div>
-                        <label>Cantidad:</label>
-                        <input v-model="currentExistencia.cantidad" type="text" />
-                    </div>
-                    
-                    <div >
+                            </div>
+
+                            <!-- Segunda columna -->
+                            <div class="form-column">
+                                <div>
+                                    <label>Nombre:</label>
+                                    <input v-model="currentExistencia.nombre" type="text" />
+                                </div>
+                                <div>
+                                    <label>Importe sin IVA:</label>
+                                    <input v-model="currentExistencia.importeSinIVA" type="text" />
+                                </div>
+                                <div>
+                                    <label>IVA:</label>
+                                    <input v-model="currentExistencia.iva" type="text" />
+                                </div>
+                                <div>
+                                    <label>Importe con IVA:</label>
+                                    <input v-model="currentExistencia.importeConIVA" type="text" />
+                                </div>
+                                <label for="fotoArticulo">Foto artículo</label>
+                                <div class="dropzone" @drop.prevent="handleDrop" @dragover.prevent
+                                    @click="triggerFileInput">
+
+                                    <input type="file" id="updateFotoArticulo" ref="fileInput"
+                                        @change="handleFileChange" accept=".pdf,.jpg,.png" style="display: none;" />
+
+                                    <i class="fas fa-cloud-upload-alt"></i>
+                                    <span v-if="!currentExistencia.fotoArticulo">
+                                        Arrastra o selecciona un archivo (PDF, JPG, PNG)
+                                    </span>
+                                    <span v-else>
+                                        {{ currentExistencia.fotoArticulo.name }}
+                                    </span>
+                                </div>
+
+                            </div>
+
+                            <!-- Tercera columna -->
+                            <div class="form-column">
+                                <div>
+                                    <label>Cantidad:</label>
+                                    <input v-model="currentExistencia.cantidad" type="text" />
+                                </div>
+                                <div>
                                     <label>Unidad de medida:</label>
-                                    <select v-model="currentExistencia.unidadmedida" class="form-input">
+                                    <select v-model="currentExistencia.unidadMedida" class="form-input">
                                         <option value="" disabled>Selecciona una opción</option>
-                            <option value="piezas">Piezas</option>
-                            <option value="paquetes">Paquetes</option>
-                            <option value="cajas">Cajas</option>
-                            <option value="kilogramos">Kilogramos</option>
-                            <option value="litros">Litros</option>
-                            <option value="metros">Metros</option>
-                            <option value="rollos">Rollos</option>
-                            <option value="bultos">Bultos</option>
+                                        <option value="piezas">Piezas</option>
+                                        <option value="paquetes">Paquetes</option>
+                                        <option value="cajas">Cajas</option>
+                                        <option value="kilogramos">Kilogramos</option>
+                                        <option value="litros">Litros</option>
+                                        <option value="metros">Metros</option>
+                                        <option value="rollos">Rollos</option>
+                                        <option value="bultos">Bultos</option>
                                     </select>
                                 </div>
-                </div>
+                                <div>
+                                    <label>Ubicación en almacén:</label>
+                                    <input v-model="currentExistencia.ubicacionAlmacen" type="text" />
+                                </div>
+                                <div>
+                                    <label>Total de ingreso:</label>
+                                    <input v-model="currentExistencia.totalIngreso" type="text" />
+                                </div>
 
-                <!-- Tercera columna -->
-                <div class="form-column">
-                    
-                    <div>
-                        <label>Ubicación en almacén:</label>
-                        <input v-model="currentExistencia.ubicacionAlmacen" type="text" />
-                    </div>
-                    <div>
-                        <label>Total de ingreso:</label>
-                        <input v-model="currentExistencia.totalIngreso" type="text" />
-                    </div>
-                    <div>
-                        <label>Foto artículo:</label>
-                        <input type="file" @change="updateFotoArticulo" />
-                    </div>
-                    
+
+
+                            </div>
+
+                        </div>
+
+                        <!-- Botones debajo del formulario -->
+                        <div class="form-buttons">
+                            <button type="submit" class="save-btn">Guardar cambios</button>
+                            <button @click="cancelEdit" type="button" class="cancel-btn">Cancelar</button>
+                        </div>
+                    </form>
                 </div>
             </div>
-
-            <!-- Botones debajo del formulario -->
-            <div class="form-buttons">
-                <button type="submit" class="save-btn">Guardar cambios</button>
-                <button @click="cancelEdit" type="button" class="cancel-btn">Cancelar</button>
-            </div>
-        </form>
-    </div>
-</div>
 
 
             <!-- Modal de Confirmación de Eliminación -->
@@ -312,6 +325,29 @@ export default {
         }
     },
     methods: {
+        triggerFileInput() {
+            this.$refs.fileInput.click();
+        },
+        handleFileChange(event) {
+            const file = event.target.files[0];
+            if (file && this.isValidFileType(file)) {
+                this.currentExistencia.fotoArticulo = file;
+            } else {
+                alert('Solo se permiten archivos de tipo PDF, JPG o PNG.');
+            }
+        },
+        handleDrop(event) {
+            const file = event.dataTransfer.files[0];
+            if (file && this.isValidFileType(file)) {
+                this.currentExistencia.fotoArticulo = file;
+            } else {
+                alert('Solo se permiten archivos de tipo PDF, JPG o PNG.');
+            }
+        },
+        isValidFileType(file) {
+            const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png'];
+            return allowedTypes.includes(file.type);
+        },
         goHome() {
             this.$router.push('home'); // Redirige a la página principal ("/"). Cambia el path si es necesario.
         },
@@ -748,8 +784,8 @@ a {
     background: #691B31;
     padding: 10px;
     border-radius: 25px;
-    width: 80%;
-    max-width: 800px;
+    width: 100%;
+    max-width: 1050px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
 }
 
@@ -877,5 +913,72 @@ button[type="button"]:hover {
 .btn-cancel {
     background-color: red;
     color: white;
+}
+
+
+.form-column select {
+    background-color: #dcdcdc;
+    color: #691B31;
+    border-radius: 25px;
+    width: 315px;
+    height: 35px;
+}
+
+
+/* Estilos del Dropzone */
+.dropzone {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border: 2px dashed #98989A;
+    padding: 10px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    cursor: pointer;
+    text-align: center;
+    transition: background-color 0.3s ease;
+    min-width: 300px;
+    /* Ocupa todo el ancho disponible */
+    max-width: 300px;
+    /* Ocupa todo el ancho disponible */
+    min-height: 100px;
+    /* Mantiene una altura mínima */
+    max-height: 100px;
+    /* Mantiene una altura mínima */
+    box-sizing: border-box;
+    /* El padding no afectará el tamaño */
+    overflow: hidden;
+    /* Evita que el contenido sobrepase los límites del contenedor */
+    word-wrap: break-word;
+    /* Asegura que el texto largo se ajuste al contenedor */
+}
+
+.dropzone:hover {
+    background-color: #ecf6fc;
+}
+
+.dropzone i {
+    font-size: 30px;
+    color: #6F7271;
+}
+
+.dropzone span {
+    font-size: 12px;
+    color: #6F7271;
+    overflow: hidden;
+    /* Evita que el texto de la etiqueta ocupe más espacio del necesario */
+    text-overflow: ellipsis;
+    /* Muestra "..." si el texto es demasiado largo */
+    white-space: nowrap;
+    /* Evita que el texto se divida en varias líneas */
+}
+
+.dropzone input[type="file"] {
+    display: none;
+}
+
+.btn-download{
+    width: 80%;
 }
 </style>
