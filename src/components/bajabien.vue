@@ -34,7 +34,8 @@
                 <div class="dropdown-menu" v-show="menus.homeMenu">
                     <button @click="navigateTo('bajas')">Historial de bajas</button>
                     <button @click="navigateTo('home')">Alta de bienes</button>
-                    <button @click="navigateTo('bajabien')" style="background-color: #ddc9a3; color: #691b31; border-radius: 4px;">Baja de bienes</button>
+                    <button @click="navigateTo('bajabien')"
+                        style="background-color: #ddc9a3; color: #691b31; border-radius: 4px;">Baja de bienes</button>
                     <button @click="navigateTo('resguardo')">Mi resguardo</button>
                     <button @click="navigateTo('factura')">Asignar un bien</button>
 
@@ -63,75 +64,64 @@
             <form @submit.prevent="registerbajaBien">
                 <div class="form-row">
                     <!-- Fecha de Baja -->
-        <div class="form-field">
-          <label for="fechaBaja">Fecha de Baja</label>
-          <input type="date" id="fechaBaja" v-model="form.fechaBaja" required />
-        </div>
+                    <div class="form-field">
+                        <label for="fechaBaja">Fecha de Baja</label>
+                        <input type="date" id="fechaBaja" v-model="form.fechaBaja" required />
+                    </div>
 
 
-        <!-- Tipo de Baja -->
-        <div class="form-field">
-          <label for="tipoBaja">Tipo de Baja</label>
-          <select id="tipoBaja" v-model="form.tipoBaja" required>
-            <option value="" disabled>Seleccione un tipo</option>
-            <option value="Definitiva">Definitiva</option>
-            <option value="Temporal">Temporal</option>
-          </select>
-        </div>
+                    <!-- Tipo de Baja -->
+                    <div class="form-field">
+                        <label for="tipoBaja">Tipo de Baja</label>
+                        <select id="tipoBaja" v-model="form.tipoBaja" required>
+                            <option value="" disabled>Seleccione un tipo</option>
+                            <option value="Definitiva">Definitiva</option>
+                            <option value="Temporal">Temporal</option>
+                        </select>
+                    </div>
 
-         <!-- Descripción -->
-        <div class="form-field">
-          <label for="descripcion">Descripción</label>
-          <input
-            type="text"
-            id="descripcion"
-            placeholder="Ej. Computadora de escritorio"
-            v-model="form.descripcion"
-            required
-          />
-        </div>
+                    <!-- Descripción -->
+                    <div class="form-field">
+                        <label for="descripcion">Descripción</label>
+                        <input type="text" id="descripcion" placeholder="Ej. Computadora de escritorio"
+                            v-model="form.descripcion" required />
+                    </div>
+                    <!-- Modelo -->
+                    <div class="form-field">
+                        <label for="modelo">Modelo</label>
+                        <input type="text" id="modelo" placeholder="AQE-12" v-model="form.modelo" required />
+                    </div>
 
                 </div>
 
                 <div class="form-row">
-                    
 
-                <!-- Unidad Presupuestal -->
-        <div class="form-field">
-          <label for="unidadPresupuestal">Unidad Presupuestal</label>
-          <input
-            type="text"
-            id="unidadPresupuestal"
-            value="RADIO Y TELEVISIÓN DE HIDALGO"
-            readonly
-          />
-        </div>
 
-         <!-- Órgano Superior -->
-         <div class="form-field">
-          <label for="organoSuperior">Órgano Superior</label>
-          <input
-            type="text"
-            id="organoSuperior"
-            value="Organismo Descentralizado"
-            readonly
-          />
-        </div>
-        <!-- Marca -->
-        <div class="form-field">
-          <label for="marca">Marca</label>
-          <input
-            type="text"
-            id="marca"
-            placeholder="Ej. Dell, HP"
-            v-model="form.marca"
-            required
-          />
-        </div>
+                    <!-- Unidad Presupuestal -->
+                    <div class="form-field">
+                        <label for="unidadPresupuestal">Unidad Presupuestal</label>
+                        <input type="text" id="unidadPresupuestal" value="RADIO Y TELEVISIÓN DE HIDALGO" readonly />
+                    </div>
+
+                    <!-- Órgano Superior -->
+                    <div class="form-field">
+                        <label for="organoSuperior">Órgano Superior</label>
+                        <input type="text" id="organoSuperior" value="Organismo Descentralizado" readonly />
+                    </div>
+                    <!-- Marca -->
+                    <div class="form-field">
+                        <label for="marca">Marca</label>
+                        <input type="text" id="marca" placeholder="Ej. Dell, HP" v-model="form.marca" required />
+                    </div>
+                    <!-- Serie -->
+                    <div class="form-field">
+                        <label for="serie">Serie</label>
+                        <input type="text" id="serie" placeholder="1W33453" v-model="form.serie" required />
+                    </div>
                 </div>
 
                 <div class="form-row">
-                    
+
 
                     <!-- Documentos de Baja -->
                     <div class="form-field">
@@ -179,45 +169,47 @@
 
 <script>
 export default {
-  name: "bajaBienPage",
-  data() {
-    return {
-      form: {
-        fechaBaja: "",
-        tipoBaja: "",
-        descripcion: "",
-        marca: "",
-        documentoAmpara: null,
-        oficioDictamen: null,
-        fotoBien: null,
-      },
-      menus: {
-        homeMenu: false,
-      },
-    };
-  },
-  methods: {
-    goHome() {
-      this.$router.push("/home");
+    name: "bajaBienPage",
+    data() {
+        return {
+            form: {
+                fechaBaja: "",
+                tipoBaja: "",
+                descripcion: "",
+                marca: "",
+                modelo: "",
+                serie: "",
+                documentoAmpara: null,
+                oficioDictamen: null,
+                fotoBien: null,
+            },
+            menus: {
+                homeMenu: false,
+            },
+        };
     },
-    handleFileUpload(field) {
-      const file = event.target.files[0];
-      this.form[field] = file;
+    methods: {
+        goHome() {
+            this.$router.push("/home");
+        },
+        handleFileUpload(field) {
+            const file = event.target.files[0];
+            this.form[field] = file;
+        },
+        registerBajaBien() {
+            console.log("Formulario enviado:", this.form);
+            alert("Baja registrada correctamente.");
+        },
+        showMenu(menu) {
+            this.menus[menu] = true;
+        },
+        hideMenu(menu) {
+            this.menus[menu] = false;
+        },
+        navigateTo(page) {
+            this.$router.push({ name: page });
+        },
     },
-    registerBajaBien() {
-      console.log("Formulario enviado:", this.form);
-      alert("Baja registrada correctamente.");
-    },
-    showMenu(menu) {
-      this.menus[menu] = true;
-    },
-    hideMenu(menu) {
-      this.menus[menu] = false;
-    },
-    navigateTo(page) {
-      this.$router.push({ name: page });
-    },
-  },
 };
 </script>
 
