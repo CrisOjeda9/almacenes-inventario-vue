@@ -52,7 +52,8 @@
                     <button @click="navigateTo('existencia')">Entrada de existencias</button>
                     <button @click="navigateTo('users')">Recepcion de solicitudes</button>
                     <button @click="navigateTo('proveedor')">Ver proveedores</button>
-                    <button @click="navigateTo('factura')" style="background-color: #ddc9a3; color: #691b31; border-radius: 4px;">Facturas</button>
+                    <button @click="navigateTo('factura')"
+                        style="background-color: #ddc9a3; color: #691b31; border-radius: 4px;">Facturas</button>
                     <button @click="navigateTo('poliza')">Polizas</button>
                 </div>
             </div>
@@ -62,13 +63,46 @@
         <div class="form-container">
             <form @submit.prevent="registerFactura">
                 <div class="form-row">
+                    <!-- Tipo de alta -->
+                    <div class="form-field">
+                        <label for="tipoAlta">Tipo de alta</label>
+                        <select id="tipoAlta" v-model="form.tipoAlta" required>
+                            <option value="" disabled>Selecciona una opción</option>
+                            <option value="compra">Compra (CM)</option>
+                            <option value="donacion">Donacion (DN)</option>
+                            <option value="comodato">Comodato (CO)</option>
+                        </select>
+                    </div>
+                    <!-- Tipo de alta -->
+                    <div class="form-field">
+                        <label for="tipoDocumentoAmpara">Tipo de doc. que ampara</label>
+                        <select id="tipoDocumentoAmpara" v-model="form.tipoDocumentoAmpara" required>
+                            <option value="" disabled>Selecciona una opción</option>
+                            <option value="contrato">Contrato de Comodato (CO)</option>
+                            <option value="cd">CD</option>
+                            <option value="conprobante">Comprobante Fiscal Digital por Internet (CFDI)</option>
+                        </select>
+                    </div>
+                    <!-- Fecha de aduisicion -->
+                    <div class="form-field">
+                        <label for="fechaAdquisicion">Fecha de Adquisición</label>
+                        <input type="date" id="fechaAdquisicion" v-model="form.fechaAdquisicion" required />
+                    </div>
                     <!-- No. Factura -->
                     <div class="form-field">
                         <label for="numfactura">No. Factura</label>
-                        <input type="text" id="numfactura" placeholder="Ej. F123456" v-model="form.numFactura"
+                        <input type="number" min="0" id="numfactura" placeholder="Ej. F123456" v-model="form.numFactura"
                             required />
                     </div>
 
+
+
+
+
+
+                </div>
+
+                <div class="form-row">
                     <!-- Tipo de Compra -->
                     <div class="form-field">
                         <label for="tipoCompra">Tipo de compra</label>
@@ -78,19 +112,55 @@
                             <option value="presupuestal">Presupuestal</option>
                         </select>
                     </div>
-
                     <!-- Concepto -->
                     <div class="form-field">
                         <label for="concepto">Concepto</label>
                         <input type="text" id="concepto" placeholder="Ej. Compra de material" v-model="form.concepto"
                             minlength="3" maxlength="100" style="text-transform: uppercase;" required />
                     </div>
-
                     <!-- Fecha de Factura -->
                     <div class="form-field">
                         <label for="fechaFactura">Fecha de Factura</label>
                         <input type="date" id="fechaFactura" v-model="form.fechaFactura" required />
                     </div>
+                    <!-- Cantidad -->
+                    <div class="form-field">
+                        <label for="cantidad">Cantidad</label>
+                        <input type="number" min="0" id="cantidad" placeholder="Ej. 100" v-model="form.cantidad"
+                            required />
+                    </div>
+
+                </div>
+
+                <div class="form-row">
+
+
+
+                    <!-- Precio Unitario -->
+                    <div class="form-field">
+                        <label for="precioUnitario">Precio Unitario</label>
+                        <input type="number" id="precioUnitario" step="0.01" placeholder="Ej. 50.00"
+                            v-model="form.precioUnitario" min="0" required />
+                    </div>
+                    <!-- Precio Total sin IVA -->
+                    <div class="form-field">
+                        <label for="precioTotalSinIVA">Precio total sin IVA</label>
+                        <input type="number" id="precioTotalSinIVA" step="0.01" placeholder="Ej. 5000.00"
+                            v-model="form.precioTotalSinIVA" min="0" required />
+                    </div>
+                    <!-- IVA -->
+                    <div class="form-field">
+                        <label for="iva">IVA</label>
+                        <input type="number" id="iva" step="0.01" placeholder="Ej. 800.00" v-model="form.iva" min="0"
+                            required />
+                    </div>
+                    <!-- Precio Total con IVA -->
+                    <div class="form-field">
+                        <label for="precioTotalConIVA">Precio total con IVA</label>
+                        <input type="number" id="precioTotalConIVA" step="0.01" placeholder="Ej. 5800.00"
+                            v-model="form.precioTotalConIVA" min="0" required />
+                    </div>
+
                 </div>
 
                 <div class="form-row">
@@ -99,46 +169,9 @@
                         <label for="proveedor">Proveedor</label>
                         <select id="proveedor" v-model="form.proveedor" required>
                             <option value="" disabled>Selecciona una opción</option>
-                            <option value="carlos">Carlos</option>
+                            <option value="carlos">Carlos Martin Hernandez de Jesus</option>
                             <option value="martin">Martin</option>
                         </select>
-                    </div>
-
-                    <!-- Cantidad -->
-                    <div class="form-field">
-                        <label for="cantidad">Cantidad</label>
-                        <input type="number" min="0" id="cantidad" placeholder="Ej. 100" v-model="form.cantidad"
-                            required />
-                    </div>
-
-                    <!-- Precio Unitario -->
-                    <div class="form-field">
-                        <label for="precioUnitario">Precio Unitario</label>
-                        <input type="number" id="precioUnitario" step="0.01" placeholder="Ej. 50.00"
-                            v-model="form.precioUnitario" min="0" required />
-                    </div>
-
-                    <!-- Precio Total sin IVA -->
-                    <div class="form-field">
-                        <label for="precioTotalSinIVA">Precio total sin IVA</label>
-                        <input type="number" id="precioTotalSinIVA" step="0.01" placeholder="Ej. 5000.00"
-                            v-model="form.precioTotalSinIVA" min="0" required />
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <!-- IVA -->
-                    <div class="form-field">
-                        <label for="iva">IVA</label>
-                        <input type="number" id="iva" step="0.01" placeholder="Ej. 800.00" v-model="form.iva" min="0"
-                            required />
-                    </div>
-
-                    <!-- Precio Total con IVA -->
-                    <div class="form-field">
-                        <label for="precioTotalConIVA">Precio total con IVA</label>
-                        <input type="number" id="precioTotalConIVA" step="0.01" placeholder="Ej. 5800.00"
-                            v-model="form.precioTotalConIVA" min="0" required />
                     </div>
                     <!-- Documento de Factura -->
                     <div class="form-field">
@@ -146,8 +179,7 @@
                         <div class="dropzone" @drop.prevent="handleDrop" @dragover.prevent @click="triggerFileInput">
                             <input type="file" id="documentofactura" ref="fileInput" @change="handleFileUpload"
                                 accept=".pdf,.jpg,.png" />
-                            <i class="fas fa-cloud-upload-alt"></i>
-                            <span v-if="!form.documentofactura">Arrastra o selecciona un archivo (PDF, JPG, PNG)</span>
+                            <span v-if="!form.documentofactura">Arrastra o selecciona un archivo (PDF)</span>
                             <span v-else>{{ form.documentofactura.name }}</span>
                         </div>
                     </div>
@@ -170,6 +202,8 @@ export default {
     data() {
         return {
             form: {
+                tipoAlta: "", // Asegúrate de que esté vacío por defecto
+                tipoDocumentoAmpara: "", // Asegúrate de que esté vacío por defecto
                 numfactura: "",           // No. Factura
                 tipoCompra: "", // Asegúrate de que esté vacío por defecto
                 concepto: "",             // Concepto
@@ -382,20 +416,18 @@ export default {
 
 form {
     background: white;
-    padding: 40px;
+    padding: 30px;
     padding-bottom: 80px;
     border-radius: 10px;
-    width: 800px;
+    width: 1150px;
     height: 375px;
-    max-width: 800px;
-    color: black;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
 .form-row {
     display: flex;
     justify-content: center;
-    margin-bottom: 25px;
+    margin-bottom: 20px;
     padding-bottom: 15px;
 }
 
@@ -425,7 +457,6 @@ button:hover {
 .button-container {
     display: flex;
     justify-content: center;
-    margin-top: 20px;
 }
 
 
@@ -434,50 +465,45 @@ label {
     margin-bottom: 5px;
     font-size: 14px;
     color: #691B31;
-}
 
-.input-wrapper {
-    position: relative;
 }
-
-.input-wrapper input {
-    width: 100%;
-    /* Espacio para el ícono */
-}
-
-.input-wrapper i {
-    position: absolute;
-    right: -10px;
-    top: 50%;
-    transform: translateY(-50%);
-    cursor: pointer;
-}
-
-.form-field {
-    padding-left: 3%;
-    padding-right: 6%;
-}
-
 
 a {
     text-decoration: none;
+
 }
 
+/* Estilo para la fila de campos */
+.form-row {
+    display: flex;
+    gap: 20px;
+    /* Espacio entre los campos en la misma fila */
+    flex-wrap: wrap;
+    /* Permite que los campos se ajusten a nuevas filas si no caben */
+}
 
+/* Estilo para cada campo en la fila */
+.form-field {
+    flex: 1;
+    /* Cada campo ocupa un 100% del ancho disponible dentro de la fila */
+    min-width: 200px;
+    /* Establece un ancho mínimo para que no se colapse */
 
-.form-field select {
-    width: 100%;
-    max-width: 200px;
-    position: relative;
-    font-size: 15px;
+}
+
+/* Estilo de los inputs dentro de la fila */
+.form-field input,
+.form-field select,
+.form-field textarea {
+    padding: 10px;
     border: 1px solid #ccc;
     border-radius: 5px;
+    font-size: 14px;
+    width: 100%;
     box-sizing: border-box;
-    background-color: white;
-    color: #333;
-    height: 40px;
-    /* Asegura que tenga la misma altura que los inputs */
 }
+
+
 
 
 /* Estilos del Dropzone */
@@ -493,13 +519,9 @@ a {
     cursor: pointer;
     text-align: center;
     transition: background-color 0.3s ease;
-    min-width: 300px;
+    width: 100%;
     /* Ocupa todo el ancho disponible */
-    max-width: 300px;
-    /* Ocupa todo el ancho disponible */
-    min-height: 100px;
-    /* Mantiene una altura mínima */
-    max-height: 100px;
+    height: auto;
     /* Mantiene una altura mínima */
     box-sizing: border-box;
     /* El padding no afectará el tamaño */
@@ -513,13 +535,10 @@ a {
     background-color: #ecf6fc;
 }
 
-.dropzone i {
-    font-size: 30px;
-    color: #6F7271;
-}
+
 
 .dropzone span {
-    font-size: 12px;
+    font-size: 13px;
     color: #6F7271;
     overflow: hidden;
     /* Evita que el texto de la etiqueta ocupe más espacio del necesario */

@@ -50,7 +50,8 @@
                     <button @click="navigateTo('existencia')">Entrada de existencias</button>
                     <button @click="navigateTo('factura')">Recepcion de solicitudes</button>
                     <button @click="navigateTo('proveedor')">Ver proveedores</button>
-                    <button @click="navigateTo('factura')" style="background-color: #ddc9a3; color: #691b31; border-radius: 4px;">Facturas</button>
+                    <button @click="navigateTo('factura')"
+                        style="background-color: #ddc9a3; color: #691b31; border-radius: 4px;">Facturas</button>
                     <button @click="navigateTo('poliza')">Polizas</button>
                 </div>
             </div>
@@ -72,6 +73,9 @@
             <table class="user-table">
                 <thead>
                     <tr>
+                        <th>Tipo de alta</th>
+                        <th>Tipo de documento que ampara</th>
+                        <th>Fecha de adquisición</th>
                         <th>No. Factura</th>
                         <th>Tipo de compra</th>
                         <th>Concepto</th>
@@ -85,11 +89,13 @@
                         <th>Documento</th>
                         <th>Fecha de registro</th>
                         <th>Acciones</th>
-
                     </tr>
                 </thead>
                 <tbody>
                     <tr v-for="user in paginatedfactura" :key="user.id">
+                        <td>{{ user.tipoAlta }}</td>
+                        <td>{{ user.tipoDocumento }}</td>
+                        <td>{{ user.fechaAdquisicion }}</td>
                         <td>{{ user.nofactura }}</td>
                         <td>{{ user.tipocomra }}</td>
                         <td>{{ user.concepto }}</td>
@@ -101,8 +107,7 @@
                         <td>{{ user.iva }}</td>
                         <td>{{ user.totalconiva }}</td>
                         <td>
-                            <!-- Botón de descarga por cada documento -->
-                            <a :href="'/ruta/del/archivo/' + user.documento" download>
+                            <a :href="'/ruta/del/archivo/' + user.archivodocumento" download>
                                 <button class="btn-download">
                                     <i class="fas fa-download"></i>
                                 </button>
@@ -120,10 +125,19 @@
             <!-- Modal de Edición -->
             <div v-if="isEditing" class="edit-modal">
                 <div class="modal-content">
-                    <h3>Editar Póliza</h3>
+                    <h3>Editar Factura</h3>
                     <form @submit.prevent="saveChanges" class="edit-form">
                         <div class="contenedorformulario">
+                            <!-- Primera columna del formulario -->
                             <div class="form-column">
+                                <div>
+                                    <label>Tipo de alta:</label>
+                                    <input v-model="currentFactura.tipoAlta" type="text" />
+                                </div>
+                                <div>
+                                    <label>Tipo de documento que ampara:</label>
+                                    <input v-model="currentFactura.tipoDocumento" type="text" />
+                                </div>
                                 <div>
                                     <label>Factura No.:</label>
                                     <input v-model="currentFactura.nofactura" type="text" />
@@ -136,28 +150,25 @@
                                     <label>Concepto:</label>
                                     <input v-model="currentFactura.concepto" type="text" />
                                 </div>
-                                <div>
-                                    <label>Fecha de factura:</label>
-                                    <input v-model="currentFactura.fechafactura" type="date" />
-                                </div>
                                 <div style="width: 100%;">
-                                    <label>Proveedor: (Seleccionalo)</label>
-                                    <select v-model="currentFactura.proveedor" class="form-input">
+                                    <label>Proveedor: (Selecciona uno)</label>
+                                    <select v-model="currentFactura.proveedor" style="height: 35px; width: 320px;" class="form-input">
                                         <option value="" disabled selected>Selecciona un proveedor</option>
                                         <option value="Proveedor 1">Proveedor 1</option>
                                         <option value="Proveedor 2">Proveedor 2</option>
                                         <option value="Proveedor 3">Proveedor 3</option>
                                     </select>
                                 </div>
-
-
-                            </div>
-
-                            <div class="form-column">
                                 <div>
                                     <label>Cantidad:</label>
                                     <input v-model="currentFactura.cantidad" type="text" />
                                 </div>
+                            </div>
+
+                            <!-- Segunda columna del formulario -->
+                            <div class="form-column">
+
+                               
                                 <div>
                                     <label>Precio unitario:</label>
                                     <input v-model="currentFactura.preciounitario" type="text" />
@@ -174,7 +185,26 @@
                                     <label>Total con IVA:</label>
                                     <input v-model="currentFactura.totalconiva" type="text" />
                                 </div>
+                                <div class="contenedor-dropzone">
+                                    <label for="archivodocumento">Documento (PDF, JPG, PNG)</label>
+                                    <div class="dropzone" @drop.prevent="handleDrop" @dragover.prevent
+                                        @click="triggerFileInput">
+                                        <!-- Campo de subida de archivo -->
+                                        <input type="file" id="archivodocumento" ref="fileInput"
+                                            @change="handleFileChange" accept=".pdf,.jpg,.png" style="display: none;" />
+
+                                        <!-- Ícono y mensaje -->
+                                        <i class="fas fa-cloud-upload-alt"></i>
+                                        <span v-if="!currentFactura.archivodocumento">
+                                            Arrastra aquí o haz clic para subir un archivo
+                                        </span>
+                                        <span v-else>
+                                            Archivo seleccionado: {{ currentFactura.archivodocumento.name }}
+                                        </span>
+                                    </div>
+                                </div>
                             </div>
+
                         </div>
 
                         <!-- Botones debajo del formulario -->
@@ -185,6 +215,7 @@
                     </form>
                 </div>
             </div>
+
 
             <!-- Modal de Confirmación de Eliminación -->
             <div v-if="isDeleteModalVisible" class="modal-overlay">
@@ -229,6 +260,9 @@ export default {
             factura: [
                 {
                     id: 1,
+                    tipoAlta: "Alta",
+                    tipoDocumento: "Factura de compra",
+                    fechaAdquisicion: "2024-01-05",
                     nofactura: "121212",
                     tipocomra: "Seguro contra incendios",
                     concepto: "Edificio principal",
@@ -239,23 +273,8 @@ export default {
                     totalsiniva: "$1,000,000",
                     iva: "30 días",
                     totalconiva: "Daños preexistentes",
-                    documento: "asdadasda",
+                    archivodocumento: "asdadasda",
                     registrationDate: "2024-01-15"
-                },
-                {
-                    id: 2,
-                    nofactura: "121212",
-                    tipocomra: "Seguro de vehículos",
-                    concepto: "Flotilla corporativa",
-                    fechafactura: "2024-01-10",
-                    proveedor: "Semestral",
-                    cantidad: "Económica",
-                    preciounitario: "$2,000",
-                    totalsiniva: "$500,000",
-                    iva: "15 días",
-                    totalconiva: "Uso no autorizado",
-                    documento: "asdadasda",
-                    registrationDate: "2024-01-16"
                 }
 
             ]
@@ -265,7 +284,9 @@ export default {
         filteredfactura() {
             const query = this.searchQuery.toLowerCase();
             return this.factura.filter(user => {
-                return user.nofactura.toString().toLowerCase().includes(query) ||
+                return user.tipoAlta.toString().toLowerCase().includes(query) ||
+                    user.tipoDocumento.toLowerCase().includes(query) ||
+                    user.nofactura.toLowerCase().includes(query) ||
                     user.tipocomra.toLowerCase().includes(query) ||
                     user.concepto.toLowerCase().includes(query) ||
                     user.fechafactura.toLowerCase().includes(query) ||
@@ -289,6 +310,21 @@ export default {
         }
     },
     methods: {
+        triggerFileInput() {
+            this.$refs.fileInput.click(); // Abre el explorador de archivos al hacer clic
+        },
+        handleFileChange(event) {
+            const file = event.target.files[0];
+            if (file) {
+                this.currentFactura.archivodocumento = file; // Guarda el archivo en el estado actual
+            }
+        },
+        handleDrop(event) {
+            const file = event.dataTransfer.files[0];
+            if (file) {
+                this.currentFactura.archivodocumento = file; // Guarda el archivo arrastrado en el estado actual
+            }
+        },
         goHome() {
             this.$router.push('home'); // Redirige a la página principal ("/"). Cambia el path si es necesario.
         },
@@ -394,6 +430,7 @@ export default {
     background: #691B31;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
+
 .navbar-left {
     flex: 1;
     display: flex;
@@ -562,23 +599,35 @@ label {
 a {
     text-decoration: none;
 }
+/* Contenedor responsivo */
+.contenedor-tabla {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    overflow-x: auto; /* Habilita desplazamiento horizontal */
+}
 
+/* Tabla principal */
 .user-table {
-    width: 95%;
+    width: 100%; /* Ocupa todo el ancho disponible */
+    max-width: 1200px; /* Limita el ancho máximo */
     border-collapse: separate;
     border-spacing: 0;
     background-color: white;
     color: #691B31;
+    font-size: 15px;
     border-radius: 15px;
-    /* Redondear las esquinas de la tabla */
     overflow: hidden;
-    /* Para que los bordes no sobresalgan */
+    table-layout: auto; /* Ajusta el ancho según el contenido */
 }
 
 .user-table th,
 .user-table td {
     padding: 10px;
     text-align: center;
+    word-wrap: break-word; /* Permite el ajuste de palabras largas */
 }
 
 .user-table th {
@@ -592,30 +641,25 @@ a {
     transition: background-color 0.3s ease;
 }
 
+/* Botones */
 .btn-edit,
 .btn-delete {
     text-align: center;
-    padding-top: 2px;
-    padding-bottom: 2px;
-    padding-left: 15px;
-    padding-right: 15px;
+    padding: 5px 15px;
     border: none;
     cursor: pointer;
-    max-width: 90px;
+    width: 100%; /* Botones se ajustan al ancho */
 }
 
 .btn-edit {
     background-color: #4CAF50;
     color: white;
     margin-bottom: 4px;
-    width: 100%;
 }
 
 .btn-delete {
     background-color: #f44336;
     color: white;
-    width: 100%;
-
 }
 
 .btn-edit:hover {
@@ -626,14 +670,23 @@ a {
     background-color: #e41f1f;
 }
 
-.contenedor-tabla {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    display: flex;
-    flex-direction: column;
+/* Media queries para pantallas más pequeñas */
+@media (max-width: 1400px) {
+    .user-table {
+        font-size: 14px;
+    }
+
+    .user-table th,
+    .user-table td {
+        padding: 8px;
+    }
+
+    .btn-edit,
+    .btn-delete {
+        padding: 5px;
+    }
 }
+
 
 /* Barra de búsqueda */
 .search-bar {
@@ -720,11 +773,12 @@ a {
 .modal-content {
     color: white;
     text-align: center;
-    font-size: 30px;
+    font-size: 20px;
     background: #691B31;
     padding: 10px;
     border-radius: 25px;
     width: 80%;
+    height: 600px;
     max-width: 800px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
 }
@@ -794,7 +848,6 @@ button[type="button"]:hover {
 }
 
 .form-buttons {
-    margin-top: 30px;
     margin-bottom: 10px;
     display: flex;
     height: 50px;
@@ -863,5 +916,74 @@ button[type="button"]:hover {
     border-radius: 25px;
     box-sizing: border-box;
     background-color: #dcdcdc;
+}
+
+
+
+/* Estilos del Dropzone */
+.dropzone {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border: 2px dashed #98989A;
+    padding: 10px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    cursor: pointer;
+    text-align: center;
+    transition: background-color 0.3s ease;
+    min-width: 300px;
+    /* Ocupa todo el ancho disponible */
+    max-width: 300px;
+    /* Ocupa todo el ancho disponible */
+    min-height: 100px;
+    /* Mantiene una altura mínima */
+    max-height: 100px;
+    /* Mantiene una altura mínima */
+    box-sizing: border-box;
+    /* El padding no afectará el tamaño */
+    overflow: hidden;
+    /* Evita que el contenido sobrepase los límites del contenedor */
+    word-wrap: break-word;
+    /* Asegura que el texto largo se ajuste al contenedor */
+}
+
+.dropzone:hover {
+    background-color: #ecf6fc;
+}
+
+.dropzone i {
+    font-size: 30px;
+    color: #6F7271;
+}
+
+.dropzone span {
+    font-size: 12px;
+    color: #6F7271;
+    overflow: hidden;
+    /* Evita que el texto de la etiqueta ocupe más espacio del necesario */
+    text-overflow: ellipsis;
+    /* Muestra "..." si el texto es demasiado largo */
+    white-space: nowrap;
+    /* Evita que el texto se divida en varias líneas */
+}
+
+.dropzone input[type="file"] {
+    display: none;
+}
+
+/* Contenedor padre para centrar el Dropzone */
+.contenedor-dropzone {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    /* Ajusta según tus necesidades */
+}
+
+.contenedor-dropzone label {
+    color: white;
 }
 </style>
