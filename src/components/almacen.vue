@@ -49,7 +49,7 @@
                 <span class="menu-icon">▼</span>
                 <div class="dropdown-menu" v-show="menus.usersMenu">
                     <button @click="navigateTo('users')">Solicitud de material</button>
-                    <button @click="navigateTo('users')">Agregar un bien para inventario</button>
+                    <button @click="navigateTo('bieninventario')">Agregar un bien para inventario</button>
                     <button @click="navigateTo('users')">Salida de existencias</button>
                     <button @click="navigateTo('existencia')">Entrada de existencias</button>
                     <button @click="navigateTo('users')">Recepcion de solicitudes</button>
@@ -70,7 +70,7 @@
                 <i class="fas fa-arrow-circle-down"></i> <!-- Ícono de entrada de existencias -->
                 <span>Entrada de existencias</span>
             </div>
-            <div class="button-card" @click="navigateTo2('mi-resguardo')">
+            <div class="button-card" @click="navigateTo2('bieninventario')">
                 <i class="fas fa-plus-circle"></i> <!-- Ícono de agregar un bien para inventario -->
                 <span>Agregar un bien para inventario</span>
             </div>

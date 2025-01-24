@@ -45,13 +45,12 @@
                 <span class="menu-icon">▼</span>
                 <div class="dropdown-menu" v-show="menus.usersMenu">
                     <button @click="navigateTo('users')">Solicitud de material</button>
-                    <button @click="navigateTo('users')">Agregar un bien para inventario</button>
+                    <button @click="navigateTo('users')" style="background-color: #ddc9a3; color: #691b31; border-radius: 4px;">Agregar un bien para inventario</button>
                     <button @click="navigateTo('users')">Salida de existencias</button>
                     <button @click="navigateTo('existencia')">Entrada de existencias</button>
                     <button @click="navigateTo('users')">Recepcion de solicitudes</button>
                     <button @click="navigateTo('proveedor')">Ver proveedores</button>
-                    <button @click="navigateTo('factura')"
-                        style="background-color: #ddc9a3; color: #691b31; border-radius: 4px;">Facturas</button>
+                    <button @click="navigateTo('factura')">Facturas</button>
                     <button @click="navigateTo('poliza')">Polizas</button>
                 </div>
             </div>
@@ -330,6 +329,8 @@ export default {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     border-radius: 5px;
     width: 150px;
+    z-index: 10; /* Asegura que esté sobre otros elementos */
+
 }
 
 .dropdown-menu button {
