@@ -10,7 +10,7 @@
                     height="auto" style="cursor: pointer;" />
             </div>
             <div class="navbar-center">
-                <h1>Nueva Poliza</h1>
+                <h1>Baja del Bien</h1>
                 <p>Sistema inventario y Almacén de Radio y Televisión de Hidalgo</p>
             </div>
             <div class="navbar-right">
@@ -34,7 +34,7 @@
                 <div class="dropdown-menu" v-show="menus.homeMenu">
                     <button @click="navigateTo('bajas')">Historial de bajas</button>
                     <button @click="navigateTo('home')">Alta de bienes</button>
-                    <button @click="navigateTo('home')">Baja de bienes</button>
+                    <button @click="navigateTo('bajabien')" style="background-color: #ddc9a3; color: #691b31; border-radius: 4px;">Baja de bienes</button>
                     <button @click="navigateTo('resguardo')">Mi resguardo</button>
                     <button @click="navigateTo('factura')">Asignar un bien</button>
 
@@ -47,13 +47,13 @@
                 <span class="menu-icon">▼</span>
                 <div class="dropdown-menu" v-show="menus.usersMenu">
                     <button @click="navigateTo('users')">Solicitud de material</button>
-                    <button @click="navigateTo('users')">Agregar un bien para inventario</button>
+                    <button @click="navigateTo('bieninventario')">Agregar un bien para inventario</button>
                     <button @click="navigateTo('users')">Salida de existencias</button>
                     <button @click="navigateTo('existencia')">Entrada de existencias</button>
                     <button @click="navigateTo('users')">Recepcion de solicitudes</button>
                     <button @click="navigateTo('proveedor')">Ver proveedores</button>
                     <button @click="navigateTo('factura')">Facturas</button>
-                    <button @click="navigateTo('poliza')" style="background-color: #ddc9a3; color: #691b31; border-radius: 4px;">Polizas</button>
+                    <button @click="navigateTo('poliza')">Polizas</button>
                 </div>
             </div>
         </div>
@@ -338,6 +338,7 @@ export default {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     border-radius: 5px;
     width: 150px;
+    z-index: 10;
 }
 
 .dropdown-menu button {
