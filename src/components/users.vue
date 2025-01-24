@@ -46,7 +46,7 @@
                 <div class="dropdown-menu" v-show="menus.userMenu">
                     <button @click="navigateTo('user')">Solicitud de material</button>
                     <button @click="navigateTo('bieninventario')">Agregar un bien para inventario</button>
-                    <button @click="navigateTo('user')">Baja de bienes</button>
+                    <button @click="navigateTo('user')">Salida de existencias</button>
                     <button @click="navigateTo('existencia')">Entrada de existencias</button>
                     <button @click="navigateTo('user')">Recepcion de solicitudes</button>
                     <button @click="navigateTo('proveedor')">Ver proveedores</button>
