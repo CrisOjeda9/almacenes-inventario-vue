@@ -47,8 +47,8 @@
                 <span class="menu-icon">▼</span>
                 <div class="dropdown-menu" v-show="menus.polizaMenu">
                     <button @click="navigateTo('poliza')">Solicitud de material</button>
-                    <button @click="navigateTo('poliza')">Agregar un bien para inventario</button>
-                    <button @click="navigateTo('poliza')">Baja de bienes</button>
+                    <button @click="navigateTo('bieninventario')">Agregar un bien para inventario</button>
+                    <button @click="navigateTo('bajabien')">Baja de bienes</button>
                     <button @click="navigateTo('existencia')"
                         style="background-color: #ddc9a3; color: #691b31; border-radius: 4px;">Entrada de
                         existencias</button>

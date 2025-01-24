@@ -34,7 +34,7 @@
                 <div class="dropdown-menu" v-show="menus.homeMenu">
                     <button @click="navigateTo('bajas')">Historial de bajas</button>
                     <button @click="navigateTo('home')">Alta de bienes</button>
-                    <button @click="navigateTo('home')">Baja de bienes</button>
+                    <button @click="navigateTo('bajabien')">Baja de bienes</button>
                     <button @click="navigateTo('resguardo')">Mi resguardo</button>
                     <button @click="navigateTo('factura')">Asignar un bien</button>
                 </div>
@@ -45,7 +45,7 @@
                 <span class="menu-icon">▼</span>
                 <div class="dropdown-menu" v-show="menus.usersMenu">
                     <button @click="navigateTo('users')">Solicitud de material</button>
-                    <button @click="navigateTo('users')" style="background-color: #ddc9a3; color: #691b31; border-radius: 4px;">Agregar un bien para inventario</button>
+                    <button @click="navigateTo('bieninventario')" style="background-color: #ddc9a3; color: #691b31; border-radius: 4px;">Agregar un bien para inventario</button>
                     <button @click="navigateTo('users')">Salida de existencias</button>
                     <button @click="navigateTo('existencia')">Entrada de existencias</button>
                     <button @click="navigateTo('users')">Recepcion de solicitudes</button>
