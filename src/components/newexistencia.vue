@@ -49,7 +49,9 @@
                     <button @click="navigateTo('users')">Solicitud de material</button>
                     <button @click="navigateTo('users')">Agregar un bien para inventario</button>
                     <button @click="navigateTo('users')">Salida de existencias</button>
-                    <button @click="navigateTo('existencia')" style="background-color: #ddc9a3; color: #691b31; border-radius: 4px;">Entrada de existencias</button>
+                    <button @click="navigateTo('existencia')"
+                        style="background-color: #ddc9a3; color: #691b31; border-radius: 4px;">Entrada de
+                        existencias</button>
                     <button @click="navigateTo('users')">Recepcion de solicitudes</button>
                     <button @click="navigateTo('proveedor')">Ver proveedores</button>
                     <button @click="navigateTo('factura')">Facturas</button>
@@ -60,7 +62,7 @@
 
         <!-- Formulario -->
         <div class="form-container">
-            <form @submit.prevent="registerProveedor">
+            <form @submit.prevent="registerExistencia">
                 <div class="form-row">
                     <!-- ID -->
                     <div class="form-field">
@@ -75,15 +77,7 @@
                             v-model="form.numeroFactura" required />
                     </div>
 
-                    <!-- Proveedor -->
-                    <div class="form-field">
-                        <label for="tipoProveedor">Proveedor</label>
-                        <select id="tipoProveedor" v-model="form.proveedor" required>
-                            <option value="" disabled>Selecciona una opción</option>
-                            <option value="carlos">Carlos</option>
-                            <option value="cristian">Cristian</option>
-                        </select>
-                    </div>
+
 
                     <!-- Número de partida -->
                     <div class="form-field">
@@ -94,15 +88,16 @@
                             <option value="moral">Moral</option>
                         </select>
                     </div>
-                </div>
-
-                <div class="form-row">
                     <!-- Nombre -->
                     <div class="form-field">
                         <label for="nombre">Nombre</label>
                         <input type="text" id="nombre" placeholder="Ej. Nombre completo" v-model="form.nombre"
                             required />
                     </div>
+                </div>
+
+                <div class="form-row">
+
 
                     <!-- Importe sin IVA -->
                     <div class="form-field">
@@ -124,16 +119,15 @@
                         <input type="number" step="0.01" id="importeConIVA" placeholder="Ej. 1160.00"
                             v-model="form.importeConIVA" required />
                     </div>
-                </div>
-
-                <div class="form-row">
                     <!-- Cantidad -->
                     <div class="form-field">
                         <label for="cantidad">Cantidad</label>
                         <input type="number" min="0" id="cantidad" placeholder="Ej. 50" v-model="form.cantidad"
                             required />
                     </div>
+                </div>
 
+                <div class="form-row">
 
                     <!-- Unidad de medida -->
                     <div class="form-field">
@@ -182,10 +176,14 @@
                     </div>
                 </div>
 
-                <div class="button-container">
+                <div class="button-container" style="gap: 30px;">
                     <button class="boton" type="submit">
                         <i class="fas fa-plus"></i> Agregar Existencia
                     </button>
+                    <button class="boton" type="button" @click="redirigirPagina">
+                        <i class="fas fa-plus-square"></i> Agregar Bien
+                    </button>
+
                 </div>
             </form>
         </div>
@@ -203,14 +201,13 @@ export default {
             form: {
                 id: "",                     // ID del registro
                 numeroFactura: "",          // Número de factura
-                proveedor: "",              // Proveedor (Carlos/Cristian)
                 numeroPartida: "",          // Número de partida (físico/moral)
                 nombre: "",                 // Nombre del artículo
                 importeSinIVA: "",          // Importe sin IVA
                 iva: "",                    // IVA
                 importeConIVA: "",          // Importe con IVA
                 cantidad: "",
-                unidadmedida:"",               // Cantidad
+                unidadmedida: "",               // Cantidad
                 ubicacionAlmacen: "",       // Ubicación en almacén
                 totalIngreso: "",           // Total de ingreso
                 fotoArticulo: null          // Foto del artículo (archivo)
@@ -229,21 +226,20 @@ export default {
         },
         handleFileUpload(event) {
             const file = event.target.files[0];
-            this.form.documentoProveedor = file; // Almacena el archivo en el formulario
+            this.form.documentoExistencia = file; // Almacena el archivo en el formulario
         },
         handleDrop(event) {
             const file = event.dataTransfer.files[0];
-            this.form.documentoProveedor = file; // Almacena el archivo en el formulario
+            this.form.documentoExistencia = file; // Almacena el archivo en el formulario
         },
         triggerFileInput() {
             this.$refs.fileInput.click(); // Trigger del input file cuando se hace click en la dropzone
         },
-        registerProveedor() {
+        registerExistencia() {
             // Valida los campos necesarios
             if (
                 !this.form.id ||
                 !this.form.numeroFactura ||
-                !this.form.proveedor ||
                 !this.form.numeroPartida ||
                 !this.form.nombre ||
                 !this.form.importeSinIVA ||
@@ -277,6 +273,10 @@ export default {
         hideMenu(menu) {
             this.menus[menu] = false;
         },
+        redirigirPagina() {
+            // Cambia 'ruta_deseada' por la URL a la que deseas redirigir
+            window.location.href = 'bieninventario';
+        }
     },
 };
 </script>

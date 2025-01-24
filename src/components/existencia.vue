@@ -49,7 +49,9 @@
                     <button @click="navigateTo('poliza')">Solicitud de material</button>
                     <button @click="navigateTo('poliza')">Agregar un bien para inventario</button>
                     <button @click="navigateTo('poliza')">Baja de bienes</button>
-                    <button @click="navigateTo('existencia')" style="background-color: #ddc9a3; color: #691b31; border-radius: 4px;">Entrada de existencias</button>
+                    <button @click="navigateTo('existencia')"
+                        style="background-color: #ddc9a3; color: #691b31; border-radius: 4px;">Entrada de
+                        existencias</button>
                     <button @click="navigateTo('poliza')">Recepcion de solicitudes</button>
                     <button @click="navigateTo('proveedor')">Ver proveedores</button>
                     <button @click="navigateTo('factura')">Facturas</button>
@@ -76,7 +78,6 @@
                     <tr>
                         <th>ID</th>
                         <th>Número de factura</th>
-                        <th>Proveedor</th>
                         <th>Número de partida</th>
                         <th>Nombre</th>
                         <th>Importe sin IVA</th>
@@ -95,7 +96,6 @@
                     <tr v-for="existencia in paginatedExistencias" :key="existencia.id">
                         <td>{{ existencia.id }}</td>
                         <td>{{ existencia.numeroFactura }}</td>
-                        <td>{{ existencia.proveedor }}</td>
                         <td>{{ existencia.numeroPartida }}</td>
                         <td>{{ existencia.nombre }}</td>
                         <td>{{ existencia.importeSinIVA }}</td>
@@ -138,23 +138,21 @@
                                     <label>Número de factura:</label>
                                     <input v-model="currentExistencia.numeroFactura" type="text" />
                                 </div>
-                                <div>
-                                    <label>Proveedor:</label>
-                                    <input v-model="currentExistencia.proveedor" type="text" />
-                                </div>
+
                                 <div>
                                     <label>Número de partida:</label>
                                     <input v-model="currentExistencia.numeroPartida" type="text" />
+                                </div>
+                                <div>
+                                    <label>Nombre:</label>
+                                    <input v-model="currentExistencia.nombre" type="text" />
                                 </div>
 
                             </div>
 
                             <!-- Segunda columna -->
                             <div class="form-column">
-                                <div>
-                                    <label>Nombre:</label>
-                                    <input v-model="currentExistencia.nombre" type="text" />
-                                </div>
+
                                 <div>
                                     <label>Importe sin IVA:</label>
                                     <input v-model="currentExistencia.importeSinIVA" type="text" />
@@ -214,8 +212,6 @@
                                     <input v-model="currentExistencia.totalIngreso" type="text" />
                                 </div>
 
-
-
                             </div>
 
                         </div>
@@ -270,7 +266,6 @@ export default {
                 {
                     id: 1,
                     numeroFactura: "FAC-202301",
-                    proveedor: "Proveedor A",
                     numeroPartida: "12345",
                     nombre: "Producto A",
                     importeSinIVA: "$10,000",
@@ -286,7 +281,6 @@ export default {
                 {
                     id: 2,
                     numeroFactura: "FAC-202302",
-                    proveedor: "Proveedor B",
                     numeroPartida: "67890",
                     nombre: "Producto B",
                     importeSinIVA: "$5,000",
@@ -308,7 +302,6 @@ export default {
             return this.existencias.filter(existencia => {
                 return (
                     existencia.numeroFactura.toLowerCase().includes(query) ||
-                    existencia.proveedor.toLowerCase().includes(query) ||
                     existencia.nombre.toLowerCase().includes(query) ||
                     existencia.ubicacionAlmacen.toLowerCase().includes(query)
                 );
