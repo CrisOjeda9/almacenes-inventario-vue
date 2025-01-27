@@ -123,14 +123,18 @@
                         <label for="tipoBaja">Tipo de Baja</label>
                         <select id="tipoBaja" v-model="form.tipoBaja" required>
                             <option value="" disabled>Seleccione un tipo</option>
-                            <option value="Definitiva">Definitiva</option>
-                            <option value="Temporal">Temporal</option>
+                            <option value="robo">Robo (RO)</option>
+                            <option value="siniestro">Siniestro (S)</option>
+                            <option value="perdida">Perdida (P)</option>
+                            <option value="obsolecencia">Obsolecencia (O)</option>
+                            <option value="donacion">Donación (DO)</option>
+                            <option value="comodato">Terminó de Comodato (TC)</option>
                         </select>
                     </div>
                     <!-- Unidad Presupuestal -->
                     <div class="form-field">
                         <label for="unidadPresupuestal">Unidad Presupuestal</label>
-                        <input type="text" id="unidadPresupuestal" value="RADIO Y TELEVISIÓN DE HIDALGO" readonly />
+                        <input type="text" id="unidadPresupuestal" value="Radio y Televisión de Hidalgo" readonly />
                     </div>
 
                     <!-- Órgano Superior -->
