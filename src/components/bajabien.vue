@@ -89,22 +89,22 @@
                     <!-- Descripción -->
                     <div class="form-field">
                         <label for="descripcion">Descripción</label>
-                        <input type="text" id="descripcion" :value="form.descripcion" readonly />
+                        <input type="text" id="descripcion" :value="form.descripcion" readonly style="background-color: #dcddcd;"/>
                     </div>
                     <!-- Modelo -->
                     <div class="form-field">
                         <label for="modelo">Modelo</label>
-                        <input type="text" id="modelo" :value="form.modelo" readonly />
+                        <input type="text" id="modelo" :value="form.modelo" readonly style="background-color: #dcddcd;"/>
                     </div>
                     <!-- Marca -->
                     <div class="form-field">
                         <label for="marca">Marca</label>
-                        <input type="text" id="marca" :value="form.marca" readonly />
+                        <input type="text" id="marca" :value="form.marca" readonly style="background-color: #dcddcd;"/>
                     </div>
                     <!-- Serie -->
                     <div class="form-field">
                         <label for="serie">Serie</label>
-                        <input type="text" id="serie" :value="form.serie" readonly />
+                        <input type="text" id="serie" :value="form.serie" readonly style="background-color: #dcddcd;"/>
                     </div>
 
                 </div>
@@ -134,13 +134,13 @@
                     <!-- Unidad Presupuestal -->
                     <div class="form-field">
                         <label for="unidadPresupuestal">Unidad Presupuestal</label>
-                        <input type="text" id="unidadPresupuestal" value="Radio y Televisión de Hidalgo" readonly />
+                        <input type="text" id="unidadPresupuestal" value="Radio y Televisión de Hidalgo" readonly style="background-color: #dcddcd;"/>
                     </div>
 
                     <!-- Órgano Superior -->
                     <div class="form-field">
                         <label for="organoSuperior">Órgano Superior</label>
-                        <input type="text" id="organoSuperior" value="Organismo Descentralizado" readonly />
+                        <input type="text" id="organoSuperior" value="Organismo Descentralizado" readonly style="background-color: #dcddcd;"/>
                     </div>
 
                 </div>
