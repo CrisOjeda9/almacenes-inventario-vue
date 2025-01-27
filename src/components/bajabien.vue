@@ -59,20 +59,26 @@
             </div>
         </div>
         <!-- Barra de búsqueda -->
-<div class="search-bar">
-    <div class="input-wrapper">
-        <input type="text" v-model="searchQuery" placeholder="Número de inventario" />
-        <i class="fas fa-search"></i>
-    </div>
-    <div class="button-wrapper">
-        <button @click="startSearch" class="search-button">Buscar</button>
-        <!-- Botón "X" para limpiar la búsqueda -->
-        <button v-if="showClearButton" @click="clearSearch" class="clear-button">
-            <i class="fas fa-times"></i>
-        </button>
-    </div>
-</div>
+        <div class="search-bar">
+            <div class="input-wrapper">
+                <input type="text" v-model="searchQuery" placeholder="Número de inventario" />
+                <i class="fas fa-search"></i>
+            </div>
+            <div class="button-wrapper">
+                <button @click="startSearch" class="search-button">Buscar</button>
+                <button v-if="showClearButton" @click="clearSearch" class="clear-button">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
 
+        <!-- Modal para mostrar alerta -->
+        <div v-if="showErrorModal" class="modal-overlay">
+            <div class="modal">
+                <p>Número de inventario no encontrado.</p>
+                <button @click="closeModal">Cerrar</button>
+            </div>
+        </div>
 
 
         <!-- Formulario -->
@@ -187,6 +193,8 @@ export default {
     name: "bajaBienPage",
     data() {
         return {
+            showClearButton: false,
+            showErrorModal: false,  // Controla la visibilidad del modal de error
             searchQuery: '',  // Número de inventario ingresado por el usuario
 
             form: {
@@ -236,21 +244,25 @@ export default {
                 this.form.marca = foundItem.marca;
                 this.form.serie = foundItem.serie;
                 this.showClearButton = true;  // Muestra el botón de limpiar
-
+                this.showErrorModal = false; // Asegura que el modal esté cerrado
             } else {
-                alert("Número de inventario no encontrado."); 0
-                this.showClearButton = false;  // Oculta el botón de limpiar si no se encuentra el inventario
-
+                // Mostrar el modal de error
+                this.showErrorModal = true;
+                this.showClearButton = false;  // Oculta el botón de limpiar
             }
         },
+        closeModal() {
+            // Cierra el modal
+            this.showErrorModal = false;
+        },
         clearSearch() {
-            // Limpia la búsqueda y oculta el botón
             this.searchQuery = '';
             this.form.descripcion = '';
             this.form.modelo = '';
             this.form.marca = '';
             this.form.serie = '';
             this.showClearButton = false;
+            this.showErrorModal = false;  // Asegura que el modal esté cerrado al limpiar
         },
         goHome() {
             this.$router.push("/home");
@@ -640,10 +652,12 @@ a {
     cursor: pointer;
     transition: background-color 0.3s ease;
     position: absolute;
-    right: 0; /* Siempre alineado a la derecha del contenedor */
+    right: 0;
+    /* Siempre alineado a la derecha del contenedor */
     top: 50%;
     transform: translateY(-50%);
-    display: none; /* Inicialmente oculto */
+    display: none;
+    /* Inicialmente oculto */
     width: auto;
     height: auto;
 }
@@ -657,4 +671,41 @@ a {
     display: block;
 }
 
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000; /* Asegúrate de que el modal esté por encima de otros elementos */
+}
+
+.modal {
+    background: white;
+    color: #691B31;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+}
+
+.modal-overlay.show {
+    visibility: visible;
+}
+
+.modal button {
+    padding: 10px 20px;
+    background-color: #BC955B;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.modal button:hover {
+    background-color: #691B31;
+}
 </style>
