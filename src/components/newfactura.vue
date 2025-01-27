@@ -170,7 +170,8 @@
                         <select id="proveedor" v-model="form.proveedor" required>
                             <option value="" disabled>Selecciona una opción</option>
                             <option value="carlos">Carlos Martin Hernandez de Jesus</option>
-                            <option value="martin">Martin</option>
+                            <option value="carlos">Myriam Valderrabano Cortes</option>
+                            <option value="carlos">Cristian Eduardo Ojeda Gayosso</option>
                         </select>
                     </div>
                     <!-- Documento de Factura -->

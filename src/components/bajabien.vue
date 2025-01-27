@@ -58,11 +58,53 @@
                 </div>
             </div>
         </div>
+        <!-- Barra de búsqueda -->
+<div class="search-bar">
+    <div class="input-wrapper">
+        <input type="text" v-model="searchQuery" placeholder="Número de inventario" />
+        <i class="fas fa-search"></i>
+    </div>
+    <div class="button-wrapper">
+        <button @click="startSearch" class="search-button">Buscar</button>
+        <!-- Botón "X" para limpiar la búsqueda -->
+        <button v-if="showClearButton" @click="clearSearch" class="clear-button">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+</div>
+
+
 
         <!-- Formulario -->
         <div class="form-container">
             <form @submit.prevent="registerbajaBien">
                 <div class="form-row">
+
+                    <!-- Descripción -->
+                    <div class="form-field">
+                        <label for="descripcion">Descripción</label>
+                        <input type="text" id="descripcion" :value="form.descripcion" readonly />
+                    </div>
+                    <!-- Modelo -->
+                    <div class="form-field">
+                        <label for="modelo">Modelo</label>
+                        <input type="text" id="modelo" :value="form.modelo" readonly />
+                    </div>
+                    <!-- Marca -->
+                    <div class="form-field">
+                        <label for="marca">Marca</label>
+                        <input type="text" id="marca" :value="form.marca" readonly />
+                    </div>
+                    <!-- Serie -->
+                    <div class="form-field">
+                        <label for="serie">Serie</label>
+                        <input type="text" id="serie" :value="form.serie" readonly />
+                    </div>
+
+                </div>
+                <hr style="margin-bottom: 20px;">
+                <div class="form-row">
+
                     <!-- Fecha de Baja -->
                     <div class="form-field">
                         <label for="fechaBaja">Fecha de Baja</label>
@@ -79,24 +121,6 @@
                             <option value="Temporal">Temporal</option>
                         </select>
                     </div>
-
-                    <!-- Descripción -->
-                    <div class="form-field">
-                        <label for="descripcion">Descripción</label>
-                        <input type="text" id="descripcion" placeholder="Ej. Computadora de escritorio"
-                            v-model="form.descripcion" required />
-                    </div>
-                    <!-- Modelo -->
-                    <div class="form-field">
-                        <label for="modelo">Modelo</label>
-                        <input type="text" id="modelo" placeholder="AQE-12" v-model="form.modelo" required />
-                    </div>
-
-                </div>
-
-                <div class="form-row">
-
-
                     <!-- Unidad Presupuestal -->
                     <div class="form-field">
                         <label for="unidadPresupuestal">Unidad Presupuestal</label>
@@ -108,16 +132,7 @@
                         <label for="organoSuperior">Órgano Superior</label>
                         <input type="text" id="organoSuperior" value="Organismo Descentralizado" readonly />
                     </div>
-                    <!-- Marca -->
-                    <div class="form-field">
-                        <label for="marca">Marca</label>
-                        <input type="text" id="marca" placeholder="Ej. Dell, HP" v-model="form.marca" required />
-                    </div>
-                    <!-- Serie -->
-                    <div class="form-field">
-                        <label for="serie">Serie</label>
-                        <input type="text" id="serie" placeholder="1W33453" v-model="form.serie" required />
-                    </div>
+
                 </div>
 
                 <div class="form-row">
@@ -172,6 +187,8 @@ export default {
     name: "bajaBienPage",
     data() {
         return {
+            searchQuery: '',  // Número de inventario ingresado por el usuario
+
             form: {
                 fechaBaja: "",
                 tipoBaja: "",
@@ -179,6 +196,8 @@ export default {
                 marca: "",
                 modelo: "",
                 serie: "",
+                unidadPresupuestal: "Radio y Television de Hidalgo",
+                organoSuperior: "Organismo Descentralizado",
                 documentoAmpara: null,
                 oficioDictamen: null,
                 fotoBien: null,
@@ -186,9 +205,53 @@ export default {
             menus: {
                 homeMenu: false,
             },
+            inventoryData: [ // Datos simulados (puedes usar una API en lugar de esto)
+                {
+                    numeroInventario: "12345",
+                    descripcion: "Laptop HP ProBook",
+                    modelo: "ProBook 450 G8",
+                    marca: "HP",
+                    serie: "5CD12345XYZ"
+                },
+                {
+                    numeroInventario: "67890",
+                    descripcion: "Impresora Canon",
+                    modelo: "PIXMA G6020",
+                    marca: "Canon",
+                    serie: "ABC67890DEF"
+                }
+            ],
         };
     },
     methods: {
+        startSearch() {
+            const foundItem = this.inventoryData.find(
+                (item) => item.numeroInventario === this.searchQuery
+            );
+
+            if (foundItem) {
+                // Actualiza los valores del formulario con los datos encontrados
+                this.form.descripcion = foundItem.descripcion;
+                this.form.modelo = foundItem.modelo;
+                this.form.marca = foundItem.marca;
+                this.form.serie = foundItem.serie;
+                this.showClearButton = true;  // Muestra el botón de limpiar
+
+            } else {
+                alert("Número de inventario no encontrado."); 0
+                this.showClearButton = false;  // Oculta el botón de limpiar si no se encuentra el inventario
+
+            }
+        },
+        clearSearch() {
+            // Limpia la búsqueda y oculta el botón
+            this.searchQuery = '';
+            this.form.descripcion = '';
+            this.form.modelo = '';
+            this.form.marca = '';
+            this.form.serie = '';
+            this.showClearButton = false;
+        },
         goHome() {
             this.$router.push("/home");
         },
@@ -212,6 +275,7 @@ export default {
     },
 };
 </script>
+
 
 
 <style scoped>
@@ -330,7 +394,7 @@ export default {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     border-radius: 5px;
     width: 150px;
-    z-index: 10;
+    z-index: 1;
 }
 
 .dropdown-menu button {
@@ -356,7 +420,6 @@ export default {
     flex: 1;
     display: flex;
     justify-content: center;
-    align-items: center;
     width: 100%;
     height: 100%;
 
@@ -365,20 +428,18 @@ export default {
 
 form {
     background: white;
-    padding: 40px;
-    padding-bottom: 90px;
+    padding: 30px;
+    padding-bottom: 80px;
     border-radius: 10px;
-    width: 800px;
-    height: 350px;
-    max-width: 800px;
-    color: black;
+    width: 1000px;
+    height: 260px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
 .form-row {
     display: flex;
     justify-content: center;
-    margin-bottom: 25px;
+    margin-bottom: 10px;
     padding-bottom: 15px;
 }
 
@@ -408,8 +469,8 @@ button:hover {
 .button-container {
     display: flex;
     justify-content: center;
-    margin-top: 20px;
 }
+
 
 
 label {
@@ -417,56 +478,50 @@ label {
     margin-bottom: 5px;
     font-size: 14px;
     color: #691B31;
-}
 
-.input-wrapper {
-    position: relative;
 }
-
-.input-wrapper input {
-    width: 100%;
-    /* Espacio para el ícono */
-}
-
-.input-wrapper i {
-    position: absolute;
-    right: -10px;
-    top: 50%;
-    transform: translateY(-50%);
-    cursor: pointer;
-}
-
-.form-field {
-    padding-left: 3%;
-    padding-right: 6%;
-}
-
 
 a {
     text-decoration: none;
+
 }
 
+/* Estilo para la fila de campos */
+.form-row {
+    display: flex;
+    gap: 20px;
+    /* Espacio entre los campos en la misma fila */
+    flex-wrap: wrap;
+    /* Permite que los campos se ajusten a nuevas filas si no caben */
+}
 
+/* Estilo para cada campo en la fila */
+.form-field {
+    flex: 1;
+    /* Cada campo ocupa un 100% del ancho disponible dentro de la fila */
+    min-width: 200px;
+    /* Establece un ancho mínimo para que no se colapse */
 
-.form-field select {
-    width: 100%;
-    max-width: 200px;
-    position: relative;
-    font-size: 15px;
+}
+
+/* Estilo de los inputs dentro de la fila */
+.form-field input,
+.form-field select,
+.form-field textarea {
+    padding: 10px;
     border: 1px solid #ccc;
     border-radius: 5px;
+    font-size: 14px;
+    width: 100%;
     box-sizing: border-box;
-    background-color: white;
-    color: #333;
-    height: 40px;
-    /* Asegura que tenga la misma altura que los inputs */
 }
+
+
 
 
 /* Estilos del Dropzone */
 .dropzone {
     display: flex;
-    flex-direction: column;
     justify-content: center;
     align-items: center;
     border: 2px dashed #98989A;
@@ -476,13 +531,9 @@ a {
     cursor: pointer;
     text-align: center;
     transition: background-color 0.3s ease;
-    min-width: 300px;
+    width: 100%;
     /* Ocupa todo el ancho disponible */
-    max-width: 300px;
-    /* Ocupa todo el ancho disponible */
-    min-height: 100px;
-    /* Mantiene una altura mínima */
-    max-height: 100px;
+    height: auto;
     /* Mantiene una altura mínima */
     box-sizing: border-box;
     /* El padding no afectará el tamaño */
@@ -496,13 +547,10 @@ a {
     background-color: #ecf6fc;
 }
 
-.dropzone i {
-    font-size: 30px;
-    color: #6F7271;
-}
+
 
 .dropzone span {
-    font-size: 12px;
+    font-size: 13px;
     color: #6F7271;
     overflow: hidden;
     /* Evita que el texto de la etiqueta ocupe más espacio del necesario */
@@ -515,4 +563,98 @@ a {
 .dropzone input[type="file"] {
     display: none;
 }
+
+
+/* Barra de búsqueda */
+.search-bar {
+    margin: 20px 0;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    align-items: center;
+}
+
+/* Contenedor de los botones */
+.input-wrapper {
+    position: relative;
+    width: 40%;
+    display: inline-block;
+}
+
+.input-wrapper input {
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+    border-radius: 25px;
+    border: 1px solid #BC955B;
+    background-color: #fff;
+}
+
+.input-wrapper i {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 18px;
+    color: #691B31;
+    pointer-events: none;
+}
+
+.input-wrapper input::placeholder {
+    color: #691B31;
+}
+
+/* Botón de búsqueda */
+.search-button {
+    margin-right: 45px;
+    width: 150px;
+    padding: 10px 20px;
+    font-size: 16px;
+    color: #fff;
+    background-color: #BC955B;
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.search-button:hover {
+    background-color: #691B31;
+}
+
+/* Contenedor de los botones para asegurarnos de que no se mueva nada */
+.button-wrapper {
+    display: flex;
+    gap: 10px;
+    position: relative;
+}
+
+/* Botón de Clear */
+.clear-button {
+    font-size: 10px;
+    color: #fff;
+    background-color: #BC955B;
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    position: absolute;
+    right: 0; /* Siempre alineado a la derecha del contenedor */
+    top: 50%;
+    transform: translateY(-50%);
+    display: none; /* Inicialmente oculto */
+    width: auto;
+    height: auto;
+}
+
+.clear-button:hover {
+    background-color: #691B31;
+}
+
+/* Mostrar el botón de Clear cuando sea necesario */
+.search-bar .clear-button {
+    display: block;
+}
+
 </style>

@@ -233,6 +233,7 @@ export default {
     background: #691B31;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
+
 .navbar-left {
     flex: 1;
     display: flex;
@@ -297,8 +298,6 @@ export default {
     /* Degradado de izquierda a derecha */
     padding: 10px 0;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    position: relative; /* Asegura que z-index funcione */
-    z-index: 10; /* Asegura que la barra de navegación esté por encima */
 }
 
 .nav-item {
@@ -322,7 +321,6 @@ export default {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     border-radius: 5px;
     width: 150px;
-    z-index: 20;
 }
 
 .dropdown-menu button {
@@ -357,20 +355,18 @@ export default {
 
 form {
     background: white;
-    padding: 40px;
+    padding: 30px;
     padding-bottom: 80px;
     border-radius: 10px;
-    width: 800px;
-    height: 350px;
-    max-width: 800px;
-    color: black;
+    width: 900px;
+    height: 250px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
 .form-row {
     display: flex;
     justify-content: center;
-    margin-bottom: 25px;
+    margin-bottom: 10px;
     padding-bottom: 15px;
 }
 
@@ -400,7 +396,6 @@ button:hover {
 .button-container {
     display: flex;
     justify-content: center;
-    margin-top: 20px;
 }
 
 
@@ -409,58 +404,50 @@ label {
     margin-bottom: 5px;
     font-size: 14px;
     color: #691B31;
-}
 
-.input-wrapper {
-    position: relative;
 }
-
-.input-wrapper input {
-    width: 100%;
-    /* Espacio para el ícono */
-}
-
-.input-wrapper i {
-    position: absolute;
-    right: -10px;
-    top: 50%;
-    transform: translateY(-50%);
-    cursor: pointer;
-}
-
-.form-field {
-    padding-left: 3%;
-    padding-right: 6%;
-}
-
 
 a {
     text-decoration: none;
+
 }
 
+/* Estilo para la fila de campos */
+.form-row {
+    display: flex;
+    gap: 20px;
+    /* Espacio entre los campos en la misma fila */
+    flex-wrap: wrap;
+    /* Permite que los campos se ajusten a nuevas filas si no caben */
+}
 
+/* Estilo para cada campo en la fila */
+.form-field {
+    flex: 1;
+    /* Cada campo ocupa un 100% del ancho disponible dentro de la fila */
+    min-width: 200px;
+    /* Establece un ancho mínimo para que no se colapse */
 
-.form-field select {
-    width: 100%;
-    max-width: 200px;
-    position: relative;
-    font-size: 15px;
+}
+
+/* Estilo de los inputs dentro de la fila */
+.form-field input,
+.form-field select,
+.form-field textarea {
+    padding: 10px;
     border: 1px solid #ccc;
     border-radius: 5px;
+    font-size: 14px;
+    width: 100%;
     box-sizing: border-box;
-    background-color: white;
-    color: #333;
-    height: 40px;
-    z-index: 1; /* Asegura que el select no esté encima de la barra de navegación */
-    position: relative;
-    /* Asegura que tenga la misma altura que los inputs */
 }
+
+
 
 
 /* Estilos del Dropzone */
 .dropzone {
     display: flex;
-    flex-direction: column;
     justify-content: center;
     align-items: center;
     border: 2px dashed #98989A;
@@ -470,13 +457,9 @@ a {
     cursor: pointer;
     text-align: center;
     transition: background-color 0.3s ease;
-    min-width: 300px;
+    width: 100%;
     /* Ocupa todo el ancho disponible */
-    max-width: 300px;
-    /* Ocupa todo el ancho disponible */
-    min-height: 100px;
-    /* Mantiene una altura mínima */
-    max-height: 100px;
+    height: auto;
     /* Mantiene una altura mínima */
     box-sizing: border-box;
     /* El padding no afectará el tamaño */
@@ -490,13 +473,10 @@ a {
     background-color: #ecf6fc;
 }
 
-.dropzone i {
-    font-size: 30px;
-    color: #6F7271;
-}
+
 
 .dropzone span {
-    font-size: 12px;
+    font-size: 13px;
     color: #6F7271;
     overflow: hidden;
     /* Evita que el texto de la etiqueta ocupe más espacio del necesario */
@@ -508,9 +488,5 @@ a {
 
 .dropzone input[type="file"] {
     display: none;
-}
-select {
-    z-index: 1; /* Aparece correctamente dentro del formulario */
-    position: relative;
 }
 </style>

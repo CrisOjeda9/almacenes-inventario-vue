@@ -139,7 +139,7 @@
                             <input type="file" id="documentopoliza" ref="fileInput" @change="handleFileUpload"
                                 accept=".pdf,.jpg,.png" />
                             <i class="fas fa-cloud-upload-alt"></i>
-                            <span v-if="!form.documentopoliza">Arrastra o selecciona un archivo (PDF, JPG, PNG)</span>
+                            <span v-if="!form.documentopoliza">Arrastra o selecciona un archivo (PDF)</span>
                             <span v-else>{{ form.documentopoliza.name }}</span>
                         </div>
                     </div>
@@ -221,7 +221,6 @@ export default {
     },
 };
 </script>
-
 
 <style scoped>
 /* Aplicar Montserrat a todo el contenido */
@@ -373,20 +372,18 @@ export default {
 
 form {
     background: white;
-    padding: 40px;
-    padding-bottom: 90px;
+    padding: 30px;
+    padding-bottom: 80px;
     border-radius: 10px;
-    width: 800px;
-    height: 350px;
-    max-width: 800px;
-    color: black;
+    width: 1000px;
+    height: 300px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
 .form-row {
     display: flex;
     justify-content: center;
-    margin-bottom: 25px;
+    margin-bottom: 20px;
     padding-bottom: 15px;
 }
 
@@ -416,7 +413,6 @@ button:hover {
 .button-container {
     display: flex;
     justify-content: center;
-    margin-top: 20px;
 }
 
 
@@ -425,56 +421,50 @@ label {
     margin-bottom: 5px;
     font-size: 14px;
     color: #691B31;
-}
 
-.input-wrapper {
-    position: relative;
 }
-
-.input-wrapper input {
-    width: 100%;
-    /* Espacio para el ícono */
-}
-
-.input-wrapper i {
-    position: absolute;
-    right: -10px;
-    top: 50%;
-    transform: translateY(-50%);
-    cursor: pointer;
-}
-
-.form-field {
-    padding-left: 3%;
-    padding-right: 6%;
-}
-
 
 a {
     text-decoration: none;
+
 }
 
+/* Estilo para la fila de campos */
+.form-row {
+    display: flex;
+    gap: 20px;
+    /* Espacio entre los campos en la misma fila */
+    flex-wrap: wrap;
+    /* Permite que los campos se ajusten a nuevas filas si no caben */
+}
 
+/* Estilo para cada campo en la fila */
+.form-field {
+    flex: 1;
+    /* Cada campo ocupa un 100% del ancho disponible dentro de la fila */
+    min-width: 200px;
+    /* Establece un ancho mínimo para que no se colapse */
 
-.form-field select {
-    width: 100%;
-    max-width: 200px;
-    position: relative;
-    font-size: 15px;
+}
+
+/* Estilo de los inputs dentro de la fila */
+.form-field input,
+.form-field select,
+.form-field textarea {
+    padding: 10px;
     border: 1px solid #ccc;
     border-radius: 5px;
+    font-size: 14px;
+    width: 100%;
     box-sizing: border-box;
-    background-color: white;
-    color: #333;
-    height: 40px;
-    /* Asegura que tenga la misma altura que los inputs */
 }
+
+
 
 
 /* Estilos del Dropzone */
 .dropzone {
     display: flex;
-    flex-direction: column;
     justify-content: center;
     align-items: center;
     border: 2px dashed #98989A;
@@ -484,13 +474,9 @@ a {
     cursor: pointer;
     text-align: center;
     transition: background-color 0.3s ease;
-    min-width: 300px;
+    width: 100%;
     /* Ocupa todo el ancho disponible */
-    max-width: 300px;
-    /* Ocupa todo el ancho disponible */
-    min-height: 100px;
-    /* Mantiene una altura mínima */
-    max-height: 100px;
+    height: auto;
     /* Mantiene una altura mínima */
     box-sizing: border-box;
     /* El padding no afectará el tamaño */
@@ -504,13 +490,10 @@ a {
     background-color: #ecf6fc;
 }
 
-.dropzone i {
-    font-size: 30px;
-    color: #6F7271;
-}
+
 
 .dropzone span {
-    font-size: 12px;
+    font-size: 13px;
     color: #6F7271;
     overflow: hidden;
     /* Evita que el texto de la etiqueta ocupe más espacio del necesario */
