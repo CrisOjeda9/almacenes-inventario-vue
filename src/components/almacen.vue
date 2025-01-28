@@ -52,7 +52,7 @@
                     <button @click="navigateTo('bieninventario')">Agregar un bien para inventario</button>
                     <button @click="navigateTo('users')">Salida de existencias</button>
                     <button @click="navigateTo('existencia')">Entrada de existencias</button>
-                    <button @click="navigateTo('users')">Recepcion de solicitudes</button>
+                    <button @click="navigateTo('recepcionsolicitudes')">Recepcion de solicitudes</button>
                     <button @click="navigateTo('proveedor')">Ver proveedores</button>
                     <button @click="navigateTo('factura')">Facturas</button>
                     <button @click="navigateTo('poliza')">Polizas</button>
@@ -80,7 +80,7 @@
         <div class="menu">
 
 
-            <div class="button-card" @click="navigateTo2('facturas')">
+            <div class="button-card" @click="navigateTo2('recepcionsolicitudes')">
                 <i class="fas fa-box"></i> <!-- Ícono de recepción de solicitudes -->
                 <span>Recepción de solicitudes</span>
             </div>

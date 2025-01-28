@@ -52,7 +52,7 @@
                     <button @click="navigateTo('bieninventario')">Agregar un bien para inventario</button>
                     <button @click="navigateTo('users')">Salida de existencias</button>
                     <button @click="navigateTo('existencia')">Entrada de existencias</button>
-                    <button @click="navigateTo('users')">Recepcion de solicitudes</button>
+                    <button @click="navigateTo('recepcionsolicitudes')">Recepcion de solicitudes</button>
                     <button @click="navigateTo('proveedor')">Ver proveedores</button>
                     <button @click="navigateTo('factura')">Facturas</button>
                     <button @click="navigateTo('poliza')">Polizas</button>
@@ -72,7 +72,7 @@
                 <span>Alta de Bienes</span>
             </div>
 
-            <div class="button-card" @click="navigateTo2('almacen')">
+            <div class="button-card" @click="navigateTo2('bajabien')">
                 <i class="fa fa-arrow-circle-down"></i>
                 <span>Baja de Bienes</span>
             </div>

@@ -55,7 +55,7 @@
                     <button @click="navigateTo('bieninventario')">Agregar un bien para inventario</button>
                     <button @click="navigateTo('bajas')">Salida de existencias</button>
                     <button @click="navigateTo('existencia')">Entrada de existencias</button>
-                    <button @click="navigateTo('bajas')"
+                    <button @click="navigateTo('recepcionsolicitudes')"
                         style="background-color: #ddc9a3; color: #691b31; border-radius: 4px;">Recepcion de
                         solicitudes</button>
                     <button @click="navigateTo('proveedor')">Ver proveedores</button>
