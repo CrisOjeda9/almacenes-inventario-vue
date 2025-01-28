@@ -19,6 +19,8 @@ import newExistenciaPage from '@/components/newexistencia.vue'
 import existenciaPage from '@/components/existencia.vue';
 import BienPage from '@/components/bieninventario.vue';
 import bajaBienPage from '@/components/bajabien.vue';
+import recepcionSolicitudesPage from '@/components/recepcionsolicitudes.vue';
+import versolicitudesPage from '@/components/versolicitudes.vue';
 
 
 
@@ -125,6 +127,16 @@ const router = createRouter({
       path: '/bajabien',
       name: 'bajabien',
       component: bajaBienPage,
+    },
+    {
+      path: '/recepcionsolicitudes',
+      name:'recepcionsolicitudes',
+      component: recepcionSolicitudesPage, // Cambia el nombre aquí
+    },
+    {
+      path: '/versolicitudes',
+      name:'versolicitudes',
+      component: versolicitudesPage, // Cambia el nombre aquí
     }
   ],
 });
