@@ -42,10 +42,10 @@
                 </div>
             </div>
 
-            <div class="nav-item" @mouseenter="showMenu('usersMenu')" @mouseleave="hideMenu('usersMenu')">
+            <div class="nav-item" @mouseenter="showMenu('facturaMenu')" @mouseleave="hideMenu('facturaMenu')">
                 Almacen
                 <span class="menu-icon">▼</span>
-                <div class="dropdown-menu" v-show="menus.usersMenu">
+                <div class="dropdown-menu" v-show="menus.facturaMenu">
                     <button @click="navigateTo('users')">Solicitud de material</button>
                     <button @click="navigateTo('bieninventario')">Agregar un bien para inventario</button>
                     <button @click="navigateTo('users')">Salida de existencias</button>
@@ -176,7 +176,7 @@
                     </div>
                     <!-- Documento de Factura -->
                     <div class="form-field">
-                        <label for="documentofactura">Documento de factura</label>
+                        <label for="documentofactura">Documento de Factura</label>
                         <div class="dropzone" @drop.prevent="handleDrop" @dragover.prevent @click="triggerFileInput">
                             <input type="file" id="documentofactura" ref="fileInput" @change="handleFileUpload"
                                 accept=".pdf,.jpg,.png" />
@@ -222,7 +222,7 @@ export default {
             showConfirmPassword: false,
             menus: {
                 homeMenu: false,
-                usersMenu: false,
+                facturaMenu: false,
                 settingsMenu: false,
             },
         };

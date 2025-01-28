@@ -40,13 +40,13 @@
                 </div>
             </div>
 
-            <div class="nav-item" @mouseenter="showMenu('usersMenu')" @mouseleave="hideMenu('usersMenu')">
+            <div class="nav-item" @mouseenter="showMenu('bieninventarioMenu')" @mouseleave="hideMenu('bieninventarioMenu')">
                 Almacen
                 <span class="menu-icon">▼</span>
-                <div class="dropdown-menu" v-show="menus.usersMenu">
-                    <button @click="navigateTo('users')">Solicitud de material</button>
+                <div class="dropdown-menu" v-show="menus.bieninventarioMenu">
+                    <button @click="navigateTo('bieninventario')">Solicitud de material</button>
                     <button @click="navigateTo('bieninventario')" style="background-color: #ddc9a3; color: #691b31; border-radius: 4px;">Agregar un bien para inventario</button>
-                    <button @click="navigateTo('users')">Salida de existencias</button>
+                    <button @click="navigateTo('bieninventario')">Salida de existencias</button>
                     <button @click="navigateTo('existencia')">Entrada de existencias</button>
                     <button @click="navigateTo('recepcionsolicitudes')">Recepcion de solicitudes</button>
                     <button @click="navigateTo('proveedor')">Ver proveedores</button>
@@ -186,7 +186,7 @@ export default {
             showConfirmPassword: false,
             menus: {
                 homeMenu: false,
-                usersMenu: false,
+                bieninventarioMenu: false,
                 settingsMenu: false,
             },
         };

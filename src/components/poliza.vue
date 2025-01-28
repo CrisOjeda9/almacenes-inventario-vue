@@ -47,7 +47,7 @@
                 <div class="dropdown-menu" v-show="menus.polizaMenu">
                     <button @click="navigateTo('poliza')">Solicitud de material</button>
                     <button @click="navigateTo('bieninventario')">Agregar un bien para inventario</button>
-                    <button @click="navigateTo('user')">Salida de existencias</button>
+                    <button @click="navigateTo('poliza')">Salida de existencias</button>
                     <button @click="navigateTo('existencia')">Entrada de existencias</button>
                     <button @click="navigateTo('recepcionsolicitudes')">Recepcion de solicitudes</button>
                     <button @click="navigateTo('proveedor')">Ver proveedores</button>
@@ -64,14 +64,14 @@
                 <i class="fas fa-search"></i> <!-- Icono de la lupa -->
             </div>
 
-            <!-- Botón para agregar nuevo usuario -->
-            <button class="add-factura-btn" @click="redirectToAddPoliza">
+            <!-- Botón para agregar nueva poliza -->
+            <button class="add-poliza-btn" @click="redirectToAddPoliza">
                 <i class="fas fa-file-invoice"></i> <i class="fas fa-plus"></i>
             </button>
         </div>
 
         <div class="contenedor-tabla">
-            <table class="user-table">
+            <table class="poliza-table">
                 <thead>
                     <tr>
                         <th>Descripcion</th>
@@ -90,28 +90,28 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr v-for="user in paginatedpoliza" :key="user.id">
-                        <td>{{ user.descripcion }}</td>
-                        <td>{{ user.cobertura }}</td>
-                        <td>{{ user.tipopoliza }}</td>
-                        <td>{{ user.calidad }}</td>
-                        <td>{{ user.deducible }}</td>
-                        <td>{{ user.indemnizacion }}</td>
-                        <td>{{ user.validacion }}</td>
-                        <td>{{ user.exclusion }}</td>
-                        <td>{{ user.fechapoliza }}</td>
+                    <tr v-for="poliza in paginatedpoliza" :key="poliza.id">
+                        <td>{{ poliza.descripcion }}</td>
+                        <td>{{ poliza.cobertura }}</td>
+                        <td>{{ poliza.tipopoliza }}</td>
+                        <td>{{ poliza.calidad }}</td>
+                        <td>{{ poliza.deducible }}</td>
+                        <td>{{ poliza.indemnizacion }}</td>
+                        <td>{{ poliza.validacion }}</td>
+                        <td>{{ poliza.exclusion }}</td>
+                        <td>{{ poliza.fechapoliza }}</td>
                         <td>
                             <!-- Botón de descarga por cada documento -->
-                            <a :href="'/ruta/del/archivo/' + user.documento" download>
+                            <a :href="'/ruta/del/archivo/' + poliza.documento" download>
                                 <button class="btn-download">
                                     <i class="fas fa-download"></i>
                                 </button>
                             </a>
                         </td>
-                        <td>{{ user.registrationDate }}</td>
+                        <td>{{ poliza.registrationDate }}</td>
                         <td>
-                            <button @click="editUser(user)" class="btn-edit">Editar</button>
-                            <button @click="showDeleteModal(user.id)" class="btn-delete">Eliminar</button>
+                            <button @click="editpoliza(poliza)" class="btn-edit">Editar</button>
+                            <button @click="showDeleteModal(poliza.id)" class="btn-delete">Eliminar</button>
                         </td>
                     </tr>
                 </tbody>
@@ -245,11 +245,11 @@ export default {
     computed: {
         filteredpoliza() {
             const query = this.searchQuery.toLowerCase();
-            return this.poliza.filter(user => {
-                return user.descripcion.toLowerCase().includes(query) ||
-                    user.cobertura.toLowerCase().includes(query) ||
-                    user.tipopoliza.toLowerCase().includes(query) ||
-                    user.calidad.toLowerCase().includes(query);
+            return this.poliza.filter(poliza => {
+                return poliza.descripcion.toLowerCase().includes(query) ||
+                    poliza.cobertura.toLowerCase().includes(query) ||
+                    poliza.tipopoliza.toLowerCase().includes(query) ||
+                    poliza.calidad.toLowerCase().includes(query);
             });
         },
         totalPages() {
@@ -288,12 +288,12 @@ export default {
                 this.currentPage++;
             }
         },
-        editUser(user) {
-            this.currentPoliza = { ...user };
+        editpoliza(poliza) {
+            this.currentPoliza = { ...poliza };
             this.isEditing = true;
         },
         saveChanges() {
-            const index = this.poliza.findIndex(user => user.id === this.currentPoliza.id);
+            const index = this.poliza.findIndex(poliza => poliza.id === this.currentPoliza.id);
             if (index !== -1) {
                 this.poliza[index] = { ...this.currentPoliza };
                 this.isEditing = false;
@@ -310,7 +310,7 @@ export default {
             this.isDeleteModalVisible = true;
         },
         confirmDelete() {
-            const index = this.poliza.findIndex(user => user.id === this.deleteId);
+            const index = this.poliza.findIndex(poliza => poliza.id === this.deleteId);
             if (index !== -1) {
                 this.poliza.splice(index, 1);
             }
@@ -537,7 +537,7 @@ a {
     text-decoration: none;
 }
 
-.user-table {
+.poliza-table {
     width: 95%;
     border-collapse: separate;
     border-spacing: 0;
@@ -549,18 +549,18 @@ a {
     /* Para que los bordes no sobresalgan */
 }
 
-.user-table th,
-.user-table td {
+.poliza-table th,
+.poliza-table td {
     padding: 10px;
     text-align: center;
 }
 
-.user-table th {
+.poliza-table th {
     background-color: #BC955B;
     color: white;
 }
 
-.user-table tr:hover {
+.poliza-table tr:hover {
     background-color: #70727265;
     color: #A02142;
     transition: background-color 0.3s ease;
@@ -647,7 +647,7 @@ a {
 
 
 
-.add-factura-btn {
+.add-poliza-btn {
     margin-left: 50px;
     width: 60px;
     height: 60px;
@@ -660,7 +660,7 @@ a {
     font-size: 18px;
 }
 
-.add-factura-btn:hover {
+.add-poliza-btn:hover {
     background-color: #a4733a;
 }
 

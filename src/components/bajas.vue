@@ -82,7 +82,7 @@
         </div>
 
         <div class="contenedor-tabla">
-            <table class="user-table">
+            <table class="bajas-table">
                 <thead>
                     <tr>
                         <th>No. Bien</th>
@@ -97,16 +97,16 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr v-for="user in paginatedBajas" :key="user.id">
-                        <td>{{ user.numerobien }}</td>
-                        <td>{{ user.cuentabancaria }}</td>
-                        <td>{{ user.poliza }}</td>
-                        <td>{{ user.persona }}</td>
-                        <td>{{ user.costounitario }}</td>
-                        <td>{{ user.rfc }}</td>
-                        <td>{{ user.direccion }}</td>
-                        <td>{{ user.tipocompra }}</td>
-                        <td>{{ user.registrationDate }}</td>
+                    <tr v-for="bajas in paginatedBajas" :key="bajas.id">
+                        <td>{{ bajas.numerobien }}</td>
+                        <td>{{ bajas.cuentabancaria }}</td>
+                        <td>{{ bajas.poliza }}</td>
+                        <td>{{ bajas.persona }}</td>
+                        <td>{{ bajas.costounitario }}</td>
+                        <td>{{ bajas.rfc }}</td>
+                        <td>{{ bajas.direccion }}</td>
+                        <td>{{ bajas.tipocompra }}</td>
+                        <td>{{ bajas.registrationDate }}</td>
 
                     </tr>
                 </tbody>
@@ -157,25 +157,25 @@ export default {
     },
     computed: {
         filteredBajas() {
-            return this.bajas.filter(user => {
+            return this.bajas.filter(bajas => {
                 const query = this.searchQuery.toLowerCase();
                 const filter = this.filterTerm.toLowerCase();
-                return (user.numerobien.toLowerCase().includes(query) ||
-                    user.cuentabancaria.toLowerCase().includes(query) ||
-                    user.poliza.toLowerCase().includes(query) ||
-                    user.persona.toLowerCase().includes(query) ||
-                    user.costounitario.toLowerCase().includes(query) ||
-                    user.rfc.toLowerCase().includes(query) ||
-                    user.tipocompra.toLowerCase().includes(query) ||
-                    user.direccion.toLowerCase().includes(query)) &&
-                    (this.filterTerm === '' || user.tipocompra.toLowerCase().includes(filter) ||
-                        user.numerobien.toLowerCase().includes(filter) ||
-                        user.cuentabancaria.toLowerCase().includes(filter) ||
-                        user.persona.toLowerCase().includes(filter) ||
-                        user.costounitario.toLowerCase().includes(filter) ||
-                        user.rfc.toLowerCase().includes(filter) ||
-                        user.direccion.toLowerCase().includes(filter) ||
-                        user.tipocompra.toLowerCase().includes(filter));
+                return (bajas.numerobien.toLowerCase().includes(query) ||
+                    bajas.cuentabancaria.toLowerCase().includes(query) ||
+                    bajas.poliza.toLowerCase().includes(query) ||
+                    bajas.persona.toLowerCase().includes(query) ||
+                    bajas.costounitario.toLowerCase().includes(query) ||
+                    bajas.rfc.toLowerCase().includes(query) ||
+                    bajas.tipocompra.toLowerCase().includes(query) ||
+                    bajas.direccion.toLowerCase().includes(query)) &&
+                    (this.filterTerm === '' || bajas.tipocompra.toLowerCase().includes(filter) ||
+                        bajas.numerobien.toLowerCase().includes(filter) ||
+                        bajas.cuentabancaria.toLowerCase().includes(filter) ||
+                        bajas.persona.toLowerCase().includes(filter) ||
+                        bajas.costounitario.toLowerCase().includes(filter) ||
+                        bajas.rfc.toLowerCase().includes(filter) ||
+                        bajas.direccion.toLowerCase().includes(filter) ||
+                        bajas.tipocompra.toLowerCase().includes(filter));
             });
         },
         // Número total de páginas
@@ -205,7 +205,7 @@ export default {
         hideMenu(menu) {
             this.menus[menu] = false;
         },
-        redirectToAddUser() {
+        redirectToAddbajas() {
             // Aquí defines la ruta a la que quieres redirigir al hacer clic en el botón
             this.$router.push('/register');
         },
@@ -436,7 +436,7 @@ a {
     text-decoration: none;
 }
 
-.user-table {
+.bajas-table {
     width: 80%;
     border-collapse: separate;
     border-spacing: 0;
@@ -448,18 +448,18 @@ a {
     /* Para que los bordes no sobresalgan */
 }
 
-.user-table th,
-.user-table td {
+.bajas-table th,
+.bajas-table td {
     padding: 10px;
     text-align: center;
 }
 
-.user-table th {
+.bajas-table th {
     background-color: #BC955B;
     color: white;
 }
 
-.user-table tr:hover {
+.bajas-table tr:hover {
     background-color: #70727265;
     color: #A02142;
     transition: background-color 0.3s ease;

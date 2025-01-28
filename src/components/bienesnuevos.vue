@@ -47,10 +47,10 @@
                 </div>
             </div>
 
-            <div class="nav-item" @mouseenter="showMenu('bajasMenu')" @mouseleave="hideMenu('bajasMenu')">
+            <div class="nav-item" @mouseenter="showMenu('bienesnuevosMenu')" @mouseleave="hideMenu('bienesnuevosMenu')">
                 Almacen
                 <span class="menu-icon">▼</span>
-                <div class="dropdown-menu" v-show="menus.bajasMenu">
+                <div class="dropdown-menu" v-show="menus.bienesnuevosMenu">
                     <button @click="navigateTo('bajas')">Solicitud de material</button>
                     <button @click="navigateTo('bieninventario')">Agregar un bien para inventario</button>
                     <button @click="navigateTo('bajas')">Salida de existencias</button>
@@ -76,7 +76,7 @@
         </div>
 
         <div class="contenedor-tabla">
-            <table class="user-table">
+            <table class="bienesnuevos-table">
                 <thead>
                     <tr>
                         <th>No. Inventario</th>
@@ -89,16 +89,16 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr v-for="user in paginatedSolicitudes" :key="user.id">
-                        <td>{{ user.noinventario }}</td>
-                        <td>{{ user.descripcion }}</td>
-                        <td>{{ user.color }}</td>
-                        <td>{{ user.material }}</td>
-                        <td>{{ user.modelo }}</td>
-                        <td>{{ user.serie }}</td>
+                    <tr v-for="bienesnuevos in paginatedBienNuevo" :key="bienesnuevos.id">
+                        <td>{{ bienesnuevos.noinventario }}</td>
+                        <td>{{ bienesnuevos.descripcion }}</td>
+                        <td>{{ bienesnuevos.color }}</td>
+                        <td>{{ bienesnuevos.material }}</td>
+                        <td>{{ bienesnuevos.modelo }}</td>
+                        <td>{{ bienesnuevos.serie }}</td>
 
                         <td>
-                            <button @click="editUser(user)" class="btn-existencias">Asignar usuario para resguardo</button>
+                            <button @click="editbienesnuevos(bienesnuevos)" class="btn-bienesnuevos">Asignar usuario para resguardo</button>
                         </td>
                     </tr>
                 </tbody>
@@ -122,11 +122,11 @@ export default {
         return {
             menus: {
                 homeMenu: false,
-                bajasMenu: false,
+                bienesnuevosMenu: false,
                 settingsMenu: false,
             },
             searchQuery: '',
-            bajas: [
+            bienesnuevos: [
                 { name: "Cristian", registrationDate: "2024-01-15", registrationDatelost: "2024-01-15"},
 
                 // Agrega más usuarios aquí...
@@ -138,9 +138,9 @@ export default {
     },
     computed: {
         filteredSolicitudes() {
-            return this.bajas.filter(user => {
+            return this.bienesnuevos.filter(bienesnuevos => {
                 const query = this.searchQuery.toLowerCase();
-                return (user.name.toLowerCase().includes(query));
+                return (bienesnuevos.name.toLowerCase().includes(query));
 
             });
         },
@@ -148,7 +148,7 @@ export default {
         totalPages() {
             return Math.ceil(this.filteredSolicitudes.length / this.itemsPerPage);
         },
-        paginatedSolicitudes() {
+        paginatedBienNuevo() {
             const start = (this.currentPage - 1) * this.itemsPerPage;
             const end = start + this.itemsPerPage;
             return this.filteredSolicitudes.slice(start, end);
@@ -171,7 +171,7 @@ export default {
         hideMenu(menu) {
             this.menus[menu] = false;
         },
-        redirectToAddUser() {
+        redirectToAddbienesnuevos() {
             // Aquí defines la ruta a la que quieres redirigir al hacer clic en el botón
             this.$router.push('/register');
         },
@@ -403,7 +403,7 @@ a {
     text-decoration: none;
 }
 
-.user-table {
+.bienesnuevos-table {
     width: 50%;
     border-collapse: separate;
     border-spacing: 0;
@@ -415,24 +415,24 @@ a {
     /* Para que los bordes no sobresalgan */
 }
 
-.user-table th,
-.user-table td {
+.bienesnuevos-table th,
+.bienesnuevos-table td {
     padding: 10px;
     text-align: center;
 }
 
-.user-table th {
+.bienesnuevos-table th {
     background-color: #BC955B;
     color: white;
 }
 
-.user-table tr:hover {
+.bienesnuevos-table tr:hover {
     background-color: #70727265;
     color: #A02142;
     transition: background-color 0.3s ease;
 }
 
-.btn-existencias {
+.btn-bienesnuevos {
     width: 120px;
     text-align: center;
     padding-top: 2px;
@@ -443,7 +443,7 @@ a {
     cursor: pointer;
 }
 
-.btn-existencias {
+.btn-bienesnuevos {
     background-color: #BC955B;
     color: white;
     margin-bottom: 4px;
@@ -451,7 +451,7 @@ a {
 
 
 
-.btn-existencias:hover {
+.btn-bienesnuevos:hover {
     background-color: #DDC9A3;
 }
 

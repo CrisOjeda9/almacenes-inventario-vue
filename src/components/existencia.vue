@@ -42,10 +42,10 @@
                 </div>
             </div>
 
-            <div class="nav-item" @mouseenter="showMenu('polizaMenu')" @mouseleave="hideMenu('polizaMenu')">
+            <div class="nav-item" @mouseenter="showMenu('existenciaMenu')" @mouseleave="hideMenu('existenciaMenu')">
                 Almacen
                 <span class="menu-icon">▼</span>
-                <div class="dropdown-menu" v-show="menus.polizaMenu">
+                <div class="dropdown-menu" v-show="menus.existenciaMenu">
                     <button @click="navigateTo('poliza')">Solicitud de material</button>
                     <button @click="navigateTo('bieninventario')">Agregar un bien para inventario</button>
                     <button @click="navigateTo('poliza')">Salida de existencias</button>
@@ -67,13 +67,13 @@
             </div>
 
             <!-- Botón para agregar nuevo usuario -->
-            <button class="add-factura-btn" @click="redirectToAddExistencia">
+            <button class="add-existencia-btn" @click="redirectToAddExistencia">
                 <i class="fas fa-file-invoice"></i> <i class="fas fa-plus"></i>
             </button>
         </div>
 
         <div class="contenedor-tabla">
-            <table class="user-table">
+            <table class="existencia-table">
                 <thead>
                     <tr>
                         <th>ID</th>
@@ -617,7 +617,7 @@ a {
     text-decoration: none;
 }
 
-.user-table {
+.existencia-table {
     width: 95%;
     border-collapse: separate;
     border-spacing: 0;
@@ -629,18 +629,18 @@ a {
     /* Para que los bordes no sobresalgan */
 }
 
-.user-table th,
-.user-table td {
+.existencia-table th,
+.existencia-table td {
     padding: 10px;
     text-align: center;
 }
 
-.user-table th {
+.existencia-table th {
     background-color: #BC955B;
     color: white;
 }
 
-.user-table tr:hover {
+.existencia-table tr:hover {
     background-color: #70727265;
     color: #A02142;
     transition: background-color 0.3s ease;
@@ -727,7 +727,7 @@ a {
 
 
 
-.add-factura-btn {
+.add-existencia-btn {
     margin-left: 50px;
     width: 60px;
     height: 60px;
@@ -740,7 +740,7 @@ a {
     font-size: 18px;
 }
 
-.add-factura-btn:hover {
+.add-existencia-btn:hover {
     background-color: #a4733a;
 }
 

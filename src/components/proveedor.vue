@@ -70,7 +70,7 @@
         </div>
 
         <div class="contenedor-tabla">
-            <table class="user-table">
+            <table class="proveedor-table">
                 <thead>
                     <tr>
                         <th>Nombre</th>
@@ -547,7 +547,7 @@ a {
     text-decoration: none;
 }
 
-.user-table {
+.proveedor-table {
     width: 95%;
     border-collapse: separate;
     border-spacing: 0;
@@ -559,18 +559,18 @@ a {
     /* Para que los bordes no sobresalgan */
 }
 
-.user-table th,
-.user-table td {
+.proveedor-table th,
+.proveedor-table td {
     padding: 10px;
     text-align: center;
 }
 
-.user-table th {
+.proveedor-table th {
     background-color: #BC955B;
     color: white;
 }
 
-.user-table tr:hover {
+.proveedor-table tr:hover {
     background-color: #70727265;
     color: #A02142;
     transition: background-color 0.3s ease;

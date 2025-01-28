@@ -47,10 +47,10 @@
                 </div>
             </div>
 
-            <div class="nav-item" @mouseenter="showMenu('bajasMenu')" @mouseleave="hideMenu('bajasMenu')">
+            <div class="nav-item" @mouseenter="showMenu('SolicitudMenu')" @mouseleave="hideMenu('SolicitudMenu')">
                 Almacen
                 <span class="menu-icon">▼</span>
-                <div class="dropdown-menu" v-show="menus.bajasMenu">
+                <div class="dropdown-menu" v-show="menus.SolicitudMenu">
                     <button @click="navigateTo('bajas')">Solicitud de material</button>
                     <button @click="navigateTo('bieninventario')">Agregar un bien para inventario</button>
                     <button @click="navigateTo('bajas')">Salida de existencias</button>
@@ -78,7 +78,7 @@
         </div>
 
         <div class="contenedor-tabla">
-            <table class="user-table">
+            <table class="solicitudes-table">
                 <thead>
                     <tr>
                         <th>Usuario Solicitante</th>
@@ -87,11 +87,11 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr v-for="user in paginatedSolicitudes" :key="user.id">
-                        <td>{{ user.name }}</td>
-                        <td>{{ user.registrationDate }}</td>
+                    <tr v-for="solicitudes in paginatedSolicitudes" :key="solicitudes.id">
+                        <td>{{ solicitudes.name }}</td>
+                        <td>{{ solicitudes.registrationDate }}</td>
                         <td>
-                            <button @click="editUser(user)" class="btn-existencias">Salida de existencias</button>
+                            <button @click="editsolicitudes(solicitudes)" class="btn-existencias">Salida de existencias</button>
                         </td>
                     </tr>
                 </tbody>
@@ -115,11 +115,11 @@ export default {
         return {
             menus: {
                 homeMenu: false,
-                bajasMenu: false,
+                SolicitudMenu: false,
                 settingsMenu: false,
             },
             searchQuery: '',
-            bajas: [
+            solicitudes: [
                 { name: "Cristian", registrationDate: "2024-01-15" },
 
                 // Agrega más usuarios aquí...
@@ -131,9 +131,9 @@ export default {
     },
     computed: {
         filteredSolicitudes() {
-            return this.bajas.filter(user => {
+            return this.solicitudes.filter(solicitudes => {
                 const query = this.searchQuery.toLowerCase();
-                return (user.name.toLowerCase().includes(query));
+                return (solicitudes.name.toLowerCase().includes(query));
 
             });
         },
@@ -164,7 +164,7 @@ export default {
         hideMenu(menu) {
             this.menus[menu] = false;
         },
-        redirectToAddUser() {
+        redirectToAddsolicitudes() {
             // Aquí defines la ruta a la que quieres redirigir al hacer clic en el botón
             this.$router.push('/register');
         },
@@ -396,7 +396,7 @@ a {
     text-decoration: none;
 }
 
-.user-table {
+.solicitudes-table {
     width: 50%;
     border-collapse: separate;
     border-spacing: 0;
@@ -408,18 +408,18 @@ a {
     /* Para que los bordes no sobresalgan */
 }
 
-.user-table th,
-.user-table td {
+.solicitudes-table th,
+.solicitudes-table td {
     padding: 10px;
     text-align: center;
 }
 
-.user-table th {
+.solicitudes-table th {
     background-color: #BC955B;
     color: white;
 }
 
-.user-table tr:hover {
+.solicitudes-table tr:hover {
     background-color: #70727265;
     color: #A02142;
     transition: background-color 0.3s ease;

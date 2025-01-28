@@ -43,13 +43,13 @@
                 </div>
             </div>
 
-            <div class="nav-item" @mouseenter="showMenu('usersMenu')" @mouseleave="hideMenu('usersMenu')">
+            <div class="nav-item" @mouseenter="showMenu('bajabienMenu')" @mouseleave="hideMenu('bajabienMenu')">
                 Almacen
                 <span class="menu-icon">▼</span>
-                <div class="dropdown-menu" v-show="menus.usersMenu">
-                    <button @click="navigateTo('users')">Solicitud de material</button>
+                <div class="dropdown-menu" v-show="menus.bajabienMenu">
+                    <button @click="navigateTo('bajabien')">Solicitud de material</button>
                     <button @click="navigateTo('bieninventario')">Agregar un bien para inventario</button>
-                    <button @click="navigateTo('users')">Salida de existencias</button>
+                    <button @click="navigateTo('bajabien')">Salida de existencias</button>
                     <button @click="navigateTo('existencia')">Entrada de existencias</button>
                     <button @click="navigateTo('recepcionsolicitudes')">Recepcion de solicitudes</button>
                     <button @click="navigateTo('proveedor')">Ver proveedores</button>

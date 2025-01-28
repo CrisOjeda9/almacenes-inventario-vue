@@ -46,7 +46,7 @@
                 <div class="dropdown-menu" v-show="menus.facturaMenu">
                     <button @click="navigateTo('factura')">Solicitud de material</button>
                     <button @click="navigateTo('bieninventario')">Agregar un bien para inventario</button>
-                    <button @click="navigateTo('users')">Salida de existencias</button>
+                    <button @click="navigateTo('facturas')">Salida de existencias</button>
                     <button @click="navigateTo('existencia')">Entrada de existencias</button>
                     <button @click="navigateTo('recepcionsolicitudes')">Recepcion de solicitudes</button>
                     <button @click="navigateTo('proveedor')">Ver proveedores</button>
@@ -70,7 +70,7 @@
         </div>
 
         <div class="contenedor-tabla">
-            <table class="user-table">
+            <table class="factura-table">
                 <thead>
                     <tr>
                         <th>Tipo de alta</th>
@@ -92,31 +92,31 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr v-for="user in paginatedfactura" :key="user.id">
-                        <td>{{ user.tipoAlta }}</td>
-                        <td>{{ user.tipoDocumento }}</td>
-                        <td>{{ user.fechaAdquisicion }}</td>
-                        <td>{{ user.nofactura }}</td>
-                        <td>{{ user.tipocomra }}</td>
-                        <td>{{ user.concepto }}</td>
-                        <td>{{ user.fechafactura }}</td>
-                        <td>{{ user.proveedor }}</td>
-                        <td>{{ user.cantidad }}</td>
-                        <td>{{ user.preciounitario }}</td>
-                        <td>{{ user.totalsiniva }}</td>
-                        <td>{{ user.iva }}</td>
-                        <td>{{ user.totalconiva }}</td>
+                    <tr v-for="factura in paginatedfactura" :key="factura.id">
+                        <td>{{ factura.tipoAlta }}</td>
+                        <td>{{ factura.tipoDocumento }}</td>
+                        <td>{{ factura.fechaAdquisicion }}</td>
+                        <td>{{ factura.nofactura }}</td>
+                        <td>{{ factura.tipocomra }}</td>
+                        <td>{{ factura.concepto }}</td>
+                        <td>{{ factura.fechafactura }}</td>
+                        <td>{{ factura.proveedor }}</td>
+                        <td>{{ factura.cantidad }}</td>
+                        <td>{{ factura.preciounitario }}</td>
+                        <td>{{ factura.totalsiniva }}</td>
+                        <td>{{ factura.iva }}</td>
+                        <td>{{ factura.totalconiva }}</td>
                         <td>
-                            <a :href="'/ruta/del/archivo/' + user.archivodocumento" download>
+                            <a :href="'/ruta/del/archivo/' + factura.archivodocumento" download>
                                 <button class="btn-download">
                                     <i class="fas fa-download"></i>
                                 </button>
                             </a>
                         </td>
-                        <td>{{ user.registrationDate }}</td>
+                        <td>{{ factura.registrationDate }}</td>
                         <td>
-                            <button @click="editUser(user)" class="btn-edit">Editar</button>
-                            <button @click="showDeleteModal(user.id)" class="btn-delete">Eliminar</button>
+                            <button @click="editfactura(factura)" class="btn-edit">Editar</button>
+                            <button @click="showDeleteModal(factura.id)" class="btn-delete">Eliminar</button>
                         </td>
                     </tr>
                 </tbody>
@@ -283,19 +283,19 @@ export default {
     computed: {
         filteredfactura() {
             const query = this.searchQuery.toLowerCase();
-            return this.factura.filter(user => {
-                return user.tipoAlta.toString().toLowerCase().includes(query) ||
-                    user.tipoDocumento.toLowerCase().includes(query) ||
-                    user.nofactura.toLowerCase().includes(query) ||
-                    user.tipocomra.toLowerCase().includes(query) ||
-                    user.concepto.toLowerCase().includes(query) ||
-                    user.fechafactura.toLowerCase().includes(query) ||
-                    user.proveedor.toLowerCase().includes(query) ||
-                    user.cantidad.toLowerCase().includes(query) ||
-                    user.preciounitario.toLowerCase().includes(query) ||
-                    user.totalsiniva.toLowerCase().includes(query) ||
-                    user.iva.toLowerCase().includes(query) ||
-                    user.totalconiva.toLowerCase().includes(query);
+            return this.factura.filter(factura => {
+                return factura.tipoAlta.toString().toLowerCase().includes(query) ||
+                    factura.tipoDocumento.toLowerCase().includes(query) ||
+                    factura.nofactura.toLowerCase().includes(query) ||
+                    factura.tipocomra.toLowerCase().includes(query) ||
+                    factura.concepto.toLowerCase().includes(query) ||
+                    factura.fechafactura.toLowerCase().includes(query) ||
+                    factura.proveedor.toLowerCase().includes(query) ||
+                    factura.cantidad.toLowerCase().includes(query) ||
+                    factura.preciounitario.toLowerCase().includes(query) ||
+                    factura.totalsiniva.toLowerCase().includes(query) ||
+                    factura.iva.toLowerCase().includes(query) ||
+                    factura.totalconiva.toLowerCase().includes(query);
             });
         },
 
@@ -351,12 +351,12 @@ export default {
                 this.currentPage++;
             }
         },
-        editUser(user) {
-            this.currentFactura = { ...user };
+        editfactura(factura) {
+            this.currentFactura = { ...factura };
             this.isEditing = true;
         },
         saveChanges() {
-            const index = this.factura.findIndex(user => user.id === this.currentFactura.id);
+            const index = this.factura.findIndex(factura => factura.id === this.currentFactura.id);
             if (index !== -1) {
                 this.factura[index] = { ...this.currentFactura };
                 this.isEditing = false;
@@ -373,7 +373,7 @@ export default {
             this.isDeleteModalVisible = true;
         },
         confirmDelete() {
-            const index = this.factura.findIndex(user => user.id === this.deleteId);
+            const index = this.factura.findIndex(factura => factura.id === this.deleteId);
             if (index !== -1) {
                 this.factura.splice(index, 1);
             }
@@ -610,7 +610,7 @@ a {
 }
 
 /* Tabla principal */
-.user-table {
+.factura-table {
     width: 100%; /* Ocupa todo el ancho disponible */
     max-width: 1200px; /* Limita el ancho máximo */
     border-collapse: separate;
@@ -623,19 +623,19 @@ a {
     table-layout: auto; /* Ajusta el ancho según el contenido */
 }
 
-.user-table th,
-.user-table td {
+.factura-table th,
+.factura-table td {
     padding: 10px;
     text-align: center;
     word-wrap: break-word; /* Permite el ajuste de palabras largas */
 }
 
-.user-table th {
+.factura-table th {
     background-color: #BC955B;
     color: white;
 }
 
-.user-table tr:hover {
+.factura-table tr:hover {
     background-color: #70727265;
     color: #A02142;
     transition: background-color 0.3s ease;
@@ -672,12 +672,12 @@ a {
 
 /* Media queries para pantallas más pequeñas */
 @media (max-width: 1400px) {
-    .user-table {
+    .factura-table {
         font-size: 14px;
     }
 
-    .user-table th,
-    .user-table td {
+    .factura-table th,
+    .factura-table td {
         padding: 8px;
     }
 

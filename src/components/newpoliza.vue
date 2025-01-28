@@ -42,10 +42,10 @@
                 </div>
             </div>
 
-            <div class="nav-item" @mouseenter="showMenu('usersMenu')" @mouseleave="hideMenu('usersMenu')">
+            <div class="nav-item" @mouseenter="showMenu('polizaMenu')" @mouseleave="hideMenu('polizaMenu')">
                 Almacen
                 <span class="menu-icon">▼</span>
-                <div class="dropdown-menu" v-show="menus.usersMenu">
+                <div class="dropdown-menu" v-show="menus.polizaMenu">
                     <button @click="navigateTo('users')">Solicitud de material</button>
                     <button @click="navigateTo('bieninventario')">Agregar un bien para inventario</button>
                     <button @click="navigateTo('users')">Salida de existencias</button>
@@ -134,7 +134,7 @@
 
                     <!-- Documento de Poliza -->
                     <div class="form-field">
-                        <label for="documentopoliza">Documento de factura</label>
+                        <label for="documentopoliza">Documento de Poliza</label>
                         <div class="dropzone" @drop.prevent="handleDrop" @dragover.prevent @click="triggerFileInput">
                             <input type="file" id="documentopoliza" ref="fileInput" @change="handleFileUpload"
                                 accept=".pdf,.jpg,.png" />
@@ -178,7 +178,7 @@ export default {
             showConfirmPassword: false,
             menus: {
                 homeMenu: false,
-                usersMenu: false,
+                polizaMenu: false,
                 settingsMenu: false,
             },
         };
@@ -201,12 +201,12 @@ export default {
         goBack() {
             console.log("Regresar a la página anterior");
         },
-        registerFactura() {
+        registerPoliza() {
             if (this.form.password !== this.form.confirmPassword) {
                 alert("Las contraseñas no coinciden");
                 return;
             }
-            console.log("Factura registrada:", this.form);
+            console.log("Poliza registrada:", this.form);
         },
         navigateTo(page) {
             console.log(`Navegando a ${page}`);

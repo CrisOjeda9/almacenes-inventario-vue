@@ -44,13 +44,13 @@
                 </div>
             </div>
 
-            <div class="nav-item" @mouseenter="showMenu('usersMenu')" @mouseleave="hideMenu('usersMenu')">
+            <div class="nav-item" @mouseenter="showMenu('passwordMenu')" @mouseleave="hideMenu('passwordMenu')">
                 Almacen
                 <span class="menu-icon">▼</span>
-                <div class="dropdown-menu" v-show="menus.usersMenu">
-                    <button @click="navigateTo('users')">Solicitud de material</button>
+                <div class="dropdown-menu" v-show="menus.passwordMenu">
+                    <button @click="navigateTo('password')">Solicitud de material</button>
                     <button @click="navigateTo('bieninventario')">Agregar un bien para inventario</button>
-                    <button @click="navigateTo('users')">Salida de existencias</button>
+                    <button @click="navigateTo('password')">Salida de existencias</button>
                     <button @click="navigateTo('existencia')">Entrada de existencias</button>
                     <button @click="navigateTo('recepcionsolicitudes')">Recepcion de solicitudes</button>
                     <button @click="navigateTo('proveedor')">Ver proveedores</button>
@@ -64,7 +64,7 @@
 
         <!-- Formulario -->
         <div class="form-container">
-            <form @submit.prevent="registerUser">
+            <form @submit.prevent="registerPassword">
 
 
 
@@ -121,7 +121,7 @@ export default {
             shownewPassword: false,
             menus: {
                 homeMenu: false,
-                usersMenu: false,
+                passwordMenu: false,
                 settingsMenu: false,
             },
         };
@@ -133,7 +133,7 @@ export default {
         goBack() {
             console.log("Regresar a la página anterior");
         },
-        registerUser() {
+        registerPassword() {
             if (this.form.password !== this.form.confirmPassword) {
                 alert("Las contraseñas no coinciden");
                 return;

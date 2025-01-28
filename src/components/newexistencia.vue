@@ -42,10 +42,10 @@
                 </div>
             </div>
 
-            <div class="nav-item" @mouseenter="showMenu('usersMenu')" @mouseleave="hideMenu('usersMenu')">
+            <div class="nav-item" @mouseenter="showMenu('existenciaMenu')" @mouseleave="hideMenu('existenciaMenu')">
                 Almacen
                 <span class="menu-icon">▼</span>
-                <div class="dropdown-menu" v-show="menus.usersMenu">
+                <div class="dropdown-menu" v-show="menus.existenciaMenu">
                     <button @click="navigateTo('users')">Solicitud de material</button>
                     <button @click="navigateTo('bieninventario')">Agregar un bien para inventario</button>
                     <button @click="navigateTo('users')">Salida de existencias</button>
@@ -215,7 +215,7 @@ export default {
 
             menus: {
                 homeMenu: false,
-                usersMenu: false,
+                existenciaMenu: false,
                 settingsMenu: false,
             },
         };

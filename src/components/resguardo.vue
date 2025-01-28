@@ -85,7 +85,7 @@
 
 
         <div class="contenedor-tabla">
-            <table class="user-table">
+            <table class="resguardo-table">
                 <thead>
                     <tr>
                         <th>No. Inventario</th>
@@ -100,20 +100,20 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr v-for="user in paginatedresguardo" :key="user.id">
-                        <td>{{ user.noinventario }}</td>
-                        <td>{{ user.descripcion }}</td>
-                        <td>{{ user.color }}</td>
-                        <td>{{ user.material }}</td>
-                        <td>{{ user.modelo }}</td>
-                        <td>{{ user.marca }}</td>
+                    <tr v-for="resguardo in paginatedresguardo" :key="resguardo.id">
+                        <td>{{ resguardo.noinventario }}</td>
+                        <td>{{ resguardo.descripcion }}</td>
+                        <td>{{ resguardo.color }}</td>
+                        <td>{{ resguardo.material }}</td>
+                        <td>{{ resguardo.modelo }}</td>
+                        <td>{{ resguardo.marca }}</td>
                         <td>
                             <img :src="require(`@/assets/logo.png`)" alt="Imagen de Inventario" width="20%"
                                 height="auto" />
                         </td>
 
-                        <td>{{ user.serie }}</td>
-                        <td>{{ user.registrationDate }}</td>
+                        <td>{{ resguardo.serie }}</td>
+                        <td>{{ resguardo.registrationDate }}</td>
 
                     </tr>
                 </tbody>
@@ -173,15 +173,15 @@ export default {
     computed: {
         filteredBajas() {
             const query = this.searchQuery.toLowerCase();
-            return this.resguardo.filter(user =>
-                user.noinventario.toLowerCase().includes(query) ||
-                user.descripcion.toLowerCase().includes(query) ||
-                user.color.toLowerCase().includes(query) ||
-                user.material.toLowerCase().includes(query) ||
-                user.modelo.toLowerCase().includes(query) ||
-                user.marca.toLowerCase().includes(query) ||
-                user.serie.toLowerCase().includes(query) ||
-                user.registrationDate.toLowerCase().includes(query)
+            return this.resguardo.filter(resguardo =>
+                resguardo.noinventario.toLowerCase().includes(query) ||
+                resguardo.descripcion.toLowerCase().includes(query) ||
+                resguardo.color.toLowerCase().includes(query) ||
+                resguardo.material.toLowerCase().includes(query) ||
+                resguardo.modelo.toLowerCase().includes(query) ||
+                resguardo.marca.toLowerCase().includes(query) ||
+                resguardo.serie.toLowerCase().includes(query) ||
+                resguardo.registrationDate.toLowerCase().includes(query)
             );
         },
 
@@ -232,20 +232,20 @@ export default {
                         "Fecha de Registro"
                     ]
                 ],
-                body: this.filteredBajas.map(user => {
-                    // Si user.foto contiene una URL o base64 de la imagen
-                    const photo = user.foto; // Asegúrate de que user.foto contenga la URL o base64 de la imagen
+                body: this.filteredBajas.map(resguardo => {
+                    // Si resguardo.foto contiene una URL o base64 de la imagen
+                    const photo = resguardo.foto; // Asegúrate de que resguardo.foto contenga la URL o base64 de la imagen
                     doc.addImage(photo, 'JPEG', 150, 20, 30, 30); // Agrega la foto en la posición especificada
                     return [
-                        user.noinventario,
-                        user.descripcion,
-                        user.color,
-                        user.material,
-                        user.modelo,
-                        user.marca,
+                        resguardo.noinventario,
+                        resguardo.descripcion,
+                        resguardo.color,
+                        resguardo.material,
+                        resguardo.modelo,
+                        resguardo.marca,
                         "Foto",  // Puedes seguir mostrando el texto "Foto" o nombre
-                        user.serie,
-                        user.registrationDate
+                        resguardo.serie,
+                        resguardo.registrationDate
                     ];
                 }),
                 headStyles: {
@@ -256,16 +256,16 @@ export default {
         },
 
         downloadExcel() {
-            const ws = XLSX.utils.json_to_sheet(this.filteredBajas.map(user => ({
-                noinventario: user.noinventario,
-                descripcion: user.descripcion,
-                color: user.color,
-                material: user.material,
-                modelo: user.modelo,
-                marca: user.marca,
-                foto: user.foto,
-                serie: user.serie,
-                registrationDate: user.registrationDate
+            const ws = XLSX.utils.json_to_sheet(this.filteredBajas.map(resguardo => ({
+                noinventario: resguardo.noinventario,
+                descripcion: resguardo.descripcion,
+                color: resguardo.color,
+                material: resguardo.material,
+                modelo: resguardo.modelo,
+                marca: resguardo.marca,
+                foto: resguardo.foto,
+                serie: resguardo.serie,
+                registrationDate: resguardo.registrationDate
             })));
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, 'Resguardo');
@@ -519,7 +519,7 @@ a {
     text-decoration: none;
 }
 
-.user-table {
+.resguardo-table {
     width: 80%;
     border-collapse: separate;
     border-spacing: 0;
@@ -531,18 +531,18 @@ a {
     /* Para que los bordes no sobresalgan */
 }
 
-.user-table th,
-.user-table td {
+.resguardo-table th,
+.resguardo-table td {
     padding: 10px;
     text-align: center;
 }
 
-.user-table th {
+.resguardo-table th {
     background-color: #BC955B;
     color: white;
 }
 
-.user-table tr:hover {
+.resguardo-table tr:hover {
     background-color: #70727265;
     color: #A02142;
     transition: background-color 0.3s ease;
