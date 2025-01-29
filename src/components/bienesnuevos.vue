@@ -85,7 +85,7 @@
                         <th>Material</th>
                         <th>Modelo</th>
                         <th>Serie</th>
-                        <th>Acciones</th>
+                        <th>Asignar Usuario</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -98,7 +98,7 @@
                         <td>{{ bienesnuevos.serie }}</td>
 
                         <td>
-                            <button @click="editbienesnuevos(bienesnuevos)" class="btn-bienesnuevos">Asignar usuario para resguardo</button>
+                            <button @click="editbienesnuevos(bienesnuevos)" class="btn-bienesnuevos">+</button>
                         </td>
                     </tr>
                 </tbody>
@@ -127,7 +127,15 @@ export default {
             },
             searchQuery: '',
             bienesnuevos: [
-                { name: "Cristian", registrationDate: "2024-01-15", registrationDatelost: "2024-01-15"},
+                {
+                    noinventario: "123456",
+                    descripcion: "Laptop",
+                    color: "Negro",
+                    material: "Plástico",
+                    modelo: "2021",
+                    serie: "ABC123",
+                    usuario_id: null,
+                },
 
                 // Agrega más usuarios aquí...
             ],
@@ -140,7 +148,12 @@ export default {
         filteredSolicitudes() {
             return this.bienesnuevos.filter(bienesnuevos => {
                 const query = this.searchQuery.toLowerCase();
-                return (bienesnuevos.name.toLowerCase().includes(query));
+                return (bienesnuevos.noinventario.toLowerCase().includes(query) ||
+                    bienesnuevos.descripcion.toLowerCase().includes(query) ||
+                    bienesnuevos.color.toLowerCase().includes(query) ||
+                    bienesnuevos.material.toLowerCase().includes(query) ||
+                    bienesnuevos.modelo.toLowerCase().includes(query) ||
+                    bienesnuevos.serie.toLowerCase().includes(query));
 
             });
         },
@@ -433,7 +446,8 @@ a {
 }
 
 .btn-bienesnuevos {
-    width: 120px;
+    width: auto;
+    height: auto;
     text-align: center;
     padding-top: 2px;
     padding-bottom: 2px;

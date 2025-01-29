@@ -161,16 +161,15 @@ export default {
     data() {
         return {
             form: {
-                numfactura: "",           // No. Factura
-                tipoCompra: "", // Asegúrate de que esté vacío por defecto
-                concepto: "",             // Concepto
-                fechafactura: "",         // Fecha de Factura
-                proveedor: "",            // Proveedor
-                cantidad: 0,              // Cantidad
-                preciounitario: 0.0,      // Precio Unitario
-                preciosiniva: 0.0,        // Precio total sin IVA
-                iva: 0.0,                 // IVA
-                precioconiva: 0.0,        // Precio total con IVA
+                descripcion: "",           // No. Factura
+                cobertura: "", // Asegúrate de que esté vacío por defecto
+                tipopoliza: "",             // Concepto
+                calidad: "",         // Fecha de Factura
+                deducible: "",            // Proveedor
+                indemnizacion: 0,              // Cantidad
+                validacion: "",      // Precio Unitario
+                exclusion: "",        // Precio total sin IVA
+                fechapoliza: "",                 // IVA
                 documentopoliza: null, // Almacena el archivo seleccionado
             },
 
