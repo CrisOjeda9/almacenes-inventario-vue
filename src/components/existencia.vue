@@ -35,7 +35,7 @@
                 <div class="dropdown-menu" v-show="menus.homeMenu">
                     <button @click="navigateTo('bajas')">Historial de bajas</button>
                     <button @click="navigateTo('home')">Alta de bienes</button>
-                    <button @click="navigateTo('home')">Baja de bienes</button>
+                    <button @click="navigateTo('bajabien')">Baja de bienes</button>
                     <button @click="navigateTo('resguardo')">Mi resguardo</button>
                     <button @click="navigateTo('factura')">Asignar un bien</button>
 
@@ -435,6 +435,7 @@ export default {
     background: linear-gradient(to bottom, #000000, #691B31);
     flex-direction: column;
     color: white;
+    overflow-x: hidden;
 }
 
 /* Menú de navegación */
