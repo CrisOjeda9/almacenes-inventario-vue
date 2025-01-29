@@ -2,7 +2,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
 
-
     <div class="container">
         <!-- Menú de navegación -->
         <nav class="navbar">
@@ -323,12 +322,12 @@ a {
 }
 
 .menu {
-
+    height: 100%;
     display: flex;
+    align-items: center;
     justify-content: center;
     gap: 20px;
     /* Espacio entre los botones */
-    margin-top: 12%;
 }
 
 .button-card {
