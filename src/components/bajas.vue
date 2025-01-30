@@ -34,10 +34,14 @@
                 <span class="menu-icon">▼</span>
                 <div class="dropdown-menu" v-show="menus.homeMenu">
                     <button @click="navigateTo('bajas')" style="background-color: #ddc9a3; color: #691b31; border-radius: 4px;">Historial de bajas</button>
+                    <button @click="navigateTo('')">Historial de bienes</button>
                     <button @click="navigateTo('home')">Alta de bienes</button>
                     <button @click="navigateTo('bajabien')">Baja de bienes</button>
                     <button @click="navigateTo('resguardo')">Mi resguardo</button>
-                    <button @click="navigateTo('factura')">Asignar un bien</button>
+                    <button @click="navigateTo('listaalmacen')">Lista Almacén para asignar No.Inventario</button>
+                    <button @click="navigateTo('')">Lista Bienes con No.Inventario para asignar Usuario</button>
+                    <button @click="navigateTo('')">Generación de Formatos/Reportes</button>
+                    <button @click="navigateTo('bienesnuevos')">Bienes nuevos para resguardo</button>
 
 
 
