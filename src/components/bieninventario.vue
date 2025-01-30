@@ -155,7 +155,7 @@
                 </div>
 
                 <div class="button-container">
-                    <button class="boton" type="submit">
+                    <button  class="boton" type="submit">
                         <i class="fas fa-plus"></i> Agregar Bien
                     </button>
                 </div>
@@ -229,6 +229,10 @@ export default {
         },
         hideMenu(menu) {
             this.menus[menu] = false;
+        },
+        redirectToAddbienesnuevos() {
+            // Aquí defines la ruta a la que quieres redirigir al hacer clic en el botón
+            this.$router.push('/bienesnuevos');
         },
         registerBien() {
             // Aquí procesas el formulario y luego rediriges

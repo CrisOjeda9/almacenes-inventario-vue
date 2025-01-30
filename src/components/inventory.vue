@@ -102,7 +102,7 @@
         </div>
 
         <div class="menu">
-            <div class="button-card" @click="navigateTo2('resguardo')">
+            <div class="button-card" @click="navigateTo2('listaalmacen')">
                 <i class="fas fa-warehouse"></i> <!-- Almacén -->
                 <span>Lista de Almacen para asignar No. Inventario</span>
             </div>
