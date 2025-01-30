@@ -85,12 +85,33 @@
                 <span>Mi Resguardo</span>
             </div>
 
-            <div class="button-card" @click="navigateTo2('factura')">
+            <div class="button-card" @click="navigateTo2('bienesnuevos')">
                 <i class="fas fa-user"></i>
-                <span>Asignar un bien a un usuario</span>
+                <span>Bienes nuev. para asignar resguardo</span>
+            </div>
+            <div class="button-card" @click="navigateTo2('')">
+                <i class="fas fa-history"></i> <!-- Historial -->
+                <span>Historial de Bienes</span>
             </div>
 
-            
+
+        </div>
+
+        <div class="menu">
+            <div class="button-card" @click="navigateTo2('resguardo')">
+                <i class="fas fa-warehouse"></i> <!-- Almacén -->
+                <span>Lista de Almacen para asignar No. Inventario</span>
+            </div>
+
+            <div class="button-card" @click="navigateTo2('factura')">
+                <i class="fas fa-tasks"></i> <!-- Asignación de usuario -->
+                <span>Bienes con No. Inventario para asignar Usuario</span>
+            </div>
+
+            <div class="button-card" @click="navigateTo2('factura')">
+                <i class="fas fa-file-alt"></i> <!-- Reportes -->
+                <span>Gen. de formato o Reportes para Transparencia</span>
+            </div>
         </div>
 
 
@@ -158,6 +179,7 @@ export default {
     background: linear-gradient(to bottom, #000000, #691B31);
     flex-direction: column;
     color: white;
+    overflow-x: hidden;
 }
 
 /* Menú de navegación */
@@ -345,7 +367,7 @@ a {
     justify-content: center;
     gap: 20px;
     /* Espacio entre los botones */
-    margin-top: 4%;
+    margin-top: 40px;
 }
 
 .button-card {

@@ -98,7 +98,7 @@
                         <td>{{ bienesnuevos.serie }}</td>
 
                         <td>
-                            <button @click="editbienesnuevos(bienesnuevos)" class="btn-bienesnuevos">+</button>
+                            <button @click="redirectToAddbienesnuevos" class="btn-bienesnuevos">+</button>
                         </td>
                     </tr>
                 </tbody>
@@ -116,6 +116,7 @@
 </template>
 
 <script>
+
 export default {
     name: "bienesnuevosPage",
     data() {
@@ -186,7 +187,7 @@ export default {
         },
         redirectToAddbienesnuevos() {
             // Aquí defines la ruta a la que quieres redirigir al hacer clic en el botón
-            this.$router.push('/register');
+            this.$router.push('/asignarbienusuario');
         },
         changePage(page) {
             if (page >= 1 && page <= this.totalPages) {

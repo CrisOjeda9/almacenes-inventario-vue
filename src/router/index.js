@@ -22,6 +22,7 @@ import bajaBienPage from '@/components/bajabien.vue';
 import recepcionSolicitudesPage from '@/components/recepcionsolicitudes.vue';
 import versolicitudesPage from '@/components/versolicitudes.vue';
 import bienesnuevosPage from '@/components/bienesnuevos.vue';
+import asignarBienPage from '@/components/asignarbienusuario.vue';
 
 
 const router = createRouter({
@@ -142,6 +143,11 @@ const router = createRouter({
       path: '/bienesnuevos',
       name:'bienesnuevos',
       component: bienesnuevosPage,
+    },
+    {
+      path: '/asignarbienusuario',
+      name: 'asignarbienusuario',
+      component: asignarBienPage, // Cambia el nombre aquí
     }
   ],
 });

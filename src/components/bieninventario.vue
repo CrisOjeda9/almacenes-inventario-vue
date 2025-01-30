@@ -126,7 +126,7 @@
                 <div class="form-row">
                     <!-- Tipo de posesión -->
                     <div class="form-field">
-                        <label for="tipodeposesion">Tipo de posesió</label>
+                        <label for="tipodeposesion">Tipo de posesión</label>
                         <select id="tipodeposesion" v-model="form.tipodeposesion" required>
                             <option value="" disabled>Selecciona una opción</option>
                             <option value="inventario">Inventario (I)</option>
