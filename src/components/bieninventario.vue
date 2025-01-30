@@ -40,12 +40,15 @@
                 </div>
             </div>
 
-            <div class="nav-item" @mouseenter="showMenu('bieninventarioMenu')" @mouseleave="hideMenu('bieninventarioMenu')">
+            <div class="nav-item" @mouseenter="showMenu('bieninventarioMenu')"
+                @mouseleave="hideMenu('bieninventarioMenu')">
                 Almacen
                 <span class="menu-icon">▼</span>
                 <div class="dropdown-menu" v-show="menus.bieninventarioMenu">
                     <button @click="navigateTo('bieninventario')">Solicitud de material</button>
-                    <button @click="navigateTo('bieninventario')" style="background-color: #ddc9a3; color: #691b31; border-radius: 4px;">Agregar un bien para inventario</button>
+                    <button @click="navigateTo('bieninventario')"
+                        style="background-color: #ddc9a3; color: #691b31; border-radius: 4px;">Agregar un bien para
+                        inventario</button>
                     <button @click="navigateTo('bieninventario')">Salida de existencias</button>
                     <button @click="navigateTo('existencia')">Entrada de existencias</button>
                     <button @click="navigateTo('recepcionsolicitudes')">Recepcion de solicitudes</button>
@@ -73,11 +76,12 @@
                         </select>
                     </div>
 
-                    <!-- inventario -->
+                    <!-- Número de inventario -->
                     <div class="form-field">
-                        <label for="inventario" style="font-size: 11px;">Numero de Inventario</label>
+                        <label for="inventario">Número de Inventario</label>
                         <input type="text" id="inventario" placeholder="Ej. Compra de material"
-                            v-model="form.inventario" required />
+                            v-model="form.inventario" :disabled="form.tipoInventario === 'gob' ? false : true"
+                            @input="handleInput" required />
                     </div>
                     <!-- Descripción -->
                     <div class="form-field">
@@ -91,8 +95,6 @@
                         <input type="text" id="color" placeholder="Ej. Compra de material" v-model="form.color"
                             required />
                     </div>
-
-
                 </div>
 
                 <div class="form-row">
@@ -131,7 +133,6 @@
                             <option value="" disabled>Selecciona una opción</option>
                             <option value="inventario">Inventario (I)</option>
                             <option value="comodato">Comodato (CO)</option>
-
                         </select>
                     </div>
 
@@ -145,11 +146,8 @@
                             <option value="regular">Regular (RE)</option>
                             <option value="malo">Malo (M)</option>
                             <option value="inservible">Inservible (I)</option>
-
                         </select>
                     </div>
-
-
                 </div>
 
                 <div class="button-container">
@@ -169,8 +167,8 @@ export default {
     data() {
         return {
             form: {
-                tipoInventario: "", // Asegúrate de que esté vacío por defecto
-                inventario: "", // Asegúrate de que esté vacío por defecto
+                tipoInventario: "",
+                inventario: "",
                 descripcion: "",
                 color: "",
                 material: "",
@@ -179,11 +177,9 @@ export default {
                 serie: "",
                 tipodeposesion: "",
                 estadobien: ""
-
             },
+            inventarioCounter: 10000,  // Número de inicio para el inventario automático
 
-            showPassword: false,
-            showConfirmPassword: false,
             menus: {
                 homeMenu: false,
                 bieninventarioMenu: false,
@@ -191,16 +187,38 @@ export default {
             },
         };
     },
+    watch: {
+        'form.tipoInventario': function (newVal) {
+            if (newVal === 'gob') {
+                this.form.inventario = ""; // Limpiar campo de inventario cuando se selecciona "GOB"
+            } else if (newVal !== 'gob') {
+                this.generateInventoryNumber(); // Generar automáticamente si no es "GOB"
+            }
+        },
+    },
     methods: {
+        generateInventoryNumber() {
+            // Generar un número de inventario único de 5 dígitos (incremental)
+            this.form.inventario = this.inventarioCounter.toString().padStart(5, '0');
+            this.inventarioCounter++; // Incrementar para el siguiente número
+        },
+        handleInput() {
+            // Si el tipo de inventario es "gob", dejar al usuario escribir el número.
+            // Si no es "gob", evitar que el usuario lo cambie.
+            if (this.form.tipoInventario !== 'gob' && this.form.inventario !== this.inventarioCounter.toString().padStart(5, '0')) {
+                this.generateInventoryNumber();
+            }
+        },
+
         goHome() {
-            this.$router.push('home'); // Redirige a la página principal ("/"). Cambia el path si es necesario.
+            this.$router.push('home');
         },
         goBack() {
             console.log("Regresar a la página anterior");
         },
         navigateTo(page) {
             console.log(`Navegando a ${page}`);
-            this.$router.push({ name: page }); // Asegúrate de que las rutas estén definidas con `name`.
+            this.$router.push({ name: page });
         },
         showMenu(menu) {
             this.menus[menu] = true;
@@ -208,9 +226,15 @@ export default {
         hideMenu(menu) {
             this.menus[menu] = false;
         },
+        registerBien() {
+            // Aquí procesas el formulario y luego rediriges
+            console.log("Formulario enviado:", this.form);
+            this.$router.push('/bienesnuevos'); // Redirige a la vista de inicio o la vista que desees
+        }
     },
 };
 </script>
+
 
 <style scoped>
 /* Aplicar Montserrat a todo el contenido */
@@ -448,6 +472,4 @@ a {
     width: 100%;
     box-sizing: border-box;
 }
-
-
 </style>

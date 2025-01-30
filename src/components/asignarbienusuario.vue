@@ -175,8 +175,6 @@
                         <label for="resguardofecha">Fecha de Resguardo</label>
                         <input type="date" id="resguardofecha" v-model="form.resguardofecha" :min="today" required />
                     </div>
-
-
                     <!-- Foto del bien de baja -->
                     <div class="form-field">
                         <label for="fotoBienBaja">Foto del bien recibido</label>
