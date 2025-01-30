@@ -66,7 +66,7 @@
         </div>
         <div class="menu">
             <!-- Fila 1 -->
-            <div class="button-card" @click="navigateTo2('bajas')">
+            <div class="button-card"  @click="navigateTo2('bajas')">
                 <i class="fa fa-history"></i>
                 <span>Historial de bajas</span>
             </div>
@@ -93,7 +93,7 @@
                 <i class="fas fa-user"></i>
                 <span>Bienes nuev. para asignar resguardo</span>
             </div>
-            <div class="button-card" @click="navigateTo2('')">
+            <div class="button-card" style="background-color:red" @click="navigateTo2('')">
                 <i class="fas fa-history"></i> <!-- Historial -->
                 <span>Historial de Bienes</span>
             </div>
@@ -107,12 +107,12 @@
                 <span>Lista de Almacen para asignar No. Inventario</span>
             </div>
 
-            <div class="button-card" @click="navigateTo2('factura')">
+            <div class="button-card" style="background-color:red" @click="navigateTo2('')">
                 <i class="fas fa-tasks"></i> <!-- Asignación de usuario -->
                 <span>Bienes con No. Inventario para asignar Usuario</span>
             </div>
 
-            <div class="button-card" @click="navigateTo2('factura')">
+            <div class="button-card" style="background-color:red" @click="navigateTo2('factura')">
                 <i class="fas fa-file-alt"></i> <!-- Reportes -->
                 <span>Gen. de formato o Reportes para Transparencia</span>
             </div>

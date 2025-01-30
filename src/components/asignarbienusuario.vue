@@ -192,7 +192,7 @@
 
                 <div class="button-container">
                     <button class="boton" type="submit">
-                        <i class="fas fa-plus"></i> Agregar Baja
+                        <i class="fas fa-plus"></i> Asignar Bien
                     </button>
                 </div>
             </form>
