@@ -46,30 +46,98 @@
                 </div>
             </div>
 
-            <div class="nav-item" @mouseenter="showMenu('solicitudMaterialMenu')" @mouseleave="hideMenu('solicitudMaterialMenu')">
+            <div class="nav-item" @mouseenter="showMenu('solicitudMaterialMenu')"
+                @mouseleave="hideMenu('solicitudMaterialMenu')">
                 Almacen
                 <span class="menu-icon">▼</span>
                 <div class="dropdown-menu" v-show="menus.solicitudMaterialMenu">
-                    <button @click="navigateTo('users')">Solicitud de material</button>
+                    <button @click="navigateTo('solicitudmaterial')"
+                        style="background-color: #ddc9a3; color: #691b31; border-radius: 4px;">Solicitud de
+                        material</button>
                     <button @click="navigateTo('bieninventario')">Agregar un bien para inventario</button>
                     <button @click="navigateTo('users')">Salida de existencias</button>
                     <button @click="navigateTo('existencia')">Entrada de existencias</button>
                     <button @click="navigateTo('recepcionsolicitudes')">Recepcion de solicitudes</button>
                     <button @click="navigateTo('proveedor')">Ver proveedores</button>
-                    <button @click="navigateTo('factura')"
-                        style="background-color: #ddc9a3; color: #691b31; border-radius: 4px;">Facturas</button>
-                    <button @click="navigateTo('poliza')">Polizas</button>
+                    <button @click="navigateTo('factura')">Facturas</button>
+                    <button @click="navigateTo('Polizas')">Plizas</button>
                 </div>
             </div>
         </div>
 
-        <!-- Formulario -->
         <div class="form-container">
-            <form @submit.prevent="registersolicitudMaterial">
-            </form>
-        </div>
+            <form @submit.prevent="addArticulo">
+                <div class="form-row">
+                    <div class="form-field">
+                        <label for="cantidad">Cantidad a solicitar</label>
+                        <input type="number" min="0" v-model="form.cantidad" required />
+                    </div>
+                    <div class="form-field">
+                        <label for="medida">Unidad de medida</label>
+                        <select v-model="form.medida" required>
+                            <option value="" disabled>Selecciona una opción</option>
+                            <option value="pieza">Pieza</option>
+                            <option value="metro">Metro</option>
+                            <option value="litro">Litro</option>
+                            <option value="kilogramo">Kilogramo</option>
+                            <option value="paquete">Paquete</option>
+                        </select>
+                    </div>
+                    <button class="boton" type="submit">
+                        <i class="fas fa-plus"></i> Agregar artículo
+                    </button>
 
+                </div>
+
+                <div class="form-row">
+                    <div class="form-field">
+                        <label for="descripcion">Descripción</label>
+                        <input type="text" v-model="form.descripcion" required />
+                    </div>
+                    <button class="boton2" type="button" @click="verSolicitudes">
+                        <i class="fas fa-eye"></i> Ver solicitudes enviadas
+                    </button>
+
+
+                </div>
+
+                <div class="contenedor-tabla">
+                    <table class="solicitud-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 10%;">Cantidad</th>
+                                <th style="width: 20%;">Unidad</th>
+                                <th style="width: 60%;">Descripción</th>
+                                <th style="width: 10%;">Editar</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="(item, index) in articulos" :key="index">
+                                <td style="width: 10%;">{{ item.cantidad }}</td>
+                                <td style="width: 20%;">{{ item.unidad }}</td>
+                                <td style="width: 60%;" class="descripcion">{{ item.descripcion }}</td>
+                                <td class="editar" style="width: 10%;">
+                                    <button @click="editpoliza(poliza)" class="btn-edit">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="button-container">
+                    <button class="boton" type="button" @click="registersolicitudMaterial">
+                        <i class="fas fa-user"></i> Enviar Solicitud
+                    </button>
+                </div>
+
+
+            </form>
+
+
+        </div>
     </div>
+
 </template>
 
 <script>
@@ -78,25 +146,39 @@ export default {
     data() {
         return {
             form: {
-                
+                cantidad: '',
+                medida: '',
+                descripcion: ''
             },
             menus: {
                 homeMenu: false,
                 solicitudMaterialMenu: false,
                 settingsMenu: false,
             },
+            articulos: []
+
         };
     },
     methods: {
+        addArticulo() {
+            this.articulos.push({
+                cantidad: this.form.cantidad,
+                descripcion: this.form.descripcion,
+                unidad: this.form.medida  // Asegúrate de usar "medida" aquí
+            });
+
+            // Reiniciar los valores del formulario
+            this.form.cantidad = "";
+            this.form.descripcion = "";
+            this.form.medida = "";
+        },
         goHome() {
             this.$router.push('home'); // Redirige a la página principal ("/"). Cambia el path si es necesario.
         },
         goBack() {
             console.log("Regresar a la página anterior");
         },
-        registersolicitudMaterial() {
-            console.log("Solicitud de Material registrada:", this.form);
-        },
+        
         navigateTo(page) {
             console.log(`Navegando a ${page}`);
             this.$router.push({ name: page }); // Asegúrate de que las rutas estén definidas con `name`.
@@ -107,12 +189,109 @@ export default {
         hideMenu(menu) {
             this.menus[menu] = false;
         },
+        verSolicitudes() {
+            this.$router.push('/versolicitudes'); // Reemplaza con la ruta correcta
+        },
+        registersolicitudMaterial() {
+            // Aquí puedes agregar el código para enviar los datos de la tabla
+            console.log("Solicitud de Material registrada:", this.articulos);
+            // Aquí podrías llamar a una API para registrar la solicitud en el backend
+        },
     },
 };
 </script>
 
 
 <style scoped>
+.solicitud-table {
+    width: 95%;
+    height: 200px;
+    border-collapse: collapse;
+    background-color: white;
+    color: #691B31;
+    border-radius: 15px;
+    overflow: hidden;
+}
+
+.solicitud-table th,
+.solicitud-table td {
+    padding: 10px;
+    text-align: center;
+
+}
+
+.solicitud-table th {
+    background-color: #BC955B;
+    color: white;
+    position: sticky;
+    /* Fija los encabezados al desplazarse */
+    top: 0;
+    /* Fija los encabezados a la parte superior */
+    z-index: 1;
+    /* Asegura que los encabezados estén encima de las filas */
+}
+
+.solicitud-table tr:hover {
+    background-color: #70727265;
+    color: #A02142;
+    transition: background-color 0.3s ease;
+}
+
+.contenedor-tabla {
+    width: 100%;
+    height: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    max-height: 200px;
+    /* Ajusta la altura máxima antes de activar el scroll */
+    margin-top: 10px;
+    /* Espacio superior para separación */
+}
+
+.solicitud-table thead {
+    display: table;
+    /* Asegura que el encabezado se comporte como parte de la tabla */
+    width: 100%;
+}
+
+.solicitud-table tbody {
+    display: block;
+    max-height: 150px;
+    /* Ajusta esta altura según lo que necesites */
+    overflow-y: auto;
+    /* Activa el scroll solo para las filas */
+    width: 100%;
+}
+
+.solicitud-table tbody tr {
+    display: table;
+    /* Asegura que cada fila se comporta correctamente */
+    width: 100%;
+    /* Hace que la fila ocupe el ancho total */
+}
+
+.solicitud-table td {
+    word-wrap: break-word;
+
+    /* Permite que el texto largo se ajuste dentro de la celda */
+}
+
+/* Borde en la parte inferior de las filas de inserciones */
+.solicitud-table tbody tr {
+    border-bottom: 1px solid #ddd;
+    /* Puedes ajustar el color y grosor del borde */
+}
+
+/* Borde en la parte inferior de las filas de inserciones */
+.solicitud-table tbody tr {
+    border-bottom: 1px solid #bc955b;
+    /* Puedes ajustar el color y grosor del borde */
+}
+
+
+
 /* Aplicar Montserrat a todo el contenido */
 * {
     font-family: 'Montserrat', sans-serif;
@@ -272,6 +451,7 @@ form {
 
 .form-row {
     display: flex;
+    align-items: center;
     justify-content: center;
     margin-bottom: 20px;
     padding-bottom: 15px;
@@ -301,8 +481,12 @@ button:hover {
 }
 
 .button-container {
+
+    width: 100%;
+    height: 50px;
     display: flex;
     justify-content: center;
+    margin-top: 5px;
 }
 
 
@@ -352,49 +536,60 @@ a {
 
 
 
-/* Estilos del Dropzone */
-.dropzone {
+
+
+.boton {
+    width: 300px;
+}
+
+.boton2 {
+    width: 300px;
+    background-color: #bc955b;
+}
+
+.boton2:hover {
+    background: #DDC9A3;
+}
+
+
+
+
+.btn-edit {
     display: flex;
-    flex-direction: column;
     justify-content: center;
     align-items: center;
-    border: 2px dashed #98989A;
-    padding: 10px;
-    background-color: #f9f9f9;
-    border-radius: 8px;
-    cursor: pointer;
     text-align: center;
-    transition: background-color 0.3s ease;
+    border: none;
+    cursor: pointer;
     width: 100%;
-    /* Ocupa todo el ancho disponible */
-    height: auto;
-    /* Mantiene una altura mínima */
-    box-sizing: border-box;
-    /* El padding no afectará el tamaño */
-    overflow: hidden;
-    /* Evita que el contenido sobrepase los límites del contenedor */
+    height: 30px;
+}
+
+.btn-edit {
+    background-color: #4CAF50;
+    color: white;
+    margin-bottom: 4px;
+}
+
+
+
+.btn-edit:hover {
+    background-color: #45a049;
+}
+
+
+.editar {
+    width: 200px;
+}
+
+.descripcion {
+    min-width: 150px;
+    /* Define un ancho mínimo */
+    max-width: 400px;
+    /* Define un ancho máximo */
     word-wrap: break-word;
-    /* Asegura que el texto largo se ajuste al contenedor */
-}
-
-.dropzone:hover {
-    background-color: #ecf6fc;
-}
-
-
-
-.dropzone span {
-    font-size: 13px;
-    color: #6F7271;
-    overflow: hidden;
-    /* Evita que el texto de la etiqueta ocupe más espacio del necesario */
-    text-overflow: ellipsis;
-    /* Muestra "..." si el texto es demasiado largo */
-    white-space: nowrap;
-    /* Evita que el texto se divida en varias líneas */
-}
-
-.dropzone input[type="file"] {
-    display: none;
+    /* Permite dividir palabras largas */
+    white-space: normal;
+    /* Permite que el texto se divida en varias líneas */
 }
 </style>
