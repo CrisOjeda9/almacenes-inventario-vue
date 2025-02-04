@@ -10,7 +10,7 @@
                     height="auto" style="cursor: pointer;" />
             </div>
             <div class="navbar-center">
-                <h1>Asignar Bien a un Usuario</h1>
+                <h1>Solicitud de Materiales</h1>
                 <p>Sistema inventario y Almacén de Radio y Televisión de Hidalgo</p>
             </div>
             <div class="navbar-right">
@@ -40,10 +40,9 @@
                     <button @click="navigateTo('listaalmacen')">Lista Almacén para asignar No.Inventario</button>
                     <button @click="navigateTo('')">Lista Bienes con No.Inventario para asignar Usuario</button>
                     <button @click="navigateTo('')">Generación de Formatos/Reportes</button>
-                    <button @click="navigateTo('bienesnuevos')"
-                        style="background-color: #ddc9a3; color: #691b31; border-radius: 4px;">Bienes nuevos para
-                        asignar
-                        resguardo</button>
+                    <button @click="navigateTo('bienesnuevos')">Bienes nuevos para asignar resguardo</button>
+
+
                 </div>
             </div>
 
@@ -51,46 +50,25 @@
                 Almacen
                 <span class="menu-icon">▼</span>
                 <div class="dropdown-menu" v-show="menus.solicitudMaterialMenu">
-                    <button @click="navigateTo('bajabien')">Solicitud de material</button>
+                    <button @click="navigateTo('users')">Solicitud de material</button>
                     <button @click="navigateTo('bieninventario')">Agregar un bien para inventario</button>
-                    <button @click="navigateTo('bajabien')">Salida de existencias</button>
+                    <button @click="navigateTo('users')">Salida de existencias</button>
                     <button @click="navigateTo('existencia')">Entrada de existencias</button>
                     <button @click="navigateTo('recepcionsolicitudes')">Recepcion de solicitudes</button>
                     <button @click="navigateTo('proveedor')">Ver proveedores</button>
-                    <button @click="navigateTo('factura')">Facturas</button>
+                    <button @click="navigateTo('factura')"
+                        style="background-color: #ddc9a3; color: #691b31; border-radius: 4px;">Facturas</button>
                     <button @click="navigateTo('poliza')">Polizas</button>
                 </div>
             </div>
         </div>
-        <!-- Barra de búsqueda -->
-        <div class="search-bar">
-            <div class="input-wrapper">
-                <input type="text" v-model="searchQuery" placeholder="Número de inventario" />
-                <i class="fas fa-search"></i>
-            </div>
-            <div class="button-wrapper">
-                <button @click="startSearch" class="search-button">Buscar</button>
-                <button v-if="showClearButton" @click="clearSearch" class="clear-button">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-        </div>
-
-        <!-- Modal para mostrar alerta -->
-        <div v-if="showErrorModal" class="modal-overlay">
-            <div class="modal">
-                <p>Número de inventario no encontrado.</p>
-                <button @click="closeModal">Cerrar</button>
-            </div>
-        </div>
-
 
         <!-- Formulario -->
         <div class="form-container">
             <form @submit.prevent="registersolicitudMaterial">
-               
             </form>
         </div>
+
     </div>
 </template>
 
@@ -99,122 +77,29 @@ export default {
     name: "solicitudMaterialPage",
     data() {
         return {
-            showClearButton: false,
-            showErrorModal: false,  // Controla la visibilidad del modal de error
-            searchQuery: '',  // Número de inventario ingresado por el usuario
-
             form: {
-                descripcion: "",
-                marca: "",
-                modelo: "",
-                serie: "",
-                responsable: "",
-                departamento: "",
-                area: "",
-                rfc: "",
-                resguardofecha: "",
-                unidadPresupuestal: "Radio y Televisión de Hidalgo",
-                fotoBien: null,
-                fotoBienRecibido: null // Se agregó este campo para la foto del bien de baja
+                
             },
-            responsables: [
-                "Juan Pérez",
-                "María López",
-                "Carlos Sánchez",
-                "Ana García",
-                "Myriam García",
-                "Myriam Valderrabano",
-                "Myriam Ojeda",
-                "Myriam Ojeda Gayosso",
-                "Myriam Cortes",
-                "Cristian Eduardo Ojeda Gayosso",
-                "Carlos Martin Hernandez de Jesus",
-                "Luis Martínez"
-            ],
-            filteredResponsables: [],
-            today: new Date().toISOString().split("T")[0], // Obtiene la fecha actual en formato YYYY-MM-DD
-
             menus: {
                 homeMenu: false,
+                solicitudMaterialMenu: false,
+                settingsMenu: false,
             },
-            inventoryData: [ // Datos simulados (puedes usar una API en lugar de esto)
-                {
-                    numeroInventario: "12345",
-                    descripcion: "Laptop HP ProBook",
-                    modelo: "ProBook 450 G8",
-                    marca: "HP",
-                    serie: "5CD12345XYZ"
-                },
-                {
-                    numeroInventario: "67890",
-                    descripcion: "Impresora Canon",
-                    modelo: "PIXMA G6020",
-                    marca: "Canon",
-                    serie: "ABC67890DEF"
-                }
-            ],
-
         };
     },
     methods: {
-        // ... otros métodos ...
-        filterResponsables() {
-            if (this.form.responsable) {
-                this.filteredResponsables = this.responsables.filter(responsable =>
-                    responsable.toLowerCase().includes(this.form.responsable.toLowerCase())
-                )
-                .sort((a, b) => a.localeCompare(b)); // Ordena alfabéticamente
-
-            } else {
-                this.filteredResponsables = [];
-            }
-        },
-        selectResponsable(responsable) {
-            this.form.responsable = responsable;
-            this.filteredResponsables = [];
-        },
-        startSearch() {
-            const foundItem = this.inventoryData.find(
-                (item) => item.numeroInventario === this.searchQuery
-            );
-
-            if (foundItem) {
-                // Actualiza los valores del formulario con los datos encontrados
-                this.form.descripcion = foundItem.descripcion;
-                this.form.modelo = foundItem.modelo;
-                this.form.marca = foundItem.marca;
-                this.form.serie = foundItem.serie;
-                this.showClearButton = true;  // Muestra el botón de limpiar
-                this.showErrorModal = false; // Asegura que el modal esté cerrado
-            } else {
-                // Mostrar el modal de error
-                this.showErrorModal = true;
-                this.showClearButton = false;  // Oculta el botón de limpiar
-            }
-        },
-        closeModal() {
-            // Cierra el modal
-            this.showErrorModal = false;
-        },
-        clearSearch() {
-            this.searchQuery = '';
-            this.form.descripcion = '';
-            this.form.modelo = '';
-            this.form.marca = '';
-            this.form.serie = '';
-            this.showClearButton = false;
-            this.showErrorModal = false;  // Asegura que el modal esté cerrado al limpiar
-        },
         goHome() {
-            this.$router.push("/home");
+            this.$router.push('home'); // Redirige a la página principal ("/"). Cambia el path si es necesario.
         },
-        handleFileUpload(field) {
-            const file = event.target.files[0];
-            this.form[field] = file;
+        goBack() {
+            console.log("Regresar a la página anterior");
         },
         registersolicitudMaterial() {
-            console.log("Formulario enviado:", this.form);
-            alert("Baja registrada correctamente.");
+            console.log("Solicitud de Material registrada:", this.form);
+        },
+        navigateTo(page) {
+            console.log(`Navegando a ${page}`);
+            this.$router.push({ name: page }); // Asegúrate de que las rutas estén definidas con `name`.
         },
         showMenu(menu) {
             this.menus[menu] = true;
@@ -222,13 +107,9 @@ export default {
         hideMenu(menu) {
             this.menus[menu] = false;
         },
-        navigateTo(page) {
-            this.$router.push({ name: page });
-        },
     },
 };
 </script>
-
 
 
 <style scoped>
@@ -347,7 +228,6 @@ export default {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     border-radius: 5px;
     width: 150px;
-    z-index: 1;
 }
 
 .dropdown-menu button {
@@ -372,8 +252,8 @@ export default {
 .form-container {
     flex: 1;
     display: flex;
-    align-items: center;
     justify-content: center;
+    align-items: center;
     width: 100%;
     height: 100%;
 
@@ -385,15 +265,15 @@ form {
     padding: 30px;
     padding-bottom: 80px;
     border-radius: 10px;
-    width: 1000px;
-    height: 260px;
+    width: 1150px;
+    height: 375px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
 .form-row {
     display: flex;
     justify-content: center;
-    margin-bottom: 10px;
+    margin-bottom: 20px;
     padding-bottom: 15px;
 }
 
@@ -424,7 +304,6 @@ button:hover {
     display: flex;
     justify-content: center;
 }
-
 
 
 label {
@@ -476,6 +355,7 @@ a {
 /* Estilos del Dropzone */
 .dropzone {
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
     border: 2px dashed #98989A;
@@ -516,164 +396,5 @@ a {
 
 .dropzone input[type="file"] {
     display: none;
-}
-
-
-/* Barra de búsqueda */
-.search-bar {
-    margin: 20px 0;
-    text-align: center;
-    display: flex;
-    justify-content: center;
-    gap: 30px;
-    align-items: center;
-}
-
-/* Contenedor de los botones */
-.input-wrapper {
-    position: relative;
-    width: 40%;
-    display: inline-block;
-}
-
-.input-wrapper input {
-    width: 100%;
-    padding: 10px;
-    font-size: 16px;
-    border-radius: 25px;
-    border: 1px solid #BC955B;
-    background-color: #fff;
-}
-
-.input-wrapper i {
-    position: absolute;
-    right: 10px;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 18px;
-    color: #691B31;
-    pointer-events: none;
-}
-
-.input-wrapper input::placeholder {
-    color: #691B31;
-}
-
-/* Botón de búsqueda */
-.search-button {
-    margin-right: 45px;
-    width: 150px;
-    padding: 10px 20px;
-    font-size: 16px;
-    color: #fff;
-    background-color: #BC955B;
-    border: none;
-    border-radius: 25px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-}
-
-.search-button:hover {
-    background-color: #691B31;
-}
-
-/* Contenedor de los botones para asegurarnos de que no se mueva nada */
-.button-wrapper {
-    display: flex;
-    gap: 10px;
-    position: relative;
-}
-
-/* Botón de Clear */
-.clear-button {
-    font-size: 10px;
-    color: #fff;
-    background-color: #BC955B;
-    border: none;
-    border-radius: 25px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-    position: absolute;
-    right: 0;
-    /* Siempre alineado a la derecha del contenedor */
-    top: 50%;
-    transform: translateY(-50%);
-    display: none;
-    /* Inicialmente oculto */
-    width: auto;
-    height: auto;
-}
-
-.clear-button:hover {
-    background-color: #691B31;
-}
-
-/* Mostrar el botón de Clear cuando sea necesario */
-.search-bar .clear-button {
-    display: block;
-}
-
-.modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-    /* Asegúrate de que el modal esté por encima de otros elementos */
-}
-
-.modal {
-    background: white;
-    color: #691B31;
-    padding: 20px;
-    border-radius: 10px;
-    text-align: center;
-}
-
-.modal-overlay.show {
-    visibility: visible;
-}
-
-.modal button {
-    padding: 10px 20px;
-    background-color: #BC955B;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-}
-
-.modal button:hover {
-    background-color: #691B31;
-}
-
-.autocomplete-list {
-    list-style-type: none;
-    padding: 0;
-    margin: 0;
-    border: 1px solid #ccc;
-    border-top: none;
-    max-height: 150px;
-    overflow-y: auto;
-    position: absolute;
-    width: 300px;
-    background-color: #A02142;
-    z-index: 1000;
-    color: white;
-}
-
-.autocomplete-list li {
-    padding: 8px;
-    cursor: pointer;
-}
-
-.autocomplete-list li:hover {
-    background-color: #dcdcdc;
-    color: #691B31;
 }
 </style>
