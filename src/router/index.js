@@ -24,7 +24,7 @@ import versolicitudesPage from '@/components/versolicitudes.vue';
 import bienesnuevosPage from '@/components/bienesnuevos.vue';
 import asignarBienPage from '@/components/asignarbienusuario.vue';
 import listaAlmacenPage from '@/components/listaalmacen.vue';
-
+import solicitudMaterialPage from '@/components/solicitudmateriales.vue';
 
 const router = createRouter({
   history: createWebHistory(),
@@ -154,6 +154,11 @@ const router = createRouter({
       path: '/listaalmacen',
       name: 'listaalmacen',
       component: listaAlmacenPage, // Cambia el nombre aquí
+    },
+    {
+      path: '/solicitudmaterial',
+      name: 'solicitudmaterial',
+      component: solicitudMaterialPage,
     }
   ],
 });
