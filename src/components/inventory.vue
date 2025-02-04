@@ -66,12 +66,12 @@
         </div>
         <div class="menu">
             <!-- Fila 1 -->
-            <div class="button-card"  @click="navigateTo2('bajas')">
+            <div class="button-card" @click="navigateTo2('bajas')">
                 <i class="fa fa-history"></i>
                 <span>Historial de bajas</span>
             </div>
 
-            <div class="button-card" @click="navigateTo2('gestion-usuarios')">
+            <div class="button-card" @click="navigateTo2('gestion-usuarios')" style="background-color:red">
                 <i class="fa fa-arrow-circle-up"></i>
                 <span>Alta de Bienes</span>
             </div>
@@ -107,7 +107,7 @@
                 <span>Lista de Almacen para asignar No. Inventario</span>
             </div>
 
-            <div class="button-card" style="background-color:red" @click="navigateTo2('')">
+            <div class="button-card"  @click="navigateTo2('asignarbienusuario')">
                 <i class="fas fa-tasks"></i> <!-- Asignación de usuario -->
                 <span>Bienes con No. Inventario para asignar Usuario</span>
             </div>

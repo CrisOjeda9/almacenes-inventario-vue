@@ -41,7 +41,8 @@
                     <button @click="navigateTo('')">Lista Bienes con No.Inventario para asignar Usuario</button>
                     <button @click="navigateTo('')">Generación de Formatos/Reportes</button>
                     <button @click="navigateTo('bienesnuevos')"
-                        style="background-color: #ddc9a3; color: #691b31; border-radius: 4px;">Bienes nuevos para asignar
+                        style="background-color: #ddc9a3; color: #691b31; border-radius: 4px;">Bienes nuevos para
+                        asignar
                         resguardo</button>
                 </div>
             </div>
@@ -134,11 +135,16 @@
                             style="background-color: #dcddcd;" />
                     </div>
 
-                    <!-- Nombre de responsable -->
                     <div class="form-field">
                         <label for="responsable">Nombre del responsable</label>
                         <input type="text" id="responsable" placeholder="Ej. Juan Pérez" v-model="form.responsable"
-                            required />
+                            @input="filterResponsables" required  autocomplete="off" />
+                        <ul v-if="filteredResponsables.length > 0" class="autocomplete-list">
+                            <li v-for="responsable in filteredResponsables" :key="responsable"
+                                @click="selectResponsable(responsable)">
+                                {{ responsable }}
+                            </li>
+                        </ul>
                     </div>
 
                     <!-- Departamento del responsable -->
@@ -223,6 +229,21 @@ export default {
                 fotoBien: null,
                 fotoBienRecibido: null // Se agregó este campo para la foto del bien de baja
             },
+            responsables: [
+                "Juan Pérez",
+                "María López",
+                "Carlos Sánchez",
+                "Ana García",
+                "Myriam García",
+                "Myriam Valderrabano",
+                "Myriam Ojeda",
+                "Myriam Ojeda Gayosso",
+                "Myriam Cortes",
+                "Cristian Eduardo Ojeda Gayosso",
+                "Carlos Martin Hernandez de Jesus",
+                "Luis Martínez"
+            ],
+            filteredResponsables: [],
             today: new Date().toISOString().split("T")[0], // Obtiene la fecha actual en formato YYYY-MM-DD
 
             menus: {
@@ -248,6 +269,22 @@ export default {
         };
     },
     methods: {
+        // ... otros métodos ...
+        filterResponsables() {
+            if (this.form.responsable) {
+                this.filteredResponsables = this.responsables.filter(responsable =>
+                    responsable.toLowerCase().includes(this.form.responsable.toLowerCase())
+                )
+                .sort((a, b) => a.localeCompare(b)); // Ordena alfabéticamente
+
+            } else {
+                this.filteredResponsables = [];
+            }
+        },
+        selectResponsable(responsable) {
+            this.form.responsable = responsable;
+            this.filteredResponsables = [];
+        },
         startSearch() {
             const foundItem = this.inventoryData.find(
                 (item) => item.numeroInventario === this.searchQuery
@@ -725,5 +762,30 @@ a {
 
 .modal button:hover {
     background-color: #691B31;
+}
+
+.autocomplete-list {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+    border: 1px solid #ccc;
+    border-top: none;
+    max-height: 150px;
+    overflow-y: auto;
+    position: absolute;
+    width: 300px;
+    background-color: #A02142;
+    z-index: 1000;
+    color: white;
+}
+
+.autocomplete-list li {
+    padding: 8px;
+    cursor: pointer;
+}
+
+.autocomplete-list li:hover {
+    background-color: #dcdcdc;
+    color: #691B31;
 }
 </style>
