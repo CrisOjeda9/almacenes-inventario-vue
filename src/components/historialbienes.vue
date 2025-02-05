@@ -33,10 +33,9 @@
                 Inventario
                 <span class="menu-icon">▼</span>
                 <div class="dropdown-menu" v-show="menus.homeMenu">
-                    <button @click="navigateTo('bienes')"
-                        style="background-color: #ddc9a3; color: #691b31; border-radius: 4px;">Historial de
-                        bienes</button>
-                    <button @click="navigateTo('')">Historial de bienes</button>
+                    <button @click="navigateTo('bajas')">Historial de Bajas</button>
+                    <button @click="navigateTo('historialbienes')"
+                        style="background-color: #ddc9a3; color: #691b31; border-radius: 4px;">Historial de bienes</button>
                     <button @click="navigateTo('home')">Alta de bienes</button>
                     <button @click="navigateTo('bajabien')">Baja de bienes</button>
                     <button @click="navigateTo('resguardo')">Mi resguardo</button>

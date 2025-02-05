@@ -34,7 +34,7 @@
                 <span class="menu-icon">▼</span>
                 <div class="dropdown-menu" v-show="menus.homeMenu">
                     <button @click="navigateTo('bajas')">Historial de bajas</button>
-                    <button @click="navigateTo('')">Historial de bienes</button>
+                    <button @click="navigateTo('historialbienes')">Historial de bienes</button>
                     <button @click="navigateTo('home')">Alta de bienes</button>
                     <button @click="navigateTo('bajabien')">Baja de bienes</button>
                     <button @click="navigateTo('resguardo')">Mi resguardo</button>
@@ -52,7 +52,7 @@
                 Almacen
                 <span class="menu-icon">▼</span>
                 <div class="dropdown-menu" v-show="menus.passwordMenu">
-                    <button @click="navigateTo('password')">Solicitud de material</button>
+                    <button @click="navigateTo('solicitudmaterial')">Solicitud de material</button>
                     <button @click="navigateTo('bieninventario')">Agregar un bien para inventario</button>
                     <button @click="navigateTo('password')">Salida de existencias</button>
                     <button @click="navigateTo('existencia')">Entrada de existencias</button>

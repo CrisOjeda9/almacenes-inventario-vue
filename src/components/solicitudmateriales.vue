@@ -33,7 +33,7 @@
                 <span class="menu-icon">▼</span>
                 <div class="dropdown-menu" v-show="menus.homeMenu">
                     <button @click="navigateTo('bajas')">Historial de bajas</button>
-                    <button @click="navigateTo('')">Historial de bienes</button>
+                    <button @click="navigateTo('historialbienes')">Historial de bienes</button>
                     <button @click="navigateTo('home')">Alta de bienes</button>
                     <button @click="navigateTo('bajabien')">Baja de bienes</button>
                     <button @click="navigateTo('resguardo')">Mi resguardo</button>
