@@ -64,7 +64,7 @@
         </div>
         <div class="menu">
             <!-- Fila 1 -->
-            <div class="button-card" style="background-color:red" @click="navigateTo2('')">
+            <div class="button-card" @click="navigateTo2('solicitudmaterial')">
                 <i class="fas fa-cart-plus"></i> <!-- Ícono de solicitud de materiales -->
                 <span>Solicitud de Materiales</span>
             </div>

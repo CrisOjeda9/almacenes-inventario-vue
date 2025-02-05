@@ -117,7 +117,7 @@
                                 <td style="width: 20%;">{{ item.unidad }}</td>
                                 <td style="width: 60%;" class="descripcion">{{ item.descripcion }}</td>
                                 <td class="editar" style="width: 10%;">
-                                    <button @click="editpoliza(poliza)" class="btn-edit">
+                                    <button @click="editArticulo(item)" class="btn-edit">
                                         <i class="fas fa-edit"></i>
                                     </button>
                                 </td>
@@ -160,6 +160,7 @@ export default {
         };
     },
     methods: {
+        
         addArticulo() {
             this.articulos.push({
                 cantidad: this.form.cantidad,
@@ -178,7 +179,7 @@ export default {
         goBack() {
             console.log("Regresar a la página anterior");
         },
-        
+
         navigateTo(page) {
             console.log(`Navegando a ${page}`);
             this.$router.push({ name: page }); // Asegúrate de que las rutas estén definidas con `name`.
@@ -223,7 +224,6 @@ export default {
 .solicitud-table th {
     background-color: #BC955B;
     color: white;
-    position: sticky;
     /* Fija los encabezados al desplazarse */
     top: 0;
     /* Fija los encabezados a la parte superior */
@@ -407,6 +407,8 @@ export default {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     border-radius: 5px;
     width: 150px;
+    z-index: 1;
+
 }
 
 .dropdown-menu button {
@@ -417,6 +419,7 @@ export default {
     color: white;
     text-align: left;
     font-size: 14px;
+    
 }
 
 .dropdown-menu button:hover {
