@@ -153,7 +153,6 @@ export default {
                 const query = this.searchQuery.toLowerCase();
                 return (
                     reporte.tipoReporte.toLowerCase().includes(query) ||
-                    reporte.fechaGeneracion.toLowerCase().includes(query) ||
                     reporte.usuarioGenero.toLowerCase().includes(query)
                 );
             });
