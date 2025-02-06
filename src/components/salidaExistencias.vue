@@ -1,5 +1,4 @@
 <template>
-
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
 
@@ -11,9 +10,7 @@
                     height="auto" style="cursor: pointer;" />
             </div>
             <div class="navbar-center">
-                <h1>Recepcion de Solicitudes
-
-                </h1>
+                <h1>Salida de existencias</h1>
                 <p>Sistema inventario y Almacén de Radio y Televisión de Hidalgo</p>
             </div>
             <div class="navbar-right">
@@ -35,7 +32,9 @@
                 Inventario
                 <span class="menu-icon">▼</span>
                 <div class="dropdown-menu" v-show="menus.homeMenu">
-                    <button @click="navigateTo('bajas')">Historial de bajas</button>
+                    <button @click="navigateTo('bajas')"
+                        style="background-color: #ddc9a3; color: #691b31; border-radius: 4px;">Historial de
+                        bajas</button>
                     <button @click="navigateTo('historialbienes')">Historial de bienes</button>
                     <button @click="navigateTo('home')">Alta de bienes</button>
                     <button @click="navigateTo('bajabien')">Baja de bienes</button>
@@ -43,63 +42,62 @@
                     <button @click="navigateTo('listaalmacen')">Lista Almacén para asignar No.Inventario</button>
                     <button @click="navigateTo('')">Lista Bienes con No.Inventario para asignar Usuario</button>
                     <button @click="navigateTo('reportes')">Generación de Formatos/Reportes</button>
-                    <button @click="navigateTo('bienesnuevos')">Bienes nuevos para asignar resguardo</button>
-
-
-
+                    <button @click="navigateTo('bienesnuevos')">Bienes nuevos para resguardo</button>
                 </div>
             </div>
 
-            <div class="nav-item" @mouseenter="showMenu('SolicitudMenu')" @mouseleave="hideMenu('SolicitudMenu')">
+            <div class="nav-item" @mouseenter="showMenu('bajasMenu')" @mouseleave="hideMenu('bajasMenu')">
                 Almacen
                 <span class="menu-icon">▼</span>
-                <div class="dropdown-menu" v-show="menus.SolicitudMenu">
+                <div class="dropdown-menu" v-show="menus.bajasMenu">
                     <button @click="navigateTo('solicitudmaterial')">Solicitud de material</button>
                     <button @click="navigateTo('bieninventario')">Agregar un bien para inventario</button>
                     <button @click="navigateTo('bajas')">Salida de existencias</button>
                     <button @click="navigateTo('existencia')">Entrada de existencias</button>
-                    <button @click="navigateTo('recepcionsolicitudes')"
-                        style="background-color: #ddc9a3; color: #691b31; border-radius: 4px;">Recepcion de
-                        solicitudes</button>
+                    <button @click="navigateTo('recepcionsolicitudes')">Recepcion de solicitudes</button>
                     <button @click="navigateTo('proveedor')">Ver proveedores</button>
                     <button @click="navigateTo('factura')">Facturas</button>
                     <button @click="navigateTo('poliza')">Polizas</button>
                 </div>
             </div>
-
         </div>
 
-        <div class="search-bar">
 
-            <div class="input-wrapper">
-                <input type="text" v-model="searchQuery" placeholder="Buscar..." />
-                <i class="fas fa-search"></i> <!-- Icono de la lupa -->
-            </div>
-
-
-
-        </div>
 
         <div class="contenedor-tabla">
-            <table class="solicitudes-table">
+            <!-- Nombre del usuario encima de la tabla --> 
+             <div class="contenedor-nombre">
+                <div class="user-info-display">
+                <h3>{{ userName }}</h3>
+            </div>
+             </div>
+            
+            
+            <table class="bajas-table">
                 <thead>
                     <tr>
-                        <th>Usuario Solicitante</th>
-                        <th>Fecha en que llego</th>
-                        <th>Acciones</th>
+                        <th>Cantidad solicitada</th>
+                        <th>Unidad de medida</th>
+                        <th>Descripción del material solicitado</th>
+                        <th>Cantidad a entregar</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr v-for="solicitudes in paginatedSolicitudes" :key="solicitudes.id">
-                        <td>{{ solicitudes.name }}</td>
-                        <td>{{ solicitudes.registrationDate }}</td>
+                    <tr v-for="bajas in paginatedBajas" :key="bajas.id">
+                        <td>{{ bajas.cantidadSolicitada }}</td>
+                        <td>{{ bajas.unidadMedida }}</td>
+                        <td>{{ bajas.descripcionMaterial }}</td>
                         <td>
-                            <button @click="redirectToAddsolicitudes" class="btn-existencias">Salida de existencias</button>
+                            <input type="number" min="0" v-model="bajas.cantidadEntregar" class="input-edit" />
                         </td>
                     </tr>
                 </tbody>
-
             </table>
+            <div class="button-container">
+                <button class="boton" type="submit">
+                    <i class="fas fa-paper-plane"></i> Enviar
+                </button>
+            </div>
             <!-- Paginador -->
             <div class="pagination">
                 <button :disabled="currentPage === 1" @click="changePage(currentPage - 1)">Anterior</button>
@@ -107,69 +105,64 @@
                 <button :disabled="currentPage === totalPages" @click="changePage(currentPage + 1)">Siguiente</button>
             </div>
         </div>
-
     </div>
 </template>
 
 <script>
 export default {
-    name: "recepcionSolicitudesPage",
+    name: "salidaExistenciasPage",
     data() {
         return {
             menus: {
                 homeMenu: false,
-                SolicitudMenu: false,
+                bajasMenu: false,
                 settingsMenu: false,
             },
+            userName: "Random User xd", // Aquí puedes poner dinámicamente el nombre del usuario
             searchQuery: '',
-            solicitudes: [
-                { name: "Cristian", registrationDate: "2024-01-15" },
-
-                // Agrega más usuarios aquí...
+            bajas: [
+                { cantidadSolicitada: 10, unidadMedida: 'kg', descripcionMaterial: 'Material A', cantidadEntregar: 5 },
+                { cantidadSolicitada: 20, unidadMedida: 'm', descripcionMaterial: 'Material B', cantidadEntregar: 8 },
+                { cantidadSolicitada: 15, unidadMedida: 'l', descripcionMaterial: 'Material C', cantidadEntregar: 3 },
             ],
-            itemsPerPage: 10, // Cantidad de elementos por página
-            currentPage: 1, // Página actual
-
+            itemsPerPage: 10,
+            currentPage: 1,
+            filterTerm: '',
         };
     },
     computed: {
-        filteredSolicitudes() {
-            return this.solicitudes.filter(solicitudes => {
+        filteredBajas() {
+            return this.bajas.filter(bajas => {
                 const query = this.searchQuery.toLowerCase();
-                return (solicitudes.name.toLowerCase().includes(query));
-
+                return bajas.descripcionMaterial.toLowerCase().includes(query) ||
+                    bajas.unidadMedida.toLowerCase().includes(query);
             });
         },
-        // Número total de páginas
         totalPages() {
-            return Math.ceil(this.filteredSolicitudes.length / this.itemsPerPage);
+            return Math.ceil(this.filteredBajas.length / this.itemsPerPage);
         },
-        paginatedSolicitudes() {
+        paginatedBajas() {
             const start = (this.currentPage - 1) * this.itemsPerPage;
             const end = start + this.itemsPerPage;
-            return this.filteredSolicitudes.slice(start, end);
+            return this.filteredBajas.slice(start, end);
         },
     },
     methods: {
         goHome() {
-            this.$router.push('home'); // Redirige a la página principal ("/"). Cambia el path si es necesario.
+            this.$router.push('home');
         },
         goBack() {
             console.log("Regresar a la página anterior");
         },
         navigateTo(page) {
             console.log(`Navegando a ${page}`);
-            this.$router.push({ name: page }); // Asegúrate de que las rutas estén definidas con `name`.
+            this.$router.push({ name: page });
         },
         showMenu(menu) {
             this.menus[menu] = true;
         },
         hideMenu(menu) {
             this.menus[menu] = false;
-        },
-        redirectToAddsolicitudes() {
-            // Aquí defines la ruta a la que quieres redirigir al hacer clic en el botón
-            this.$router.push('/salidaExistencias');
         },
         changePage(page) {
             if (page >= 1 && page <= this.totalPages) {
@@ -180,13 +173,47 @@ export default {
 };
 </script>
 
+
 <style scoped>
 /* Aplicar Montserrat a todo el contenido */
 * {
     font-family: 'Montserrat', sans-serif;
 }
 
+.user-info-display {
+    text-align: center;
+    width: 200px;
+    height: 60px;
+    background-color: white;
+    margin-bottom: 20px;
+    font-size: 15px;
+    font-weight: bold;
+    color: #691B31;
+    border-radius: 20px;
+}
 
+.contenedor-nombre{
+    display: flex;
+    width: 80%;
+    height: 60px;
+    margin-bottom: 10px;
+}
+
+.contenedor-tabla {
+    display: flex;
+    align-items: left;
+}
+
+.input-edit {
+    text-align: center;
+    border: none;
+    background-color: #dcdcdc;
+    color: #691B31;
+    border-radius: 5px;
+    padding: 5px;
+    width: 100px;
+    box-sizing: border-box;
+}
 
 .pagination {
     display: flex;
@@ -364,9 +391,16 @@ button:hover {
 }
 
 .button-container {
+    width: 100%;
     display: flex;
     justify-content: center;
     margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+.boton {
+    width: 400px;
+
 }
 
 
@@ -399,8 +433,8 @@ a {
     text-decoration: none;
 }
 
-.solicitudes-table {
-    width: 50%;
+.bajas-table {
+    width: 80%;
     border-collapse: separate;
     border-spacing: 0;
     background-color: white;
@@ -411,47 +445,22 @@ a {
     /* Para que los bordes no sobresalgan */
 }
 
-.solicitudes-table th,
-.solicitudes-table td {
+.bajas-table th,
+.bajas-table td {
     padding: 10px;
     text-align: center;
 }
 
-.solicitudes-table th {
+.bajas-table th {
     background-color: #BC955B;
     color: white;
 }
 
-.solicitudes-table tr:hover {
+.bajas-table tr:hover {
     background-color: #70727265;
     color: #A02142;
     transition: background-color 0.3s ease;
 }
-
-.btn-existencias{
-    width: 120px;
-    text-align: center;
-    padding-top: 2px;
-    padding-bottom: 2px;
-    padding-left: 15px;
-    padding-right: 15px;
-    border: none;
-    cursor: pointer;
-}
-
-.btn-existencias {
-    background-color: #BC955B;
-    color: white;
-    margin-bottom: 4px;
-}
-
-
-
-.btn-existencias:hover {
-    background-color: #DDC9A3;
-}
-
-
 
 .contenedor-tabla {
     display: flex;
@@ -461,40 +470,5 @@ a {
     display: flex;
     align-items: center;
     justify-content: center;
-}
-
-/* Barra de búsqueda */
-.search-bar {
-    margin: 12px 0;
-    text-align: center;
-}
-
-.input-wrapper {
-    position: relative;
-    width: 60%;
-    display: inline-block;
-}
-
-.input-wrapper input {
-    width: 100%;
-    padding: 10px;
-    font-size: 16px;
-    border-radius: 25px;
-    border: 1px solid #BC955B;
-    background-color: #fff;
-}
-
-.input-wrapper i {
-    position: absolute;
-    right: 10px;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 18px;
-    color: #691B31;
-    pointer-events: none;
-}
-
-.input-wrapper input::placeholder {
-    color: #691B31;
 }
 </style>

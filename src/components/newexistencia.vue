@@ -184,14 +184,22 @@
                     <button class="boton" type="submit">
                         <i class="fas fa-plus"></i> Agregar Existencia
                     </button>
-                    <button class="boton" type="button" @click="redirigirPagina">
+                    <button class="boton" type="button" @click="mostrarModal">
                         <i class="fas fa-plus-square"></i> Agregar Bien
                     </button>
 
                 </div>
             </form>
         </div>
-
+        <!-- Modal de Éxito -->
+        <div v-if="modalVisible" class="modal">
+            <div class="modal-content">
+                <span class="close" @click="cerrarModal">&times;</span>
+                <h2>¡Registro Exitoso!</h2>
+                <p>El bien ha sido agregado correctamente.</p>
+                <button @click="redirigirPagina">Aceptar</button>
+            </div>
+        </div>
 
 
     </div>
@@ -222,20 +230,30 @@ export default {
                 existenciaMenu: false,
                 settingsMenu: false,
             },
+            modalVisible: false, // Estado del modal
+
         };
     },
     methods: {
+        mostrarModal() {
+            this.modalVisible = true; // Muestra el modal
+        },
+        cerrarModal() {
+            this.modalVisible = false; // Oculta el modal
+        },
+
         goHome() {
             this.$router.push('home'); // Redirige a la página principal ("/").
         },
         handleFileUpload(event) {
             const file = event.target.files[0];
-            this.form.documentoExistencia = file; // Almacena el archivo en el formulario
+            this.form.fotoArticulo = file; // Cambia "fotoArticulo" por "fotoArticulo"
         },
         handleDrop(event) {
             const file = event.dataTransfer.files[0];
-            this.form.documentoExistencia = file; // Almacena el archivo en el formulario
+            this.form.fotoArticulo = file; // Cambia "fotoArticulo" por "fotoArticulo"
         },
+
         triggerFileInput() {
             this.$refs.fileInput.click(); // Trigger del input file cuando se hace click en la dropzone
         },
@@ -279,7 +297,7 @@ export default {
         },
         redirigirPagina() {
             // Cambia 'ruta_deseada' por la URL a la que deseas redirigir
-            window.location.href = 'bieninventario';
+            window.location.href = 'listaalmacen';
         }
     },
 };
@@ -291,6 +309,34 @@ export default {
 /* Aplicar Montserrat a todo el contenido */
 * {
     font-family: 'Montserrat', sans-serif;
+}
+
+.modal {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+}
+
+.modal-content {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    text-align: center;
+    color: #691B31;
+}
+
+.close {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 20px;
+    cursor: pointer;
 }
 
 .container {

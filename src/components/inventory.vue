@@ -71,10 +71,7 @@
                 <span>Historial de bajas</span>
             </div>
 
-            <div class="button-card" @click="navigateTo2('gestion-usuarios')" style="background-color:red">
-                <i class="fa fa-arrow-circle-up"></i>
-                <span>Alta de Bienes</span>
-            </div>
+           
 
             <div class="button-card" @click="navigateTo2('bajabien')">
                 <i class="fa fa-arrow-circle-down"></i>
@@ -91,7 +88,7 @@
 
             <div class="button-card" @click="navigateTo2('bienesnuevos')">
                 <i class="fas fa-user"></i>
-                <span>Bienes nuev. para asignar resguardo</span>
+                <span>Asignar resguardo</span>
             </div>
             <div class="button-card"  @click="navigateTo2('historialbienes')">
                 <i class="fas fa-history"></i> <!-- Historial -->
@@ -104,17 +101,14 @@
         <div class="menu">
             <div class="button-card" @click="navigateTo2('listaalmacen')">
                 <i class="fas fa-warehouse"></i> <!-- Almacén -->
-                <span>Lista de Almacen para asignar No. Inventario</span>
+                <span>Asignar No. Inventario</span>
             </div>
 
-            <div class="button-card"  @click="navigateTo2('asignarbienusuario')">
-                <i class="fas fa-tasks"></i> <!-- Asignación de usuario -->
-                <span>Bienes con No. Inventario para asignar Usuario</span>
-            </div>
+           
 
             <div class="button-card"  @click="navigateTo2('reportes')">
                 <i class="fas fa-file-alt"></i> <!-- Reportes -->
-                <span>Gen. de formato o Reportes para Transparencia</span>
+                <span>Generacion de reportes</span>
             </div>
         </div>
 

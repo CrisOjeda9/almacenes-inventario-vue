@@ -568,6 +568,6 @@ a {
     margin-right: 15px;
 }
 .btn-download {
-    width: 100%;
+    width: 50px;
 }
 </style>
