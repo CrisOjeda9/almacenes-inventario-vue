@@ -117,13 +117,36 @@
                                 <td style="width: 20%;">{{ item.unidad }}</td>
                                 <td style="width: 60%;" class="descripcion">{{ item.descripcion }}</td>
                                 <td class="editar" style="width: 10%;">
-                                    <button @click="editArticulo(item)" class="btn-edit">
+                                    <button type="button" @click="openEditModal(index)" class="btn-edit">
                                         <i class="fas fa-edit"></i>
                                     </button>
+
                                 </td>
                             </tr>
                         </tbody>
                     </table>
+                    <div v-if="showModal" class="modal">
+                        <div class="modal-content">
+                            <h2>Editar Artículo</h2>
+                            <label for="cantidad">Cantidad</label>
+                            <input type="number" v-model="editForm.cantidad" />
+                            <label for="unidad">Unidad</label>
+                            <select v-model="editForm.unidad">
+                                <option value="pieza">Pieza</option>
+                                <option value="metro">Metro</option>
+                                <option value="litro">Litro</option>
+                                <option value="kilogramo">Kilogramo</option>
+                                <option value="paquete">Paquete</option>
+                            </select>
+                            <label for="descripcion">Descripción</label>
+                            <input type="text" v-model="editForm.descripcion" />
+                            <div class="button-container" style="gap:20px ;">
+                                <button @click="updateArticulo">Guardar Cambios</button>
+                                <button @click="showModal = false" class="cancelar">Cancelar</button>
+                            </div>
+
+                        </div>
+                    </div>
                 </div>
                 <div class="button-container">
                     <button class="boton" type="button" @click="registersolicitudMaterial">
@@ -155,12 +178,30 @@ export default {
                 solicitudMaterialMenu: false,
                 settingsMenu: false,
             },
-            articulos: []
-
+            articulos: [],
+            showModal: false,
+            editIndex: null,
+            editForm: {
+                cantidad: '',
+                unidad: '',
+                descripcion: ''
+            }
         };
     },
     methods: {
-        
+        openEditModal(index) {
+            this.editIndex = index;
+            this.editForm = { ...this.articulos[index] };
+            this.showModal = true;
+        },
+        updateArticulo() {
+            if (this.editIndex !== null) {
+                this.articulos[this.editIndex] = { ...this.editForm };
+                this.showModal = false;
+                this.editIndex = null;
+            }
+        },
+
         addArticulo() {
             this.articulos.push({
                 cantidad: this.form.cantidad,
@@ -204,6 +245,64 @@ export default {
 
 
 <style scoped>
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: #691B31;
+    color: white;
+    padding: 20px;
+    border-radius: 20px;
+    width: 500px;
+}
+
+.modal-content select {
+    width: 84%;
+    height: 40px;
+    border-radius: 20px;
+}
+
+.modal-content label {
+    color: white;
+    margin-top: 10px;
+
+}
+
+.modal-content input {
+    width: 80%;
+    border-radius: 20px;
+    margin-bottom: 10px;
+}
+
+.close {
+    float: right;
+    cursor: pointer;
+}
+
+.cancelar {
+    background: #98989a;
+    color: white;
+}
+
+button.cancelar:hover {
+    background: #6f7271;
+    color: white;
+}
+
+
 .solicitud-table {
     width: 95%;
     height: 200px;
@@ -419,7 +518,7 @@ export default {
     color: white;
     text-align: left;
     font-size: 14px;
-    
+
 }
 
 .dropdown-menu button:hover {
