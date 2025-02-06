@@ -42,7 +42,7 @@
                     <button @click="navigateTo('resguardo')">Mi resguardo</button>
                     <button @click="navigateTo('listaalmacen')">Lista Almacén para asignar No.Inventario</button>
                     <button @click="navigateTo('')">Lista Bienes con No.Inventario para asignar Usuario</button>
-                    <button @click="navigateTo('')">Generación de Formatos/Reportes</button>
+                    <button @click="navigateTo('reportes')">Generación de Formatos/Reportes</button>
                     <button @click="navigateTo('bienesnuevos')">Bienes nuevos para asignar resguardo</button>
 
 

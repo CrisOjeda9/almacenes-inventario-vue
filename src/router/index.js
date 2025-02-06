@@ -26,6 +26,7 @@ import asignarBienPage from '@/components/asignarbienusuario.vue';
 import listaAlmacenPage from '@/components/listaalmacen.vue';
 import solicitudMaterialPage from '@/components/solicitudmateriales.vue';
 import historialBienesPage from '@/components/historialbienes.vue';
+import reportesPage from '@/components/reportes.vue';
 
 const router = createRouter({
   history: createWebHistory(),
@@ -165,6 +166,11 @@ const router = createRouter({
       path: '/historialbienes',
       name: 'historialbienes',
       component: historialBienesPage,
+    },
+    {
+      path: '/reportes',
+      name: 'reportes',
+      component: reportesPage,
     }
   ],
 });

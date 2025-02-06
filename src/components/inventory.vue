@@ -41,7 +41,7 @@
                     <button @click="navigateTo('resguardo')">Mi resguardo</button>
                     <button @click="navigateTo('listaalmacen')">Lista Almacén para asignar No.Inventario</button>
                     <button @click="navigateTo('')">Lista Bienes con No.Inventario para asignar Usuario</button>
-                    <button @click="navigateTo('')">Generación de Formatos/Reportes</button>
+                    <button @click="navigateTo('reportes')">Generación de Formatos/Reportes</button>
                     <button @click="navigateTo('bienesnuevos')">Bienes nuevos para asignar resguardo</button>
 
 
@@ -112,7 +112,7 @@
                 <span>Bienes con No. Inventario para asignar Usuario</span>
             </div>
 
-            <div class="button-card" style="background-color:red" @click="navigateTo2('factura')">
+            <div class="button-card" style="background-color:red" @click="navigateTo2('reportes')">
                 <i class="fas fa-file-alt"></i> <!-- Reportes -->
                 <span>Gen. de formato o Reportes para Transparencia</span>
             </div>
