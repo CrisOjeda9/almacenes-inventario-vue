@@ -93,7 +93,7 @@
                 <i class="fas fa-user"></i>
                 <span>Bienes nuev. para asignar resguardo</span>
             </div>
-            <div class="button-card" style="background-color:red" @click="navigateTo2('historialbienes')">
+            <div class="button-card"  @click="navigateTo2('historialbienes')">
                 <i class="fas fa-history"></i> <!-- Historial -->
                 <span>Historial de Bienes</span>
             </div>
@@ -112,7 +112,7 @@
                 <span>Bienes con No. Inventario para asignar Usuario</span>
             </div>
 
-            <div class="button-card" style="background-color:red" @click="navigateTo2('reportes')">
+            <div class="button-card"  @click="navigateTo2('reportes')">
                 <i class="fas fa-file-alt"></i> <!-- Reportes -->
                 <span>Gen. de formato o Reportes para Transparencia</span>
             </div>
