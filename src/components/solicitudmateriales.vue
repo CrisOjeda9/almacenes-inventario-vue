@@ -34,13 +34,11 @@
                 <div class="dropdown-menu" v-show="menus.homeMenu">
                     <button @click="navigateTo('bajas')">Historial de bajas</button>
                     <button @click="navigateTo('historialbienes')">Historial de bienes</button>
-                    <button @click="navigateTo('home')">Alta de bienes</button>
                     <button @click="navigateTo('bajabien')">Baja de bienes</button>
-                    <button @click="navigateTo('resguardo')">Mi resguardo</button>
-                    <button @click="navigateTo('listaalmacen')">Lista Almacén para asignar No.Inventario</button>
-                    <button @click="navigateTo('')">Lista Bienes con No.Inventario para asignar Usuario</button>
-                    <button @click="navigateTo('reportes')">Generación de Formatos/Reportes</button>
-                    <button @click="navigateTo('bienesnuevos')">Bienes nuevos para asignar resguardo</button>
+                    <button @click="navigateTo('resguardo')">Bienes sin Resguardo</button>
+                    <button @click="navigateTo('listaalmacen')">Asignar No.Inventario</button>
+                    <button @click="navigateTo('reportes')">Generación de Reportes</button>
+                    <button @click="navigateTo('bienesnuevos')">Asignar resguardo</button>
 
 
                 </div>
@@ -55,7 +53,6 @@
                         style="background-color: #ddc9a3; color: #691b31; border-radius: 4px;">Solicitud de
                         material</button>
                     <button @click="navigateTo('bieninventario')">Agregar un bien para inventario</button>
-                    <button @click="navigateTo('users')">Salida de existencias</button>
                     <button @click="navigateTo('existencia')">Entrada de existencias</button>
                     <button @click="navigateTo('recepcionsolicitudes')">Recepcion de solicitudes</button>
                     <button @click="navigateTo('proveedor')">Ver proveedores</button>
@@ -154,6 +151,14 @@
                     </button>
                 </div>
 
+                <div v-if="showConfirmationModal" class="modal">
+                    <div class="modal-content" style="background-color: white; color: #691b31;">
+                        <h2>Solicitud Enviada</h2>
+                        <p>Su solicitud ha sido enviada con éxito.</p>
+                        <button @click="closeModal">Aceptar</button>
+                    </div>
+                </div>
+
 
             </form>
 
@@ -185,10 +190,21 @@ export default {
                 cantidad: '',
                 unidad: '',
                 descripcion: ''
-            }
+            },
+
+            showConfirmationModal: false,
+
         };
     },
     methods: {
+        registersolicitudMaterial() {
+            console.log("Solicitud de Material registrada:", this.articulos);
+            this.showConfirmationModal = true;
+        },
+        closeModal() {
+            this.showConfirmationModal = false;
+            this.$router.push('/recepcionsolicitudes'); // Reemplaza con la vista correcta
+        },
         openEditModal(index) {
             this.editIndex = index;
             this.editForm = { ...this.articulos[index] };
@@ -234,11 +250,7 @@ export default {
         verSolicitudes() {
             this.$router.push('/versolicitudes'); // Reemplaza con la ruta correcta
         },
-        registersolicitudMaterial() {
-            // Aquí puedes agregar el código para enviar los datos de la tabla
-            console.log("Solicitud de Material registrada:", this.articulos);
-            // Aquí podrías llamar a una API para registrar la solicitud en el backend
-        },
+        
     },
 };
 </script>

@@ -34,14 +34,11 @@
                 <div class="dropdown-menu" v-show="menus.homeMenu">
                     <button @click="navigateTo('bajas')">Historial de bajas</button>
                     <button @click="navigateTo('historialbienes')">Historial de bienes</button>
-                    <button @click="navigateTo('home')">Alta de bienes</button>
-                    <button @click="navigateTo('bajabien')"
-                        style="background-color: #ddc9a3; color: #691b31; border-radius: 4px;">Baja de bienes</button>
-                        <button @click="navigateTo('resguardo')">Mi resguardo</button>
-                    <button @click="navigateTo('listaalmacen')">Lista Almacén para asignar No.Inventario</button>
-                    <button @click="navigateTo('')">Lista Bienes con No.Inventario para asignar Usuario</button>
-                    <button @click="navigateTo('reportes')">Generación de Formatos/Reportes</button>
-                    <button @click="navigateTo('bienesnuevos')">Bienes nuevos para asignar resguardo</button>
+                    <button @click="navigateTo('bajabien')" style="background-color: #ddc9a3; color: #691b31; border-radius: 4px;">Baja de bienes</button>
+                    <button @click="navigateTo('resguardo')">Bienes sin Resguardo</button>
+                    <button @click="navigateTo('listaalmacen')">Asignar No.Inventario</button>
+                    <button @click="navigateTo('reportes')">Generación de Reportes</button>
+                    <button @click="navigateTo('bienesnuevos')">Asignar resguardo</button>
 
 
                 </div>
@@ -53,7 +50,6 @@
                 <div class="dropdown-menu" v-show="menus.bajabienMenu">
                     <button @click="navigateTo('solicitudmaterial')">Solicitud de material</button>
                     <button @click="navigateTo('bieninventario')">Agregar un bien para inventario</button>
-                    <button @click="navigateTo('bajabien')">Salida de existencias</button>
                     <button @click="navigateTo('existencia')">Entrada de existencias</button>
                     <button @click="navigateTo('recepcionsolicitudes')">Recepcion de solicitudes</button>
                     <button @click="navigateTo('proveedor')">Ver proveedores</button>
@@ -87,28 +83,30 @@
 
         <!-- Formulario -->
         <div class="form-container">
-            <form @submit.prevent="registerbajaBien">
+            <form @submit.prevent="registerBajaBien">
                 <div class="form-row">
 
                     <!-- Descripción -->
                     <div class="form-field">
                         <label for="descripcion">Descripción</label>
-                        <input type="text" id="descripcion" :value="form.descripcion" readonly style="background-color: #dcddcd;"/>
+                        <input type="text" id="descripcion" :value="form.descripcion" readonly
+                            style="background-color: #dcddcd;" />
                     </div>
                     <!-- Modelo -->
                     <div class="form-field">
                         <label for="modelo">Modelo</label>
-                        <input type="text" id="modelo" :value="form.modelo" readonly style="background-color: #dcddcd;"/>
+                        <input type="text" id="modelo" :value="form.modelo" readonly
+                            style="background-color: #dcddcd;" />
                     </div>
                     <!-- Marca -->
                     <div class="form-field">
                         <label for="marca">Marca</label>
-                        <input type="text" id="marca" :value="form.marca" readonly style="background-color: #dcddcd;"/>
+                        <input type="text" id="marca" :value="form.marca" readonly style="background-color: #dcddcd;" />
                     </div>
                     <!-- Serie -->
                     <div class="form-field">
                         <label for="serie">Serie</label>
-                        <input type="text" id="serie" :value="form.serie" readonly style="background-color: #dcddcd;"/>
+                        <input type="text" id="serie" :value="form.serie" readonly style="background-color: #dcddcd;" />
                     </div>
 
                 </div>
@@ -138,13 +136,15 @@
                     <!-- Unidad Presupuestal -->
                     <div class="form-field">
                         <label for="unidadPresupuestal">Unidad Presupuestal</label>
-                        <input type="text" id="unidadPresupuestal" value="Radio y Televisión de Hidalgo" readonly style="background-color: #dcddcd;"/>
+                        <input type="text" id="unidadPresupuestal" value="Radio y Televisión de Hidalgo" readonly
+                            style="background-color: #dcddcd;" />
                     </div>
 
                     <!-- Órgano Superior -->
                     <div class="form-field">
                         <label for="organoSuperior">Órgano Superior</label>
-                        <input type="text" id="organoSuperior" value="Organismo Descentralizado" readonly style="background-color: #dcddcd;"/>
+                        <input type="text" id="organoSuperior" value="Organismo Descentralizado" readonly
+                            style="background-color: #dcddcd;" />
                     </div>
 
                 </div>
@@ -152,38 +152,48 @@
                 <div class="form-row">
 
 
-                    <!-- Documentos de Baja -->
+                    <!-- Documento que ampara la baja -->
                     <div class="form-field">
-                        <label for="documentoAmpara">Documento que amapara la baja</label>
-                        <div class="dropzone" @drop.prevent="handleDrop" @dragover.prevent @click="triggerFileInput">
-                            <input type="file" id="documentoAmpara" ref="fileInput" @change="handleFileUpload"
-                                accept=".pdf,.jpg,.png" />
+                        <label for="documentoAmpara">Documento que ampara la baja</label>
+                        <div class="dropzone" @drop.prevent="handleDrop('documentoAmpara')" @dragover.prevent
+                            @click="triggerFileInput('documentoAmpara')">
+                            <input type="file" id="documentoAmpara" ref="documentoAmparaInput"
+                                @change="handleFileUpload($event, 'documentoAmpara')" accept=".pdf,.jpg,.png"
+                                style="display: none;" />
                             <i class="fas fa-cloud-upload-alt"></i>
                             <span v-if="!form.documentoAmpara">Arrastra o selecciona un archivo (PDF, JPG, PNG)</span>
                             <span v-else>{{ form.documentoAmpara.name }}</span>
                         </div>
                     </div>
 
+                    <!-- Oficio de solicitud de dictamen -->
                     <div class="form-field">
                         <label for="oficioSolicitud">Oficio de solicitud de dictamen</label>
-                        <div class="dropzone" @drop.prevent="handleDrop" @dragover.prevent @click="triggerFileInput">
-                            <input type="file" id="oficioSolicitud" ref="fileInput" @change="handleFileUpload"
-                                accept=".pdf,.jpg,.png" />
+                        <div class="dropzone" @drop.prevent="handleDrop('oficioSolicitud')" @dragover.prevent
+                            @click="triggerFileInput('oficioSolicitud')">
+                            <input type="file" id="oficioSolicitud" ref="oficioSolicitudInput"
+                                @change="handleFileUpload($event, 'oficioSolicitud')" accept=".pdf,.jpg,.png"
+                                style="display: none;" />
                             <i class="fas fa-cloud-upload-alt"></i>
                             <span v-if="!form.oficioSolicitud">Arrastra o selecciona un archivo (PDF, JPG, PNG)</span>
                             <span v-else>{{ form.oficioSolicitud.name }}</span>
                         </div>
                     </div>
+
+                    <!-- Foto del bien cuando se da de baja -->
                     <div class="form-field">
                         <label for="fotoBien">Foto del bien cuando se da de baja</label>
-                        <div class="dropzone" @drop.prevent="handleDrop" @dragover.prevent @click="triggerFileInput">
-                            <input type="file" id="fotoBien" ref="fileInput" @change="handleFileUpload"
-                                accept=".pdf,.jpg,.png" />
+                        <div class="dropzone" @drop.prevent="handleDrop('fotoBien')" @dragover.prevent
+                            @click="triggerFileInput('fotoBien')">
+                            <input type="file" id="fotoBien" ref="fotoBienInput"
+                                @change="handleFileUpload($event, 'fotoBien')" accept=".jpg,.png"
+                                style="display: none;" />
                             <i class="fas fa-cloud-upload-alt"></i>
-                            <span v-if="!form.fotoBien">Arrastra o selecciona un archivo (PDF, JPG, PNG)</span>
+                            <span v-if="!form.fotoBien">Arrastra o selecciona un archivo (JPG, PNG)</span>
                             <span v-else>{{ form.fotoBien.name }}</span>
                         </div>
                     </div>
+
                 </div>
                 <div class="button-container">
                     <button class="boton" type="submit">
@@ -240,6 +250,7 @@ export default {
         };
     },
     methods: {
+
         startSearch() {
             const foundItem = this.inventoryData.find(
                 (item) => item.numeroInventario === this.searchQuery
@@ -275,14 +286,15 @@ export default {
         goHome() {
             this.$router.push("/home");
         },
-        handleFileUpload(field) {
-            const file = event.target.files[0];
-            this.form[field] = file;
-        },
         registerBajaBien() {
+            // Aquí puedes agregar la lógica para enviar los datos del formulario
             console.log("Formulario enviado:", this.form);
-            alert("Baja registrada correctamente.");
+
+            // Redirige a la página de historial de bajas después de registrar la baja
+            this.$router.push("/bajas");
         },
+
+
         showMenu(menu) {
             this.menus[menu] = true;
         },
@@ -291,6 +303,24 @@ export default {
         },
         navigateTo(page) {
             this.$router.push({ name: page });
+        },
+
+        handleDrop(field, event) {
+            const file = event.dataTransfer.files[0];
+            if (file) {
+                this.form[field] = file;
+            }
+        },
+
+        triggerFileInput(field) {
+            this.$refs[`${field}Input`].click();
+        },
+
+        handleFileUpload(event, field) {
+            const file = event.target.files[0];
+            if (file) {
+                this.form[field] = file;
+            }
         },
     },
 };
@@ -690,7 +720,8 @@ a {
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 1000; /* Asegúrate de que el modal esté por encima de otros elementos */
+    z-index: 1000;
+    /* Asegúrate de que el modal esté por encima de otros elementos */
 }
 
 .modal {

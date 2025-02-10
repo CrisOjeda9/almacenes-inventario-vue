@@ -1,5 +1,4 @@
 <template>
-
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
 
@@ -11,9 +10,7 @@
                     height="auto" style="cursor: pointer;" />
             </div>
             <div class="navbar-center">
-                <h1>Lista de Almacen para asignar No. inventario
-
-                </h1>
+                <h1>Lista de Almacen para asignar No. inventario</h1>
                 <p>Sistema inventario y Almacén de Radio y Televisión de Hidalgo</p>
             </div>
             <div class="navbar-right">
@@ -37,17 +34,11 @@
                 <div class="dropdown-menu" v-show="menus.homeMenu">
                     <button @click="navigateTo('bajas')">Historial de bajas</button>
                     <button @click="navigateTo('historialbienes')">Historial de bienes</button>
-                    <button @click="navigateTo('home')">Alta de bienes</button>
                     <button @click="navigateTo('bajabien')">Baja de bienes</button>
-                    <button @click="navigateTo('resguardo')">Mi resguardo</button>
-                    <button @click="navigateTo('listaalmacen')" 
-                    style="background-color: #ddc9a3; color: #691b31; border-radius: 4px;">Lista Almacén para asignar No.Inventario</button>
-                    <button @click="navigateTo('')">Lista Bienes con No.Inventario para asignar Usuario</button>
-                    <button @click="navigateTo('reportes')">Generación de Formatos/Reportes</button>
-                    <button @click="navigateTo('bienesnuevos')">Bienes nuevos para asignar resguardo</button>
-
-
-
+                    <button @click="navigateTo('resguardo')">Bienes sin Resguardo</button>
+                    <button @click="navigateTo('listaalmacen')" style="background-color: #ddc9a3; color: #691b31; border-radius: 4px;">Asignar No.Inventario</button>
+                    <button @click="navigateTo('reportes')">Generación de Reportes</button>
+                    <button @click="navigateTo('bienesnuevos')">Asignar resguardo</button>
                 </div>
             </div>
 
@@ -57,53 +48,63 @@
                 <div class="dropdown-menu" v-show="menus.AlmacenMenu">
                     <button @click="navigateTo('solicitudmaterial')">Solicitud de material</button>
                     <button @click="navigateTo('bieninventario')">Agregar un bien para inventario</button>
-                    <button @click="navigateTo('bajas')">Salida de existencias</button>
                     <button @click="navigateTo('existencia')">Entrada de existencias</button>
-                    <button @click="navigateTo('recepcionsolicitudes')"
-                        style="background-color: #ddc9a3; color: #691b31; border-radius: 4px;">Recepcion de
-                        Solicitudes</button>
+                    <button @click="navigateTo('recepcionsolicitudes')">Recepcion de Solicitudes</button>
                     <button @click="navigateTo('proveedor')">Ver proveedores</button>
                     <button @click="navigateTo('factura')">Facturas</button>
                     <button @click="navigateTo('poliza')">Polizas</button>
                 </div>
             </div>
-
         </div>
 
         <div class="search-bar">
-
             <div class="input-wrapper">
                 <input type="text" v-model="searchQuery" placeholder="Buscar..." />
                 <i class="fas fa-search"></i> <!-- Icono de la lupa -->
             </div>
-
-
-
         </div>
 
         <div class="contenedor-tabla">
             <table class="almacenes-table">
                 <thead>
                     <tr>
-                        <th>Descripción</th>
-                        <th>Fecha en que se envio</th>
+                        <th>ID</th>
+                        <th>Número de factura</th>
+                        <th>Número de partida</th>
+                        <th>Nombre</th>
+                        <th>Importe sin IVA</th>
+                        <th>IVA</th>
+                        <th>Importe con IVA</th>
+                        <th>Cantidad</th>
+                        <th>Unidad de medida</th>
+                        <th>Total de ingreso</th>
+                        <th>Foto artículo</th>
+                        <th>Fecha de registro</th>
                         <th>Asignar No. Inventario</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr v-for="almacenes in paginatedalmacenes" :key="almacenes.id">
+                        <td>{{ almacenes.id }}</td>
+                        <td>{{ almacenes.invoiceNumber }}</td>
+                        <td>{{ almacenes.batchNumber }}</td>
                         <td>{{ almacenes.name }}</td>
+                        <td>{{ almacenes.amountWithoutTax }}</td>
+                        <td>{{ almacenes.tax }}</td>
+                        <td>{{ almacenes.amountWithTax }}</td>
+                        <td>{{ almacenes.quantity }}</td>
+                        <td>{{ almacenes.unit }}</td>
+                        <td>{{ almacenes.totalIncome }}</td>
+                        <td><a :href="almacenes.photo" target="_blank">Ver Foto</a></td>
                         <td>{{ almacenes.registrationDate }}</td>
                         <td>
-                            <button @click="redirectnventario" class="btn-existencias">
-                                <i class="fa fa-list-ol"></i>
+                            <button @click="redirecinventario" class="btn-existencias">
+                                <i class="fas fa-list-ol"></i>
                             </button>
+
                         </td>
-
-
                     </tr>
                 </tbody>
-
             </table>
             <!-- Paginador -->
             <div class="pagination">
@@ -112,7 +113,6 @@
                 <button :disabled="currentPage === totalPages" @click="changePage(currentPage + 1)">Siguiente</button>
             </div>
         </div>
-
     </div>
 </template>
 
@@ -128,13 +128,38 @@ export default {
             },
             searchQuery: '',
             almacenes: [
-                { name: "Cristian", registrationDate: "2024-01-15" },
-
-                // Agrega más usuarios aquí...
+                {
+                    id: "001",
+                    invoiceNumber: "A12345",
+                    batchNumber: "B67890",
+                    name: "Cristian",
+                    amountWithoutTax: "1000",
+                    tax: "160",
+                    amountWithTax: "1160",
+                    quantity: "5",
+                    unit: "piezas",
+                    totalIncome: "5800",
+                    photo: "https://example.com/photo.jpg",
+                    registrationDate: "2024-01-15"
+                },
+                {
+                    id: "002",
+                    invoiceNumber: "A12346",
+                    batchNumber: "B67891",
+                    name: "Material A",
+                    amountWithoutTax: "2000",
+                    tax: "320",
+                    amountWithTax: "2320",
+                    quantity: "10",
+                    unit: "cajas",
+                    totalIncome: "23200",
+                    photo: "https://example.com/photo2.jpg",
+                    registrationDate: "2024-01-25"
+                },
+                // Agrega más almacenes aquí...
             ],
             itemsPerPage: 10, // Cantidad de elementos por página
             currentPage: 1, // Página actual
-
         };
     },
     computed: {
@@ -142,10 +167,8 @@ export default {
             return this.almacenes.filter(almacenes => {
                 const query = this.searchQuery.toLowerCase();
                 return (almacenes.name.toLowerCase().includes(query));
-
             });
         },
-        // Número total de páginas
         totalPages() {
             return Math.ceil(this.filteredalmacenes.length / this.itemsPerPage);
         },
@@ -156,25 +179,21 @@ export default {
         },
     },
     methods: {
-        goHome() {
-            this.$router.push('home'); // Redirige a la página principal ("/"). Cambia el path si es necesario.
+        redirecinventario() {
+            this.$router.push('/bieninventario');
         },
-        goBack() {
-            console.log("Regresar a la página anterior");
+        goHome() {
+            this.$router.push('home');
         },
         navigateTo(page) {
             console.log(`Navegando a ${page}`);
-            this.$router.push({ name: page }); // Asegúrate de que las rutas estén definidas con `name`.
+            this.$router.push({ name: page });
         },
         showMenu(menu) {
             this.menus[menu] = true;
         },
         hideMenu(menu) {
             this.menus[menu] = false;
-        },
-        redirectnventario() {
-            // Aquí defines la ruta a la que quieres redirigir al hacer clic en el botón
-            this.$router.push('/bieninventario');
         },
         changePage(page) {
             if (page >= 1 && page <= this.totalPages) {

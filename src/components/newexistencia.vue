@@ -34,13 +34,11 @@
                 <div class="dropdown-menu" v-show="menus.homeMenu">
                     <button @click="navigateTo('bajas')">Historial de bajas</button>
                     <button @click="navigateTo('historialbienes')">Historial de bienes</button>
-                    <button @click="navigateTo('home')">Alta de bienes</button>
                     <button @click="navigateTo('bajabien')">Baja de bienes</button>
-                    <button @click="navigateTo('resguardo')">Mi resguardo</button>
-                    <button @click="navigateTo('listaalmacen')">Lista Almacén para asignar No.Inventario</button>
-                    <button @click="navigateTo('')">Lista Bienes con No.Inventario para asignar Usuario</button>
-                    <button @click="navigateTo('reportes')">Generación de Formatos/Reportes</button>
-                    <button @click="navigateTo('bienesnuevos')">Bienes nuevos para asignar resguardo</button>
+                    <button @click="navigateTo('resguardo')">Bienes sin Resguardo</button>
+                    <button @click="navigateTo('listaalmacen')">Asignar No.Inventario</button>
+                    <button @click="navigateTo('reportes')">Generación de Reportes</button>
+                    <button @click="navigateTo('bienesnuevos')">Asignar resguardo</button>
 
 
                 </div>
@@ -52,7 +50,6 @@
                 <div class="dropdown-menu" v-show="menus.existenciaMenu">
                     <button @click="navigateTo('solicitudmaterial')">Solicitud de material</button>
                     <button @click="navigateTo('bieninventario')">Agregar un bien para inventario</button>
-                    <button @click="navigateTo('users')">Salida de existencias</button>
                     <button @click="navigateTo('existencia')"
                         style="background-color: #ddc9a3; color: #691b31; border-radius: 4px;">Entrada de
                         existencias</button>
@@ -106,21 +103,21 @@
                     <!-- Importe sin IVA -->
                     <div class="form-field">
                         <label for="importeSinIVA">Importe sin IVA</label>
-                        <input type="number" step="0.01" id="importeSinIVA" placeholder="Ej. 1000.00"
+                        <input type="number" step="0.01" min="0" id="importeSinIVA" placeholder="Ej. 1000.00"
                             v-model="form.importeSinIVA" required />
                     </div>
 
                     <!-- IVA -->
                     <div class="form-field">
                         <label for="iva">IVA</label>
-                        <input type="number" step="0.01" id="iva" placeholder="Ej. 160.00" v-model="form.iva"
+                        <input type="number" step="0.01" min="0" id="iva" placeholder="Ej. 160.00" v-model="form.iva"
                             required />
                     </div>
 
                     <!-- Importe con IVA -->
                     <div class="form-field">
                         <label for="importeConIVA">Importe con IVA</label>
-                        <input type="number" step="0.01" id="importeConIVA" placeholder="Ej. 1160.00"
+                        <input type="number" step="0.01" id="importeConIVA" min="0" placeholder="Ej. 1160.00"
                             v-model="form.importeConIVA" required />
                     </div>
                     <!-- Cantidad -->
@@ -150,17 +147,12 @@
                     </div>
 
 
-                    <!-- Ubicación en almacén -->
-                    <div class="form-field">
-                        <label for="ubicacionAlmacen">Ubic. almacén</label>
-                        <input type="text" id="ubicacionAlmacen" placeholder="Ej. Pasillo A3"
-                            v-model="form.ubicacionAlmacen" required />
-                    </div>
+
 
                     <!-- Total de ingreso -->
                     <div class="form-field">
                         <label for="totalIngreso">Total de ingreso</label>
-                        <input type="number" step="0.01" id="totalIngreso" placeholder="Ej. 5000.00"
+                        <input type="number" step="0.01" min="0" id="totalIngreso" placeholder="Ej. 5000.00"
                             v-model="form.totalIngreso" required />
                     </div>
 
@@ -181,13 +173,12 @@
                 </div>
 
                 <div class="button-container" style="gap: 30px;">
-                    <button class="boton" type="submit">
-                        <i class="fas fa-plus"></i> Agregar Existencia
+                    <button class="boton" type="submit" @click.prevent="registerExistencia('articulo')">
+                        <i class="fas fa-plus-square"></i> Agregar Articulo
                     </button>
-                    <button class="boton" type="button" @click="mostrarModal">
+                    <button class="boton" type="submit" @click.prevent="registerExistencia('bien')">
                         <i class="fas fa-plus-square"></i> Agregar Bien
                     </button>
-
                 </div>
             </form>
         </div>
@@ -196,7 +187,7 @@
             <div class="modal-content">
                 <span class="close" @click="cerrarModal">&times;</span>
                 <h2>¡Registro Exitoso!</h2>
-                <p>El bien ha sido agregado correctamente.</p>
+                <p>La existencia ha sido agregada correctamente.</p>
                 <button @click="redirigirPagina">Aceptar</button>
             </div>
         </div>
@@ -220,7 +211,6 @@ export default {
                 importeConIVA: "",          // Importe con IVA
                 cantidad: "",
                 unidadmedida: "",               // Cantidad
-                ubicacionAlmacen: "",       // Ubicación en almacén
                 totalIngreso: "",           // Total de ingreso
                 fotoArticulo: null          // Foto del artículo (archivo)
             },
@@ -231,6 +221,8 @@ export default {
                 settingsMenu: false,
             },
             modalVisible: false, // Estado del modal
+            buttonType: "",  // Agrega esta propiedad
+
 
         };
     },
@@ -257,8 +249,8 @@ export default {
         triggerFileInput() {
             this.$refs.fileInput.click(); // Trigger del input file cuando se hace click en la dropzone
         },
-        registerExistencia() {
-            // Valida los campos necesarios
+        registerExistencia(tipo) {
+            // Validar campos obligatorios
             if (
                 !this.form.id ||
                 !this.form.numeroFactura ||
@@ -268,7 +260,6 @@ export default {
                 !this.form.iva ||
                 !this.form.importeConIVA ||
                 !this.form.cantidad ||
-                !this.form.ubicacionAlmacen ||
                 !this.form.totalIngreso
             ) {
                 alert("Por favor, completa todos los campos obligatorios.");
@@ -280,9 +271,14 @@ export default {
                 return;
             }
 
-            // Procesa el registro
+            // Simulación de registro (aquí iría la lógica para guardar en la base de datos)
             console.log("Datos registrados:", this.form);
-            alert("Datos registrados exitosamente.");
+
+            // Guardar el tipo de registro para usarlo en la redirección
+            this.buttonType = tipo;
+
+            // Mostrar modal de éxito
+            this.mostrarModal();
         },
 
         navigateTo(page) {
@@ -296,8 +292,15 @@ export default {
             this.menus[menu] = false;
         },
         redirigirPagina() {
-            // Cambia 'ruta_deseada' por la URL a la que deseas redirigir
-            window.location.href = 'listaalmacen';
+            // Cerrar el modal
+            this.cerrarModal();
+
+            // Redirigir según el tipo de registro
+            if (this.buttonType === 'articulo') {
+                this.$router.push({ name: 'existencia' });
+            } else if (this.buttonType === 'bien') {
+                this.$router.push({ name: 'listaalmacen' });
+            }
         }
     },
 };

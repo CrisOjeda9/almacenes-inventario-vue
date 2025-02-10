@@ -34,13 +34,11 @@
                 <div class="dropdown-menu" v-show="menus.homeMenu">
                     <button @click="navigateTo('bajas')">Historial de bajas</button>
                     <button @click="navigateTo('historialbienes')">Historial de bienes</button>
-                    <button @click="navigateTo('home')">Alta de bienes</button>
                     <button @click="navigateTo('bajabien')">Baja de bienes</button>
-                    <button @click="navigateTo('resguardo')">Mi resguardo</button>
-                    <button @click="navigateTo('listaalmacen')">Lista Almacén para asignar No.Inventario</button>
-                    <button @click="navigateTo('')">Lista Bienes con No.Inventario para asignar Usuario</button>
-                    <button @click="navigateTo('reportes')">Generación de Formatos/Reportes</button>
-                    <button @click="navigateTo('bienesnuevos')">Bienes nuevos para asignar resguardo</button>
+                    <button @click="navigateTo('resguardo')">Bienes sin Resguardo</button>
+                    <button @click="navigateTo('listaalmacen')">Asignar No.Inventario</button>
+                    <button @click="navigateTo('reportes')">Generación de Reportes</button>
+                    <button @click="navigateTo('bienesnuevos')">Asignar resguardo</button>
 
 
                 </div>
@@ -52,12 +50,12 @@
                 <div class="dropdown-menu" v-show="menus.polizaMenu">
                     <button @click="navigateTo('solicitudmaterial')">Solicitud de material</button>
                     <button @click="navigateTo('bieninventario')">Agregar un bien para inventario</button>
-                    <button @click="navigateTo('users')">Salida de existencias</button>
                     <button @click="navigateTo('existencia')">Entrada de existencias</button>
                     <button @click="navigateTo('recepcionsolicitudes')">Recepcion de solicitudes</button>
                     <button @click="navigateTo('proveedor')">Ver proveedores</button>
                     <button @click="navigateTo('factura')">Facturas</button>
-                    <button @click="navigateTo('poliza')" style="background-color: #ddc9a3; color: #691b31; border-radius: 4px;">Polizas</button>
+                    <button @click="navigateTo('poliza')"
+                        style="background-color: #ddc9a3; color: #691b31; border-radius: 4px;">Polizas</button>
                 </div>
             </div>
         </div>
@@ -155,7 +153,13 @@
                 </div>
             </form>
         </div>
-
+        <!-- Modal -->
+        <div v-if="showModal" class="modal">
+            <div class="modal-content">
+                <h2>Poliza registrada con éxito.</h2>
+                <button @click="closeModal">Aceptar</button>
+            </div>
+        </div>
     </div>
 </template>
 
@@ -184,6 +188,8 @@ export default {
                 polizaMenu: false,
                 settingsMenu: false,
             },
+            showModal: false
+
         };
     },
     methods: {
@@ -209,7 +215,7 @@ export default {
                 alert("Las contraseñas no coinciden");
                 return;
             }
-            console.log("Poliza registrada:", this.form);
+            this.showModal = true;
         },
         navigateTo(page) {
             console.log(`Navegando a ${page}`);
@@ -221,6 +227,10 @@ export default {
         hideMenu(menu) {
             this.menus[menu] = false;
         },
+        closeModal() {
+            this.showModal = false;
+            this.$router.push('/poliza');
+        },
     },
 };
 </script>
@@ -229,6 +239,30 @@ export default {
 /* Aplicar Montserrat a todo el contenido */
 * {
     font-family: 'Montserrat', sans-serif;
+}
+
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: white;
+    color: #691B31;
+    padding: 20px;
+    border-radius: 20px;
+    width: 500px;
 }
 
 .container {

@@ -36,13 +36,11 @@
                 <div class="dropdown-menu" v-show="menus.homeMenu">
                     <button @click="navigateTo('bajas')">Historial de bajas</button>
                     <button @click="navigateTo('historialbienes')">Historial de bienes</button>
-                    <button @click="navigateTo('home')">Alta de bienes</button>
                     <button @click="navigateTo('bajabien')">Baja de bienes</button>
-                    <button @click="navigateTo('resguardo')">Mi resguardo</button>
-                    <button @click="navigateTo('listaalmacen')">Lista Almacén para asignar No.Inventario</button>
-                    <button @click="navigateTo('')">Lista Bienes con No.Inventario para asignar Usuario</button>
-                    <button @click="navigateTo('reportes')">Generación de Formatos/Reportes</button>
-                    <button @click="navigateTo('bienesnuevos')">Bienes nuevos para asignar resguardo</button>
+                    <button @click="navigateTo('resguardo')">Bienes sin Resguardo</button>
+                    <button @click="navigateTo('listaalmacen')">Asignar No.Inventario</button>
+                    <button @click="navigateTo('reportes')">Generación de Reportes</button>
+                    <button @click="navigateTo('bienesnuevos')">Asignar resguardo</button>
 
 
                 </div>
@@ -54,7 +52,6 @@
                 <div class="dropdown-menu" v-show="menus.inventoryMenu">
                     <button @click="navigateTo('solicitudmaterial')">Solicitud de material</button>
                     <button @click="navigateTo('bieninventario')">Agregar un bien para inventario</button>
-                    <button @click="navigateTo('users')">Salida de existencias</button>
                     <button @click="navigateTo('existencia')">Entrada de existencias</button>
                     <button @click="navigateTo('recepcionsolicitudes')">Recepcion de solicitudes</button>
                     <button @click="navigateTo('proveedor')">Ver proveedores</button>
@@ -68,7 +65,7 @@
             <!-- Fila 1 -->
             <div class="button-card" @click="navigateTo2('bajas')">
                 <i class="fa fa-history"></i>
-                <span>Historial de bajas</span>
+                <span>Historial de Bajas</span>
             </div>
 
            
@@ -83,12 +80,12 @@
         <div class="menu">
             <div class="button-card" @click="navigateTo2('resguardo')">
                 <i class="fas fa-clipboard"></i>
-                <span>Mi Resguardo</span>
+                <span>Bienes sin Resguardo</span>
             </div>
 
             <div class="button-card" @click="navigateTo2('bienesnuevos')">
                 <i class="fas fa-user"></i>
-                <span>Asignar resguardo</span>
+                <span>Asignar Resguardo</span>
             </div>
             <div class="button-card"  @click="navigateTo2('historialbienes')">
                 <i class="fas fa-history"></i> <!-- Historial -->
@@ -108,7 +105,7 @@
 
             <div class="button-card"  @click="navigateTo2('reportes')">
                 <i class="fas fa-file-alt"></i> <!-- Reportes -->
-                <span>Generacion de reportes</span>
+                <span>Generacion de Reportes</span>
             </div>
         </div>
 

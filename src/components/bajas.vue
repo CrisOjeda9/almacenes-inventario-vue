@@ -33,15 +33,16 @@
                 Inventario
                 <span class="menu-icon">▼</span>
                 <div class="dropdown-menu" v-show="menus.homeMenu">
-                    <button @click="navigateTo('bajas')" style="background-color: #ddc9a3; color: #691b31; border-radius: 4px;">Historial de bajas</button>
+                    <button @click="navigateTo('bajas')"
+                        style="background-color: #ddc9a3; color: #691b31; border-radius: 4px;">Historial de
+                        bajas</button>
+                        <button @click="navigateTo('bajas')" style="background-color: #ddc9a3; color: #691b31; border-radius: 4px;">Historial de bajas</button>
                     <button @click="navigateTo('historialbienes')">Historial de bienes</button>
-                    <button @click="navigateTo('home')">Alta de bienes</button>
                     <button @click="navigateTo('bajabien')">Baja de bienes</button>
-                    <button @click="navigateTo('resguardo')">Mi resguardo</button>
-                    <button @click="navigateTo('listaalmacen')">Lista Almacén para asignar No.Inventario</button>
-                    <button @click="navigateTo('')">Lista Bienes con No.Inventario para asignar Usuario</button>
-                    <button @click="navigateTo('reportes')">Generación de Formatos/Reportes</button>
-                    <button @click="navigateTo('bienesnuevos')">Bienes nuevos para resguardo</button>
+                    <button @click="navigateTo('resguardo')">Bienes sin Resguardo</button>
+                    <button @click="navigateTo('listaalmacen')">Asignar No.Inventario</button>
+                    <button @click="navigateTo('reportes')">Generación de Reportes</button>
+                    <button @click="navigateTo('bienesnuevos')">Asignar resguardo</button>
 
 
 
@@ -55,7 +56,6 @@
                 <div class="dropdown-menu" v-show="menus.bajasMenu">
                     <button @click="navigateTo('solicitudmaterial')">Solicitud de material</button>
                     <button @click="navigateTo('bieninventario')">Agregar un bien para inventario</button>
-                    <button @click="navigateTo('bajas')">Salida de existencias</button>
                     <button @click="navigateTo('existencia')">Entrada de existencias</button>
                     <button @click="navigateTo('recepcionsolicitudes')">Recepcion de solicitudes</button>
                     <button @click="navigateTo('proveedor')">Ver proveedores</button>
@@ -90,31 +90,54 @@
                 <thead>
                     <tr>
                         <th>No. Bien</th>
-                        <th>Cuenta Bancaria</th>
-                        <th>No. Poliza</th>
-                        <th>Persona</th>
-                        <th>Costo Unitario</th>
-                        <th>RFC</th>
-                        <th>Dirección</th>
-                        <th>Tipo de Compra</th>
-                        <th>Fecha de compra</th>
+                        <th>Descripción</th>
+                        <th>Modelo</th>
+                        <th>Marca</th>
+                        <th>Serie</th>
+                        <th>Fecha de Baja</th>
+                        <th>Tipo de Baja</th>
+                        <th>Unidad Presupuestal</th>
+                        <th>Órgano Superior</th>
+                        <th>Documento Baja</th>
+                        <th>Oficio Dictamen</th>
+                        <th>Foto Bien</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr v-for="bajas in paginatedBajas" :key="bajas.id">
-                        <td>{{ bajas.numerobien }}</td>
-                        <td>{{ bajas.cuentabancaria }}</td>
-                        <td>{{ bajas.poliza }}</td>
-                        <td>{{ bajas.persona }}</td>
-                        <td>{{ bajas.costounitario }}</td>
-                        <td>{{ bajas.rfc }}</td>
-                        <td>{{ bajas.direccion }}</td>
-                        <td>{{ bajas.tipocompra }}</td>
-                        <td>{{ bajas.registrationDate }}</td>
+                    <tr v-for="baja in paginatedBajas" :key="baja.id">
+                        <td>{{ baja.numerobien }}</td>
+                        <td>{{ baja.descripcion }}</td>
+                        <td>{{ baja.modelo }}</td>
+                        <td>{{ baja.marca }}</td>
+                        <td>{{ baja.serie }}</td>
+                        <td>{{ baja.fechaBaja }}</td>
+                        <td>{{ baja.tipoBaja }}</td>
+                        <td>{{ baja.unidadPresupuestal }}</td>
+                        <td>{{ baja.organoSuperior }}</td>
+                        <td>
+                            <a :href="'/ruta/del/archivo/' + bajas.documentoAmpara" download>
+                                <button class="btn-download">
+                                    <i class="fas fa-file-alt"></i> <!-- Icon for document -->
+                                </button>
+                            </a>
+                        </td>
+                        <td>
+                            <a :href="'/ruta/del/archivo/' + bajas.oficioSolicitud" download>
+                                <button class="btn-download">
+                                    <i class="fas fa-file-signature"></i> <!-- Icon for signature or official letter -->
+                                </button>
+                            </a>
+                        </td>
+                        <td>
+                            <a :href="'/ruta/del/archivo/' + bajas.fotoBien" download>
+                                <button class="btn-download">
+                                    <i class="fas fa-camera-retro"></i> <!-- Icon for photo -->
+                                </button>
+                            </a>
+                        </td>
 
                     </tr>
                 </tbody>
-
             </table>
             <!-- Paginador -->
             <div class="pagination">
@@ -137,52 +160,56 @@ export default {
                 bajasMenu: false,
                 settingsMenu: false,
             },
-            searchQuery: '',
             bajas: [
-                { numerobien: "15051", cuentabancaria: "526452658758985785", poliza: "adasd4654", persona: "Moral", costounitario: "100.00", rfc: "hsadjhasd4", direccion: "asdasdada", tipocompra: "Presupuestal", registrationDate: "2024-01-15" },
-                { numerobien: "45661", cuentabancaria: "757586867478932473", poliza: "asd66ddd", persona: "Fisica", costounitario: "200.00", rfc: "jghfgddjgdk4", direccion: "asdad5456", tipocompra: "Estatal", registrationDate: "2024-01-15" },
-                { numerobien: "45661", cuentabancaria: "757586867478932473", poliza: "asd66ddd", persona: "Fisica", costounitario: "200.00", rfc: "jghfgddjgdk4", direccion: "asdad5456", tipocompra: "Estatal", registrationDate: "2024-01-15" },
-                { numerobien: "45661", cuentabancaria: "757586867478932473", poliza: "asd66ddd", persona: "Fisica", costounitario: "200.00", rfc: "jghfgddjgdk4", direccion: "asdad5456", tipocompra: "Estatal", registrationDate: "2024-01-15" },
-                { numerobien: "45661", cuentabancaria: "757586867478932473", poliza: "asd66ddd", persona: "Fisica", costounitario: "200.00", rfc: "jghfgddjgdk4", direccion: "asdad5456", tipocompra: "Estatal", registrationDate: "2024-01-15" },
-                { numerobien: "45661", cuentabancaria: "757586867478932473", poliza: "asd66ddd", persona: "Fisica", costounitario: "200.00", rfc: "jghfgddjgdk4", direccion: "asdad5456", tipocompra: "Estatal", registrationDate: "2024-01-15" },
-                { numerobien: "0", cuentabancaria: "757586867478932473", poliza: "asd66ddd", persona: "hola", costounitario: "200.00", rfc: "jghfgddjgdk4", direccion: "asdad5456", tipocompra: "Estatal", registrationDate: "2024-01-15" },
-                { numerobien: "0", cuentabancaria: "757586867478932473", poliza: "asd66ddd", persona: "hola", costounitario: "200.00", rfc: "jghfgddjgdk4", direccion: "asdad5456", tipocompra: "Estatal", registrationDate: "2024-01-15" },
-                { numerobien: "0", cuentabancaria: "757586867478932473", poliza: "asd66ddd", persona: "hola", costounitario: "200.00", rfc: "jghfgddjgdk4", direccion: "asdad5456", tipocompra: "Estatal", registrationDate: "2024-01-15" },
-                { numerobien: "0", cuentabancaria: "757586867478932473", poliza: "asd66ddd", persona: "hola", costounitario: "200.00", rfc: "jghfgddjgdk4", direccion: "asdad5456", tipocompra: "Estatal", registrationDate: "2024-01-15" },
-                { numerobien: "0", cuentabancaria: "757586867478932473", poliza: "asd66ddd", persona: "hola", costounitario: "200.00", rfc: "jghfgddjgdk4", direccion: "asdad5456", tipocompra: "Estatal", registrationDate: "2024-01-15" },
-                { numerobien: "RTH-0", cuentabancaria: "757586867478932473", poliza: "asd66ddd", persona: "hola", costounitario: "200.00", rfc: "jghfgddjgdk4", direccion: "asdad5456", tipocompra: "Estatal", registrationDate: "2024-01-15" },
-                // Agrega más usuarios aquí...
+                {
+                    numerobien: "12345",
+                    descripcion: "Laptop HP ProBook",
+                    modelo: "ProBook 450 G8",
+                    marca: "HP",
+                    serie: "5CD12345XYZ",
+                    fechaBaja: "2024-01-15",
+                    tipoBaja: "Robo",
+                    unidadPresupuestal: "Radio y Televisión de Hidalgo",
+                    organoSuperior: "Organismo Descentralizado",
+                    documentoAmpara: "/path/to/documento.pdf",
+                    oficioSolicitud: "/path/to/oficio.pdf",
+                    fotoBien: "/path/to/foto.jpg"
+                },
+                {
+                    numerobien: "67890",
+                    descripcion: "Impresora Canon",
+                    modelo: "PIXMA G6020",
+                    marca: "Canon",
+                    serie: "ABC67890DEF",
+                    fechaBaja: "2024-01-20",
+                    tipoBaja: "Donación",
+                    unidadPresupuestal: "Radio y Televisión de Hidalgo",
+                    organoSuperior: "Organismo Descentralizado",
+                    documentoAmpara: "/path/to/documento2.pdf",
+                    oficioSolicitud: "/path/to/oficio2.pdf",
+                    fotoBien: "/path/to/foto2.jpg"
+                }
             ],
-            itemsPerPage: 10, // Cantidad de elementos por página
-            currentPage: 1, // Página actual
-            filterTerm: '', // Variable para filtrar por término específico
-
+            itemsPerPage: 10,
+            currentPage: 1,
+            filterTerm: '',
+            searchQuery: ''
         };
     },
     computed: {
         filteredBajas() {
-            return this.bajas.filter(bajas => {
+            return this.bajas.filter(baja => {
                 const query = this.searchQuery.toLowerCase();
-                const filter = this.filterTerm.toLowerCase();
-                return (bajas.numerobien.toLowerCase().includes(query) ||
-                    bajas.cuentabancaria.toLowerCase().includes(query) ||
-                    bajas.poliza.toLowerCase().includes(query) ||
-                    bajas.persona.toLowerCase().includes(query) ||
-                    bajas.costounitario.toLowerCase().includes(query) ||
-                    bajas.rfc.toLowerCase().includes(query) ||
-                    bajas.tipocompra.toLowerCase().includes(query) ||
-                    bajas.direccion.toLowerCase().includes(query)) &&
-                    (this.filterTerm === '' || bajas.tipocompra.toLowerCase().includes(filter) ||
-                        bajas.numerobien.toLowerCase().includes(filter) ||
-                        bajas.cuentabancaria.toLowerCase().includes(filter) ||
-                        bajas.persona.toLowerCase().includes(filter) ||
-                        bajas.costounitario.toLowerCase().includes(filter) ||
-                        bajas.rfc.toLowerCase().includes(filter) ||
-                        bajas.direccion.toLowerCase().includes(filter) ||
-                        bajas.tipocompra.toLowerCase().includes(filter));
+                return (
+                    baja.numerobien.toLowerCase().includes(query) ||
+                    baja.descripcion.toLowerCase().includes(query) ||
+                    baja.modelo.toLowerCase().includes(query) ||
+                    baja.marca.toLowerCase().includes(query) ||
+                    baja.serie.toLowerCase().includes(query) ||
+                    baja.tipoBaja.toLowerCase().includes(query)
+                );
             });
         },
-        // Número total de páginas
         totalPages() {
             return Math.ceil(this.filteredBajas.length / this.itemsPerPage);
         },
@@ -190,7 +217,7 @@ export default {
             const start = (this.currentPage - 1) * this.itemsPerPage;
             const end = start + this.itemsPerPage;
             return this.filteredBajas.slice(start, end);
-        },
+        }
     },
     methods: {
         goHome() {
@@ -272,6 +299,7 @@ export default {
     background: #691B31;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
+
 .navbar-left {
     flex: 1;
     display: flex;
@@ -549,5 +577,9 @@ a {
     border-radius: 10px;
     justify-content: space-between;
     margin-right: 15px;
+}
+
+.btn-download {
+    width: 50px;
 }
 </style>

@@ -32,17 +32,13 @@
                 Inventario
                 <span class="menu-icon">▼</span>
                 <div class="dropdown-menu" v-show="menus.homeMenu">
-                    <button @click="navigateTo('bajas')"
-                        style="background-color: #ddc9a3; color: #691b31; border-radius: 4px;">Historial de
-                        bajas</button>
+                    <button @click="navigateTo('bajas')">Historial de bajas</button>
                     <button @click="navigateTo('historialbienes')">Historial de bienes</button>
-                    <button @click="navigateTo('home')">Alta de bienes</button>
                     <button @click="navigateTo('bajabien')">Baja de bienes</button>
-                    <button @click="navigateTo('resguardo')">Mi resguardo</button>
-                    <button @click="navigateTo('listaalmacen')">Lista Almacén para asignar No.Inventario</button>
-                    <button @click="navigateTo('')">Lista Bienes con No.Inventario para asignar Usuario</button>
-                    <button @click="navigateTo('reportes')">Generación de Formatos/Reportes</button>
-                    <button @click="navigateTo('bienesnuevos')">Bienes nuevos para resguardo</button>
+                    <button @click="navigateTo('resguardo')">Bienes sin Resguardoo</button>
+                    <button @click="navigateTo('listaalmacen')">Asignar No.Inventario</button>
+                    <button @click="navigateTo('reportes')">Generación de Reportes</button>
+                    <button @click="navigateTo('bienesnuevos')">Asignar resguardo</button>
                 </div>
             </div>
 
@@ -52,7 +48,6 @@
                 <div class="dropdown-menu" v-show="menus.bajasMenu">
                     <button @click="navigateTo('solicitudmaterial')">Solicitud de material</button>
                     <button @click="navigateTo('bieninventario')">Agregar un bien para inventario</button>
-                    <button @click="navigateTo('bajas')">Salida de existencias</button>
                     <button @click="navigateTo('existencia')">Entrada de existencias</button>
                     <button @click="navigateTo('recepcionsolicitudes')">Recepcion de solicitudes</button>
                     <button @click="navigateTo('proveedor')">Ver proveedores</button>
@@ -65,14 +60,14 @@
 
 
         <div class="contenedor-tabla">
-            <!-- Nombre del usuario encima de la tabla --> 
-             <div class="contenedor-nombre">
+            <!-- Nombre del usuario encima de la tabla -->
+            <div class="contenedor-nombre">
                 <div class="user-info-display">
-                <h3>{{ userName }}</h3>
+                    <h3>{{ userName }}</h3>
+                </div>
             </div>
-             </div>
-            
-            
+
+
             <table class="bajas-table">
                 <thead>
                     <tr>
@@ -94,9 +89,17 @@
                 </tbody>
             </table>
             <div class="button-container">
-                <button class="boton" type="submit">
+                <button class="boton" type="button" @click="enviarSolicitud">
                     <i class="fas fa-paper-plane"></i> Enviar
                 </button>
+            </div>
+
+            <div v-if="showModal" class="modal">
+                <div class="modal-content">
+                    <h2>Enviado con éxito</h2>
+                    <p>La existencia a sido enviada correctamente.</p> 
+                    <button @click="cerrarModal">Aceptar</button>
+                </div>
             </div>
             <!-- Paginador -->
             <div class="pagination">
@@ -128,6 +131,8 @@ export default {
             itemsPerPage: 10,
             currentPage: 1,
             filterTerm: '',
+            showModal: false,
+
         };
     },
     computed: {
@@ -169,8 +174,17 @@ export default {
                 this.currentPage = page;
             }
         },
+        enviarSolicitud() {
+            console.log("Solicitud enviada");
+            this.showModal = true;
+        },
+        cerrarModal() {
+            this.showModal = false;
+            this.$router.push('/versolicitudes');
+        }
     },
 };
+
 </script>
 
 
@@ -178,6 +192,30 @@ export default {
 /* Aplicar Montserrat a todo el contenido */
 * {
     font-family: 'Montserrat', sans-serif;
+}
+
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: white;
+    color: #691B31;
+    padding: 20px;
+    border-radius: 20px;
+    width: 500px;
 }
 
 .user-info-display {
@@ -192,7 +230,7 @@ export default {
     border-radius: 20px;
 }
 
-.contenedor-nombre{
+.contenedor-nombre {
     display: flex;
     width: 80%;
     height: 60px;

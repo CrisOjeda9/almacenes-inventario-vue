@@ -34,16 +34,12 @@
                 <div class="dropdown-menu" v-show="menus.homeMenu">
                     <button @click="navigateTo('bajas')">Historial de bajas</button>
                     <button @click="navigateTo('historialbienes')">Historial de bienes</button>
-                    <button @click="navigateTo('home')">Alta de bienes</button>
                     <button @click="navigateTo('bajabien')">Baja de bienes</button>
-                    <button @click="navigateTo('resguardo')">Mi resguardo</button>
-                    <button @click="navigateTo('listaalmacen')">Lista Almacén para asignar No.Inventario</button>
-                    <button @click="navigateTo('')">Lista Bienes con No.Inventario para asignar Usuario</button>
-                    <button @click="navigateTo('reportes')">Generación de Formatos/Reportes</button>
+                    <button @click="navigateTo('resguardo')">Bienes sin Resguardo</button>
+                    <button @click="navigateTo('listaalmacen')">Asignar No.Inventario</button>
+                    <button @click="navigateTo('reportes')">Generación de Reportes</button>
                     <button @click="navigateTo('bienesnuevos')"
-                        style="background-color: #ddc9a3; color: #691b31; border-radius: 4px;">Bienes nuevos para
-                        asignar
-                        resguardo</button>
+                        style="background-color: #ddc9a3; color: #691b31; border-radius: 4px;">Asignar resguardo</button>
                 </div>
             </div>
 
@@ -53,7 +49,6 @@
                 <div class="dropdown-menu" v-show="menus.bajabienMenu">
                     <button @click="navigateTo('solicitudmaterial')">Solicitud de material</button>
                     <button @click="navigateTo('bieninventario')">Agregar un bien para inventario</button>
-                    <button @click="navigateTo('bajabien')">Salida de existencias</button>
                     <button @click="navigateTo('existencia')">Entrada de existencias</button>
                     <button @click="navigateTo('recepcionsolicitudes')">Recepcion de solicitudes</button>
                     <button @click="navigateTo('proveedor')">Ver proveedores</button>
@@ -87,7 +82,7 @@
 
         <!-- Formulario -->
         <div class="form-container">
-            <form @submit.prevent="registerbajaBien">
+            <form @submit.prevent="registerBajaBien">
                 <div class="form-row">
                     <!-- Descripción -->
                     <div class="form-field">
@@ -138,11 +133,11 @@
                     <div class="form-field">
                         <label for="responsable">Nombre del responsable</label>
                         <input type="text" id="responsable" placeholder="Ej. Juan Pérez" v-model="form.responsable"
-                            @input="filterResponsables" required  autocomplete="off" />
+                            @input="filterResponsables" required autocomplete="off" />
                         <ul v-if="filteredResponsables.length > 0" class="autocomplete-list">
-                            <li v-for="responsable in filteredResponsables" :key="responsable"
+                            <li v-for="responsable in filteredResponsables" :key="responsable.nombre"
                                 @click="selectResponsable(responsable)">
-                                {{ responsable }}
+                                {{ responsable.nombre }}
                             </li>
                         </ul>
                     </div>
@@ -150,55 +145,46 @@
                     <!-- Departamento del responsable -->
                     <div class="form-field">
                         <label for="departamento">Departamento del responsable</label>
-                        <select id="departamento" v-model="form.departamento" required>
-                            <option value="" disabled>Seleccione un departamento</option>
-                            <option value="Administración">Administración</option>
-                            <option value="Recursos Humanos">Recursos Humanos</option>
-                            <option value="Tecnología">Tecnología</option>
-                        </select>
+                        <input type="text" id="departamento" v-model="form.departamento" readonly
+                            style="background-color: #dcddcd;" />
                     </div>
-                </div>
 
-                <div class="form-row">
                     <!-- Área del responsable -->
                     <div class="form-field">
                         <label for="area">Área del responsable</label>
-                        <select id="area" v-model="form.area" required>
-                            <option value="" disabled>Seleccione un área</option>
-                            <option value="Finanzas">Finanzas</option>
-                            <option value="Operaciones">Operaciones</option>
-                            <option value="Soporte Técnico">Soporte Técnico</option>
-                        </select>
+                        <input type="text" id="area" v-model="form.area" readonly style="background-color: #dcddcd;" />
                     </div>
 
                     <!-- RFC del responsable -->
                     <div class="form-field">
                         <label for="rfc">RFC del responsable</label>
-                        <input type="text" id="rfc" placeholder="Ej. ABC123456XYZ" v-model="form.rfc" minlength="13"
-                            maxlength="13" required />
+                        <input type="text" id="rfc" v-model="form.rfc" readonly style="background-color: #dcddcd;" />
                     </div>
+
 
                     <!-- Fecha de resguardo -->
                     <div class="form-field">
                         <label for="resguardofecha">Fecha de Resguardo</label>
                         <input type="date" id="resguardofecha" v-model="form.resguardofecha" :min="today" required />
                     </div>
-                    <!-- Foto del bien de baja -->
+
                     <div class="form-field">
                         <label for="fotoBienBaja">Foto del bien recibido</label>
-                        <div class="dropzone" @drop.prevent="handleDrop" @dragover.prevent @click="triggerFileInput">
-                            <input type="file" id="fotoBienBaja" ref="fileInputBaja" @change="handleFileUpload"
-                                accept=".pdf,.jpg,.png" />
+                        <div class="dropzone" @drop.prevent="handleDrop('fotoBienRecibido')" @dragover.prevent
+                            @click="triggerFileInput('fotoBienRecibido')">
+                            <input type="file" id="fotoBienBaja" ref="fileInputBaja"
+                                @change="handleFileUpload('fotoBienRecibido')" accept="image/*" />
                             <i class="fas fa-cloud-upload-alt"></i>
-                            <span v-if="!form.fotoBienRecibido">Arrastra o selecciona un archivo (PDF, JPG, PNG)</span>
+                            <span v-if="!form.fotoBienRecibido">Arrastra o selecciona una imagen (JPG, PNG)</span>
                             <span v-else>{{ form.fotoBienRecibido.name }}</span>
                         </div>
+                        <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
                     </div>
                 </div>
 
                 <div class="button-container">
                     <button class="boton" type="submit">
-                        <i class="fas fa-plus"></i> Asignar Bien
+                        <i class="fas fa-plus"></i> Asignar bien
                     </button>
                 </div>
             </form>
@@ -230,20 +216,12 @@ export default {
                 fotoBienRecibido: null // Se agregó este campo para la foto del bien de baja
             },
             responsables: [
-                "Juan Pérez",
-                "María López",
-                "Carlos Sánchez",
-                "Ana García",
-                "Myriam García",
-                "Myriam Valderrabano",
-                "Myriam Ojeda",
-                "Myriam Ojeda Gayosso",
-                "Myriam Cortes",
-                "Cristian Eduardo Ojeda Gayosso",
-                "Carlos Martin Hernandez de Jesus",
-                "Luis Martínez"
+                { nombre: "Juan Pérez", departamento: "Administración", area: "Finanzas", rfc: "JUAP921214ABC" },
+                { nombre: "María López", departamento: "Recursos Humanos", area: "Operaciones", rfc: "MALO850701XYZ" },
+                { nombre: "Carlos Sánchez", departamento: "Tecnología", area: "Soporte Técnico", rfc: "CASO760612DEF" },
+                // Otros responsables...
             ],
-            filteredResponsables: [],
+            filteredResponsables: [], // Para almacenar los responsables filtrados
             today: new Date().toISOString().split("T")[0], // Obtiene la fecha actual en formato YYYY-MM-DD
 
             menus: {
@@ -269,20 +247,31 @@ export default {
         };
     },
     methods: {
-        // ... otros métodos ...
         filterResponsables() {
-            if (this.form.responsable) {
-                this.filteredResponsables = this.responsables.filter(responsable =>
-                    responsable.toLowerCase().includes(this.form.responsable.toLowerCase())
-                )
-                .sort((a, b) => a.localeCompare(b)); // Ordena alfabéticamente
-
+            // Verifica si el campo de responsable tiene texto
+            if (this.form.responsable.trim() !== "") {
+                const searchTerm = this.form.responsable.toLowerCase();
+                this.filteredResponsables = this.responsables
+                    .filter(responsable =>
+                        responsable.nombre.toLowerCase().includes(searchTerm)
+                    )
+                    .sort((a, b) => a.nombre.localeCompare(b.nombre));  // Orden alfabético
             } else {
+                // Si no hay texto en el campo, limpia los resultados filtrados
                 this.filteredResponsables = [];
             }
         },
+
+
+
+        // Cuando seleccionas un responsable de la lista, actualiza los campos
         selectResponsable(responsable) {
-            this.form.responsable = responsable;
+            this.form.responsable = responsable.nombre;  // Asigna el nombre al campo
+            this.form.departamento = responsable.departamento;
+            this.form.area = responsable.area;
+            this.form.rfc = responsable.rfc;
+
+            // Limpia la lista de resultados filtrados
             this.filteredResponsables = [];
         },
         startSearch() {
@@ -320,14 +309,25 @@ export default {
         goHome() {
             this.$router.push("/home");
         },
-        handleFileUpload(field) {
-            const file = event.target.files[0];
-            this.form[field] = file;
-        },
+
         registerBajaBien() {
+            // Verifica si el nombre del responsable está vacío
+            if (!this.form.responsable.trim()) {
+                // Muestra un mensaje de error si el campo está vacío
+                alert("Por favor, ingresa el nombre del responsable.");
+                return;  // Detiene la ejecución si el campo está vacío
+            }
+
+            // Aquí puedes agregar la lógica para enviar los datos del formulario
             console.log("Formulario enviado:", this.form);
-            alert("Baja registrada correctamente.");
-        },
+
+            // Redirige a la página historialbienes
+            this.$router.push({ name: 'historialbienes' }).catch(err => {
+                console.error("Error al redirigir: ", err);
+            });
+        }
+,
+
         showMenu(menu) {
             this.menus[menu] = true;
         },
@@ -337,6 +337,39 @@ export default {
         navigateTo(page) {
             this.$router.push({ name: page });
         },
+        handleFileUpload(field) {
+            const file = event.target.files[0];
+            if (file && this.isImage(file)) {
+                this.form[field] = file;
+                this.errorMessage = ""; // Limpia el mensaje de error si el archivo es válido
+            }
+        },
+
+        isImage(file) {
+            // Verifica si el archivo es una imagen
+            return file && file.type.startsWith("image/");
+        },
+
+        triggerFileInput(field) {
+            if (field === 'fotoBienRecibido') {
+                this.$refs.fileInputBaja.click();
+            } else {
+                this.$refs.fileInput.click();
+            }
+        },
+
+        handleDrop(field) {
+            const file = event.dataTransfer.files[0];
+            if (file && this.isImage(file)) {
+                this.form[field] = file;
+                this.errorMessage = ""; // Limpia el mensaje de error si el archivo es válido
+            } else {
+                this.form[field] = null; // Limpia el campo si el archivo no es válido
+                this.errorMessage = "Por favor, sube un archivo de imagen válido (JPG, PNG).";
+            }
+        },
+
+
     },
 };
 </script>

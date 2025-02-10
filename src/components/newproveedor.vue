@@ -34,13 +34,11 @@
                 <div class="dropdown-menu" v-show="menus.homeMenu">
                     <button @click="navigateTo('bajas')">Historial de bajas</button>
                     <button @click="navigateTo('historialbienes')">Historial de bienes</button>
-                    <button @click="navigateTo('home')">Alta de bienes</button>
                     <button @click="navigateTo('bajabien')">Baja de bienes</button>
-                    <button @click="navigateTo('resguardo')">Mi resguardo</button>
-                    <button @click="navigateTo('listaalmacen')">Lista Almacén para asignar No.Inventario</button>
-                    <button @click="navigateTo('')">Lista Bienes con No.Inventario para asignar Usuario</button>
-                    <button @click="navigateTo('reportes')">Generación de Formatos/Reportes</button>
-                    <button @click="navigateTo('bienesnuevos')">Bienes nuevos para asignar resguardo</button>
+                    <button @click="navigateTo('resguardo')">Bienes sin Resguardo</button>
+                    <button @click="navigateTo('listaalmacen')">Asignar No.Inventario</button>
+                    <button @click="navigateTo('reportes')">Generación de Reportes</button>
+                    <button @click="navigateTo('bienesnuevos')">Asignar resguardo</button>
 
 
                 </div>
@@ -52,10 +50,10 @@
                 <div class="dropdown-menu" v-show="menus.proveedorMenu">
                     <button @click="navigateTo('solicitudmaterial')">Solicitud de material</button>
                     <button @click="navigateTo('bieninventario')">Agregar un bien para inventario</button>
-                    <button @click="navigateTo('users')">Salida de existencias</button>
                     <button @click="navigateTo('existencia')">Entrada de existencias</button>
                     <button @click="navigateTo('recepcionsolicitudes')">Recepcion de solicitudes</button>
-                    <button @click="navigateTo('proveedor')" style="background-color: #ddc9a3; color: #691b31; border-radius: 4px;">Ver proveedores</button>
+                    <button @click="navigateTo('proveedor')"
+                        style="background-color: #ddc9a3; color: #691b31; border-radius: 4px;">Ver proveedores</button>
                     <button @click="navigateTo('factura')">Facturas</button>
                     <button @click="navigateTo('poliza')">Polizas</button>
                 </div>
@@ -64,79 +62,91 @@
 
         <!-- Formulario -->
         <div class="form-container">
-    <form @submit.prevent="registerProveedor">
-        <div class="form-row">
-            <!-- Nombre -->
-            <div class="form-field">
-                <label for="nombre">Nombre</label>
-                <input type="text" id="nombre" placeholder="Ej. Juan" v-model="form.nombre" required />
-            </div>
+            <form @submit.prevent="registerProveedor">
+                <div class="form-row">
+                    <!-- Nombre -->
+                    <div class="form-field">
+                        <label for="nombre">Nombre</label>
+                        <input type="text" id="nombre" placeholder="Ej. Juan" v-model="form.nombre" required />
+                    </div>
 
-            <!-- Apellidos -->
-            <div class="form-field">
-                <label for="apellidos">Apellidos</label>
-                <input type="text" id="apellidos" placeholder="Ej. Pérez López" v-model="form.apellidos" required />
-            </div>
+                    <!-- Apellidos -->
+                    <div class="form-field">
+                        <label for="apellidos">Apellidos</label>
+                        <input type="text" id="apellidos" placeholder="Ej. Pérez López" v-model="form.apellidos"
+                            required />
+                    </div>
 
-            <!-- Tipo de Proveedor -->
-            <div class="form-field">
-                <label for="tipoProveedor">Tipo de proveedor</label>
-                <select id="tipoProveedor" v-model="form.tipoProveedor" required>
-                    <option value="" disabled>Selecciona una opción</option>
-                    <option value="fisico">Físico</option>
-                    <option value="moral">Moral</option>
-                </select>
-            </div>
+                    <!-- Tipo de Proveedor -->
+                    <div class="form-field">
+                        <label for="tipoProveedor">Tipo de proveedor</label>
+                        <select id="tipoProveedor" v-model="form.tipoProveedor" required>
+                            <option value="" disabled>Selecciona una opción</option>
+                            <option value="fisico">Físico</option>
+                            <option value="moral">Moral</option>
+                        </select>
+                    </div>
 
-            <!-- RFC -->
-            <div class="form-field">
-                <label for="rfc">RFC</label>
-                <input type="text" id="rfc" placeholder="Ej. ABC1234567Z9" v-model="form.rfc" required />
-            </div>
-        </div>
-
-        <div class="form-row">
-            <!-- Dirección -->
-            <div class="form-field">
-                <label for="direccion">Dirección</label>
-                <input type="text" id="direccion" placeholder="Ej. Calle 123, Ciudad, Estado" v-model="form.direccion" required />
-            </div>
-
-            <!-- Correo Electrónico -->
-            <div class="form-field">
-                <label for="correo">Correo electrónico</label>
-                <input type="email" id="correo" placeholder="Ej. ejemplo@correo.com" v-model="form.correo" required />
-            </div>
-
-            <!-- Cuenta Bancaria -->
-            <div class="form-field">
-                <label for="cuentaBancaria">Cuenta bancaria</label>
-                <input type="text" id="cuentaBancaria" placeholder="Ej. 1234567890123456" v-model="form.cuentaBancaria" required />
-            </div>
-        </div>
-
-        <div class="form-row">
-            <!-- Documento relacionado -->
-            <div class="form-field">
-                <label for="documentoProveedor">Documento de acuerdo al proveedor</label>
-                <div class="dropzone" @drop.prevent="handleDrop" @dragover.prevent @click="triggerFileInput">
-                    <input type="file" id="documentoProveedor" ref="fileInput" @change="handleFileUpload" accept=".pdf,.jpg,.png" />
-                    <i class="fas fa-cloud-upload-alt"></i>
-                    <span v-if="!form.documentoProveedor">Arrastra o selecciona un archivo (PDF, JPG, PNG)</span>
-                    <span v-else>{{ form.documentoProveedor.name }}</span>
+                    <!-- RFC -->
+                    <div class="form-field">
+                        <label for="rfc">RFC</label>
+                        <input type="text" id="rfc" placeholder="Ej. ABC1234567Z9" v-model="form.rfc" required />
+                    </div>
                 </div>
+
+                <div class="form-row">
+                    <!-- Dirección -->
+                    <div class="form-field">
+                        <label for="direccion">Dirección</label>
+                        <input type="text" id="direccion" placeholder="Ej. Calle 123, Ciudad, Estado"
+                            v-model="form.direccion" required />
+                    </div>
+
+                    <!-- Correo Electrónico -->
+                    <div class="form-field">
+                        <label for="correo">Correo electrónico</label>
+                        <input type="email" id="correo" placeholder="Ej. ejemplo@correo.com" v-model="form.correo"
+                            required />
+                    </div>
+
+                    <!-- Cuenta Bancaria -->
+                    <div class="form-field">
+                        <label for="cuentaBancaria">Cuenta bancaria</label>
+                        <input type="text" id="cuentaBancaria" placeholder="Ej. 1234567890123456"
+                            v-model="form.cuentaBancaria" required />
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <!-- Documento relacionado -->
+                    <div class="form-field">
+                        <label for="documentoProveedor">Documento de acuerdo al proveedor</label>
+                        <div class="dropzone" @drop.prevent="handleDrop" @dragover.prevent @click="triggerFileInput">
+                            <input type="file" id="documentoProveedor" ref="fileInput" @change="handleFileUpload"
+                                accept=".pdf,.jpg,.png" />
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <span v-if="!form.documentoProveedor">Arrastra o selecciona un archivo (PDF, JPG,
+                                PNG)</span>
+                            <span v-else>{{ form.documentoProveedor.name }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="button-container">
+                    <button class="boton" type="submit">
+                        <i class="fas fa-plus"></i> Agregar Proveedor
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Modal -->
+        <div v-if="showModal" class="modal">
+            <div class="modal-content">
+                <h2>Proveedor registrado con éxito</h2>
+                <button @click="closeModal">Aceptar</button>
             </div>
         </div>
-
-        <div class="button-container">
-            <button class="boton" type="submit">
-                <i class="fas fa-plus"></i> Agregar Proveedor
-            </button>
-        </div>
-    </form>
-</div>
-
-
     </div>
 </template>
 
@@ -160,6 +170,8 @@ export default {
                 proveedorMenu: false,
                 settingsMenu: false,
             },
+            showModal: false
+
         };
     },
     methods: {
@@ -181,6 +193,7 @@ export default {
             // Valida los campos necesarios
             if (!this.form.nombre || !this.form.apellidos || !this.form.tipoProveedor || !this.form.rfc || !this.form.direccion || !this.form.correo || !this.form.cuentaBancaria) {
                 alert("Por favor, completa todos los campos obligatorios.");
+
                 return;
             }
             if (!this.form.documentoProveedor) {
@@ -188,9 +201,7 @@ export default {
                 return;
             }
 
-            // Procesa el registro del proveedor
-            console.log("Proveedor registrado:", this.form);
-            alert("Proveedor registrado exitosamente.");
+            this.showModal = true;
         },
         navigateTo(page) {
             console.log(`Navegando a ${page}`);
@@ -201,6 +212,11 @@ export default {
         },
         hideMenu(menu) {
             this.menus[menu] = false;
+        },
+
+        closeModal() {
+            this.showModal = false;
+            this.$router.push('/proveedor');
         },
     },
 };
@@ -213,6 +229,30 @@ export default {
 /* Aplicar Montserrat a todo el contenido */
 * {
     font-family: 'Montserrat', sans-serif;
+}
+
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: white;
+    color: #691B31;
+    padding: 20px;
+    border-radius: 20px;
+    width: 500px;
 }
 
 .container {

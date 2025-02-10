@@ -37,15 +37,13 @@
                 <div class="dropdown-menu" v-show="menus.homeMenu">
                     <button @click="navigateTo('bajas')">Historial de bajas</button>
                     <button @click="navigateTo('historialbienes')">Historial de bienes</button>
-                    <button @click="navigateTo('home')">Alta de bienes</button>
                     <button @click="navigateTo('bajabien')">Baja de bienes</button>
-                    <button @click="navigateTo('resguardo')">Mi resguardo</button>
-                    <button @click="navigateTo('listaalmacen')">Lista Almacén para asignar No.Inventario</button>
-                    <button @click="navigateTo('')">Lista Bienes con No.Inventario para asignar Usuario</button>
-                    <button @click="navigateTo('reportes')">Generación de Formatos/Reportes</button>
+                    <button @click="navigateTo('resguardo')">Bienes sin Resguardo</button>
+                    <button @click="navigateTo('listaalmacen')">Asignar No.Inventario</button>
+                    <button @click="navigateTo('reportes')">Generación de Reportes</button>
                     <button @click="navigateTo('bienesnuevos')"
-                        style="background-color: #ddc9a3; color: #691b31; border-radius: 4px;">Bienes nuevos para asignar resguardo</button>
-
+                        style="background-color: #ddc9a3; color: #691b31; border-radius: 4px;">Asignar
+                        resguardo</button>
 
 
 
@@ -58,7 +56,6 @@
                 <div class="dropdown-menu" v-show="menus.bienesnuevosMenu">
                     <button @click="navigateTo('solicitudmaterial')">Solicitud de material</button>
                     <button @click="navigateTo('bieninventario')">Agregar un bien para inventario</button>
-                    <button @click="navigateTo('bajas')">Salida de existencias</button>
                     <button @click="navigateTo('existencia')">Entrada de existencias</button>
                     <button @click="navigateTo('recepcionsolicitudes')">Recepcion de solicitudes</button>
                     <button @click="navigateTo('proveedor')">Ver proveedores</button>
@@ -81,34 +78,50 @@
         </div>
 
         <div class="contenedor-tabla">
+            <!-- Tabla con botón para descargar QR -->
+            <!-- Tabla con botón para descargar QR -->
             <table class="bienesnuevos-table">
                 <thead>
                     <tr>
+                        <th>Tipo de Inventario</th>
                         <th>No. Inventario</th>
                         <th>Descripción</th>
                         <th>Color</th>
                         <th>Material</th>
+                        <th>Marca</th>
                         <th>Modelo</th>
                         <th>Serie</th>
+                        <th>Descargar QR</th>
+
                         <th>Asignar Usuario</th>
+
                     </tr>
                 </thead>
                 <tbody>
                     <tr v-for="bienesnuevos in paginatedBienNuevo" :key="bienesnuevos.id">
+                       
+                        <td>{{ bienesnuevos.tipoinventario }}</td>
                         <td>{{ bienesnuevos.noinventario }}</td>
                         <td>{{ bienesnuevos.descripcion }}</td>
                         <td>{{ bienesnuevos.color }}</td>
                         <td>{{ bienesnuevos.material }}</td>
+                        <td>{{ bienesnuevos.marca }}</td>
                         <td>{{ bienesnuevos.modelo }}</td>
                         <td>{{ bienesnuevos.serie }}</td>
-
                         <td>
-                            <button @click="redirectToAddbienesnuevos" class="btn-bienesnuevos">+</button>
+                            <button class="boton" @click="generateAndDownloadQRCode(bienesnuevos)">
+                                <i class="fas fa-qrcode"></i>
+                            </button>
+                        </td>
+                        <td>
+                            <button @click="redirectToAddbienesnuevos" class="btn-bienesnuevos">
+                                <i class="fas fa-plus"></i>
+                            </button>
                         </td>
                     </tr>
                 </tbody>
-
             </table>
+
             <!-- Paginador -->
             <div class="pagination">
                 <button :disabled="currentPage === 1" @click="changePage(currentPage - 1)">Anterior</button>
@@ -121,6 +134,7 @@
 </template>
 
 <script>
+import QRCode from 'qrcode';
 
 export default {
     name: "bienesnuevosPage",
@@ -134,10 +148,12 @@ export default {
             searchQuery: '',
             bienesnuevos: [
                 {
+                    tipoinventario: 'RTH',
                     noinventario: "123456",
                     descripcion: "Laptop",
                     color: "Negro",
                     material: "Plástico",
+                    marca: "Sony",
                     modelo: "2021",
                     serie: "ABC123",
                     usuario_id: null,
@@ -147,6 +163,8 @@ export default {
             ],
             itemsPerPage: 10, // Cantidad de elementos por página
             currentPage: 1, // Página actual
+            qrData: "",
+
 
         };
     },
@@ -155,9 +173,11 @@ export default {
             return this.bienesnuevos.filter(bienesnuevos => {
                 const query = this.searchQuery.toLowerCase();
                 return (bienesnuevos.noinventario.toLowerCase().includes(query) ||
+                    bienesnuevos.tipoinventario.toLowerCase().includes(query) ||
                     bienesnuevos.descripcion.toLowerCase().includes(query) ||
                     bienesnuevos.color.toLowerCase().includes(query) ||
                     bienesnuevos.material.toLowerCase().includes(query) ||
+                    bienesnuevos.marca.toLowerCase().includes(query) ||
                     bienesnuevos.modelo.toLowerCase().includes(query) ||
                     bienesnuevos.serie.toLowerCase().includes(query));
 
@@ -174,6 +194,31 @@ export default {
         },
     },
     methods: {
+        generateAndDownloadQRCode(bien) {
+            // Formatear el número de inventario con el tipo
+            const inventarioFormatted = `${bien.tipoinventario}-${bien.noinventario}`;
+
+            // Construir los datos en formato clave-valor
+            const qrData = `Tipo Inventario: ${bien.tipoinventario}\n` +
+                `Número Inventario: ${inventarioFormatted}\n` +
+                `Descripción: ${bien.descripcion}\n` +
+                `Color: ${bien.color}\n` +
+                `Material: ${bien.material}\n` +
+                `Marca: ${bien.marca}\n` +
+                `Modelo: ${bien.modelo}\n` +
+                `Serie: ${bien.serie}`;
+
+            QRCode.toDataURL(qrData, (error, url) => {
+                if (error) {
+                    console.error("Error generando el código QR", error);
+                    return;
+                }
+                const link = document.createElement("a");
+                link.href = url;
+                link.download = "codigo_qr.png";
+                link.click();
+            });
+        },
         goHome() {
             this.$router.push('home'); // Redirige a la página principal ("/"). Cambia el path si es necesario.
         },
@@ -208,8 +253,6 @@ export default {
 * {
     font-family: 'Montserrat', sans-serif;
 }
-
-
 
 .pagination {
     display: flex;
@@ -452,8 +495,8 @@ a {
 }
 
 .btn-bienesnuevos {
-    width: auto;
-    height: auto;
+    width: 50px;
+    height: 50px;
     text-align: center;
     padding-top: 2px;
     padding-bottom: 2px;
