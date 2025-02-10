@@ -37,9 +37,9 @@
                     <button @click="navigateTo('bajas')">Historial de bajas</button>
                     <button @click="navigateTo('historialbienes')">Historial de bienes</button>
                     <button @click="navigateTo('bajabien')">Baja de bienes</button>
-                    <button @click="navigateTo('resguardo')">Bienes sin Resguardo</button>
+                    <button @click="navigateTo('resguardo')">Bienes sin resguardo</button>
                     <button @click="navigateTo('listaalmacen')">Asignar No.Inventario</button>
-                    <button @click="navigateTo('reportes')">Generación de Reportes</button>
+                    <button @click="navigateTo('reportes')">Generación de reportes</button>
                     <button @click="navigateTo('bienesnuevos')">Asignar resguardo</button>
 
 
@@ -65,14 +65,14 @@
             <!-- Fila 1 -->
             <div class="button-card" @click="navigateTo2('bajas')">
                 <i class="fa fa-history"></i>
-                <span>Historial de Bajas</span>
+                <span>Historial de bajas</span>
             </div>
 
            
 
             <div class="button-card" @click="navigateTo2('bajabien')">
                 <i class="fa fa-arrow-circle-down"></i>
-                <span>Baja de Bienes</span>
+                <span>Baja de bienes</span>
             </div>
         </div>
 
@@ -80,16 +80,16 @@
         <div class="menu">
             <div class="button-card" @click="navigateTo2('resguardo')">
                 <i class="fas fa-clipboard"></i>
-                <span>Bienes sin Resguardo</span>
+                <span>Bienes sin resguardo</span>
             </div>
 
             <div class="button-card" @click="navigateTo2('bienesnuevos')">
                 <i class="fas fa-user"></i>
-                <span>Asignar Resguardo</span>
+                <span>Asignar resguardo</span>
             </div>
             <div class="button-card"  @click="navigateTo2('historialbienes')">
                 <i class="fas fa-history"></i> <!-- Historial -->
-                <span>Historial de Bienes</span>
+                <span>Historial de bienes</span>
             </div>
 
 
@@ -105,7 +105,7 @@
 
             <div class="button-card"  @click="navigateTo2('reportes')">
                 <i class="fas fa-file-alt"></i> <!-- Reportes -->
-                <span>Generacion de Reportes</span>
+                <span>Generacion de reportes</span>
             </div>
         </div>
 

@@ -35,9 +35,9 @@
                     <button @click="navigateTo('bajas')">Historial de bajas</button>
                     <button @click="navigateTo('historialbienes')">Historial de bienes</button>
                     <button @click="navigateTo('bajabien')">Baja de bienes</button>
-                    <button @click="navigateTo('resguardo')">Bienes sin Resguardo</button>
+                    <button @click="navigateTo('resguardo')">Bienes sin resguardo</button>
                     <button @click="navigateTo('listaalmacen')">Asignar No.Inventario</button>
-                    <button @click="navigateTo('reportes')">Generación de Reportes</button>
+                    <button @click="navigateTo('reportes')">Generación de reportes</button>
                     <button @click="navigateTo('bienesnuevos')">Asignar resguardo</button>
 
 
@@ -68,13 +68,13 @@
                     <!-- ID -->
                     <div class="form-field">
                         <label for="id">ID</label>
-                        <input type="number" min="0" id="id" placeholder="Ej. 1" v-model="form.id" required />
+                        <input type="number" min="0" id="id" placeholder="" v-model="form.id" required />
                     </div>
 
                     <!-- Número de factura -->
                     <div class="form-field">
                         <label for="numerofactura">Número de factura</label>
-                        <input type="number" min="0" id="numerofactura" placeholder="Ej. 10"
+                        <input type="number" min="0" id="numerofactura" placeholder=""
                             v-model="form.numeroFactura" required />
                     </div>
 
@@ -92,7 +92,7 @@
                     <!-- Nombre -->
                     <div class="form-field">
                         <label for="nombre">Nombre</label>
-                        <input type="text" id="nombre" placeholder="Ej. Nombre completo" v-model="form.nombre"
+                        <input type="text" id="nombre" placeholder="" v-model="form.nombre"
                             required />
                     </div>
                 </div>
@@ -103,27 +103,27 @@
                     <!-- Importe sin IVA -->
                     <div class="form-field">
                         <label for="importeSinIVA">Importe sin IVA</label>
-                        <input type="number" step="0.01" min="0" id="importeSinIVA" placeholder="Ej. 1000.00"
+                        <input type="number" step="0.01" min="0" id="importeSinIVA" placeholder=""
                             v-model="form.importeSinIVA" required />
                     </div>
 
                     <!-- IVA -->
                     <div class="form-field">
                         <label for="iva">IVA</label>
-                        <input type="number" step="0.01" min="0" id="iva" placeholder="Ej. 160.00" v-model="form.iva"
+                        <input type="number" step="0.01" min="0" id="iva" placeholder="" v-model="form.iva"
                             required />
                     </div>
 
                     <!-- Importe con IVA -->
                     <div class="form-field">
                         <label for="importeConIVA">Importe con IVA</label>
-                        <input type="number" step="0.01" id="importeConIVA" min="0" placeholder="Ej. 1160.00"
+                        <input type="number" step="0.01" id="importeConIVA" min="0" placeholder=""
                             v-model="form.importeConIVA" required />
                     </div>
                     <!-- Cantidad -->
                     <div class="form-field">
                         <label for="cantidad">Cantidad</label>
-                        <input type="number" min="0" id="cantidad" placeholder="Ej. 50" v-model="form.cantidad"
+                        <input type="number" min="0" id="cantidad" placeholder="" v-model="form.cantidad"
                             required />
                     </div>
                 </div>
@@ -152,7 +152,7 @@
                     <!-- Total de ingreso -->
                     <div class="form-field">
                         <label for="totalIngreso">Total de ingreso</label>
-                        <input type="number" step="0.01" min="0" id="totalIngreso" placeholder="Ej. 5000.00"
+                        <input type="number" step="0.01" min="0" id="totalIngreso" placeholder=""
                             v-model="form.totalIngreso" required />
                     </div>
 
@@ -164,9 +164,9 @@
                         <label for="fotoArticulo">Foto artículo</label>
                         <div class="dropzone" @drop.prevent="handleDrop" @dragover.prevent @click="triggerFileInput">
                             <input type="file" id="fotoArticulo" ref="fileInput" @change="handleFileUpload"
-                                accept=".pdf,.jpg,.png" />
+                                accept=".jpg,.png" />
                             <i class="fas fa-cloud-upload-alt"></i>
-                            <span v-if="!form.fotoArticulo">Arrastra o selecciona un archivo (PDF, JPG, PNG)</span>
+                            <span v-if="!form.fotoArticulo">Arrastra o selecciona una imagen (JPG, PNG)</span>
                             <span v-else>{{ form.fotoArticulo.name }}</span>
                         </div>
                     </div>

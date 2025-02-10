@@ -36,9 +36,9 @@
                     <button @click="navigateTo('bajas')">Historial de bajas</button>
                     <button @click="navigateTo('historialbienes')">Historial de bienes</button>
                     <button @click="navigateTo('bajabien')">Baja de bienes</button>
-                    <button @click="navigateTo('resguardo')">Bienes sin Resguardo</button>
+                    <button @click="navigateTo('resguardo')">Bienes sin resguardo</button>
                     <button @click="navigateTo('listaalmacen')">Asignar No.Inventario</button>
-                    <button @click="navigateTo('reportes')">Generación de Reportes</button>
+                    <button @click="navigateTo('reportes')">Generación de reportes</button>
                     <button @click="navigateTo('bienesnuevos')">Asignar resguardo</button>
 
 
@@ -136,7 +136,7 @@
                             placeholder="Radio y Televisión de Hidalgo" v-model="form.areapresupuestal" readonly />
                     </div>
                     <div class="form-field">
-                        <label for="email">Email</label>
+                        <label for="email">Correo electrónico</label>
                         <input type="email" v-model="form.email" />
                     </div>
                     <div class="form-field">
@@ -168,9 +168,9 @@
                         <div class="dropzone" @drop.prevent="handleDrop('INE')" @dragover.prevent
                             @click="triggerFileInput('INE')">
                             <input type="file" id="documentoINE" ref="fileInputINE" @change="handleFileUpload('INE')"
-                                accept=".pdf,.jpg,.png" />
+                                accept=".pdf" />
                             <i class="fas fa-cloud-upload-alt"></i>
-                            <span v-if="!form.documentoINE">Arrastra o selecciona un archivo (PDF, JPG, PNG)</span>
+                            <span v-if="!form.documentoINE">Arrastra o selecciona un archivo (PDF)</span>
                             <span v-else>{{ form.documentoINE.name }}</span>
                         </div>
                     </div>
@@ -183,7 +183,7 @@
                             <input type="file" id="documentoFoto" ref="fileInputFoto" @change="handleFileUpload('Foto')"
                                 accept=".jpg,.png" />
                             <i class="fas fa-cloud-upload-alt"></i>
-                            <span v-if="!form.documentoFoto">Arrastra o selecciona un archivo (JPG, PNG)</span>
+                            <span v-if="!form.documentoFoto">Arrastra o selecciona una imagen (JPG, PNG)</span>
                             <span v-else>{{ form.documentoFoto.name }}</span>
                         </div>
                     </div>

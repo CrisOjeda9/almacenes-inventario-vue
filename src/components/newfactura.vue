@@ -35,9 +35,9 @@
                     <button @click="navigateTo('bajas')">Historial de bajas</button>
                     <button @click="navigateTo('historialbienes')">Historial de bienes</button>
                     <button @click="navigateTo('bajabien')">Baja de bienes</button>
-                    <button @click="navigateTo('resguardo')">Bienes sin Resguardo</button>
+                    <button @click="navigateTo('resguardo')">Bienes sin resguardo</button>
                     <button @click="navigateTo('listaalmacen')">Asignar No.Inventario</button>
-                    <button @click="navigateTo('reportes')">Generación de Reportes</button>
+                    <button @click="navigateTo('reportes')">Generación de reportes</button>
                     <button @click="navigateTo('bienesnuevos')">Asignar resguardo</button>
 
 
@@ -92,7 +92,7 @@
                     <!-- No. Factura -->
                     <div class="form-field">
                         <label for="numfactura">No. Factura</label>
-                        <input type="number" min="0" id="numfactura" placeholder="Ej. F123456" v-model="form.numFactura"
+                        <input type="number" min="0" id="numfactura" placeholder="" v-model="form.numFactura"
                             required />
                     </div>
 
@@ -116,7 +116,7 @@
                     <!-- Concepto -->
                     <div class="form-field">
                         <label for="concepto">Concepto</label>
-                        <input type="text" id="concepto" placeholder="Ej. Compra de material" v-model="form.concepto"
+                        <input type="text" id="concepto" placeholder="" v-model="form.concepto"
                             minlength="3" maxlength="100" style="text-transform: uppercase;" required />
                     </div>
                     <!-- Fecha de Factura -->
@@ -127,7 +127,7 @@
                     <!-- Cantidad -->
                     <div class="form-field">
                         <label for="cantidad">Cantidad</label>
-                        <input type="number" min="0" id="cantidad" placeholder="Ej. 100" v-model="form.cantidad"
+                        <input type="number" min="0" id="cantidad" placeholder="" v-model="form.cantidad"
                             required />
                     </div>
 
@@ -140,25 +140,25 @@
                     <!-- Precio Unitario -->
                     <div class="form-field">
                         <label for="precioUnitario">Precio Unitario</label>
-                        <input type="number" id="precioUnitario" step="0.01" placeholder="Ej. 50.00"
+                        <input type="number" id="precioUnitario" step="0.01" placeholder=""
                             v-model="form.precioUnitario" min="0" required />
                     </div>
                     <!-- Precio Total sin IVA -->
                     <div class="form-field">
                         <label for="precioTotalSinIVA">Precio total sin IVA</label>
-                        <input type="number" id="precioTotalSinIVA" step="0.01" placeholder="Ej. 5000.00"
+                        <input type="number" id="precioTotalSinIVA" step="0.01" placeholder=""
                             v-model="form.precioTotalSinIVA" min="0" required />
                     </div>
                     <!-- IVA -->
                     <div class="form-field">
                         <label for="iva">IVA</label>
-                        <input type="number" id="iva" step="0.01" placeholder="Ej. 800.00" v-model="form.iva" min="0"
+                        <input type="number" id="iva" step="0.01" placeholder="" v-model="form.iva" min="0"
                             required />
                     </div>
                     <!-- Precio Total con IVA -->
                     <div class="form-field">
                         <label for="precioTotalConIVA">Precio total con IVA</label>
-                        <input type="number" id="precioTotalConIVA" step="0.01" placeholder="Ej. 5800.00"
+                        <input type="number" id="precioTotalConIVA" step="0.01" placeholder=""
                             v-model="form.precioTotalConIVA" min="0" required />
                     </div>
 

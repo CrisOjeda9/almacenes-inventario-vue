@@ -35,9 +35,9 @@
                     <button @click="navigateTo('bajas')">Historial de bajas</button>
                     <button @click="navigateTo('historialbienes')">Historial de bienes</button>
                     <button @click="navigateTo('bajabien')">Baja de bienes</button>
-                    <button @click="navigateTo('resguardo')">Bienes sin Resguardo</button>
+                    <button @click="navigateTo('resguardo')">Bienes sin resguardo</button>
                     <button @click="navigateTo('listaalmacen')">Asignar No.Inventario</button>
-                    <button @click="navigateTo('reportes')">Generación de Reportes</button>
+                    <button @click="navigateTo('reportes')">Generación de reportes</button>
                     <button @click="navigateTo('bienesnuevos')"
                         style="background-color: #ddc9a3; color: #691b31; border-radius: 4px;">Asignar resguardo</button>
                 </div>
@@ -115,7 +115,7 @@
                         <div class="dropzone" @drop.prevent="handleDrop" @dragover.prevent @click="triggerFileInput"
                             style="background-color: #dcddcd;">
                             <input type="file" id="fotoBien" ref="fileInput" @change="handleFileUpload" readonly
-                                accept=".pdf,.jpg,.png" />
+                                accept=".jpg,.png" />
                             <i class="fas fa-cloud-upload-alt" style="color: #691b31;"></i>
                             <span v-if="!form.fotoBien" style="color: #691b31; margin-left: 2px;">Arrastra/Selecciona
                                 una foto</span>
@@ -132,7 +132,7 @@
 
                     <div class="form-field">
                         <label for="responsable">Nombre del responsable</label>
-                        <input type="text" id="responsable" placeholder="Ej. Juan Pérez" v-model="form.responsable"
+                        <input type="text" id="responsable" placeholder="" v-model="form.responsable"
                             @input="filterResponsables" required autocomplete="off" />
                         <ul v-if="filteredResponsables.length > 0" class="autocomplete-list">
                             <li v-for="responsable in filteredResponsables" :key="responsable.nombre"

@@ -35,9 +35,9 @@
                     <button @click="navigateTo('bajas')">Historial de bajas</button>
                     <button @click="navigateTo('historialbienes')">Historial de bienes</button>
                     <button @click="navigateTo('bajabien')">Baja de bienes</button>
-                    <button @click="navigateTo('resguardo')">Bienes sin Resguardo</button>
+                    <button @click="navigateTo('resguardo')">Bienes sin resguardo</button>
                     <button @click="navigateTo('listaalmacen')">Asignar No.Inventario</button>
-                    <button @click="navigateTo('reportes')">Generación de Reportes</button>
+                    <button @click="navigateTo('reportes')">Generación de reportes</button>
                     <button @click="navigateTo('bienesnuevos')">Asignar resguardo</button>
 
 
@@ -67,27 +67,27 @@
                     <!-- Descripción -->
                     <div class="form-field">
                         <label for="descripcion">Descripción</label>
-                        <input type="text" id="descripcion" placeholder="Ej. Póliza de seguro"
+                        <input type="text" id="descripcion" placeholder=""
                             v-model="form.descripcion" required />
                     </div>
 
                     <!-- Cobertura -->
                     <div class="form-field">
                         <label for="cobertura">Cobertura</label>
-                        <input type="text" id="cobertura" placeholder="Ej. Total" v-model="form.cobertura" required />
+                        <input type="text" id="cobertura" placeholder="" v-model="form.cobertura" required />
                     </div>
 
                     <!-- Tipo de Póliza -->
                     <div class="form-field">
                         <label for="tipopoliza">Tipo de Póliza</label>
-                        <input type="text" id="tipopoliza" placeholder="Ej. Póliza de vida" v-model="form.tipopoliza"
+                        <input type="text" id="tipopoliza" placeholder="" v-model="form.tipopoliza"
                             required />
                     </div>
 
                     <!-- Calidad -->
                     <div class="form-field">
                         <label for="calidad">Calidad</label>
-                        <input type="text" id="calidad" placeholder="Ej. Premium" v-model="form.calidad" required />
+                        <input type="text" id="calidad" placeholder="" v-model="form.calidad" required />
                     </div>
                 </div>
 
@@ -95,28 +95,28 @@
                     <!-- Deducible -->
                     <div class="form-field">
                         <label for="deducible">Deducible</label>
-                        <input type="number" step="0.01" id="deducible" placeholder="Ej. 5000" v-model="form.deducible"
+                        <input type="number" step="0.01" id="deducible" placeholder="" v-model="form.deducible"
                             min="0" required />
                     </div>
 
                     <!-- Limite de indemnización -->
                     <div class="form-field">
                         <label for="indemnizacion">Límite de indemnización</label>
-                        <input type="number" step="0.01" id="indemnizacion" placeholder="Ej. 100000"
+                        <input type="number" step="0.01" id="indemnizacion" placeholder=""
                             v-model="form.indemnizacion" min="0" required />
                     </div>
 
                     <!-- Periodo de Validación -->
                     <div class="form-field">
                         <label for="validacion">Periodo de Validación</label>
-                        <input type="number" min="0" id="validacion" placeholder="Ej. 1 año" v-model="form.validacion"
+                        <input type="number" min="0" id="validacion" placeholder="" v-model="form.validacion"
                             required />
                     </div>
 
                     <!-- Clausulas de Exclusion -->
                     <div class="form-field">
                         <label for="exclusion">Cláusulas de Exclusion</label>
-                        <input type="text" id="exclusion" placeholder="Ej. No aplica en caso de... "
+                        <input type="text" id="exclusion" placeholder=""
                             v-model="form.exclusion" required />
                     </div>
                 </div>

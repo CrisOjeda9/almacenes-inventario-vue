@@ -35,9 +35,9 @@
                     <button @click="navigateTo('bajas')">Historial de bajas</button>
                     <button @click="navigateTo('historialbienes')">Historial de bienes</button>
                     <button @click="navigateTo('bajabien')">Baja de bienes</button>
-                    <button @click="navigateTo('resguardo')">Bienes sin Resguardo</button>
+                    <button @click="navigateTo('resguardo')">Bienes sin resguardo</button>
                     <button @click="navigateTo('listaalmacen')">Asignar No.Inventario</button>
-                    <button @click="navigateTo('reportes')">Generación de Reportes</button>
+                    <button @click="navigateTo('reportes')">Generación de reportes</button>
                     <button @click="navigateTo('bienesnuevos')">Asignar resguardo</button>
 
 
@@ -67,13 +67,13 @@
                     <!-- Nombre -->
                     <div class="form-field">
                         <label for="nombre">Nombre</label>
-                        <input type="text" id="nombre" placeholder="Ej. Juan" v-model="form.nombre" required />
+                        <input type="text" id="nombre" placeholder="" v-model="form.nombre" required />
                     </div>
 
                     <!-- Apellidos -->
                     <div class="form-field">
                         <label for="apellidos">Apellidos</label>
-                        <input type="text" id="apellidos" placeholder="Ej. Pérez López" v-model="form.apellidos"
+                        <input type="text" id="apellidos" placeholder="" v-model="form.apellidos"
                             required />
                     </div>
 
@@ -90,7 +90,8 @@
                     <!-- RFC -->
                     <div class="form-field">
                         <label for="rfc">RFC</label>
-                        <input type="text" id="rfc" placeholder="Ej. ABC1234567Z9" v-model="form.rfc" required />
+                        <input type="text" placeholder="" minlength="13" maxlength="13" v-model="form.rfc"
+                            style="text-transform: uppercase;" required />
                     </div>
                 </div>
 
@@ -98,21 +99,21 @@
                     <!-- Dirección -->
                     <div class="form-field">
                         <label for="direccion">Dirección</label>
-                        <input type="text" id="direccion" placeholder="Ej. Calle 123, Ciudad, Estado"
+                        <input type="text" id="direccion" placeholder=""
                             v-model="form.direccion" required />
                     </div>
 
                     <!-- Correo Electrónico -->
                     <div class="form-field">
                         <label for="correo">Correo electrónico</label>
-                        <input type="email" id="correo" placeholder="Ej. ejemplo@correo.com" v-model="form.correo"
+                        <input type="email" id="correo" placeholder="" v-model="form.correo"
                             required />
                     </div>
 
                     <!-- Cuenta Bancaria -->
                     <div class="form-field">
                         <label for="cuentaBancaria">Cuenta bancaria</label>
-                        <input type="text" id="cuentaBancaria" placeholder="Ej. 1234567890123456"
+                        <input type="text" id="cuentaBancaria" placeholder=""
                             v-model="form.cuentaBancaria" required />
                     </div>
                 </div>
@@ -123,10 +124,9 @@
                         <label for="documentoProveedor">Documento de acuerdo al proveedor</label>
                         <div class="dropzone" @drop.prevent="handleDrop" @dragover.prevent @click="triggerFileInput">
                             <input type="file" id="documentoProveedor" ref="fileInput" @change="handleFileUpload"
-                                accept=".pdf,.jpg,.png" />
+                                accept=".pdf" />
                             <i class="fas fa-cloud-upload-alt"></i>
-                            <span v-if="!form.documentoProveedor">Arrastra o selecciona un archivo (PDF, JPG,
-                                PNG)</span>
+                            <span v-if="!form.documentoProveedor">Arrastra o selecciona un archivo (PDF)</span>
                             <span v-else>{{ form.documentoProveedor.name }}</span>
                         </div>
                     </div>

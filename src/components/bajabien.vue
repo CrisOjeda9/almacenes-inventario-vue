@@ -35,9 +35,9 @@
                     <button @click="navigateTo('bajas')">Historial de bajas</button>
                     <button @click="navigateTo('historialbienes')">Historial de bienes</button>
                     <button @click="navigateTo('bajabien')" style="background-color: #ddc9a3; color: #691b31; border-radius: 4px;">Baja de bienes</button>
-                    <button @click="navigateTo('resguardo')">Bienes sin Resguardo</button>
+                    <button @click="navigateTo('resguardo')">Bienes sin resguardo</button>
                     <button @click="navigateTo('listaalmacen')">Asignar No.Inventario</button>
-                    <button @click="navigateTo('reportes')">Generación de Reportes</button>
+                    <button @click="navigateTo('reportes')">Generación de reportes</button>
                     <button @click="navigateTo('bienesnuevos')">Asignar resguardo</button>
 
 
@@ -158,10 +158,10 @@
                         <div class="dropzone" @drop.prevent="handleDrop('documentoAmpara')" @dragover.prevent
                             @click="triggerFileInput('documentoAmpara')">
                             <input type="file" id="documentoAmpara" ref="documentoAmparaInput"
-                                @change="handleFileUpload($event, 'documentoAmpara')" accept=".pdf,.jpg,.png"
+                                @change="handleFileUpload($event, 'documentoAmpara')" accept=".pdf"
                                 style="display: none;" />
                             <i class="fas fa-cloud-upload-alt"></i>
-                            <span v-if="!form.documentoAmpara">Arrastra o selecciona un archivo (PDF, JPG, PNG)</span>
+                            <span v-if="!form.documentoAmpara">Arrastra o selecciona un archivo (PDF)</span>
                             <span v-else>{{ form.documentoAmpara.name }}</span>
                         </div>
                     </div>
@@ -172,10 +172,10 @@
                         <div class="dropzone" @drop.prevent="handleDrop('oficioSolicitud')" @dragover.prevent
                             @click="triggerFileInput('oficioSolicitud')">
                             <input type="file" id="oficioSolicitud" ref="oficioSolicitudInput"
-                                @change="handleFileUpload($event, 'oficioSolicitud')" accept=".pdf,.jpg,.png"
+                                @change="handleFileUpload($event, 'oficioSolicitud')" accept=".pdf"
                                 style="display: none;" />
                             <i class="fas fa-cloud-upload-alt"></i>
-                            <span v-if="!form.oficioSolicitud">Arrastra o selecciona un archivo (PDF, JPG, PNG)</span>
+                            <span v-if="!form.oficioSolicitud">Arrastra o selecciona un archivo (PDF)</span>
                             <span v-else>{{ form.oficioSolicitud.name }}</span>
                         </div>
                     </div>
@@ -189,7 +189,7 @@
                                 @change="handleFileUpload($event, 'fotoBien')" accept=".jpg,.png"
                                 style="display: none;" />
                             <i class="fas fa-cloud-upload-alt"></i>
-                            <span v-if="!form.fotoBien">Arrastra o selecciona un archivo (JPG, PNG)</span>
+                            <span v-if="!form.fotoBien">Arrastra o selecciona una imagen (JPG, PNG)</span>
                             <span v-else>{{ form.fotoBien.name }}</span>
                         </div>
                     </div>

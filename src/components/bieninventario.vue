@@ -35,9 +35,9 @@
                     <button @click="navigateTo('bajas')">Historial de bajas</button>
                     <button @click="navigateTo('historialbienes')">Historial de bienes</button>
                     <button @click="navigateTo('bajabien')">Baja de bienes</button>
-                    <button @click="navigateTo('resguardo')">Bienes sin Resguardo</button>
+                    <button @click="navigateTo('resguardo')">Bienes sin resguardo</button>
                     <button @click="navigateTo('listaalmacen')" >Asignar No.Inventario</button>
-                    <button @click="navigateTo('reportes')">Generación de Reportes</button>
+                    <button @click="navigateTo('reportes')">Generación de reportes</button>
                     <button @click="navigateTo('bienesnuevos')">Asignar resguardo</button>
                 </div>
             </div>
@@ -80,20 +80,20 @@
                     <!-- Número de inventario -->
                     <div class="form-field">
                         <label for="inventario">Número de Inventario</label>
-                        <input type="text" id="inventario" placeholder="Ej. Compra de material"
+                        <input type="text" id="inventario" placeholder=""
                             v-model="form.inventario" :disabled="form.tipoInventario === 'gob' ? false : true"
                             @input="handleInput" required />
                     </div>
                     <!-- Descripción -->
                     <div class="form-field">
                         <label for="descripcion">Descripción</label>
-                        <input type="text" id="descripcion" placeholder="Ej. Compra de material"
+                        <input type="text" id="descripcion" placeholder=""
                             v-model="form.descripcion" required />
                     </div>
                     <!-- Color -->
                     <div class="form-field">
                         <label for="color">Color</label>
-                        <input type="text" id="color" placeholder="Ej. Compra de material" v-model="form.color"
+                        <input type="text" id="color" placeholder="" v-model="form.color"
                             required />
                     </div>
                 </div>
@@ -102,26 +102,26 @@
                     <!-- Material -->
                     <div class="form-field">
                         <label for="material">Material</label>
-                        <input type="text" id="material" placeholder="Ej. Compra de material" v-model="form.material"
+                        <input type="text" id="material" placeholder="" v-model="form.material"
                             required />
                     </div>
                     <!-- Marca -->
                     <div class="form-field">
                         <label for="marca">Marca</label>
-                        <input type="text" id="marca" placeholder="Ej. Compra de material" v-model="form.marca"
+                        <input type="text" id="marca" placeholder="" v-model="form.marca"
                             required />
                     </div>
                     <!-- Modelo -->
                     <div class="form-field">
                         <label for="modelo">Modelo</label>
-                        <input type="text" id="modelo" placeholder="Ej. Compra de material" v-model="form.modelo"
+                        <input type="text" id="modelo" placeholder="" v-model="form.modelo"
                             required />
                     </div>
 
                     <!-- Serie -->
                     <div class="form-field">
                         <label for="serie">Serie</label>
-                        <input type="text" id="serie" placeholder="Ej. Compra de material" v-model="form.serie"
+                        <input type="text" id="serie" placeholder="" v-model="form.serie"
                             required />
                     </div>
                 </div>
