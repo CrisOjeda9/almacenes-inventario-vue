@@ -36,7 +36,9 @@
                     <button @click="navigateTo('bajas')">Historial de bajas</button>
                     <button @click="navigateTo('historialbienes')">Historial de bienes</button>
                     <button @click="navigateTo('bajabien')">Baja de bienes</button>
-                    <button @click="navigateTo('resguardo')" style="background-color: #ddc9a3; color: #691b31; border-radius: 4px;">Bienes sin resguardo</button>
+                    <button @click="navigateTo('resguardo')"
+                        style="background-color: #ddc9a3; color: #691b31; border-radius: 4px;">Bienes sin
+                        resguardo</button>
                     <button @click="navigateTo('listaalmacen')">Asignar No.Inventario</button>
                     <button @click="navigateTo('reportes')">Generación de reportes</button>
                     <button @click="navigateTo('bienesnuevos')">Asignar resguardo</button>
@@ -65,11 +67,8 @@
         <div class="search-bar">
             <div class="input-wrapper">
                 <input type="text" v-model="searchQuery" placeholder="Buscar..." />
-                <i class="fas fa-search"></i> <!-- Icono de la lupa -->
+                <i class="fas fa-search"></i>
             </div>
-
-
-
         </div>
         <!-- Botones de descarga -->
         <div class="download-buttons">
@@ -83,49 +82,32 @@
             </button>
         </div>
 
-
         <div class="contenedor-tabla">
-            <table class="resguardo-table">
-                <thead>
-                    <tr>
-                        <th>No. Inventario</th>
-                        <th>Descripción</th>
-                        <th>Color</th>
-                        <th>Material</th>
-                        <th>Modelo</th>
-                        <th>Marca</th>
-                        <th>Foto</th>
-                        <th>Serie</th>
-                        <th>Fecha de Registro</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr v-for="resguardo in paginatedresguardo" :key="resguardo.id">
-                        <td>{{ resguardo.noinventario }}</td>
-                        <td>{{ resguardo.descripcion }}</td>
-                        <td>{{ resguardo.color }}</td>
-                        <td>{{ resguardo.material }}</td>
-                        <td>{{ resguardo.modelo }}</td>
-                        <td>{{ resguardo.marca }}</td>
-                        <td>
-                            <img :src="require(`@/assets/logo.png`)" alt="Imagen de Inventario" width="20%"
-                                height="auto" />
-                        </td>
-
-                        <td>{{ resguardo.serie }}</td>
-                        <td>{{ resguardo.registrationDate }}</td>
-
-                    </tr>
-                </tbody>
-
-            </table>
-            <!-- Paginador -->
-            <div class="pagination">
-                <button :disabled="currentPage === 1" @click="changePage(currentPage - 1)">Anterior</button>
-                <span>Página {{ currentPage }} de {{ totalPages }}</span>
-                <button :disabled="currentPage === totalPages" @click="changePage(currentPage + 1)">Siguiente</button>
-            </div>
-        </div>
+        <table class="resguardo-table">
+            <thead>
+                <tr>
+                    <th v-for="field in tableFields" :key="field.value">
+                        <label>
+                            <input type="checkbox" v-model="selectedFields" :value="field.value"> {{ field.label }}
+                        </label>
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr v-for="resguardo in paginatedResguardo" :key="resguardo.noinventario">
+                    <td v-for="field in tableFields" :key="field.value">
+                        <!-- Verificar si el campo es 'foto' y mostrar la imagen -->
+                        <template v-if="field.value === 'foto'">
+                            <img :src="'/path/to/photos/' + resguardo[field.value]" alt="Foto" width="50" height="50" />
+                        </template>
+                        <template v-else>
+                            {{ resguardo[field.value] }}
+                        </template>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
 
     </div>
 </template>
@@ -139,59 +121,49 @@ export default {
     name: "resguardoPage",
     data() {
         return {
+            
             menus: {
                 homeMenu: false,
                 resguardoMenu: false,
                 settingsMenu: false,
             },
             searchQuery: '',
+            selectedFields: ["noinventario", "descripcion", "color", "material", "modelo", "marca", "serie", "foto", "registrationDate"], // Añadir 'foto' en la selección
+            tableFields: [
+                { label: "No. Inventario", value: "noinventario" },
+                { label: "Descripción", value: "descripcion" },
+                { label: "Color", value: "color" },
+                { label: "Material", value: "material" },
+                { label: "Modelo", value: "modelo" },
+                { label: "Marca", value: "marca" },
+                { label: "Serie", value: "serie" },
+                { label: "Foto", value: "foto" }, // Nueva columna para foto
+                { label: "Fecha de Registro", value: "registrationDate" }
+            ],
             resguardo: [
-                { noinventario: "15051", descripcion: "es grande", color: "Rojo", material: "Marmol", modelo: "pro", marca: "apple", foto: "asdad456564", serie: "pro", registrationDate: "2024-01-15" },
-                { noinventario: "15052", descripcion: "compacto", color: "Azul", material: "Aluminio", modelo: "mini", marca: "samsung", foto: "asd1234567", serie: "mini", registrationDate: "2024-01-16" },
-                { noinventario: "15053", descripcion: "elegante", color: "Negro", material: "Vidrio", modelo: "elegant", marca: "sony", foto: "sdgfdfg1345", serie: "elegant", registrationDate: "2024-01-17" },
-                { noinventario: "15054", descripcion: "resistente", color: "Gris", material: "Acero", modelo: "strong", marca: "dell", foto: "ertyu564321", serie: "strong", registrationDate: "2024-01-18" },
-                { noinventario: "15055", descripcion: "ligero", color: "Blanco", material: "Plástico", modelo: "light", marca: "lg", foto: "wertyuqwo123", serie: "light", registrationDate: "2024-01-19" },
-                { noinventario: "15056", descripcion: "fino", color: "Oro", material: "Madera", modelo: "fine", marca: "bose", foto: "yugfdg6543", serie: "fine", registrationDate: "2024-01-20" },
-                { noinventario: "15057", descripcion: "práctico", color: "Verde", material: "Silicona", modelo: "basic", marca: "xiaomi", foto: "fghj12453", serie: "basic", registrationDate: "2024-01-21" },
-                { noinventario: "15058", descripcion: "pequeño", color: "Amarillo", material: "Cerámica", modelo: "small", marca: "samsung", foto: "3456dfg789", serie: "small", registrationDate: "2024-01-22" },
-                { noinventario: "15059", descripcion: "potente", color: "Rojo", material: "Acero", modelo: "power", marca: "apple", foto: "hgfghg654", serie: "power", registrationDate: "2024-01-23" },
-                { noinventario: "15060", descripcion: "sofisticado", color: "Negro", material: "Cristal", modelo: "sophisticated", marca: "lg", foto: "kljoi6745", serie: "sophisticated", registrationDate: "2024-01-24" },
-                { noinventario: "15061", descripcion: "grande", color: "Gris", material: "Acero", modelo: "big", marca: "sony", foto: "wertyui987", serie: "big", registrationDate: "2024-01-25" },
-                { noinventario: "15062", descripcion: "de lujo", color: "Plata", material: "Cuero", modelo: "luxury", marca: "samsung", foto: "yuio87645", serie: "luxury", registrationDate: "2024-01-26" },
-                { noinventario: "15063", descripcion: "moderno", color: "Negro", material: "Plástico", modelo: "modern", marca: "lg", foto: "poiu6543", serie: "modern", registrationDate: "2024-01-27" },
-                { noinventario: "15064", descripcion: "clásico", color: "Marrón", material: "Madera", modelo: "classic", marca: "bose", foto: "ghjb6541", serie: "classic", registrationDate: "2024-01-28" },
-                { noinventario: "15065", descripcion: "grande", color: "Blanco", material: "Plástico", modelo: "large", marca: "xiaomi", foto: "cvbn12345", serie: "large", registrationDate: "2024-01-29" },
-                { noinventario: "15066", descripcion: "elegante", color: "Azul", material: "Vidrio", modelo: "elegance", marca: "sony", foto: "ertyyu876", serie: "elegance", registrationDate: "2024-01-30" },
-                { noinventario: "15067", descripcion: "práctico", color: "Verde", material: "Silicona", modelo: "practical", marca: "dell", foto: "vbfdg4532", serie: "practical", registrationDate: "2024-01-31" },
-                { noinventario: "15068", descripcion: "compacto", color: "Amarillo", material: "Cerámica", modelo: "compact", marca: "lg", foto: "ikmnb5678", serie: "compact", registrationDate: "2024-02-01" },
-                { noinventario: "15069", descripcion: "de lujo", color: "Plata", material: "Cristal", modelo: "luxury", marca: "apple", foto: "mnbvcx123", serie: "luxury", registrationDate: "2024-02-02" }
+                { noinventario: "15051", descripcion: "es grande", color: "Rojo", material: "Marmol", modelo: "pro", marca: "apple", foto: "asdad456564.jpg", serie: "pro", registrationDate: "2024-01-15" },
+                { noinventario: "15052", descripcion: "compacto", color: "Azul", material: "Aluminio", modelo: "mini", marca: "samsung", foto: "asd1234567.jpg", serie: "mini", registrationDate: "2024-01-16" },
+                { noinventario: "15053", descripcion: "elegante", color: "Negro", material: "Vidrio", modelo: "elegant", marca: "sony", foto: "sdgfdfg1345.jpg", serie: "elegant", registrationDate: "2024-01-17" }
             ],
             itemsPerPage: 10, // Cantidad de elementos por página
             currentPage: 1, // Página actual
         };
     },
     computed: {
-        filteredBajas() {
-            const query = this.searchQuery.toLowerCase();
+        filteredResguardo() {
             return this.resguardo.filter(resguardo =>
-                resguardo.noinventario.toLowerCase().includes(query) ||
-                resguardo.descripcion.toLowerCase().includes(query) ||
-                resguardo.color.toLowerCase().includes(query) ||
-                resguardo.material.toLowerCase().includes(query) ||
-                resguardo.modelo.toLowerCase().includes(query) ||
-                resguardo.marca.toLowerCase().includes(query) ||
-                resguardo.serie.toLowerCase().includes(query) ||
-                resguardo.registrationDate.toLowerCase().includes(query)
+                Object.values(resguardo).some(value =>
+                    value.toString().toLowerCase().includes(this.searchQuery.toLowerCase())
+                )
             );
         },
-
-        paginatedresguardo() {
+        paginatedResguardo() {
             const start = (this.currentPage - 1) * this.itemsPerPage;
             const end = start + this.itemsPerPage;
-            return this.filteredBajas.slice(start, end);
+            return this.filteredResguardo.slice(start, end);
         },
         totalPages() {
-            return Math.ceil(this.filteredBajas.length / this.itemsPerPage);
+            return Math.ceil(this.filteredResguardo.length / this.itemsPerPage);
         }
     },
     methods: {
@@ -218,59 +190,63 @@ export default {
         downloadPDF() {
             const doc = new jsPDF();
             doc.text("Tabla de Resguardo", 14, 10);
+
+            // Filtrar las columnas seleccionadas en el orden en que aparecen en tableFields
+            const orderedSelectedFields = this.tableFields
+                .filter(field => this.selectedFields.includes(field.value))
+                .map(field => field.value);
+
+            // Generar encabezados respetando el orden
+            const headers = orderedSelectedFields.map(field =>
+                this.tableFields.find(f => f.value === field).label
+            );
+
+            // Generar filas respetando el orden
+            const data = this.filteredResguardo.map(resguardo =>
+                orderedSelectedFields.map(field => resguardo[field])
+            );
+
             doc.autoTable({
-                head: [
-                    [
-                        "No. Bien",
-                        "Descripción",
-                        "Color",
-                        "Material",
-                        "Modelo",
-                        "Marca",
-                        "Foto",  // Esto se mantendrá como nombre, pero la imagen se incluye
-                        "Serie",
-                        "Fecha de Registro"
-                    ]
-                ],
-                body: this.filteredBajas.map(resguardo => {
-                    // Si resguardo.foto contiene una URL o base64 de la imagen
-                    const photo = resguardo.foto; // Asegúrate de que resguardo.foto contenga la URL o base64 de la imagen
-                    doc.addImage(photo, 'JPEG', 150, 20, 30, 30); // Agrega la foto en la posición especificada
-                    return [
-                        resguardo.noinventario,
-                        resguardo.descripcion,
-                        resguardo.color,
-                        resguardo.material,
-                        resguardo.modelo,
-                        resguardo.marca,
-                        "Foto",  // Puedes seguir mostrando el texto "Foto" o nombre
-                        resguardo.serie,
-                        resguardo.registrationDate
-                    ];
-                }),
+                head: [headers], // Encabezados en el orden correcto
+                body: data, // Datos en el orden correcto
                 headStyles: {
-                    fillColor: "691B31"  // Color rojo para la primera fila
+                    fillColor: '#691B31', // Color de fondo 
+                    textColor: 255, // Blanco para el texto
+                    fontStyle: 'bold', // Negrita en los encabezados
+                    halign: 'center', // Alineación horizontal al centro
+                    valign: 'middle', // Alineación vertical al medio
                 }
             });
+
             doc.save("Tabla_resguardo.pdf");
         },
 
+
+
         downloadExcel() {
-            const ws = XLSX.utils.json_to_sheet(this.filteredBajas.map(resguardo => ({
-                noinventario: resguardo.noinventario,
-                descripcion: resguardo.descripcion,
-                color: resguardo.color,
-                material: resguardo.material,
-                modelo: resguardo.modelo,
-                marca: resguardo.marca,
-                foto: resguardo.foto,
-                serie: resguardo.serie,
-                registrationDate: resguardo.registrationDate
-            })));
+            // Filtrar las columnas seleccionadas en el orden en que aparecen en tableFields
+            const orderedSelectedFields = this.tableFields
+                .filter(field => this.selectedFields.includes(field.value))
+                .map(field => field.value);
+
+            // Crear encabezados en el orden correcto
+            const headers = orderedSelectedFields.map(field =>
+                this.tableFields.find(f => f.value === field).label
+            );
+
+            // Generar filas respetando el orden
+            const data = this.filteredResguardo.map(resguardo =>
+                orderedSelectedFields.map(field => resguardo[field])
+            );
+
+            // Crear la hoja de Excel con los encabezados y datos
+            const ws = XLSX.utils.aoa_to_sheet([headers, ...data]);
+
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, 'Resguardo');
             XLSX.writeFile(wb, 'Tabla_resguardo.xlsx');
-        }
+        },
+
 
     },
 

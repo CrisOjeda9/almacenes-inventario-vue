@@ -68,11 +68,13 @@
                 <span>Historial de bajas</span>
             </div>
 
-           
-
             <div class="button-card" @click="navigateTo2('bajabien')">
                 <i class="fa fa-arrow-circle-down"></i>
                 <span>Baja de bienes</span>
+            </div>
+            <div class="button-card" @click="navigateTo2('liberarbien')">
+                <i class="fa fa-user-times"></i>
+                <span>Liberar Bien de Usuario</span>
             </div>
         </div>
 

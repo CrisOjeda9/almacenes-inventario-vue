@@ -39,7 +39,8 @@
                     <button @click="navigateTo('listaalmacen')">Asignar No.Inventario</button>
                     <button @click="navigateTo('reportes')">Generación de reportes</button>
                     <button @click="navigateTo('bienesnuevos')"
-                        style="background-color: #ddc9a3; color: #691b31; border-radius: 4px;">Asignar resguardo</button>
+                        style="background-color: #ddc9a3; color: #691b31; border-radius: 4px;">Asignar
+                        resguardo</button>
                 </div>
             </div>
 
@@ -163,23 +164,32 @@
 
 
                     <!-- Fecha de resguardo -->
-                    <div class="form-field">
+                    <div class="form-field" style="margin-bottom: 30px;">
                         <label for="resguardofecha">Fecha de Resguardo</label>
                         <input type="date" id="resguardofecha" v-model="form.resguardofecha" :min="today" required />
                     </div>
 
                     <div class="form-field">
                         <label for="fotoBienBaja">Foto del bien recibido</label>
-                        <div class="dropzone" @drop.prevent="handleDrop('fotoBienRecibido')" @dragover.prevent
-                            @click="triggerFileInput('fotoBienRecibido')">
-                            <input type="file" id="fotoBienBaja" ref="fileInputBaja"
-                                @change="handleFileUpload('fotoBienRecibido')" accept="image/*" />
+                        <div class="dropzone" @drop.prevent="handleDrop" @dragover.prevent @click="triggerFileInput">
+                            <input type="file" id="fotoBienBaja" ref="fileInputBaja" multiple @change="handleFileUpload"
+                                accept="image/*" />
                             <i class="fas fa-cloud-upload-alt"></i>
-                            <span v-if="!form.fotoBienRecibido">Arrastra o selecciona una imagen (JPG, PNG)</span>
-                            <span v-else>{{ form.fotoBienRecibido.name }}</span>
+                            <span v-if="form.fotoBienRecibido.length === 0">Arrastra o selecciona imágenes (JPG,
+                                PNG)</span>
+                            <span v-else>{{ form.fotoBienRecibido.length }} imágenes seleccionadas</span>
                         </div>
                         <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
+
+                        <!-- Botón para abrir el modal con los nombres de las imágenes -->
+                        <button v-if="form.fotoBienRecibido.length > 0" @click.prevent="openImageModal"
+                            class="view-images-btn">
+                            Ver Imágenes
+                        </button>
+
+
                     </div>
+
                 </div>
 
                 <div class="button-container">
@@ -188,7 +198,29 @@
                     </button>
                 </div>
             </form>
+
         </div>
+        <!-- Modal para mostrar las imágenes y sus nombres -->
+        <div v-if="showImageModal" class="modal-overlay">
+            <div class="modal">
+                <h2>Imágenes seleccionadas</h2>
+                <div class="image-preview-container">
+                    <!-- Vista previa de las imágenes con su nombre -->
+                    <div v-for="(img, index) in form.fotoBienRecibido" :key="index" class="image-preview">
+                        <div class="image-container">
+                            <img :src="getImageUrl(img)" :alt="img.name" class="image-preview-img" />
+                            <button @click="removeImage(index)" class="remove-btn">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </div>
+                        <p class="image-name">{{ img.name }}</p>
+                    </div>
+                </div>
+                <button @click="closeImageModal">Cerrar</button>
+            </div>
+        </div>
+
+
     </div>
 </template>
 
@@ -213,7 +245,7 @@ export default {
                 resguardofecha: "",
                 unidadPresupuestal: "Radio y Televisión de Hidalgo",
                 fotoBien: null,
-                fotoBienRecibido: null // Se agregó este campo para la foto del bien de baja
+                fotoBienRecibido: [] // Ahora se asegura de que sea un array vacío
             },
             responsables: [
                 { nombre: "Juan Pérez", departamento: "Administración", area: "Finanzas", rfc: "JUAP921214ABC" },
@@ -243,10 +275,24 @@ export default {
                     serie: "ABC67890DEF"
                 }
             ],
+            fotoBienRecibido: [],// Ahora es un array para múltiples imágenes
+            showImageModal: false,  // Controla la visibilidad del modal
+
 
         };
+
     },
     methods: {
+
+
+        openImageModal() {
+            this.showImageModal = true;
+        },
+        // Método para cerrar el modal
+        closeImageModal() {
+            this.showImageModal = false;
+        },
+
         filterResponsables() {
             // Verifica si el campo de responsable tiene texto
             if (this.form.responsable.trim() !== "") {
@@ -326,7 +372,7 @@ export default {
                 console.error("Error al redirigir: ", err);
             });
         }
-,
+        ,
 
         showMenu(menu) {
             this.menus[menu] = true;
@@ -337,38 +383,36 @@ export default {
         navigateTo(page) {
             this.$router.push({ name: page });
         },
-        handleFileUpload(field) {
-            const file = event.target.files[0];
-            if (file && this.isImage(file)) {
-                this.form[field] = file;
-                this.errorMessage = ""; // Limpia el mensaje de error si el archivo es válido
-            }
+        triggerFileInput() {
+            this.$refs.fileInputBaja.click();
         },
+        handleFileUpload(event) {
+            if (!event || !event.target || !event.target.files) return;
 
+            if (!this.form.fotoBienRecibido) {
+                this.form.fotoBienRecibido = [];
+            }
+
+            const files = Array.from(event.target.files);
+            const validFiles = files.filter(file => this.isImage(file));
+
+            if (validFiles.length + this.form.fotoBienRecibido.length > 10) {
+                this.errorMessage = "Solo puedes subir hasta 10 imágenes.";
+                return;
+            }
+
+            this.form.fotoBienRecibido.push(...validFiles);
+            this.errorMessage = "";
+        },
         isImage(file) {
-            // Verifica si el archivo es una imagen
-            return file && file.type.startsWith("image/");
+            return file.type.startsWith("image/");
         },
-
-        triggerFileInput(field) {
-            if (field === 'fotoBienRecibido') {
-                this.$refs.fileInputBaja.click();
-            } else {
-                this.$refs.fileInput.click();
-            }
+        getImageUrl(file) {
+            return URL.createObjectURL(file);
         },
-
-        handleDrop(field) {
-            const file = event.dataTransfer.files[0];
-            if (file && this.isImage(file)) {
-                this.form[field] = file;
-                this.errorMessage = ""; // Limpia el mensaje de error si el archivo es válido
-            } else {
-                this.form[field] = null; // Limpia el campo si el archivo no es válido
-                this.errorMessage = "Por favor, sube un archivo de imagen válido (JPG, PNG).";
-            }
-        },
-
+        removeImage(index) {
+            this.form.fotoBienRecibido.splice(index, 1);
+        }
 
     },
 };
@@ -381,6 +425,81 @@ export default {
 * {
     font-family: 'Montserrat', sans-serif;
 }
+
+.image-preview-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.image-preview {
+    text-align: center;
+    position: relative;
+    /* Esto es necesario para posicionar el botón dentro de la imagen */
+}
+
+.image-container {
+    position: relative;
+}
+
+.image-preview-img {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 4px;
+}
+
+.remove-btn {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    width: auto;
+    background-color: rgba(0, 0, 0, 0.5);
+    color: white;
+    border: none;
+    padding: 0px;
+    cursor: pointer;
+    font-size: 16px;
+    border-radius: 25px;
+}
+.remove-btn i {
+    font-size: 14px;
+    /* Ajusta el tamaño del ícono dentro del botón */
+}
+.remove-btn:hover {
+    background-color: rgba(0, 0, 0, 0.7);
+}
+
+.image-name {
+    font-size: 12px;
+    color: #333;
+    margin-top: 5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100px;
+}
+
+
+
+.view-images-btn {
+    display: flex;
+    justify-content: center;
+    position: relative;
+    width: 100%;
+    background-color: #691b31;
+    color: white;
+    border: none;
+    padding: 5px;
+    cursor: pointer;
+    border-radius: 5px;
+    margin-top: 2px;
+    font-size: 15px;
+}
+
+
+
+
 
 .container {
     position: fixed;
@@ -531,7 +650,7 @@ form {
     padding-bottom: 80px;
     border-radius: 10px;
     width: 1000px;
-    height: 260px;
+    height: 290px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 

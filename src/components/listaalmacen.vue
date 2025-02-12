@@ -139,7 +139,7 @@ export default {
                     quantity: "5",
                     unit: "piezas",
                     totalIncome: "5800",
-                    photo: "https://example.com/photo.jpg",
+                    photo: "https://images.milenio.com/SDPlnvqDjRz1WJsCidywePDW2Tw=/942x532/uploads/media/2022/02/22/radio-y-television-de-hidalgo.jpg",
                     registrationDate: "2024-01-15"
                 },
                 {
@@ -153,7 +153,7 @@ export default {
                     quantity: "10",
                     unit: "cajas",
                     totalIncome: "23200",
-                    photo: "https://example.com/photo2.jpg",
+                    photo: "https://images.milenio.com/SDPlnvqDjRz1WJsCidywePDW2Tw=/942x532/uploads/media/2022/02/22/radio-y-television-de-hidalgo.jpg",
                     registrationDate: "2024-01-25"
                 },
                 // Agrega más almacenes aquí...

@@ -35,8 +35,9 @@
                 <div class="dropdown-menu" v-show="menus.homeMenu">
                     <button @click="navigateTo('bajas')">Historial de Bajas</button>
                     <button @click="navigateTo('historialbienes')"
-                        style="background-color: #ddc9a3; color: #691b31; border-radius: 4px;">Historial de bienes</button>
-                        <button @click="navigateTo('bajabien')">Baja de bienes</button>
+                        style="background-color: #ddc9a3; color: #691b31; border-radius: 4px;">Historial de
+                        bienes</button>
+                    <button @click="navigateTo('bajabien')">Baja de bienes</button>
                     <button @click="navigateTo('resguardo')">Bienes sin resguardo</button>
                     <button @click="navigateTo('listaalmacen')">Asignar No.Inventario</button>
                     <button @click="navigateTo('reportes')">Generación de reportes</button>
@@ -89,7 +90,7 @@
                         <th>Área Presupuestal</th>
                         <th>RFC</th>
                         <th>Fecha de Resguardo</th>
-                        <th>Foto del Bien al Recibir</th>
+                        <th>Ver el bien recibido</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -99,11 +100,9 @@
                         <td>{{ bienes.modelo }}</td>
                         <td>{{ bienes.serie }}</td>
                         <td>
-                            <a :href="'/ruta/del/archivo/' + bienes.fotoBien" download>
-                                <button class="btn-download">
-                                    <i class="fas fa-download"></i>
-                                </button>
-                            </a>
+                            <button @click="openModal(bienes.fotoBien)" class="btn-download">
+                                <i class="fas fa-eye"></i>
+                            </button>
                         </td>
                         <td>{{ bienes.nombreResponsable }}</td>
                         <td>{{ bienes.departamento }}</td>
@@ -112,13 +111,11 @@
                         <td>{{ bienes.rfc }}</td>
                         <td>{{ bienes.fechaResguardo }}</td>
                         <td>
-                            <a :href="'/ruta/del/archivo/' + bienes.fotoBienRecibido" download>
-                                <button class="btn-download">
-                                    <i class="fas fa-download"></i>
-                                </button>
-                            </a>
+                            <button @click="openModal(bienes.fotosBienRecibido)" class="btn-download">
+                                <i class="fas fa-eye"></i>
+                            </button>
                         </td>
-                        
+
                     </tr>
                 </tbody>
             </table>
@@ -129,6 +126,24 @@
                 <button :disabled="currentPage === totalPages" @click="changePage(currentPage + 1)">Siguiente</button>
             </div>
         </div>
+        <!-- Modal para mostrar imágenes -->
+        <div v-if="showModal" class="modal-overlay" @click="closeModal">
+            <div class="modal" @click.stop>
+                <h2>Imágenes</h2>
+                <hr>
+                <div class="image-container">
+                    <div v-for="(foto, i) in modalImages" :key="i" class="image-box">
+                        <!-- Envolvemos la imagen con un enlace -->
+                        <a :href="getImageUrl(foto)" target="_blank">
+                            <img :src="getImageUrl(foto)" alt="Foto del bien recibido" class="modal-img" />
+                        </a>
+                        <p class="image-name">{{ foto }}</p>
+                    </div>
+                </div>
+                <button @click="closeModal">Cerrar</button>
+            </div>
+        </div>
+
 
     </div>
 </template>
@@ -150,32 +165,34 @@ export default {
                     marca: "HP",
                     modelo: "Pavilion",
                     serie: "123456789",
-                    fotoBien: "imagen_a.jpg",
+                    fotoBien: ["laptop.jpeg"],
                     nombreResponsable: "Juan Pérez",
                     departamento: "Tecnología",
                     area: "Sistemas",
                     rfc: "JUPZ123456",
                     fechaResguardo: "2024-01-15",
-                    fotoBienRecibido: "imagen_b.jpg"
+                    fotosBienRecibido: ["radio-y-television-de-hidalgo.jpg","radio.jpeg","radio2.jpg", "radio-y-television-de-hidalgo.jpg",  "radio-y-television-de-hidalgo.jpg", "document_download.png", "logo.png"]
                 },
                 {
                     descripcion: "Impresora láser",
                     marca: "Epson",
                     modelo: "L120",
                     serie: "987654321",
-                    fotoBien: "imagen_a.jpg",
+                    fotoBien: ["laptop.jpeg"],
                     nombreResponsable: "María López",
                     departamento: "Recursos Humanos",
                     area: "Administración",
                     rfc: "MALO987654",
                     fechaResguardo: "2024-02-10",
-                    fotoBienRecibido: "imagen_b.jpg"
+                    fotosBienRecibido: ["imagen_d.jpg", "imagen_e.jpg"]
                 },
                 // Agrega más bienes aquí...
             ],
             itemsPerPage: 10, // Cantidad de elementos por página
             currentPage: 1, // Página actual
             filterTerm: '', // Variable para filtrar por término específico
+            showModal: false,
+            modalImages: [],
         };
     },
     computed: {
@@ -206,6 +223,14 @@ export default {
         },
     },
     methods: {
+        openModal(fotos) {
+            this.modalImages = fotos;
+            this.showModal = true;
+        },
+        closeModal() {
+            this.showModal = false;
+            this.modalImages = [];
+        },
         goHome() {
             this.$router.push('home'); // Redirige a la página principal ("/"). Cambia el path si es necesario.
         },
@@ -231,6 +256,9 @@ export default {
                 this.currentPage = page;
             }
         },
+        getImageUrl(image) {
+            return require(`@/assets/${image}`);
+        }
     },
 };
 </script>
@@ -241,7 +269,83 @@ export default {
     font-family: 'Montserrat', sans-serif;
 }
 
+.image-container {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    /* Muestra 5 imágenes por fila */
+    gap: 10px;
+    /* Espacio entre las imágenes */
+    margin-top: 20px;
+}
 
+.image-name {
+    font-size: 12px;
+    color: #333;
+    margin-top: 5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 200px;
+
+}
+
+
+.modal-img {
+    max-width: 300px;
+    border-radius: 8px;
+    width: auto;
+    height: 120px;
+
+}
+
+
+/* Efecto de zoom al pasar el cursor por encima de la imagen */
+.modal-img:hover {
+    transition: transform 0.3s ease-in-out;
+    transform: scale(1.1);
+    box-shadow: 0 4px 8px #6f7271;
+    /* Hace que la imagen crezca al 150% de su tamaño */
+}
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    /* Asegúrate de que el modal esté por encima de otros elementos */
+}
+
+.modal {
+    background: white;
+    color: #691B31;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+    width: 1100px;
+}
+
+.modal-overlay.show {
+    visibility: visible;
+}
+
+.modal button {
+    padding: 10px 20px;
+    background-color: #BC955B;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.modal button:hover {
+    background-color: #691B31;
+}
 
 .pagination {
     display: flex;
@@ -564,6 +668,7 @@ a {
     justify-content: space-between;
     margin-right: 15px;
 }
+
 .btn-download {
     width: 50px;
 }

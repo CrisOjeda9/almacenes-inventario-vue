@@ -36,7 +36,6 @@
                     <button @click="navigateTo('bajas')"
                         style="background-color: #ddc9a3; color: #691b31; border-radius: 4px;">Historial de
                         bajas</button>
-                        <button @click="navigateTo('bajas')" style="background-color: #ddc9a3; color: #691b31; border-radius: 4px;">Historial de bajas</button>
                     <button @click="navigateTo('historialbienes')">Historial de bienes</button>
                     <button @click="navigateTo('bajabien')">Baja de bienes</button>
                     <button @click="navigateTo('resguardo')">Bienes sin resguardo</button>
@@ -48,7 +47,7 @@
 
 
                 </div>
-            </div>
+            </div>                                                                                              
 
             <div class="nav-item" @mouseenter="showMenu('bajasMenu')" @mouseleave="hideMenu('bajasMenu')">
                 Almacen
