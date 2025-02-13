@@ -186,8 +186,6 @@
                             class="view-images-btn">
                             Ver Imágenes
                         </button>
-
-
                     </div>
 
                 </div>
