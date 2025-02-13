@@ -95,7 +95,11 @@
                         <td>{{ almacenes.quantity }}</td>
                         <td>{{ almacenes.unit }}</td>
                         <td>{{ almacenes.totalIncome }}</td>
-                        <td><a :href="almacenes.photo" target="_blank">Ver Foto</a></td>
+                        <td>
+                            <button @click="openModal(almacenes.photo)" class="btn-download">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </td>
                         <td>{{ almacenes.registrationDate }}</td>
                         <td>
                             <button @click="redirecinventario" class="btn-existencias">
@@ -111,6 +115,23 @@
                 <button :disabled="currentPage === 1" @click="changePage(currentPage - 1)">Anterior</button>
                 <span>Página {{ currentPage }} de {{ totalPages }}</span>
                 <button :disabled="currentPage === totalPages" @click="changePage(currentPage + 1)">Siguiente</button>
+            </div>
+        </div>
+        <!-- Modal para mostrar imágenes -->
+        <div v-if="showModal" class="modal-overlay" @click="closeModal">
+            <div class="modal" @click.stop>
+                <h2>Imágenes</h2>
+                <hr>
+                <div class="image-container">
+                    <div v-for="(foto, i) in modalImages" :key="i" class="image-box">
+                        <!-- Envolvemos la imagen con un enlace -->
+                        <a :href="getImageUrl(foto)" target="_blank">
+                            <img :src="getImageUrl(foto)" alt="Foto artículo" class="modal-img" />
+                        </a>
+                        <p class="image-name">{{ foto }}</p>
+                    </div>
+                </div>
+                <button @click="closeModal">Cerrar</button>
             </div>
         </div>
     </div>
@@ -139,7 +160,7 @@ export default {
                     quantity: "5",
                     unit: "piezas",
                     totalIncome: "5800",
-                    photo: "https://images.milenio.com/SDPlnvqDjRz1WJsCidywePDW2Tw=/942x532/uploads/media/2022/02/22/radio-y-television-de-hidalgo.jpg",
+                    photo: ["radio-y-television-de-hidalgo.jpg","radio.jpeg","radio2.jpg", "radio-y-television-de-hidalgo.jpg",  "radio-y-television-de-hidalgo.jpg", "document_download.png", "logo.png"],
                     registrationDate: "2024-01-15"
                 },
                 {
@@ -153,13 +174,16 @@ export default {
                     quantity: "10",
                     unit: "cajas",
                     totalIncome: "23200",
-                    photo: "https://images.milenio.com/SDPlnvqDjRz1WJsCidywePDW2Tw=/942x532/uploads/media/2022/02/22/radio-y-television-de-hidalgo.jpg",
+                    photo: ["radio-y-television-de-hidalgo.jpg","radio.jpeg","radio2.jpg", "radio-y-television-de-hidalgo.jpg",  "radio-y-television-de-hidalgo.jpg", "document_download.png", "logo.png"],
                     registrationDate: "2024-01-25"
                 },
                 // Agrega más almacenes aquí...
             ],
             itemsPerPage: 10, // Cantidad de elementos por página
             currentPage: 1, // Página actual
+            showModal: false,
+            modalImages: [],
+            itemToRemove: null,
         };
     },
     computed: {
@@ -179,6 +203,14 @@ export default {
         },
     },
     methods: {
+        openModal(fotos) {
+            this.modalImages = fotos;
+            this.showModal = true;
+        },
+        closeModal() {
+            this.showModal = false;
+            this.modalImages = [];
+        },
         redirecinventario() {
             this.$router.push('/bieninventario');
         },
@@ -200,6 +232,9 @@ export default {
                 this.currentPage = page;
             }
         },
+        getImageUrl(image) {
+            return require(`@/assets/${image}`);
+        }
     },
 };
 </script>
@@ -211,6 +246,83 @@ export default {
 }
 
 
+.image-container {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    /* Muestra 5 imágenes por fila */
+    gap: 10px;
+    /* Espacio entre las imágenes */
+    margin-top: 20px;
+}
+
+.image-name {
+    font-size: 12px;
+    color: #333;
+    margin-top: 5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 200px;
+
+}
+
+
+.modal-img {
+    max-width: 300px;
+    border-radius: 8px;
+    width: auto;
+    height: 120px;
+
+}
+
+
+/* Efecto de zoom al pasar el cursor por encima de la imagen */
+.modal-img:hover {
+    transition: transform 0.3s ease-in-out;
+    transform: scale(1.1);
+    box-shadow: 0 4px 8px #6f7271;
+    /* Hace que la imagen crezca al 150% de su tamaño */
+}
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    /* Asegúrate de que el modal esté por encima de otros elementos */
+}
+
+.modal {
+    background: white;
+    color: #691B31;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+    width: 1100px;
+}
+
+.modal-overlay.show {
+    visibility: visible;
+}
+
+.modal button {
+    padding: 10px 20px;
+    background-color: #BC955B;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.modal button:hover {
+    background-color: #691B31;
+}
 
 .pagination {
     display: flex;
@@ -524,5 +636,8 @@ a {
 
 .input-wrapper input::placeholder {
     color: #691B31;
+}
+.btn-download {
+    width: 50px;
 }
 </style>

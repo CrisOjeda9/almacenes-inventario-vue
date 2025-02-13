@@ -164,7 +164,7 @@
                     <div class="form-field">
                         <label for="fotoArticulo">Foto artículo</label>
                         <div class="dropzone" @drop.prevent="handleDrop" @dragover.prevent @click="triggerFileInput">
-                            <input type="file" id="fotoArticulo" ref="fileInputBaja" multiple @change="handleFileUpload"
+                            <input type="file" id="fotoArticulo" ref="fileInputExistencia" multiple @change="handleFileUpload"
                                 accept="image/*" />
                             <i class="fas fa-cloud-upload-alt"></i>
                             <span v-if="form.fotoArticulo.length === 0">Arrastra o selecciona imágenes (JPG,
@@ -281,7 +281,7 @@ export default {
             this.form.fotoArticulo = file; // Cambia "fotoArticulo" por "fotoArticulo"
         },
         triggerFileInput() {
-            this.$refs.fileInputBaja.click();
+            this.$refs.fileInputExistencia.click();
         },
         handleFileUpload(event) {
             if (!event || !event.target || !event.target.files) return;
