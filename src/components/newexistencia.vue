@@ -160,17 +160,27 @@
                 </div>
                 <div class="form-row">
                     <!-- Foto artículo -->
+
                     <div class="form-field">
                         <label for="fotoArticulo">Foto artículo</label>
                         <div class="dropzone" @drop.prevent="handleDrop" @dragover.prevent @click="triggerFileInput">
-                            <input type="file" id="fotoArticulo" ref="fileInput" @change="handleFileUpload"
-                                accept=".jpg,.png" />
+                            <input type="file" id="fotoArticulo" ref="fileInputBaja" multiple @change="handleFileUpload"
+                                accept="image/*" />
                             <i class="fas fa-cloud-upload-alt"></i>
-                            <span v-if="!form.fotoArticulo">Arrastra o selecciona una imagen (JPG, PNG)</span>
-                            <span v-else>{{ form.fotoArticulo.name }}</span>
+                            <span v-if="form.fotoArticulo.length === 0">Arrastra o selecciona imágenes (JPG,
+                                PNG)</span>
+                            <span v-else>{{ form.fotoArticulo.length }} imágenes seleccionadas</span>
                         </div>
+                        <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
+
+                        <!-- Botón para abrir el modal con los nombres de las imágenes -->
+                        <button v-if="form.fotoArticulo.length > 0" @click.prevent="openImageModal"
+                            class="view-images-btn">
+                            Ver Imágenes
+                        </button>
                     </div>
                 </div>
+
 
                 <div class="button-container" style="gap: 30px;">
                     <button class="boton" type="submit" @click.prevent="registerExistencia('articulo')">
@@ -181,6 +191,26 @@
                     </button>
                 </div>
             </form>
+        </div>
+
+        <!-- Modal para mostrar las imágenes y sus nombres -->
+        <div v-if="showImageModal" class="modal-overlay2">
+            <div class="modal2">
+                <h2>Imágenes seleccionadas</h2>
+                <div class="image-preview-container">
+                    <!-- Vista previa de las imágenes con su nombre -->
+                    <div v-for="(img, index) in form.fotoArticulo" :key="index" class="image-preview">
+                        <div class="image-container">
+                            <img :src="getImageUrl(img)" :alt="img.name" class="image-preview-img" />
+                            <button @click="removeImage(index)" class="remove-btn">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </div>
+                        <p class="image-name">{{ img.name }}</p>
+                    </div>
+                </div>
+                <button @click="closeImageModal">Cerrar</button>
+            </div>
         </div>
         <!-- Modal de Éxito -->
         <div v-if="modalVisible" class="modal">
@@ -212,7 +242,7 @@ export default {
                 cantidad: "",
                 unidadmedida: "",               // Cantidad
                 totalIngreso: "",           // Total de ingreso
-                fotoArticulo: null          // Foto del artículo (archivo)
+                fotoArticulo: []         // Foto del artículo (archivo)
             },
 
             menus: {
@@ -222,11 +252,20 @@ export default {
             },
             modalVisible: false, // Estado del modal
             buttonType: "",  // Agrega esta propiedad
+            fotoArticulo: [],
+            showImageModal: false,
 
 
         };
     },
     methods: {
+        openImageModal() {
+            this.showImageModal = true;
+        },
+        // Método para cerrar el modal
+        closeImageModal() {
+            this.showImageModal = false;
+        },
         mostrarModal() {
             this.modalVisible = true; // Muestra el modal
         },
@@ -237,17 +276,39 @@ export default {
         goHome() {
             this.$router.push('home'); // Redirige a la página principal ("/").
         },
-        handleFileUpload(event) {
-            const file = event.target.files[0];
-            this.form.fotoArticulo = file; // Cambia "fotoArticulo" por "fotoArticulo"
-        },
         handleDrop(event) {
             const file = event.dataTransfer.files[0];
             this.form.fotoArticulo = file; // Cambia "fotoArticulo" por "fotoArticulo"
         },
-
         triggerFileInput() {
-            this.$refs.fileInput.click(); // Trigger del input file cuando se hace click en la dropzone
+            this.$refs.fileInputBaja.click();
+        },
+        handleFileUpload(event) {
+            if (!event || !event.target || !event.target.files) return;
+
+            if (!this.form.fotoArticulo) {
+                this.form.fotoArticulo = [];
+            }
+
+            const files = Array.from(event.target.files);
+            const validFiles = files.filter(file => this.isImage(file));
+
+            if (validFiles.length + this.form.fotoArticulo.length > 10) {
+                this.errorMessage = "Solo puedes subir hasta 10 imágenes.";
+                return;
+            }
+
+            this.form.fotoArticulo.push(...validFiles);
+            this.errorMessage = "";
+        },
+        isImage(file) {
+            return file.type.startsWith("image/");
+        },
+        getImageUrl(file) {
+            return URL.createObjectURL(file);
+        },
+        removeImage(index) {
+            this.form.fotoArticulo.splice(index, 1);
         },
         registerExistencia(tipo) {
             // Validar campos obligatorios
@@ -314,6 +375,118 @@ export default {
     font-family: 'Montserrat', sans-serif;
 }
 
+.image-preview-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.image-preview {
+    text-align: center;
+    position: relative;
+    /* Esto es necesario para posicionar el botón dentro de la imagen */
+}
+
+.image-container {
+    position: relative;
+}
+
+.image-preview-img {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 4px;
+}
+
+.remove-btn {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    width: auto;
+    background-color: rgba(0, 0, 0, 0.5);
+    color: white;
+    border: none;
+    padding: 0px;
+    cursor: pointer;
+    font-size: 16px;
+    border-radius: 25px;
+}
+.remove-btn i {
+    font-size: 14px;
+    /* Ajusta el tamaño del ícono dentro del botón */
+}
+.remove-btn:hover {
+    background-color: rgba(0, 0, 0, 0.7);
+}
+
+.image-name {
+    font-size: 12px;
+    color: #333;
+    margin-top: 5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100px;
+}
+
+
+
+.view-images-btn {
+    display: flex;
+    justify-content: center;
+    position: relative;
+    width: 100%;
+    background-color: #691b31;
+    color: white;
+    border: none;
+    padding: 5px;
+    cursor: pointer;
+    border-radius: 5px;
+    margin-top: 2px;
+    font-size: 15px;
+}
+
+
+.modal-overlay2 {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    /* Asegúrate de que el modal esté por encima de otros elementos */
+}
+
+.modal2 {
+    background: white;
+    color: #691B31;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+}
+
+.modal-overlay2.show {
+    visibility: visible;
+}
+
+.modal2 button {
+    padding: 10px 20px;
+    background-color: #BC955B;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.modal2 button:hover {
+    background-color: #691B31;
+}
+
+
 .modal {
     display: flex;
     justify-content: center;
@@ -341,6 +514,7 @@ export default {
     font-size: 20px;
     cursor: pointer;
 }
+
 
 .container {
     position: fixed;
