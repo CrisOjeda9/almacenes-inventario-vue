@@ -66,6 +66,34 @@
             <form @submit.prevent="addArticulo">
                 <div class="form-row">
                     <div class="form-field">
+                        <label for="bien">Bien/Articulo</label>
+                        <select v-model="form.bien" @change="updateDescripcion" required>
+                            <option value="" disabled>Selecciona una opción</option>
+                            <option value="micrófono">Micrófono</option>
+                            <option value="cámara">Cámara</option>
+                            <option value="tripode">Trípode</option>
+                            <option value="transmisor">Transmisor</option>
+                            <option value="pantalla">Pantalla</option>
+                            <option value="audio">Audio</option>
+                            <option value="mezcladora">Mezcladora</option>
+                            <option value="monitor">Monitor</option>
+                            <option value="luces">Luces</option>
+                            <option value="controlador">Controlador</option>
+                        </select>
+                    </div>
+                    <div class="form-field">
+                        <label for="descripcion">Descripción</label>
+                        <input type="text" v-model="form.descripcion" readonly />
+                    </div>
+
+                    <button class="boton" type="submit">
+                        <i class="fas fa-plus"></i> Agregar artículo
+                    </button>
+
+                </div>
+
+                <div class="form-row">
+                    <div class="form-field">
                         <label for="cantidad">Cantidad a solicitar</label>
                         <input type="number" min="0" v-model="form.cantidad" required />
                     </div>
@@ -79,17 +107,6 @@
                             <option value="kilogramo">Kilogramo</option>
                             <option value="paquete">Paquete</option>
                         </select>
-                    </div>
-                    <button class="boton" type="submit">
-                        <i class="fas fa-plus"></i> Agregar artículo
-                    </button>
-
-                </div>
-
-                <div class="form-row">
-                    <div class="form-field">
-                        <label for="descripcion">Descripción</label>
-                        <input type="text" v-model="form.descripcion" required />
                     </div>
                     <button class="boton2" type="button" @click="verSolicitudes">
                         <i class="fas fa-eye"></i> Ver solicitudes enviadas
@@ -174,9 +191,22 @@ export default {
     data() {
         return {
             form: {
+                bien: '',
                 cantidad: '',
                 medida: '',
                 descripcion: ''
+            },
+            bienDescripcion: {
+                micrófono: "Equipo para capturar audio de alta calidad.",
+                cámara: "Dispositivo utilizado para grabación de video.",
+                tripode: "Soporte para estabilizar cámaras durante grabaciones.",
+                transmisor: "Equipo usado para transmitir señales de audio o video.",
+                pantalla: "Pantalla para visualizar contenidos audiovisuales.",
+                audio: "Sistema de sonido para transmisión en vivo o grabación.",
+                mezcladora: "Equipo que permite controlar los niveles de audio.",
+                monitor: "Pantalla para visualización de contenido en tiempo real.",
+                luces: "Iluminación profesional para grabaciones y eventos.",
+                controlador: "Equipo para manejar y ajustar el flujo de señales."
             },
             menus: {
                 homeMenu: false,
@@ -197,6 +227,10 @@ export default {
         };
     },
     methods: {
+        updateDescripcion() {
+            // Asignar la descripción automática según el bien seleccionado
+            this.form.descripcion = this.bienDescripcion[this.form.bien] || '';
+        },
         registersolicitudMaterial() {
             console.log("Solicitud de Material registrada:", this.articulos);
             this.showConfirmationModal = true;
@@ -250,7 +284,7 @@ export default {
         verSolicitudes() {
             this.$router.push('/versolicitudes'); // Reemplaza con la ruta correcta
         },
-        
+
     },
 };
 </script>

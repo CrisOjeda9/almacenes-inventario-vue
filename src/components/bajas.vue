@@ -47,7 +47,7 @@
 
 
                 </div>
-            </div>                                                                                              
+            </div>
 
             <div class="nav-item" @mouseenter="showMenu('bajasMenu')" @mouseleave="hideMenu('bajasMenu')">
                 Almacen
@@ -128,11 +128,9 @@
                             </a>
                         </td>
                         <td>
-                            <a :href="'/ruta/del/archivo/' + bajas.fotoBien" download>
-                                <button class="btn-download">
-                                    <i class="fas fa-camera-retro"></i> <!-- Icon for photo -->
-                                </button>
-                            </a>
+                            <button @click="openModal(baja.fotoBien)" class="btn-download">
+                                <i class="fas fa-eye"></i>
+                            </button>
                         </td>
 
                     </tr>
@@ -145,7 +143,23 @@
                 <button :disabled="currentPage === totalPages" @click="changePage(currentPage + 1)">Siguiente</button>
             </div>
         </div>
-
+        <!-- Modal para mostrar imágenes -->
+        <div v-if="showModal" class="modal-overlay" @click="closeModal">
+            <div class="modal" @click.stop>
+                <h2>Imágenes</h2>
+                <hr>
+                <div class="image-container">
+                    <div v-for="(foto, i) in modalImages" :key="i" class="image-box">
+                        <!-- Envolvemos la imagen con un enlace -->
+                        <a :href="getImageUrl(foto)" target="_blank">
+                            <img :src="getImageUrl(foto)" alt="Foto del bien recibido" class="modal-img" />
+                        </a>
+                        <p class="image-name">{{ foto }}</p>
+                    </div>
+                </div>
+                <button @click="closeModal">Cerrar</button>
+            </div>
+        </div>
     </div>
 </template>
 
@@ -172,7 +186,7 @@ export default {
                     organoSuperior: "Organismo Descentralizado",
                     documentoAmpara: "/path/to/documento.pdf",
                     oficioSolicitud: "/path/to/oficio.pdf",
-                    fotoBien: "/path/to/foto.jpg"
+                    fotoBien: ["radio-y-television-de-hidalgo.jpg", "radio.jpeg", "radio2.jpg", "radio-y-television-de-hidalgo.jpg", "radio-y-television-de-hidalgo.jpg", "document_download.png", "logo.png"]
                 },
                 {
                     numerobien: "67890",
@@ -186,13 +200,15 @@ export default {
                     organoSuperior: "Organismo Descentralizado",
                     documentoAmpara: "/path/to/documento2.pdf",
                     oficioSolicitud: "/path/to/oficio2.pdf",
-                    fotoBien: "/path/to/foto2.jpg"
+                    fotoBien: ["radio-y-television-de-hidalgo.jpg", "radio.jpeg", "radio2.jpg", "radio-y-television-de-hidalgo.jpg", "radio-y-television-de-hidalgo.jpg", "document_download.png", "logo.png"]
                 }
             ],
             itemsPerPage: 10,
             currentPage: 1,
             filterTerm: '',
-            searchQuery: ''
+            searchQuery: '',
+            showModal: false,
+            modalImages: [],
         };
     },
     computed: {
@@ -219,6 +235,14 @@ export default {
         }
     },
     methods: {
+        openModal(fotos) {
+            this.modalImages = fotos;
+            this.showModal = true;
+        },
+        closeModal() {
+            this.showModal = false;
+            this.modalImages = [];
+        },
         goHome() {
             this.$router.push('home'); // Redirige a la página principal ("/"). Cambia el path si es necesario.
         },
@@ -244,6 +268,10 @@ export default {
                 this.currentPage = page;
             }
         },
+        
+        getImageUrl(image) {
+            return require(`@/assets/${image}`);
+        },
     },
 };
 </script>
@@ -255,6 +283,83 @@ export default {
 }
 
 
+.image-container {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    /* Muestra 5 imágenes por fila */
+    gap: 10px;
+    /* Espacio entre las imágenes */
+    margin-top: 20px;
+}
+
+.image-name {
+    font-size: 12px;
+    color: #333;
+    margin-top: 5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 200px;
+
+}
+
+
+.modal-img {
+    max-width: 300px;
+    border-radius: 8px;
+    width: auto;
+    height: 120px;
+
+}
+
+
+/* Efecto de zoom al pasar el cursor por encima de la imagen */
+.modal-img:hover {
+    transition: transform 0.3s ease-in-out;
+    transform: scale(1.1);
+    box-shadow: 0 4px 8px #6f7271;
+    /* Hace que la imagen crezca al 150% de su tamaño */
+}
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    /* Asegúrate de que el modal esté por encima de otros elementos */
+}
+
+.modal {
+    background: white;
+    color: #691B31;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+    width: 1100px;
+}
+
+.modal-overlay.show {
+    visibility: visible;
+}
+
+.modal button {
+    padding: 10px 20px;
+    background-color: #BC955B;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.modal button:hover {
+    background-color: #691B31;
+}
 
 .pagination {
     display: flex;

@@ -99,11 +99,9 @@
                         <td>{{ baja.serie }}</td>
                         <td style="background-color: #ddc9a3;;">{{ baja.nombreresponsable }}</td>
                         <td>
-                            <a :href="'/ruta/del/archivo/' + baja.fotoBien" download>
-                                <button class="btn-download">
-                                    <i class="fas fa-camera-retro"></i> <!-- Icono para foto -->
-                                </button>
-                            </a>
+                            <button @click="openModal(baja.fotoBien)" class="btn-download">
+                                <i class="fas fa-eye"></i>
+                            </button>
                         </td>
                         <td>{{ baja.fechaBaja }}</td>
                         <td>
@@ -123,15 +121,33 @@
             </div>
         </div>
         <!-- Modal de Confirmación -->
-        <div v-if="showModal" class="modal-overlay">
+        <div v-if="showConfirmModal" class="modal-overlay">
             <div class="modal-content-delete">
                 <p>¿Estás seguro de que deseas remover este bien?</p>
                 <div class="modal-buttons">
                     <button @click="removeGood" class="btn-confirm">Confirmar</button>
-                    <button @click="showModal = false" class="btn-cancel">Cancelar</button>
+                    <button @click="showConfirmModal = false" class="btn-cancel">Cancelar</button>
                 </div>
             </div>
         </div>
+
+        <!-- Modal para mostrar imágenes -->
+        <div v-if="showImageModal" class="modal-overlay2" @click="closeModal">
+            <div class="modal2" @click.stop>
+                <h2>Imágenes</h2>
+                <hr>
+                <div class="image-container">
+                    <div v-for="(foto, i) in modalImages" :key="i" class="image-box">
+                        <a :href="getImageUrl(foto)" target="_blank">
+                            <img :src="getImageUrl(foto)" alt="Foto del bien recibido" class="modal-img" />
+                        </a>
+                        <p class="image-name">{{ foto }}</p>
+                    </div>
+                </div>
+                <button @click="closeModal">Cerrar</button>
+            </div>
+        </div>
+
     </div>
 </template>
 
@@ -154,7 +170,7 @@ export default {
                     serie: "5CD12345XYZ",
                     nombreresponsable: "Myriam",
                     fechaBaja: "",
-                    fotoBien: "/path/to/foto.jpg"
+                    fotoBien: ["radio-y-television-de-hidalgo.jpg", "radio.jpeg", "radio2.jpg", "radio-y-television-de-hidalgo.jpg", "radio-y-television-de-hidalgo.jpg", "document_download.png", "logo.png"]
                 },
                 {
                     numeroinventario: "67890",
@@ -164,7 +180,7 @@ export default {
                     serie: "ABC67890DEF",
                     nombreresponsable: "Myriam",
                     fechaBaja: "",
-                    fotoBien: "/path/to/foto2.jpg"
+                    fotoBien: ["radio-y-television-de-hidalgo.jpg", "radio.jpeg", "radio2.jpg", "radio-y-television-de-hidalgo.jpg", "radio-y-television-de-hidalgo.jpg", "document_download.png", "logo.png"]
                 },
                 {
                     numeroinventario: "67890",
@@ -174,95 +190,17 @@ export default {
                     serie: "ABC67890DEF",
                     nombreresponsable: "Myriam",
                     fechaBaja: "",
-                    fotoBien: "/path/to/foto2.jpg"
-                },
-                {
-                    numeroinventario: "67890",
-                    descripcion: "Impresora Canon",
-                    modelo: "PIXMA G6020",
-                    marca: "Canon",
-                    serie: "ABC67890DEF",
-                    nombreresponsable: "Myriam",
-                    fechaBaja: "",
-                    fotoBien: "/path/to/foto2.jpg"
-                },
-                {
-                    numeroinventario: "67890",
-                    descripcion: "Impresora Canon",
-                    modelo: "PIXMA G6020",
-                    marca: "Canon",
-                    serie: "ABC67890DEF",
-                    nombreresponsable: "Myriam",
-                    fechaBaja: "",
-                    fotoBien: "/path/to/foto2.jpg"
-                },
-                {
-                    numeroinventario: "67890",
-                    descripcion: "Impresora Canon",
-                    modelo: "PIXMA G6020",
-                    marca: "Canon",
-                    serie: "ABC67890DEF",
-                    nombreresponsable: "Myriam",
-                    fechaBaja: "",
-                    fotoBien: "/path/to/foto2.jpg"
-                },
-                {
-                    numeroinventario: "67890",
-                    descripcion: "Impresora Canon",
-                    modelo: "PIXMA G6020",
-                    marca: "Canon",
-                    serie: "ABC67890DEF",
-                    nombreresponsable: "Myriam",
-                    fechaBaja: "",
-                    fotoBien: "/path/to/foto2.jpg"
-                },
-                {
-                    numeroinventario: "67890",
-                    descripcion: "Impresora Canon",
-                    modelo: "PIXMA G6020",
-                    marca: "Canon",
-                    serie: "ABC67890DEF",
-                    nombreresponsable: "Myriam",
-                    fechaBaja: "",
-                    fotoBien: "/path/to/foto2.jpg"
-                },
-                {
-                    numeroinventario: "67890",
-                    descripcion: "Impresora Canon",
-                    modelo: "PIXMA G6020",
-                    marca: "Canon",
-                    serie: "ABC67890DEF",
-                    nombreresponsable: "Myriam",
-                    fechaBaja: "",
-                    fotoBien: "/path/to/foto2.jpg"
-                },
-                {
-                    numeroinventario: "67890",
-                    descripcion: "Impresora Canon",
-                    modelo: "PIXMA G6020",
-                    marca: "Canon",
-                    serie: "ABC67890DEF",
-                    nombreresponsable: "Myriam",
-                    fechaBaja: "",
-                    fotoBien: "/path/to/foto2.jpg"
-                },
-                {
-                    numeroinventario: "67890",
-                    descripcion: "Impresora Canon",
-                    modelo: "PIXMA G6020",
-                    marca: "Canon",
-                    serie: "ABC67890DEF",
-                    nombreresponsable: "Myriam",
-                    fechaBaja: "",
-                    fotoBien: "/path/to/foto2.jpg"
+                    fotoBien: ["radio-y-television-de-hidalgo.jpg", "radio.jpeg", "radio2.jpg", "radio-y-television-de-hidalgo.jpg", "radio-y-television-de-hidalgo.jpg", "document_download.png", "logo.png"]
                 }
             ],
             itemsPerPage: 10,
             currentPage: 1,
             filterTerm: '',
             searchQuery: '',
-            showModal: false,
+            showImageModal: false,
+            showConfirmModal: false,
             itemToRemove: null,
+            modalImages: [],
         };
     },
     computed: {
@@ -289,21 +227,31 @@ export default {
         }
     },
     methods: {
+
+
+        getImageUrl(image) {
+            return require(`@/assets/${image}`);
+        },
+        openModal(fotos) {
+            this.modalImages = fotos;
+            this.showImageModal = true;
+        },
+        closeModal() {
+            this.showImageModal = false;
+            this.modalImages = [];
+        },
         confirmRemove(baja) {
             this.itemToRemove = baja;
-            this.showModal = true;
+            this.showConfirmModal = true;
         },
         removeGood() {
             if (this.itemToRemove) {
                 this.itemToRemove.fechaBaja = new Date().toLocaleDateString();
-                this.itemToRemove.removido = true; // Marca que el bien ha sido removido
-
-                // Mover el elemento removido al final de la lista
+                this.itemToRemove.removido = true;
                 const index = this.bajas.indexOf(this.itemToRemove);
                 this.bajas.splice(index, 1);
                 this.bajas.push(this.itemToRemove);
-
-                this.showModal = false;
+                this.showConfirmModal = false;
                 this.itemToRemove = null;
             }
         },
@@ -339,6 +287,85 @@ export default {
 /* Aplicar Montserrat a todo el contenido */
 * {
     font-family: 'Montserrat', sans-serif;
+}
+
+
+.modal-overlay2 {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    /* Asegúrate de que el modal esté por encima de otros elementos */
+}
+
+.modal2 {
+    background: white;
+    color: #691B31;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+    width: 1100px;
+}
+
+.modal-overlay2.show {
+    visibility: visible;
+}
+
+.modal2 button {
+    padding: 10px 20px;
+    background-color: #BC955B;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.modal2 button:hover {
+    background-color: #691B31;
+}
+
+.image-container {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    /* Muestra 5 imágenes por fila */
+    gap: 10px;
+    /* Espacio entre las imágenes */
+    margin-top: 20px;
+}
+
+.image-name {
+    font-size: 12px;
+    color: #333;
+    margin-top: 5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 200px;
+
+}
+
+
+.modal-img {
+    max-width: 300px;
+    border-radius: 8px;
+    width: auto;
+    height: 120px;
+
+}
+
+
+/* Efecto de zoom al pasar el cursor por encima de la imagen */
+.modal-img:hover {
+    transition: transform 0.3s ease-in-out;
+    transform: scale(1.1);
+    box-shadow: 0 4px 8px #6f7271;
+    /* Hace que la imagen crezca al 150% de su tamaño */
 }
 
 .removed-row {

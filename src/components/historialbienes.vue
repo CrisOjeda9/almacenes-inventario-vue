@@ -193,6 +193,8 @@ export default {
             filterTerm: '', // Variable para filtrar por término específico
             showModal: false,
             modalImages: [],
+            itemToRemove: null,
+
         };
     },
     computed: {
