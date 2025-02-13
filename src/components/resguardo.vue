@@ -83,32 +83,51 @@
         </div>
 
         <div class="contenedor-tabla">
-        <table class="resguardo-table">
-            <thead>
-                <tr>
-                    <th v-for="field in tableFields" :key="field.value">
-                        <label>
-                            <input type="checkbox" v-model="selectedFields" :value="field.value"> {{ field.label }}
-                        </label>
-                    </th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr v-for="resguardo in paginatedResguardo" :key="resguardo.noinventario">
-                    <td v-for="field in tableFields" :key="field.value">
-                        <!-- Verificar si el campo es 'foto' y mostrar la imagen -->
-                        <template v-if="field.value === 'foto'">
-                            <img :src="'/path/to/photos/' + resguardo[field.value]" alt="Foto" width="50" height="50" />
-                        </template>
-                        <template v-else>
-                            {{ resguardo[field.value] }}
-                        </template>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
+            <table class="resguardo-table">
+                <thead>
+                    <tr>
+                        <th v-for="field in tableFields" :key="field.value">
+                            <label>
+                                <input type="checkbox" v-model="selectedFields" :value="field.value"> {{ field.label }}
+                            </label>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="resguardo in paginatedResguardo" :key="resguardo.noinventario">
+                        <td v-for="field in tableFields" :key="field.value">
+                            <!-- Verificar si el campo es 'foto' y mostrar la imagen -->
+                            <template v-if="field.value === 'foto'">
+                                <button @click="openModal(resguardo.foto)" class="btn-download">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </template>
+                            <template v-else>
+                                {{ resguardo[field.value] }}
+                            </template>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
 
+        <!-- Modal para mostrar imágenes -->
+        <div v-if="showModal" class="modal-overlay" @click="closeModal">
+            <div class="modal" @click.stop>
+                <h2>Imágenes</h2>
+                <hr>
+                <div class="image-container">
+                    <div v-for="(foto, i) in modalImages" :key="i" class="image-box">
+                        <!-- Envolvemos la imagen con un enlace -->
+                        <a :href="getImageUrl(foto)" target="_blank">
+                            <img :src="getImageUrl(foto)" alt="Foto del bien" class="modal-img" />
+                        </a>
+                        <p class="image-name">{{ foto }}</p>
+                    </div>
+                </div>
+                <button @click="closeModal">Cerrar</button>
+            </div>
+        </div>
     </div>
 </template>
 
@@ -121,7 +140,7 @@ export default {
     name: "resguardoPage",
     data() {
         return {
-            
+
             menus: {
                 homeMenu: false,
                 resguardoMenu: false,
@@ -141,12 +160,19 @@ export default {
                 { label: "Fecha de Registro", value: "registrationDate" }
             ],
             resguardo: [
-                { noinventario: "15051", descripcion: "es grande", color: "Rojo", material: "Marmol", modelo: "pro", marca: "apple", foto: "asdad456564.jpg", serie: "pro", registrationDate: "2024-01-15" },
-                { noinventario: "15052", descripcion: "compacto", color: "Azul", material: "Aluminio", modelo: "mini", marca: "samsung", foto: "asd1234567.jpg", serie: "mini", registrationDate: "2024-01-16" },
-                { noinventario: "15053", descripcion: "elegante", color: "Negro", material: "Vidrio", modelo: "elegant", marca: "sony", foto: "sdgfdfg1345.jpg", serie: "elegant", registrationDate: "2024-01-17" }
+                { noinventario: "15051", descripcion: "es grande", color: "Rojo", material: "Marmol", modelo: "pro", marca: "apple", foto: ["radio-y-television-de-hidalgo.jpg", "radio.jpeg","radio2.jpg"], serie: "pro", registrationDate: "2024-01-15" },
+                { noinventario: "15052", descripcion: "compacto", color: "Azul", material: "Aluminio", modelo: "mini", marca: "samsung", foto:["radio-y-television-de-hidalgo.jpg", "radio.jpeg","radio2.jpg"], serie: "mini", registrationDate: "2024-01-16" },
+                { noinventario: "15053", descripcion: "elegante", color: "Negro", material: "Vidrio", modelo: "elegant", marca: "sony", foto: ["radio-y-television-de-hidalgo.jpg",  "radio.jpeg","radio2.jpg"], serie: "elegant", registrationDate: "2024-01-17" }
             ],
             itemsPerPage: 10, // Cantidad de elementos por página
             currentPage: 1, // Página actual
+            showModal: false,
+            modalImages: [],
+            itemToRemove: null,
+
+            getImageUrl(image) {
+                return require(`@/assets/${image}`);
+            },
         };
     },
     computed: {
@@ -167,6 +193,14 @@ export default {
         }
     },
     methods: {
+        openModal(fotos) {
+            this.modalImages = fotos;
+            this.showModal = true;
+        },
+        closeModal() {
+            this.showModal = false;
+            this.modalImages = [];
+        },
         goHome() {
             this.$router.push('home'); // Redirige a la página principal ("/"). Cambia el path si es necesario.
         },
@@ -272,6 +306,7 @@ export default {
             this.currentPage = page;
         }
     },
+
 };
 
 </script>
@@ -282,6 +317,87 @@ export default {
     font-family: 'Montserrat', sans-serif;
 }
 
+.btn-download {
+    width: 50px;
+}
+
+.image-container {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    /* Muestra 5 imágenes por fila */
+    gap: 10px;
+    /* Espacio entre las imágenes */
+    margin-top: 20px;
+}
+
+.image-name {
+    font-size: 12px;
+    color: #333;
+    margin-top: 5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 200px;
+
+}
+
+
+.modal-img {
+    max-width: 300px;
+    border-radius: 8px;
+    width: auto;
+    height: 120px;
+
+}
+
+
+/* Efecto de zoom al pasar el cursor por encima de la imagen */
+.modal-img:hover {
+    transition: transform 0.3s ease-in-out;
+    transform: scale(1.1);
+    box-shadow: 0 4px 8px #6f7271;
+    /* Hace que la imagen crezca al 150% de su tamaño */
+}
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    /* Asegúrate de que el modal esté por encima de otros elementos */
+}
+
+.modal {
+    background: white;
+    color: #691B31;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+    width: 1100px;
+}
+
+.modal-overlay.show {
+    visibility: visible;
+}
+
+.modal button {
+    padding: 10px 20px;
+    background-color: #BC955B;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.modal button:hover {
+    background-color: #691B31;
+}
 
 
 .pagination {
