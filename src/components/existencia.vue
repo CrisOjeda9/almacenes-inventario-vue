@@ -107,11 +107,9 @@
                         <td>{{ existencia.ubicacionAlmacen }}</td>
                         <td>{{ existencia.totalIngreso }}</td>
                         <td>
-                            <a :href="'/ruta/del/archivo/' + existencia.fotoArticulo" download>
-                                <button class="btn-download">
-                                    <i class="fas fa-download"></i>
-                                </button>
-                            </a>
+                            <button @click="openModal(existencia.fotoArticulo)" class="btn-download">
+                                <i class="fas fa-eye"></i>
+                            </button>
                         </td>
                         <td>{{ existencia.fechaRegistro }}</td>
                         <td>
@@ -244,6 +242,23 @@
                 <button @click="nextPage" :disabled="currentPage === totalPages">Siguiente</button>
             </div>
         </div>
+        <!-- Modal para mostrar imágenes -->
+        <div v-if="showModal" class="modal-overlay2" @click="closeModal">
+            <div class="modal2" @click.stop>
+                <h2>Imágenes</h2>
+                <hr>
+                <div class="image-container2">
+                    <div v-for="(foto, i) in modalImages" :key="i" class="image-box">
+                        <!-- Envolvemos la imagen con un enlace -->
+                        <a :href="getImageUrl(foto)" target="_blank">
+                            <img :src="getImageUrl(foto)" alt="Foto del bien recibido" class="modal-img2" />
+                        </a>
+                        <p class="image-name2">{{ foto }}</p>
+                    </div>
+                </div>
+                <button @click="closeModal">Cerrar</button>
+            </div>
+        </div>
     </div>
 </template>
 
@@ -261,6 +276,9 @@ export default {
             searchQuery: '',
             currentPage: 1,
             existenciasPerPage: 10,
+            showModal: false,
+            modalImages: [],
+            itemToRemove: null,
             isEditing: false, // Para controlar si estamos en modo de edición
             currentExistencia: {}, // Objeto para almacenar la existencia que se está editando
             existencias: [
@@ -276,7 +294,7 @@ export default {
                     unidadMedida: "Piezas",
                     ubicacionAlmacen: "Almacén 1 - Estante 3",
                     totalIngreso: "100",
-                    fotoArticulo: "imagen_a.jpg",
+                    fotoArticulo: ["radio-y-television-de-hidalgo.jpg","radio.jpeg","radio2.jpg", "radio-y-television-de-hidalgo.jpg",  "radio-y-television-de-hidalgo.jpg"],
                     fechaRegistro: "2024-01-01"
                 },
                 {
@@ -291,7 +309,7 @@ export default {
                     unidadMedida: "Cajas",
                     ubicacionAlmacen: "Almacén 2 - Estante 5",
                     totalIngreso: "50",
-                    fotoArticulo: "imagen_b.jpg",
+                    fotoArticulo: ["radio-y-television-de-hidalgo.jpg","radio.jpeg","radio2.jpg", "radio-y-television-de-hidalgo.jpg",  "radio-y-television-de-hidalgo.jpg"],
                     fechaRegistro: "2024-01-02"
                 }
             ]
@@ -318,6 +336,14 @@ export default {
         }
     },
     methods: {
+        openModal(fotos) {
+            this.modalImages = fotos;
+            this.showModal = true;
+        },
+        closeModal() {
+            this.showModal = false;
+            this.modalImages = [];
+        },
         triggerFileInput() {
             this.$refs.fileInput.click();
         },
@@ -407,6 +433,9 @@ export default {
         redirectToAddExistencia() {
             // Aquí defines la ruta a la que quieres redirigir al hacer clic en el botón
             this.$router.push('/newexistencia');
+        },
+        getImageUrl(image) {
+            return require(`@/assets/${image}`);
         }
     }
 };
@@ -419,6 +448,90 @@ export default {
 * {
     font-family: 'Montserrat', sans-serif;
 }
+
+.btn-download {
+    width: 50px;
+}
+
+
+.image-container2 {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    /* Muestra 5 imágenes por fila */
+    gap: 10px;
+    /* Espacio entre las imágenes */
+    margin-top: 20px;
+}
+
+.image-name2 {
+    font-size: 12px;
+    color: #333;
+    margin-top: 5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 200px;
+
+}
+
+
+.modal-img2 {
+    max-width: 300px;
+    border-radius: 8px;
+    width: auto;
+    height: 120px;
+
+}
+
+
+/* Efecto de zoom al pasar el cursor por encima de la imagen */
+.modal-img2:hover {
+    transition: transform 0.3s ease-in-out;
+    transform: scale(1.1);
+    box-shadow: 0 4px 8px #6f7271;
+    /* Hace que la imagen crezca al 150% de su tamaño */
+}
+
+.modal-overlay2 {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    /* Asegúrate de que el modal esté por encima de otros elementos */
+}
+
+.modal2 {
+    background: white;
+    color: #691B31;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+    width: 1100px;
+}
+
+.modal-overlay2.show {
+    visibility: visible;
+}
+
+.modal2 button {
+    padding: 10px 20px;
+    background-color: #BC955B;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.modal2 button:hover {
+    background-color: #691B31;
+}
+
 
 .titulo {
     font-size: 30px;
