@@ -11,7 +11,7 @@
             </div>
 
             <div class="navbar-center">
-                <h1>Existencias</h1>
+                <h1>Artículos</h1>
                 <p>Sistema inventario y Almacén de Radio y Televisión de Hidalgo</p>
             </div>
             <div class="navbar-right">
@@ -1087,7 +1087,5 @@ button[type="button"]:hover {
     display: none;
 }
 
-.btn-download {
-    width: 80%;
-}
+
 </style>

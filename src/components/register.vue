@@ -66,6 +66,18 @@
             <form @submit.prevent="registerUser">
                 <div class="form-row">
                     <div class="form-field">
+                        <label for="rol">Rol de usuario</label>
+
+                        <select v-model="form.rol" required>
+                            <option value="" disabled>Selecciona una opción</option>
+                            <option value="administrador">Administrador</option>
+                            <option value="inventario">Inventario</option>
+                            <option value="almacen">Almacén</option>
+
+                        </select>
+                    </div>
+                    <div class="form-field">
+
                         <label for="nombre">Nombre(s)</label>
                         <input type="text" placeholder="" v-model="form.nombre" required />
 
@@ -81,13 +93,14 @@
                             style="text-transform: uppercase;" required />
 
                     </div>
+
+                </div>
+                <div class="form-row">
                     <div class="form-field">
                         <label for="numtrabajador">Num. Trabajador</label>
                         <input type="number" placeholder="" min="0" v-model="form.numTrabajador" required />
 
                     </div>
-                </div>
-                <div class="form-row">
 
                     <div class="form-field">
                         <label for="curp">CURP</label>
@@ -122,14 +135,15 @@
                         <input type="text" placeholder="" v-model="form.departamento" required />
 
                     </div>
+
+
+                </div>
+                <div class="form-row">
                     <div class="form-field">
                         <label for="organosuperior">Organo Superior</label>
                         <input type="text" placeholder="" v-model="form.organosuperior" required />
 
                     </div>
-
-                </div>
-                <div class="form-row">
                     <div class="form-field">
                         <label for="areapresupuestal">Área Presupuestal</label>
                         <input type="text" value="Radio y Televisión de Hidalgo"
@@ -148,6 +162,12 @@
                         </div>
                     </div>
 
+
+
+                </div>
+
+
+                <div class="form-row">
                     <div class="form-field">
                         <label for="confirmPassword">Confirmar Contraseña</label>
                         <div class="input-wrapper">
@@ -157,11 +177,6 @@
                                 @click="showConfirmPassword = !showConfirmPassword"></i>
                         </div>
                     </div>
-
-                </div>
-
-
-                <div class="form-row">
                     <!-- Campo INE -->
                     <div class="form-field">
                         <label for="documentoINE">INE</label>
@@ -196,11 +211,18 @@
                 </div>
             </form>
         </div>
-        <!-- Modal -->
         <div v-if="showModal" class="modal">
             <div class="modal-content">
                 <h2>Usuario registrado con éxito.</h2>
                 <button @click="closeModal">Aceptar</button>
+            </div>
+        </div>
+
+        <div v-if="showErrorModal" class="modal2">
+            <div class="modal-content2">
+                <h2>Error</h2>
+                <p>Las contraseñas no coinciden.</p>
+                <button @click="closeErrorModal">Aceptar</button>
             </div>
         </div>
     </div>
@@ -212,6 +234,7 @@ export default {
     data() {
         return {
             form: {
+                rol: "",
                 nombre: "",
                 apellidos: "",
                 rfc: "",
@@ -233,7 +256,9 @@ export default {
                 usersMenu: false,
                 settingsMenu: false,
             },
-            showModal: false
+            showModal: false,
+            showErrorModal: false
+
 
         };
     },
@@ -244,13 +269,7 @@ export default {
         goBack() {
             console.log("Regresar a la página anterior");
         },
-        registerUser() {
-            if (this.form.password !== this.form.confirmPassword) {
-                alert("Las contraseñas no coinciden");
-                return;
-            }
-            this.showModal = true;
-        },
+
         navigateTo(page) {
             console.log(`Navegando a ${page}`);
             this.$router.push({ name: page }); // Asegúrate de que las rutas estén definidas con `name`.
@@ -273,10 +292,20 @@ export default {
                 if (type === "Foto") this.form.documentoFoto = file;
             }
         },
+        registerUser() {
+            if (this.form.password !== this.form.confirmPassword) {
+                this.showErrorModal = true;
+                return;
+            }
+            this.showModal = true;
+        },
         closeModal() {
             this.showModal = false;
             this.$router.push('/poliza');
         },
+        closeErrorModal() {
+            this.showErrorModal = false;
+        }
     },
 };
 </script>
@@ -309,6 +338,29 @@ export default {
     padding: 20px;
     border-radius: 20px;
     width: 500px;
+}
+.modal2 {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content2 {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: white;
+    color: #691B31;
+    padding: 20px;
+    border-radius: 20px;
+    width: 300px;
 }
 
 .container {

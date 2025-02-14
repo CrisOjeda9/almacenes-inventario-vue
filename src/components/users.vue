@@ -23,7 +23,7 @@
                 </div>
             </div>
         </nav>
- 
+
         <!-- Barra de navegación amarilla -->
         <div class="sub-navbar">
             <a href="/home" class="nav-item">Inicio</a>
@@ -73,6 +73,7 @@
             <table class="user-table">
                 <thead>
                     <tr>
+                        <th>Rol</th>
                         <th>Nombre(s)</th>
                         <th>Apellidos</th>
                         <th>RFC</th>
@@ -87,6 +88,7 @@
                 </thead>
                 <tbody>
                     <tr v-for="user in paginateduser" :key="user.id">
+                        <td>{{ user.rol }}</td>
                         <td>{{ user.nombre }}</td>
                         <td>{{ user.apellidos }}</td>
                         <td>{{ user.rfc }}</td>
@@ -111,6 +113,17 @@
                     <form @submit.prevent="saveChanges" class="edit-form">
                         <div class="contenedorformulario">
                             <div class="form-column">
+                                <div style="width: 91%;">
+                                    <label for="rol">Rol de usuario</label>
+
+                                    <select v-model="currentUser.rol" required>
+                                        <option value="" disabled>Selecciona una opción</option>
+                                        <option value="administrador">Administrador</option>
+                                        <option value="inventario">Inventario</option>
+                                        <option value="almacen">Almacén</option>
+
+                                    </select>
+                                </div>
                                 <div>
                                     <label>Nombre(s):</label>
                                     <input v-model="currentUser.nombre" type="text" />
@@ -121,11 +134,11 @@
                                 </div>
                                 <div>
                                     <label>RFC:</label>
-                                    <input v-model="currentUser.rfc" type="text" />
+                                    <input v-model="currentUser.rfc" minlength="13" maxlength="13" type="text" />
                                 </div>
                                 <div>
                                     <label>CURP:</label>
-                                    <input v-model="currentUser.curp" type="text" />
+                                    <input v-model="currentUser.curp" minlength="18" maxlength="18" type="text" />
                                 </div>
 
                             </div>
@@ -219,17 +232,19 @@ export default {
             user: [
                 {
                     id: 1,
+                    rol: "administrador",
                     nombre: "Cristian",
                     apellidos: "Ojeda Gayosso",
                     rfc: "asdadadasda",
                     curp: "sadhkasldlafsasf",
                     numTrabajador: "10",
-                    direccionPertenencia: "Area ",
+                    direccionPertenencia: "direccion_general",
                     departamento: "asdasdadsd",
                     registrationDate: "2024-01-15"
                 },
                 {
                     id: 2,
+                    rol: "asdsadads",
                     nombre: "Mariana",
                     apellidos: "Torres López",
                     rfc: "MKJ9237JNK",
@@ -241,6 +256,7 @@ export default {
                 },
                 {
                     id: 3,
+                    rol: "123123123",
                     nombre: "Juan",
                     apellidos: "Pérez Sánchez",
                     rfc: "PZSJ800912KJH",
@@ -252,6 +268,7 @@ export default {
                 },
                 {
                     id: 4,
+                    rol: "qweqeq",
                     nombre: "Laura",
                     apellidos: "García Martínez",
                     rfc: "LGM123456NQR",
@@ -263,6 +280,7 @@ export default {
                 },
                 {
                     id: 5,
+                    rol: "sdadadasd",
                     nombre: "Eduardo",
                     apellidos: "Hernández Romero",
                     rfc: "EHRO456789OPQ",
@@ -274,6 +292,7 @@ export default {
                 },
                 {
                     id: 6,
+                    rol: "asdadasd",
                     nombre: "Sofía",
                     apellidos: "Ramírez Gómez",
                     rfc: "SRGM567890DFL",
@@ -294,6 +313,7 @@ export default {
             const query = this.searchQuery.toLowerCase();
             return this.user.filter(user => {
                 return user.nombre.toString().toLowerCase().includes(query) ||
+                    user.rol.toString().toLowerCase().includes(query) ||
                     user.apellidos.toString().toLowerCase().includes(query) ||
                     user.rfc.toString().toLowerCase().includes(query) ||
                     user.curp.toString().toLowerCase().includes(query) ||
@@ -637,6 +657,7 @@ a {
 
 .btn-edit,
 .btn-delete {
+    width: 95px;
     text-align: center;
     padding-top: 2px;
     padding-bottom: 2px;
@@ -644,7 +665,7 @@ a {
     padding-right: 15px;
     border: none;
     cursor: pointer;
-    
+
 }
 
 .btn-edit {

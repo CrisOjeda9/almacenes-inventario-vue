@@ -183,12 +183,12 @@ export default {
                     fotoBien: ["radio-y-television-de-hidalgo.jpg", "radio.jpeg", "radio2.jpg", "radio-y-television-de-hidalgo.jpg", "radio-y-television-de-hidalgo.jpg", "document_download.png", "logo.png"]
                 },
                 {
-                    numeroinventario: "67890",
-                    descripcion: "Impresora Canon",
+                    numeroinventario: "123213",
+                    descripcion: "Impresora",
                     modelo: "PIXMA G6020",
                     marca: "Canon",
                     serie: "ABC67890DEF",
-                    nombreresponsable: "Myriam",
+                    nombreresponsable: "Cristian",
                     fechaBaja: "",
                     fotoBien: ["radio-y-television-de-hidalgo.jpg", "radio.jpeg", "radio2.jpg", "radio-y-television-de-hidalgo.jpg", "radio-y-television-de-hidalgo.jpg", "document_download.png", "logo.png"]
                 }
