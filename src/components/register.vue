@@ -65,7 +65,7 @@
         <div class="form-container">
             <form @submit.prevent="registerUser">
                 <div class="form-row">
-                    <div class="form-field">
+<div class="form-field">
                         <label for="rol">Rol de usuario</label>
 
                         <select v-model="form.rol" required>
@@ -77,7 +77,6 @@
                         </select>
                     </div>
                     <div class="form-field">
-
                         <label for="nombre">Nombre(s)</label>
                         <input type="text" placeholder="" v-model="form.nombre" required />
 
@@ -93,14 +92,13 @@
                             style="text-transform: uppercase;" required />
 
                     </div>
-
-                </div>
-                <div class="form-row">
                     <div class="form-field">
                         <label for="numtrabajador">Num. Trabajador</label>
                         <input type="number" placeholder="" min="0" v-model="form.numTrabajador" required />
 
                     </div>
+                </div>
+                <div class="form-row">
 
                     <div class="form-field">
                         <label for="curp">CURP</label>
@@ -135,15 +133,14 @@
                         <input type="text" placeholder="" v-model="form.departamento" required />
 
                     </div>
-
-
-                </div>
-                <div class="form-row">
                     <div class="form-field">
                         <label for="organosuperior">Organo Superior</label>
                         <input type="text" placeholder="" v-model="form.organosuperior" required />
 
                     </div>
+
+                </div>
+                <div class="form-row">
                     <div class="form-field">
                         <label for="areapresupuestal">Área Presupuestal</label>
                         <input type="text" value="Radio y Televisión de Hidalgo"
@@ -162,12 +159,6 @@
                         </div>
                     </div>
 
-
-
-                </div>
-
-
-                <div class="form-row">
                     <div class="form-field">
                         <label for="confirmPassword">Confirmar Contraseña</label>
                         <div class="input-wrapper">
@@ -177,17 +168,27 @@
                                 @click="showConfirmPassword = !showConfirmPassword"></i>
                         </div>
                     </div>
-                    <!-- Campo INE -->
+
+                </div>
+
+
+                <div class="form-row">
+                    <!-- Campo Doc -->
                     <div class="form-field">
-                        <label for="documentoINE">INE</label>
-                        <div class="dropzone" @drop.prevent="handleDrop('INE')" @dragover.prevent
-                            @click="triggerFileInput('INE')">
-                            <input type="file" id="documentoINE" ref="fileInputINE" @change="handleFileUpload('INE')"
-                                accept=".pdf" />
+                        <label for="documentos">Documentos</label>
+                        <div class="dropzone" @drop.prevent="handleDrop('documentos')" @dragover.prevent
+                            @click="triggerFileInput('documentos')">
+                            <input type="file" id="documentos" ref="fileInputDoc"
+                                @change="handleFileUpload('documentos')" accept=".pdf" multiple />
                             <i class="fas fa-cloud-upload-alt"></i>
-                            <span v-if="!form.documentoINE">Arrastra o selecciona un archivo (PDF)</span>
-                            <span v-else>{{ form.documentoINE.name }}</span>
+                            <span v-if="form.documentos.length === 0">Arrastra o selecciona archivos (PDF)</span>
+                            <span v-else>{{ form.documentos.length }} archivos seleccionados</span>
+                            <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
                         </div>
+
+                        <button v-if="form.documentos.length > 0" @click="openDocumentModal" class="view-documents-btn">
+                            Ver Documentos
+                        </button>
                     </div>
 
                     <!-- Campo Foto -->
@@ -211,22 +212,31 @@
                 </div>
             </form>
         </div>
+        <!-- Modal -->
         <div v-if="showModal" class="modal">
             <div class="modal-content">
                 <h2>Usuario registrado con éxito.</h2>
                 <button @click="closeModal">Aceptar</button>
             </div>
         </div>
-
-        <div v-if="showErrorModal" class="modal2">
-            <div class="modal-content2">
-                <h2>Error</h2>
-                <p>Las contraseñas no coinciden.</p>
-                <button @click="closeErrorModal">Aceptar</button>
+        <!-- Modal para mostrar los documentos cargados -->
+        <div v-if="showDocumentModal" class="modal-overlay2">
+            <div class="modal2">
+                <h2>Documentos Cargados</h2>
+                <div class="document-list2">
+                    <div v-for="(doc, index) in form.documentos" :key="index" class="document-item2">
+                        <span>{{ doc.name }}</span>
+                        <button @click="removeDocument(index)" class="remove-btn2">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </div>
+                </div>
+                <button @click="closeDocumentModal">Cerrar</button>
             </div>
         </div>
     </div>
 </template>
+
 
 <script>
 export default {
@@ -234,7 +244,6 @@ export default {
     data() {
         return {
             form: {
-                rol: "",
                 nombre: "",
                 apellidos: "",
                 rfc: "",
@@ -246,7 +255,7 @@ export default {
                 email: "",
                 password: "",
                 confirmPassword: "",
-                documentoINE: null, // Almacena el archivo INE
+                documentos: [], // Almacena el archivo INE
                 documentoFoto: null, // Almacena el archivo Foto
             },
             showPassword: false,
@@ -257,9 +266,8 @@ export default {
                 settingsMenu: false,
             },
             showModal: false,
-            showErrorModal: false
-
-
+            showDocumentModal: false, // Controla la visibilidad del modal de documentos
+            errorMessage: "", // Mensaje de error
         };
     },
     methods: {
@@ -269,7 +277,13 @@ export default {
         goBack() {
             console.log("Regresar a la página anterior");
         },
-
+        registerUser() {
+            if (this.form.password !== this.form.confirmPassword) {
+                alert("Las contraseñas no coinciden");
+                return;
+            }
+            this.showModal = true;
+        },
         navigateTo(page) {
             console.log(`Navegando a ${page}`);
             this.$router.push({ name: page }); // Asegúrate de que las rutas estén definidas con `name`.
@@ -280,32 +294,46 @@ export default {
         hideMenu(menu) {
             this.menus[menu] = false;
         },
+        // Método para abrir el modal de documentos
+        openDocumentModal() {
+            this.showDocumentModal = true;
+        },
+
+        // Método para cerrar el modal de documentos
+        closeDocumentModal() {
+            this.showDocumentModal = false;
+        },
+
         triggerFileInput(type) {
-            if (type === "INE") this.$refs.fileInputINE.click();
-            if (type === "Foto") this.$refs.fileInputFoto.click();
+            if (type === "documentos") {
+                this.$refs.fileInputDoc.click();
+            } else if (type === "Foto") {
+                this.$refs.fileInputFoto.click();
+            }
         },
         handleFileUpload(type) {
-            const input = type === "INE" ? this.$refs.fileInputINE : this.$refs.fileInputFoto;
-            const file = input.files[0];
-            if (file) {
-                if (type === "INE") this.form.documentoINE = file;
-                if (type === "Foto") this.form.documentoFoto = file;
+            if (type === "documentos") {
+                const input = this.$refs.fileInputDoc;
+                const files = Array.from(input.files); // Convierte FileList a un array
+
+                // Validar el límite de 7 archivos
+                if (files.length + this.form.documentos.length > 7) {
+                    this.errorMessage = "Solo puedes cargar un máximo de 7 archivos.";
+                    return;
+                }
+
+                // Agregar los archivos al array
+                this.form.documentos = [...this.form.documentos, ...files];
+                this.errorMessage = ""; // Limpiar el mensaje de error
+            } else if (type === "Foto") {
+                this.form.documentoFoto = this.$refs.fileInputFoto.files[0];
             }
         },
-        registerUser() {
-            if (this.form.password !== this.form.confirmPassword) {
-                this.showErrorModal = true;
-                return;
-            }
-            this.showModal = true;
+
+        // Método para eliminar un documento
+        removeDocument(index) {
+            this.form.documentos.splice(index, 1); // Elimina el documento del array
         },
-        closeModal() {
-            this.showModal = false;
-            this.$router.push('/poliza');
-        },
-        closeErrorModal() {
-            this.showErrorModal = false;
-        }
     },
 };
 </script>
@@ -315,6 +343,64 @@ export default {
 * {
     font-family: 'Montserrat', sans-serif;
 }
+.view-documents-btn {
+    display: flex;
+    justify-content: center;
+    position: relative;
+    width: 100%;
+    background-color: #691b31;
+    color: white;
+    border: none;
+    padding: 5px;
+    cursor: pointer;
+    border-radius: 5px;
+    margin-top: 2px;
+    font-size: 15px;
+}
+
+.modal-overlay2 {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    /* Asegúrate de que el modal esté por encima de otros elementos */
+}
+
+.modal2 {
+    background: white;
+    color: #691B31;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+}
+
+.modal-overlay2.show {
+    visibility: visible;
+}
+
+.modal2 button {
+    padding: 10px 20px;
+    background-color: #BC955B;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.modal2 button:hover {
+    background-color: #691B31;
+}
+
+
+
+
+
 
 .modal {
     position: fixed;
@@ -338,29 +424,6 @@ export default {
     padding: 20px;
     border-radius: 20px;
     width: 500px;
-}
-.modal2 {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.modal-content2 {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    background: white;
-    color: #691B31;
-    padding: 20px;
-    border-radius: 20px;
-    width: 300px;
 }
 
 .container {
