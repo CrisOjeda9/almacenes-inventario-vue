@@ -65,7 +65,7 @@
         <div class="form-container">
             <form @submit.prevent="registerUser">
                 <div class="form-row">
-<div class="form-field">
+                    <div class="form-field">
                         <label for="rol">Rol de usuario</label>
 
                         <select v-model="form.rol" required>
@@ -148,7 +148,7 @@
                     </div>
                     <div class="form-field">
                         <label for="email">Correo electrónico</label>
-                        <input type="email" v-model="form.email" />
+                        <input type="email" v-model="form.email" required />
                     </div>
                     <div class="form-field">
                         <label for="password">Contraseña</label>
@@ -186,7 +186,8 @@
                             <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
                         </div>
 
-                        <button v-if="form.documentos.length > 0" @click="openDocumentModal" class="view-documents-btn">
+                        <button v-if="form.documentos.length > 0" @click.prevent="openDocumentModal"
+                            class="view-documents-btn">
                             Ver Documentos
                         </button>
                     </div>
@@ -212,6 +213,16 @@
                 </div>
             </form>
         </div>
+        <div v-if="showAlertModal" class="modal">
+            <div class="modal-content">
+                <h2>¡Error!</h2>
+                <ul>
+                    <li v-for="(message, index) in alertMessageList" :key="index">{{ message }}</li>
+                </ul>
+                <button @click="closeAlertModal">Aceptar</button>
+            </div>
+        </div>
+
         <!-- Modal -->
         <div v-if="showModal" class="modal">
             <div class="modal-content">
@@ -239,6 +250,8 @@
 
 
 <script>
+
+
 export default {
     name: "RegisterPage",
     data() {
@@ -268,6 +281,7 @@ export default {
             showModal: false,
             showDocumentModal: false, // Controla la visibilidad del modal de documentos
             errorMessage: "", // Mensaje de error
+            showAlertModal: false,
         };
     },
     methods: {
@@ -278,12 +292,29 @@ export default {
             console.log("Regresar a la página anterior");
         },
         registerUser() {
+            let errorMessages = [];
+
             if (this.form.password !== this.form.confirmPassword) {
-                alert("Las contraseñas no coinciden");
+                errorMessages.push("Las contraseñas no coinciden.");
+            }
+            if (this.form.documentos.length === 0) {
+                errorMessages.push("Debes subir al menos un documento.");
+            }
+            if (!this.form.documentoFoto) {
+                errorMessages.push("Debes subir una foto.");
+            }
+
+            if (errorMessages.length > 0) {
+                this.alertMessageList = errorMessages;  // Set the error messages as a list
+                this.showAlertModal = true; // Show the alert modal
                 return;
             }
-            this.showModal = true;
+
+            this.showModal = true; // Show the success modal
+            this.redirectOnClose = true; // Set redirection flag
         },
+
+
         navigateTo(page) {
             console.log(`Navegando a ${page}`);
             this.$router.push({ name: page }); // Asegúrate de que las rutas estén definidas con `name`.
@@ -314,17 +345,12 @@ export default {
         handleFileUpload(type) {
             if (type === "documentos") {
                 const input = this.$refs.fileInputDoc;
-                const files = Array.from(input.files); // Convierte FileList a un array
-
-                // Validar el límite de 7 archivos
+                const files = Array.from(input.files);
                 if (files.length + this.form.documentos.length > 7) {
-                    this.errorMessage = "Solo puedes cargar un máximo de 7 archivos.";
+                    alert("Solo puedes cargar un máximo de 7 archivos.");
                     return;
                 }
-
-                // Agregar los archivos al array
                 this.form.documentos = [...this.form.documentos, ...files];
-                this.errorMessage = ""; // Limpiar el mensaje de error
             } else if (type === "Foto") {
                 this.form.documentoFoto = this.$refs.fileInputFoto.files[0];
             }
@@ -333,6 +359,16 @@ export default {
         // Método para eliminar un documento
         removeDocument(index) {
             this.form.documentos.splice(index, 1); // Elimina el documento del array
+        },
+        closeModal() {
+            this.showModal = false;
+            if (this.redirectOnClose) {
+                this.$router.push("/users"); // Redirects to the 'users' page
+            }
+        },
+
+        closeAlertModal() {
+            this.showAlertModal = false; // Cierra el modal de alerta
         },
     },
 };
@@ -343,6 +379,7 @@ export default {
 * {
     font-family: 'Montserrat', sans-serif;
 }
+
 .view-documents-btn {
     display: flex;
     justify-content: center;
@@ -373,6 +410,7 @@ export default {
 }
 
 .modal2 {
+
     background: white;
     color: #691B31;
     padding: 20px;
@@ -390,7 +428,9 @@ export default {
     color: white;
     border: none;
     border-radius: 5px;
+    margin-top: 10px;
     cursor: pointer;
+
 }
 
 .modal2 button:hover {
@@ -398,7 +438,12 @@ export default {
 }
 
 
-
+.document-list2 {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 30px;
+    gap: 1px;
+}
 
 
 

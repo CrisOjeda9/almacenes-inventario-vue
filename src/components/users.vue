@@ -6,8 +6,7 @@
         <!-- Menú de navegación -->
         <nav class="navbar">
             <div class="navbar-left">
-                <img src="../assets/LOGOS DORADOS-02.png" alt="Icono" class="navbar-icon" @click="goHome" width="50%"
-                    height="auto" style="cursor: pointer;" />
+                <img src="../assets/LOGOS DORADOS-02.png" alt="Icono" class="navbar-icon" @click="goHome" width="50%" height="auto" style="cursor: pointer;" />
             </div>
             <div class="navbar-center">
                 <h1>Gestión de Usuarios</h1>
@@ -81,9 +80,9 @@
                         <th>Num. trabajador</th>
                         <th>Direc. pertenencia</th>
                         <th>Departamento</th>
+                        <th>Organo Superior</th>
                         <th>Fecha de registro</th>
                         <th>Acciones</th>
-
                     </tr>
                 </thead>
                 <tbody>
@@ -94,9 +93,9 @@
                         <td>{{ user.rfc }}</td>
                         <td>{{ user.curp }}</td>
                         <td>{{ user.numTrabajador }}</td>
-                        <td> {{ getDireccionText(user.direccionPertenencia) }}
-                        </td>
+                        <td> {{ getDireccionText(user.direccionPertenencia) }}</td>
                         <td>{{ user.departamento }}</td>
+                        <td>{{ user.organoSuperior }}</td>
                         <td>{{ user.registrationDate }}</td>
                         <td>
                             <button @click="editUser(user)" class="btn-edit">Editar</button>
@@ -115,13 +114,11 @@
                             <div class="form-column">
                                 <div style="width: 91%;">
                                     <label for="rol">Rol de usuario</label>
-
                                     <select v-model="currentUser.rol" required>
                                         <option value="" disabled>Selecciona una opción</option>
                                         <option value="administrador">Administrador</option>
                                         <option value="inventario">Inventario</option>
                                         <option value="almacen">Almacén</option>
-
                                     </select>
                                 </div>
                                 <div>
@@ -140,7 +137,6 @@
                                     <label>CURP:</label>
                                     <input v-model="currentUser.curp" minlength="18" maxlength="18" type="text" />
                                 </div>
-
                             </div>
 
                             <div class="form-column">
@@ -152,8 +148,7 @@
                                     <label>Dirección de pertenencia:</label>
                                     <select v-model="currentUser.direccionPertenencia" required>
                                         <option value="" disabled>Selecciona una opción</option>
-                                        <option v-for="direccion in direcciones" :value="direccion.value"
-                                            :key="direccion.value">
+                                        <option v-for="direccion in direcciones" :value="direccion.value" :key="direccion.value">
                                             {{ direccion.text }}
                                         </option>
                                     </select>
@@ -162,6 +157,10 @@
                                 <div>
                                     <label>Departamento:</label>
                                     <input v-model="currentUser.departamento" type="text" />
+                                </div>
+                                <div>
+                                    <label>Organo superior:</label>
+                                    <input v-model="currentUser.organoSuperior" type="text" />
                                 </div>
                                 <div>
                                     <label>Fecha de registro:</label>
@@ -178,7 +177,6 @@
                     </form>
                 </div>
             </div>
-
 
             <!-- Modal de Confirmación de Eliminación -->
             <div v-if="isDeleteModalVisible" class="modal-overlay">
@@ -240,7 +238,8 @@ export default {
                     numTrabajador: "10",
                     direccionPertenencia: "direccion_general",
                     departamento: "asdasdadsd",
-                    registrationDate: "2024-01-15"
+                    organoSuperior: "Organismo Superior",
+                    registrationDate: "2024-01-14"
                 },
                 {
                     id: 2,
@@ -252,6 +251,7 @@ export default {
                     numTrabajador: "11",
                     direccionPertenencia: "Recursos Humanos",
                     departamento: "Administración",
+                    organoSuperior: "Superior",
                     registrationDate: "2024-01-16"
                 },
                 {
@@ -264,7 +264,8 @@ export default {
                     numTrabajador: "12",
                     direccionPertenencia: "Logística",
                     departamento: "Operaciones",
-                    registrationDate: "2024-01-17"
+                    organoSuperior: "Superior",
+                    registrationDate: "2024-01-15"
                 },
                 {
                     id: 4,
@@ -276,7 +277,8 @@ export default {
                     numTrabajador: "13",
                     direccionPertenencia: "Finanzas",
                     departamento: "Contabilidad",
-                    registrationDate: "2024-01-18"
+                    organoSuperior: "Superior",
+                    registrationDate: "2024-01-17"
                 },
                 {
                     id: 5,
@@ -288,7 +290,8 @@ export default {
                     numTrabajador: "14",
                     direccionPertenencia: "Ingeniería",
                     departamento: "Proyectos",
-                    registrationDate: "2024-01-19"
+                    organoSuperior: "Superior",
+                    registrationDate: "2024-01-18"
                 },
                 {
                     id: 6,
@@ -300,12 +303,10 @@ export default {
                     numTrabajador: "15",
                     direccionPertenencia: "Marketing",
                     departamento: "Publicidad",
-                    registrationDate: "2024-01-20"
+                    organoSuperior: "Superior",
+                    registrationDate: "2024-01-19"
                 }
-
-
             ]
-
         };
     },
     computed: {
@@ -315,110 +316,64 @@ export default {
                 return user.nombre.toString().toLowerCase().includes(query) ||
                     user.rol.toString().toLowerCase().includes(query) ||
                     user.apellidos.toString().toLowerCase().includes(query) ||
-                    user.rfc.toString().toLowerCase().includes(query) ||
-                    user.curp.toString().toLowerCase().includes(query) ||
-                    user.numTrabajador.toString().toLowerCase().includes(query) ||
-                    user.direccionPertenencia.toString().toLowerCase().includes(query) ||
-                    user.departamento.toLowerCase().includes(query);
+                    user.organoSuperior.toString().toLowerCase().includes(query) ||
+                    user.rfc.toString().toLowerCase().includes(query);
+
             });
         },
-
-
         totalPages() {
             return Math.ceil(this.filtereduser.length / this.userPerPage);
         },
         paginateduser() {
-            const start = (this.currentPage - 1) * this.userPerPage;
-            const end = start + this.userPerPage;
-            return this.filtereduser.slice(start, end);
-        },
-        // Función que convierte el value en su texto correspondiente
-        direccionText() {
-            return (value) => {
-                const found = this.direcciones.find(direccion => direccion.value === value);
-                return found ? found.text : value;
-            };
+            const startIndex = (this.currentPage - 1) * this.userPerPage;
+            const endIndex = startIndex + this.userPerPage;
+            return this.filtereduser.slice(startIndex, endIndex);
         }
     },
     methods: {
-        goHome() {
-            this.$router.push('home');
+        showMenu(menuName) {
+            this.menus[menuName] = true;
         },
-        showMenu(menu) {
-            this.menus[menu] = true;
+        hideMenu(menuName) {
+            this.menus[menuName] = false;
         },
-        hideMenu(menu) {
-            this.menus[menu] = false;
-        },
-        navigateTo(page) {
-            this.$router.push({ name: page });
-        },
-        goBack() {
-            window.history.back();
-        },
-
-        prevPage() {
-            if (this.currentPage > 1) {
-                this.currentPage--;
-            }
-        },
-        nextPage() {
-            if (this.currentPage < this.totalPages) {
-                this.currentPage++;
-            }
-        },
-        editUser(user) {
-            this.currentUser = { ...user };  // Usar "currentUser" en lugar de "currentuser"
-            this.isEditing = true;
-        },
-        saveChanges() {
-            const index = this.user.findIndex(user => user.id === this.currentUser.id);
-            if (index !== -1) {
-                this.user[index] = { ...this.currentUser };
-                this.isEditing = false;
-                this.currentUser = {}; // Limpiar el objeto
-            }
+        redirectToAdduser() {
+            this.$router.push("/register");
         },
         cancelEdit() {
             this.isEditing = false;
-            this.currentUser = {}; // Limpiar el objeto
         },
-
-        // Método para mostrar el modal de eliminación
-        showDeleteModal(id) {
-            this.deleteId = id;  // Guardamos el ID del usuario a eliminar
-            this.isDeleteModalVisible = true;  // Mostramos el modal
+        editUser(user) {
+            this.currentUser = { ...user };
+            this.isEditing = true;
         },
-
-        // Método para confirmar la eliminación
+        saveChanges() {
+            // Lógica para guardar cambios (aquí se actualiza el usuario)
+            this.isEditing = false;
+        },
+        showDeleteModal(userId) {
+            this.selectedUserId = userId;
+            this.isDeleteModalVisible = true;
+        },
         confirmDelete() {
-            const index = this.user.findIndex(user => user.id === this.deleteId);
-            if (index !== -1) {
-                this.user.splice(index, 1); // Eliminamos el usuario de la lista
-                this.isDeleteModalVisible = false;  // Cerramos el modal
-                this.deleteId = null;  // Limpiamos el ID de eliminación
-            }
+            this.user = this.user.filter(user => user.id !== this.selectedUserId);
+            this.isDeleteModalVisible = false;
         },
-
-        // Método para cancelar la eliminación
         cancelDelete() {
             this.isDeleteModalVisible = false;
-            this.deleteId = null; // Limpiamos el ID de eliminación
         },
-
-        redirectToAdduser() {
-            // Aquí defines la ruta a la que quieres redirigir al hacer clic en el botón
-            this.$router.push('/register');
+        prevPage() {
+            if (this.currentPage > 1) this.currentPage--;
         },
-        getDireccionText(direccionValue) {
-            const direccion = this.direcciones.find(d => d.value === direccionValue);
-            return direccion ? direccion.text : direccionValue; // Devuelve el texto si lo encuentra, o el valor si no lo encuentra
+        nextPage() {
+            if (this.currentPage < this.totalPages) this.currentPage++;
+        },
+        getDireccionText(direccion) {
+            return this.direcciones.find(item => item.value === direccion)?.text || 'No disponible';
         }
     }
-
 };
 </script>
-
 <style scoped>
 /* Aplicar Montserrat a todo el contenido */
 * {
@@ -636,6 +591,7 @@ a {
     /* Redondear las esquinas de la tabla */
     overflow: hidden;
     /* Para que los bordes no sobresalgan */
+    font-size: 16px;
 }
 
 .user-table th,
