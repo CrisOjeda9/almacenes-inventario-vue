@@ -70,9 +70,9 @@
 
                         <select v-model="form.rol" required>
                             <option value="" disabled>Selecciona una opción</option>
-                            <option value="administrador">Administrador</option>
-                            <option value="inventario">Inventario</option>
-                            <option value="almacen">Almacén</option>
+                            <option value="Administrador">Administrador</option>
+                            <option value="Inventario">Inventario</option>
+                            <option value="Almacen">Almacén</option>
 
                         </select>
                     </div>
@@ -92,14 +92,14 @@
                             style="text-transform: uppercase;" required />
 
                     </div>
+                    
+                </div>
+                <div class="form-row">
                     <div class="form-field">
                         <label for="numtrabajador">Num. Trabajador</label>
                         <input type="number" placeholder="" min="0" v-model="form.numTrabajador" required />
 
                     </div>
-                </div>
-                <div class="form-row">
-
                     <div class="form-field">
                         <label for="curp">CURP</label>
                         <input type="text" placeholder="" minlength="18" maxlength="18" v-model="form.curp" required
@@ -133,17 +133,18 @@
                         <input type="text" placeholder="" v-model="form.departamento" required />
 
                     </div>
-                    <div class="form-field">
-                        <label for="organosuperior">Organo Superior</label>
-                        <input type="text" placeholder="" v-model="form.organosuperior" required />
-
-                    </div>
+                    
 
                 </div>
                 <div class="form-row">
                     <div class="form-field">
+                        <label for="organosuperior">Organo Superior</label>
+                        <input type="text" value="ORGANISMOS DESCENTRALIZADOS" placeholder="Organismo de Descentralizado" v-model="form.organosuperior" readonly />
+
+                    </div>
+                    <div class="form-field">
                         <label for="areapresupuestal">Área Presupuestal</label>
-                        <input type="text" value="Radio y Televisión de Hidalgo"
+                        <input type="text" value="RADIO Y TELEVICION DE HIDALGO"
                             placeholder="Radio y Televisión de Hidalgo" v-model="form.areapresupuestal" readonly />
                     </div>
                     <div class="form-field">
@@ -159,7 +160,13 @@
                         </div>
                     </div>
 
-                    <div class="form-field">
+                    
+
+                </div>
+
+
+                <div class="form-row">
+                    <div class="form-field" style="margin-bottom: 15px;">
                         <label for="confirmPassword">Confirmar Contraseña</label>
                         <div class="input-wrapper">
                             <input :type="showConfirmPassword ? 'text' : 'password'" v-model="form.confirmPassword"
@@ -168,11 +175,6 @@
                                 @click="showConfirmPassword = !showConfirmPassword"></i>
                         </div>
                     </div>
-
-                </div>
-
-
-                <div class="form-row">
                     <!-- Campo Doc -->
                     <div class="form-field">
                         <label for="documentos">Documentos</label>

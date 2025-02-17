@@ -6,7 +6,8 @@
         <!-- Menú de navegación -->
         <nav class="navbar">
             <div class="navbar-left">
-                <img src="../assets/LOGOS DORADOS-02.png" alt="Icono" class="navbar-icon" @click="goHome" width="50%" height="auto" style="cursor: pointer;" />
+                <img src="../assets/LOGOS DORADOS-02.png" alt="Icono" class="navbar-icon" @click="goHome" width="50%"
+                    height="auto" style="cursor: pointer;" />
             </div>
             <div class="navbar-center">
                 <h1>Gestión de Usuarios</h1>
@@ -90,13 +91,13 @@
                         <td>{{ user.rol }}</td>
                         <td>{{ user.nombre }}</td>
                         <td>{{ user.apellidos }}</td>
-                        <td>{{ user.rfc }}</td>
-                        <td>{{ user.curp }}</td>
-                        <td>{{ user.numTrabajador }}</td>
-                        <td> {{ getDireccionText(user.direccionPertenencia) }}</td>
+                        <td>{{ user.RFC }}</td>
+                        <td>{{ user.CURP }}</td>
+                        <td>{{ user.numero_trabajador }}</td>
+                        <td> {{ getDireccionText(user.direcion_pertenencia) }}</td>
                         <td>{{ user.departamento }}</td>
-                        <td>{{ user.organoSuperior }}</td>
-                        <td>{{ user.registrationDate }}</td>
+                        <td>{{ user.organo_superior }}</td>
+                        <td>{{ formatDate(user.createdAt) }}</td>
                         <td>
                             <button @click="editUser(user)" class="btn-edit">Editar</button>
                             <button @click="showDeleteModal(user.id)" class="btn-delete">Eliminar</button>
@@ -116,9 +117,9 @@
                                     <label for="rol">Rol de usuario</label>
                                     <select v-model="currentUser.rol" required>
                                         <option value="" disabled>Selecciona una opción</option>
-                                        <option value="administrador">Administrador</option>
-                                        <option value="inventario">Inventario</option>
-                                        <option value="almacen">Almacén</option>
+                                        <option value="Administrador">Administrador</option>
+                                        <option value="Inventario">Inventario</option>
+                                        <option value="Almacen">Almacén</option>
                                     </select>
                                 </div>
                                 <div>
@@ -131,24 +132,26 @@
                                 </div>
                                 <div>
                                     <label>RFC:</label>
-                                    <input v-model="currentUser.rfc" minlength="13" maxlength="13" type="text" />
+                                    <input v-model="currentUser.RFC" minlength="13" maxlength="13" type="text" />
                                 </div>
-                                <div>
-                                    <label>CURP:</label>
-                                    <input v-model="currentUser.curp" minlength="18" maxlength="18" type="text" />
-                                </div>
+
                             </div>
 
                             <div class="form-column">
                                 <div>
+                                    <label>CURP:</label>
+                                    <input v-model="currentUser.CURP" minlength="18" maxlength="18" type="text" />
+                                </div>
+                                <div>
                                     <label>Número de trabajador:</label>
-                                    <input v-model="currentUser.numTrabajador" type="text" />
+                                    <input v-model="currentUser.numero_trabajador" type="text" />
                                 </div>
                                 <div>
                                     <label>Dirección de pertenencia:</label>
-                                    <select v-model="currentUser.direccionPertenencia" required>
+                                    <select v-model="currentUser.direcion_pertenencia" required>
                                         <option value="" disabled>Selecciona una opción</option>
-                                        <option v-for="direccion in direcciones" :value="direccion.value" :key="direccion.value">
+                                        <option v-for="direccion in direcciones" :value="direccion.value"
+                                            :key="direccion.value">
                                             {{ direccion.text }}
                                         </option>
                                     </select>
@@ -158,14 +161,8 @@
                                     <label>Departamento:</label>
                                     <input v-model="currentUser.departamento" type="text" />
                                 </div>
-                                <div>
-                                    <label>Organo superior:</label>
-                                    <input v-model="currentUser.organoSuperior" type="text" />
-                                </div>
-                                <div>
-                                    <label>Fecha de registro:</label>
-                                    <input v-model="currentUser.registrationDate" type="date" />
-                                </div>
+
+
                             </div>
                         </div>
 
@@ -199,23 +196,26 @@
 </template>
 
 <script>
+import axios from "axios";
+
 export default {
     name: "userPage",
     data() {
         return {
             direcciones: [
-                { value: 'direccion_general', text: 'Dirección General' },
-                { value: 'direccion_coordinacion_financiera', text: 'Dirección de coordinación financiera y planeación' },
-                { value: 'direccion_television', text: 'Dirección de televisión' },
-                { value: 'direccion_noticias', text: 'Dirección de noticias' },
-                { value: 'direccion_radio', text: 'Dirección de radio' },
-                { value: 'direccion_ingenieria', text: 'Dirección de ingeniería' },
-                { value: 'direccion_proyectos_estrategicos', text: 'Dirección de proyectos estratégicos' },
-                { value: 'organo_interno_control', text: 'Órgano interno de control' },
-                { value: 'direccion_promocion_intercambio', text: 'Dirección de promoción e intercambio' },
-                { value: 'direccion_juridica', text: 'Dirección jurídica' },
-                { value: 'direccion_vinculacion', text: 'Dirección de vinculación' },
-                { value: 'estaciones_radio', text: 'Estaciones de radio' }
+                { value: 'Direccion General', text: 'Dirección General' },
+                { value: 'Direccion de Coordinacion Financiera Y Planeacion', text: 'Dirección de coordinación financiera y planeación' },
+                { value: 'Direccion de Television', text: 'Dirección de televisión' },
+                { value: 'Direccion de Noticias', text: 'Dirección de noticias' },
+                { value: 'Direccion de Radio', text: 'Dirección de radio' },
+                { value: 'Direccion de Ingenieria', text: 'Dirección de ingeniería' },
+                { value: 'Direccion de Proyectos Estrategicos', text: 'Dirección de proyectos estratégicos' },
+                { value: 'Organo Interno de Control', text: 'Órgano interno de control' },
+                { value: 'Direccion de Promocion e Intercambio', text: 'Dirección de promoción e intercambio' },
+                { value: 'Direccion Juridica', text: 'Dirección jurídica' },
+                { value: 'Direccion de Vinculacion', text: 'Dirección de vinculación' },
+                { value: 'Estaciones de Radio', text: 'Estaciones de radio' },
+                { value: 'Estaciones de Television', text: 'Estaciones de Television' }
             ],
             isDeleteModalVisible: false,
             menus: {
@@ -227,86 +227,7 @@ export default {
             currentPage: 1,
             userPerPage: 10,
             isEditing: false, // Para controlar si estamos en modo de edición
-            user: [
-                {
-                    id: 1,
-                    rol: "administrador",
-                    nombre: "Cristian",
-                    apellidos: "Ojeda Gayosso",
-                    rfc: "asdadadasda",
-                    curp: "sadhkasldlafsasf",
-                    numTrabajador: "10",
-                    direccionPertenencia: "direccion_general",
-                    departamento: "asdasdadsd",
-                    organoSuperior: "Organismo Superior",
-                    registrationDate: "2024-01-14"
-                },
-                {
-                    id: 2,
-                    rol: "asdsadads",
-                    nombre: "Mariana",
-                    apellidos: "Torres López",
-                    rfc: "MKJ9237JNK",
-                    curp: "TOLM920413HJCLPS05",
-                    numTrabajador: "11",
-                    direccionPertenencia: "Recursos Humanos",
-                    departamento: "Administración",
-                    organoSuperior: "Superior",
-                    registrationDate: "2024-01-16"
-                },
-                {
-                    id: 3,
-                    rol: "123123123",
-                    nombre: "Juan",
-                    apellidos: "Pérez Sánchez",
-                    rfc: "PZSJ800912KJH",
-                    curp: "PEJS800912HDFRZN03",
-                    numTrabajador: "12",
-                    direccionPertenencia: "Logística",
-                    departamento: "Operaciones",
-                    organoSuperior: "Superior",
-                    registrationDate: "2024-01-15"
-                },
-                {
-                    id: 4,
-                    rol: "qweqeq",
-                    nombre: "Laura",
-                    apellidos: "García Martínez",
-                    rfc: "LGM123456NQR",
-                    curp: "GMLA870609MDFLRR01",
-                    numTrabajador: "13",
-                    direccionPertenencia: "Finanzas",
-                    departamento: "Contabilidad",
-                    organoSuperior: "Superior",
-                    registrationDate: "2024-01-17"
-                },
-                {
-                    id: 5,
-                    rol: "sdadadasd",
-                    nombre: "Eduardo",
-                    apellidos: "Hernández Romero",
-                    rfc: "EHRO456789OPQ",
-                    curp: "HREL891201HDFRMD03",
-                    numTrabajador: "14",
-                    direccionPertenencia: "Ingeniería",
-                    departamento: "Proyectos",
-                    organoSuperior: "Superior",
-                    registrationDate: "2024-01-18"
-                },
-                {
-                    id: 6,
-                    rol: "asdadasd",
-                    nombre: "Sofía",
-                    apellidos: "Ramírez Gómez",
-                    rfc: "SRGM567890DFL",
-                    curp: "RGSF900502MDFRMF02",
-                    numTrabajador: "15",
-                    direccionPertenencia: "Marketing",
-                    departamento: "Publicidad",
-                    organoSuperior: "Superior",
-                    registrationDate: "2024-01-19"
-                }
-            ]
+            user: [], // Vacío al principio, se llenará con los datos de la API
         };
     },
     computed: {
@@ -316,9 +237,11 @@ export default {
                 return user.nombre.toString().toLowerCase().includes(query) ||
                     user.rol.toString().toLowerCase().includes(query) ||
                     user.apellidos.toString().toLowerCase().includes(query) ||
-                    user.organoSuperior.toString().toLowerCase().includes(query) ||
-                    user.rfc.toString().toLowerCase().includes(query);
-
+                    user.CURP.toString().toLowerCase().includes(query) ||
+                    user.numero_trabajador.toString().toLowerCase().includes(query) ||
+                    user.direccion_pertenencia.toString().toLowerCase().includes(query) ||
+                    user.departamento.toString().toLowerCase().includes(query) ||
+                    user.RFC.toString().toLowerCase().includes(query);
             });
         },
         totalPages() {
@@ -330,7 +253,26 @@ export default {
             return this.filtereduser.slice(startIndex, endIndex);
         }
     },
+    mounted() {
+        this.fetchUsers();
+    },
     methods: {
+        formatDate(dateString) {
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            const date = new Date(dateString);
+            return date.toLocaleDateString('es-MX', options); // Usando la configuración en español de México
+        },
+        fetchUsers() {
+            // Hacer una solicitud GET a la API para obtener los usuarios
+            axios.get('http://localhost:3000/api/usuarios') // Sustituye 'URL_DE_TU_API' con la URL real de tu API
+                .then(response => {
+                    // Asignar los usuarios obtenidos a la propiedad user
+                    this.user = response.data; // Ajusta esta línea según la estructura de tu respuesta de API
+                })
+                .catch(error => {
+                    console.error("Hubo un error al obtener los usuarios: ", error);
+                });
+        },
         showMenu(menuName) {
             this.menus[menuName] = true;
         },
@@ -348,17 +290,39 @@ export default {
             this.isEditing = true;
         },
         saveChanges() {
-            // Lógica para guardar cambios (aquí se actualiza el usuario)
-            this.isEditing = false;
+            // Enviar la solicitud PUT a la API con el ID del usuario
+            axios.put(`http://localhost:3000/api/usuarios/${this.currentUser.id}`, this.currentUser)
+                .then(() => {
+                    // Actualizar la lista de usuarios para reflejar los cambios
+                    this.isEditing = false;
+                    this.fetchUsers();
+                    alert("Usuario actualizado exitosamente.");
+                })
+                .catch(error => {
+                    console.error("Error al guardar los cambios: ", error);
+                    alert("Hubo un error al actualizar el usuario.");
+                });
         },
+
         showDeleteModal(userId) {
             this.selectedUserId = userId;
             this.isDeleteModalVisible = true;
         },
         confirmDelete() {
-            this.user = this.user.filter(user => user.id !== this.selectedUserId);
-            this.isDeleteModalVisible = false;
+            // Enviar solicitud DELETE a la API para eliminar el usuario
+            axios.delete(`http://localhost:3000/api/usuarios/${this.selectedUserId}`)
+                .then(() => {
+                    // Eliminar el usuario del array en frontend
+                    this.user = this.user.filter(user => user.id !== this.selectedUserId);
+                    this.isDeleteModalVisible = false;
+                })
+                .catch(error => {
+                    console.error("Error al eliminar el usuario: ", error);
+                    alert("Hubo un error al eliminar el usuario.");
+                });
         },
+
+        // Cancelar la eliminación (cerrar el modal)
         cancelDelete() {
             this.isDeleteModalVisible = false;
         },
