@@ -155,38 +155,36 @@
                         </div>
                     </div>
                     <!-- Campo Doc -->
-                    <!--  <div class="form-field">
-                        <label for="documentos">Documentos</label>
-                        <div class="dropzone" @drop.prevent="handleDrop('documentos')" @dragover.prevent
-                            @click="triggerFileInput('documentos')">
-                            <input type="file" id="documentos" ref="fileInputDoc"
-                                @change="handleFileUpload('documentos')" accept=".pdf" multiple />
+                    <div class="form-field">
+                        <label for="identificacion">identificacion</label>
+                        <div class="dropzone" @drop.prevent="handleDrop('identificacion')" @dragover.prevent
+                            @click="triggerFileInput('identificacion')">
+                            <input type="file" id="identificacion" ref="fileInputDoc"
+                                @change="handleFileUpload('identificacion')" accept=".pdf" multiple />
                             <i class="fas fa-cloud-upload-alt"></i>
-                            <span v-if="form.documentos.length === 0">Arrastra o selecciona archivos (PDF)</span>
-                            <span v-else>{{ form.documentos.length }} archivos seleccionados</span>
+                            <span v-if="form.identificacion.length === 0">Arrastra o selecciona archivos (PDF)</span>
+                            <span v-else>{{ form.identificacion.length }} archivos seleccionados</span>
                             <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
                         </div>
 
-                        <button v-if="form.documentos.length > 0" @click.prevent="openDocumentModal"
+                        <button type="button" v-if="form.identificacion.length > 0" @click="openDocumentModal"
                             class="view-documents-btn">
-                            Ver Documentos
+                            Ver identificacion
                         </button>
                     </div>
-                -->
+
                     <!-- Campo Foto -->
-                    <!-- 
                     <div class="form-field">
-                        <label for="documentoFoto">Foto</label>
+                        <label for="imagen">Foto</label>
                         <div class="dropzone" @drop.prevent="handleDrop('Foto')" @dragover.prevent
                             @click="triggerFileInput('Foto')">
-                            <input type="file" id="documentoFoto" ref="fileInputFoto" @change="handleFileUpload('Foto')"
+                            <input type="file" id="imagen" ref="fileInputFoto" @change="handleFileUpload('Foto')"
                                 accept=".jpg,.png" />
                             <i class="fas fa-cloud-upload-alt"></i>
-                            <span v-if="!form.documentoFoto">Arrastra o selecciona una imagen (JPG, PNG)</span>
-                            <span v-else>{{ form.documentoFoto.name }}</span>
+                            <span v-if="!form.imagen">Arrastra o selecciona una imagen (JPG, PNG)</span>
+                            <span v-else>{{ form.imagen.name }}</span>
                         </div>
                     </div>
-                -->
                 </div>
                 <div class="button-container">
                     <button class="boton" type="submit">
@@ -210,6 +208,23 @@
             <div class="modal-content">
                 <h2>Usuario registrado con éxito.</h2>
                 <button @click="closeModal">Aceptar</button>
+            </div>
+        </div>
+
+
+        <!-- Modal para mostrar los identificacion cargados -->
+        <div v-if="showDocumentModal" class="modal-overlay2">
+            <div class="modal2">
+                <h2>identificacion Cargados</h2>
+                <div class="document-list2">
+                    <div v-for="(doc, index) in form.identificacion" :key="index" class="document-item2">
+                        <span>{{ doc.name }}</span>
+                        <button @click="removeDocument(index)" class="remove-btn2">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </div>
+                </div>
+                <button @click="closeDocumentModal">Cerrar</button>
             </div>
         </div>
     </div>
@@ -236,6 +251,8 @@ export default {
                 email: "",
                 password: "",
                 confirm_password: "",
+                identificacion: [], // Almacena el archivo INE
+                imagen: null, // Almacena el archivo Foto
             },
             showPassword: false,
             showConfirmPassword: false,
@@ -256,21 +273,16 @@ export default {
         registerUser() {
             let errorMessages = [];
 
+            // Validar que las contraseñas coincidan
             if (this.form.password !== this.form.confirm_password) {
                 errorMessages.push("Las contraseñas no coinciden.");
             }
 
-            if (errorMessages.length > 0) {
-                this.alertMessageList = errorMessages;
-                this.showAlertModal = true;
-                return;
-            }
-
-            // Verificar que todos los campos obligatorios tengan valores válidos antes de enviarlos
+            // Validar campos obligatorios
             const requiredFields = [
                 "rol", "numero_trabajador", "nombre", "apellidos", "password",
                 "confirm_password", "departamento", "email", "RFC", "CURP",
-                "direccion_pertenencia", "organo_superior", "area_presupuestal"
+                "direccion_pertenencia", "organo_superior", "area_presupuestal",
             ];
 
             let hasErrors = false;
@@ -287,29 +299,41 @@ export default {
                 return;
             }
 
-            // Crear objeto con los datos en formato correcto
-            const userData = {
-                rol: this.form.rol,
-                numero_trabajador: parseInt(this.form.numero_trabajador),  // Asegurar número
-                nombre: this.form.nombre,
-                apellidos: this.form.apellidos,
-                password: this.form.password,
-                confirm_password: this.form.confirm_password,
-                departamento: this.form.departamento,
-                email: this.form.email,
-                RFC: this.form.RFC.toUpperCase(),  // Convertir a mayúsculas
-                CURP: this.form.CURP.toUpperCase(), // Convertir a mayúsculas
-                direccion_pertenencia: this.form.direccion_pertenencia,
-                organo_superior: this.form.organo_superior,
-                area_presupuestal: this.form.area_presupuestal,
-                fecha_registro: new Date().toISOString().split("T")[0],  // Formato YYYY-MM-DD
-            };
+            // Crear un objeto FormData
+            const formData = new FormData();
 
-            console.log("Enviando datos:", userData);
+            // Agregar campos del formulario
+            formData.append('rol', this.form.rol);
+            formData.append('numero_trabajador', this.form.numero_trabajador);
+            formData.append('nombre', this.form.nombre);
+            formData.append('apellidos', this.form.apellidos);
+            formData.append('password', this.form.password);
+            formData.append('confirm_password', this.form.confirm_password);
+            formData.append('departamento', this.form.departamento);
+            formData.append('email', this.form.email);
+            formData.append('RFC', this.form.RFC.toUpperCase());
+            formData.append('CURP', this.form.CURP.toUpperCase());
+            formData.append('direccion_pertenencia', this.form.direccion_pertenencia);
+            formData.append('organo_superior', this.form.organo_superior);
+            formData.append('area_presupuestal', this.form.area_presupuestal);
+            formData.append('fecha_registro', new Date().toISOString().split("T")[0]);
 
-            axios.post('http://localhost:3000/api/usuarios', userData, {
+            // Agregar archivos de identificación (PDFs)
+            if (this.form.identificacion.length > 0) {
+                this.form.identificacion.forEach((file) => { // Eliminamos 'index' porque no se usa
+                    formData.append('identificacion', file); // Nombre del campo: 'identificacion'
+                });
+            }
+
+            // Agregar archivo de imagen (JPG/PNG)
+            if (this.form.imagen) {
+                formData.append('imagen', this.form.imagen); // Nombre del campo: 'imagen'
+            }
+
+            // Enviar los datos a la API
+            axios.post('http://localhost:3000/api/usuarios', formData, {
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'multipart/form-data' // Importante para enviar archivos
                 }
             })
                 .then(response => {
@@ -346,7 +370,47 @@ export default {
                 }
             }
             return true;
-        }
+        },
+        openDocumentModal() {
+            this.showDocumentModal = true;
+            this.$forceUpdate(); // Forzar la actualización
+        },
+
+
+        closeDocumentModal() {
+            this.showDocumentModal = false;
+            this.$forceUpdate();  // Asegura que la vista se actualice correctamente
+        },
+        triggerFileInput(type) {
+            if (type === "identificacion") {
+                this.$refs.fileInputDoc.click();
+            } else if (type === "Foto") {
+                this.$refs.fileInputFoto.click();
+            }
+        },
+        handleFileUpload(type) {
+            if (type === "identificacion") {
+                const input = this.$refs.fileInputDoc;
+                const files = Array.from(input.files); // Convierte FileList a un array
+
+                // Validar el límite de 7 archivos
+                if (files.length + this.form.identificacion.length > 7) {
+                    this.errorMessage = "Solo puedes cargar un máximo de 7 archivos.";
+                    return;
+                }
+
+                // Agregar los archivos al array
+                this.form.identificacion = [...this.form.identificacion, ...files];
+                this.errorMessage = ""; // Limpiar el mensaje de error
+            } else if (type === "Foto") {
+                this.form.imagen = this.$refs.fileInputFoto.files[0];
+            }
+        },
+
+        // Método para eliminar un documento
+        removeDocument(index) {
+            this.form.identificacion.splice(index, 1); // Elimina el documento del array
+        },
 
     },
 };

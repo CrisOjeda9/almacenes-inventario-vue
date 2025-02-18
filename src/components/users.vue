@@ -82,6 +82,7 @@
                         <th>Direc. pertenencia</th>
                         <th>Departamento</th>
                         <th>Organo Superior</th>
+                        <th>Foto</th>
                         <th>Fecha de registro</th>
                         <th>Acciones</th>
                     </tr>
@@ -97,6 +98,14 @@
                         <td> {{ getDireccionText(user.direccion_pertenencia) }}</td>
                         <td>{{ user.departamento }}</td>
                         <td>{{ user.organo_superior }}</td>
+                        <td>
+                           
+                            <!-- Enlace para abrir la foto en una nueva pestaña -->
+                            <a v-if="user.imagen" :href="getImageUrl(user.imagen)" target="_blank" class="btn-open">
+                                <img v-if="user.imagen" :src="getImageUrl(user.imagen)" style="width: 40px; height: 40px;" alt="Foto de perfil"
+                                class="user-photo" />                            </a>
+                        </td>
+
                         <td>{{ formatDate(user.createdAt) }}</td>
                         <td>
                             <button @click="editUser(user)" class="btn-edit">Editar</button>
@@ -257,6 +266,17 @@ export default {
         this.fetchUsers();
     },
     methods: {
+        getImageUrl(imagePath) {
+            if (!imagePath) return ''; // Si no hay ruta, devolver una cadena vacía
+            const baseUrl = 'http://localhost:3000/api/users-files'; // Ruta base correcta
+            const filename = imagePath.split('\\').pop().split('/').pop(); // Extrae solo el nombre del archivo
+            return `${baseUrl}/${filename.split('.').slice(0, -1).join('.')}`;  // Eliminar la extensión para que no aparezca .png o .jpg
+        },
+
+
+
+
+
         formatDate(dateString) {
             const options = { year: 'numeric', month: 'long', day: 'numeric' };
             const date = new Date(dateString);
@@ -555,7 +575,7 @@ a {
     /* Redondear las esquinas de la tabla */
     overflow: hidden;
     /* Para que los bordes no sobresalgan */
-    font-size: 16px;
+    font-size: 15px;
 }
 
 .user-table th,
