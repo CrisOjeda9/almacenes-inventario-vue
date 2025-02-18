@@ -40,7 +40,6 @@
                     <button @click="navigateTo('listaalmacen')">Asignar No.Inventario</button>
                     <button @click="navigateTo('reportes')">Generación de reportes</button>
                     <button @click="navigateTo('bienesnuevos')">Asignar resguardo</button>
-
                 </div>
             </div>
 
@@ -120,7 +119,6 @@
                 </tbody>
             </table>
 
-
             <!-- Modal de Edición -->
             <div v-if="isEditing" class="edit-modal">
                 <div class="modal-content">
@@ -137,7 +135,6 @@
                                     <label>Número de factura:</label>
                                     <input v-model="currentExistencia.numeroFactura" type="text" />
                                 </div>
-
                                 <div>
                                     <label>Número de partida:</label>
                                     <input v-model="currentExistencia.numeroPartida" type="text" />
@@ -146,12 +143,10 @@
                                     <label>Nombre:</label>
                                     <input v-model="currentExistencia.nombre" type="text" />
                                 </div>
-
                             </div>
 
                             <!-- Segunda columna -->
                             <div class="form-column">
-
                                 <div>
                                     <label>Importe sin IVA:</label>
                                     <input v-model="currentExistencia.importeSinIVA" type="text" />
@@ -167,19 +162,19 @@
                                 <label for="fotoArticulo">Foto artículo</label>
                                 <div class="dropzone" @drop.prevent="handleDrop" @dragover.prevent
                                     @click="triggerFileInput">
-
                                     <input type="file" id="updateFotoArticulo" ref="fileInput"
-                                        @change="handleFileChange" accept=".pdf,.jpg,.png" style="display: none;" />
-
+                                        @change="handleFileChange" accept="image/*" multiple style="display: none;" />
                                     <i class="fas fa-cloud-upload-alt"></i>
-                                    <span v-if="!currentExistencia.fotoArticulo">
-                                        Arrastra o selecciona un archivo (PDF, JPG, PNG)
-                                    </span>
-                                    <span v-else>
-                                        {{ currentExistencia.fotoArticulo.name }}
-                                    </span>
+                                    <span v-if="currentExistencia.fotoArticulo.length === 0">Arrastra o selecciona
+                                        imágenes (JPG, PNG)</span>
+                                    <span v-else>{{ currentExistencia.fotoArticulo.length }} imágenes
+                                        seleccionadas</span>
                                 </div>
-
+                                <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
+                                <button v-if="currentExistencia.fotoArticulo.length > 0" @click.prevent="openImageModal"
+                                    class="view-images-btn">
+                                    Ver Imágenes
+                                </button>
                             </div>
 
                             <!-- Tercera columna -->
@@ -210,9 +205,7 @@
                                     <label>Total de ingreso:</label>
                                     <input v-model="currentExistencia.totalIngreso" type="text" />
                                 </div>
-
                             </div>
-
                         </div>
 
                         <!-- Botones debajo del formulario -->
@@ -224,6 +217,24 @@
                 </div>
             </div>
 
+            <!-- Modal para mostrar las imágenes seleccionadas -->
+            <div v-if="showImageModal" class="modal-overlay3">
+                <div class="modal3">
+                    <h2>Imágenes seleccionadas</h2>
+                    <div class="image-preview-container3">
+                        <div v-for="(img, index) in currentExistencia.fotoArticulo" :key="index" class="image-preview3">
+                            <div class="image-container3">
+                                <img :src="getImageUrl(img)" :alt="img.name" class="image-preview-img3" />
+                                <button @click="removeImage(index)" class="remove-btn">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </div>
+                            <p class="image-name3">{{ img.name }}</p>
+                        </div>
+                    </div>
+                    <button @click="closeImageModal">Cerrar</button>
+                </div>
+            </div>
 
             <!-- Modal de Confirmación de Eliminación -->
             <div v-if="isDeleteModalVisible" class="modal-overlay">
@@ -235,6 +246,7 @@
                     </div>
                 </div>
             </div>
+
             <!-- Paginación -->
             <div class="pagination">
                 <button @click="prevPage" :disabled="currentPage === 1">Anterior</button>
@@ -242,6 +254,7 @@
                 <button @click="nextPage" :disabled="currentPage === totalPages">Siguiente</button>
             </div>
         </div>
+
         <!-- Modal para mostrar imágenes -->
         <div v-if="showModal" class="modal-overlay2" @click="closeModal">
             <div class="modal2" @click.stop>
@@ -249,7 +262,6 @@
                 <hr>
                 <div class="image-container2">
                     <div v-for="(foto, i) in modalImages" :key="i" class="image-box">
-                        <!-- Envolvemos la imagen con un enlace -->
                         <a :href="getImageUrl(foto)" target="_blank">
                             <img :src="getImageUrl(foto)" alt="Foto del bien recibido" class="modal-img2" />
                         </a>
@@ -279,8 +291,12 @@ export default {
             showModal: false,
             modalImages: [],
             itemToRemove: null,
-            isEditing: false, // Para controlar si estamos en modo de edición
-            currentExistencia: {}, // Objeto para almacenar la existencia que se está editando
+            isEditing: false,
+            currentExistencia: {
+                fotoArticulo: [],
+            },
+            errorMessage: "",
+            showImageModal: false,
             existencias: [
                 {
                     id: 1,
@@ -294,7 +310,11 @@ export default {
                     unidadMedida: "Piezas",
                     ubicacionAlmacen: "Almacén 1 - Estante 3",
                     totalIngreso: "100",
-                    fotoArticulo: ["radio-y-television-de-hidalgo.jpg","radio.jpeg","radio2.jpg", "radio-y-television-de-hidalgo.jpg",  "radio-y-television-de-hidalgo.jpg"],
+                    fotoArticulo: [
+                        "https://cdn.milenio.com/uploads/media/2022/02/22/radio-y-television-de-hidalgo.jpg", // Ruta completa
+                        "https://www.cronicahidalgo.com/sitio/wp-content/uploads/2024/09/p5-RTVH.jpg", // Ruta completa
+                        "https://lasillarota.com/u/fotografias/m/2023/1/24/f768x1-394120_394247_15.jpg", // Ruta completa
+                    ],
                     fechaRegistro: "2024-01-01"
                 },
                 {
@@ -309,7 +329,11 @@ export default {
                     unidadMedida: "Cajas",
                     ubicacionAlmacen: "Almacén 2 - Estante 5",
                     totalIngreso: "50",
-                    fotoArticulo: ["radio-y-television-de-hidalgo.jpg","radio.jpeg","radio2.jpg", "radio-y-television-de-hidalgo.jpg",  "radio-y-television-de-hidalgo.jpg"],
+                    fotoArticulo: [
+                        require("@/assets/radio-y-television-de-hidalgo.jpg"), // Ruta relativa usando require
+                        require("@/assets/radio.jpeg"), // Ruta relativa usando require
+                        require("@/assets/radio2.jpg"), // Ruta relativa usando require
+                    ],
                     fechaRegistro: "2024-01-02"
                 }
             ]
@@ -337,7 +361,7 @@ export default {
     },
     methods: {
         openModal(fotos) {
-            this.modalImages = fotos;
+            this.modalImages = fotos.map(foto => this.getImageUrl(foto)); // Asegúrate de obtener la URL correcta
             this.showModal = true;
         },
         closeModal() {
@@ -348,27 +372,55 @@ export default {
             this.$refs.fileInput.click();
         },
         handleFileChange(event) {
-            const file = event.target.files[0];
-            if (file && this.isValidFileType(file)) {
-                this.currentExistencia.fotoArticulo = file;
-            } else {
-                alert('Solo se permiten archivos de tipo PDF, JPG o PNG.');
+            const files = Array.from(event.target.files);
+            const validFiles = files.filter(file => this.isImage(file));
+
+            if (validFiles.length + this.currentExistencia.fotoArticulo.length > 10) {
+                this.errorMessage = "Solo puedes subir hasta 10 imágenes.";
+                return;
             }
+
+            this.currentExistencia.fotoArticulo.push(...validFiles);
+            this.errorMessage = "";
         },
         handleDrop(event) {
-            const file = event.dataTransfer.files[0];
-            if (file && this.isValidFileType(file)) {
-                this.currentExistencia.fotoArticulo = file;
+            const files = Array.from(event.dataTransfer.files);
+            const validFiles = files.filter(file => this.isImage(file));
+
+            if (validFiles.length + this.currentExistencia.fotoArticulo.length > 10) {
+                this.errorMessage = "Solo puedes subir hasta 10 imágenes.";
+                return;
+            }
+
+            this.currentExistencia.fotoArticulo.push(...validFiles);
+            this.errorMessage = "";
+        },
+        isImage(file) {
+            return file.type.startsWith("image/");
+        },
+        getImageUrl(file) {
+            if (typeof file === 'string') {
+                // Si es una ruta de archivo (string), devuélvela directamente
+                return file;
+            } else if (file instanceof File || file instanceof Blob) {
+                // Si es un archivo (File o Blob), crea una URL temporal
+                return URL.createObjectURL(file);
             } else {
-                alert('Solo se permiten archivos de tipo PDF, JPG o PNG.');
+                console.error("Tipo de archivo no soportado:", file);
+                return ''; // Manejo de error
             }
         },
-        isValidFileType(file) {
-            const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png'];
-            return allowedTypes.includes(file.type);
+        removeImage(index) {
+            this.currentExistencia.fotoArticulo.splice(index, 1);
+        },
+        openImageModal() {
+            this.showImageModal = true;
+        },
+        closeImageModal() {
+            this.showImageModal = false;
         },
         goHome() {
-            this.$router.push('home'); // Redirige a la página principal ("/"). Cambia el path si es necesario.
+            this.$router.push('home');
         },
         showMenu(menu) {
             this.menus[menu] = true;
@@ -382,7 +434,6 @@ export default {
         goBack() {
             window.history.back();
         },
-
         prevPage() {
             if (this.currentPage > 1) {
                 this.currentPage--;
@@ -411,7 +462,6 @@ export default {
             this.isEditing = false;
             this.currentExistencia = {}; // Limpiar el objeto
         },
-
         showDeleteModal(id) {
             this.deleteId = id;
             this.isDeleteModalVisible = true;
@@ -431,12 +481,8 @@ export default {
             this.deleteId = null;
         },
         redirectToAddExistencia() {
-            // Aquí defines la ruta a la que quieres redirigir al hacer clic en el botón
             this.$router.push('/newexistencia');
         },
-        getImageUrl(image) {
-            return require(`@/assets/${image}`);
-        }
     }
 };
 </script>
@@ -452,6 +498,127 @@ export default {
 .btn-download {
     width: 50px;
 }
+
+
+.image-preview-container3 {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.image-preview3 {
+    text-align: center;
+    position: relative;
+    /* Esto es necesario para posicionar el botón dentro de la imagen */
+}
+
+.image-container3 {
+    position: relative;
+}
+
+.image-preview-img3 {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 4px;
+}
+
+.remove-btn {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    width: auto;
+    background-color: rgba(0, 0, 0, 0.5);
+    color: white;
+    border: none;
+    padding: 0px;
+    cursor: pointer;
+    font-size: 16px;
+    border-radius: 25px;
+}
+
+.remove-btn i {
+    font-size: 14px;
+    /* Ajusta el tamaño del ícono dentro del botón */
+}
+
+.remove-btn:hover {
+    background-color: rgba(0, 0, 0, 0.7);
+}
+
+.image-name3 {
+    font-size: 12px;
+    color: #333;
+    margin-top: 5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100px;
+}
+
+
+
+.view-images-btn {
+    display: flex;
+    justify-content: center;
+    position: relative;
+    width: 90%;
+    background-color: #691b31;
+    color: white;
+    border: none;
+    padding: 5px;
+    cursor: pointer;
+    border-radius: 5px;
+    margin-top: 2px;
+    font-size: 15px;
+}
+
+
+.modal-overlay3 {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    /* Asegúrate de que el modal esté por encima de otros elementos */
+}
+
+.modal3 {
+    background: white;
+    color: #691B31;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+}
+
+.modal-overlay3.show {
+    visibility: visible;
+}
+
+.modal3 button {
+    padding: 10px 20px;
+    background-color: #BC955B;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.modal3 button:hover {
+    background-color: #691B31;
+}
+
+
+
+
+
+
+
 
 
 .image-container2 {
@@ -1086,6 +1253,4 @@ button[type="button"]:hover {
 .dropzone input[type="file"] {
     display: none;
 }
-
-
 </style>
