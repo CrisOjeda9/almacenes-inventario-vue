@@ -39,8 +39,6 @@
                     <button @click="navigateTo('listaalmacen')">Asignar No.Inventario</button>
                     <button @click="navigateTo('reportes')">Generación de reportes</button>
                     <button @click="navigateTo('bienesnuevos')">Asignar resguardo</button>
-
-
                 </div>
             </div>
 
@@ -121,14 +119,21 @@
                 <div class="form-row">
                     <!-- Documento relacionado -->
                     <div class="form-field">
-                        <label for="documentoProveedor">Documento de acuerdo al proveedor</label>
-                        <div class="dropzone" @drop.prevent="handleDrop" @dragover.prevent @click="triggerFileInput">
-                            <input type="file" id="documentoProveedor" ref="fileInput" @change="handleFileUpload"
-                                accept=".pdf" />
+                        <label for="documentos">Documentos</label>
+                        <div class="dropzone" @drop.prevent="handleDrop('documentos')" @dragover.prevent
+                            @click="triggerFileInput('documentos')">
+                            <input type="file" id="documentos" ref="fileInputDoc"
+                                @change="handleFileUpload('documentos')" accept=".pdf" multiple />
                             <i class="fas fa-cloud-upload-alt"></i>
-                            <span v-if="!form.documentoProveedor">Arrastra o selecciona un archivo (PDF)</span>
-                            <span v-else>{{ form.documentoProveedor.name }}</span>
+                            <span v-if="form.documentos.length === 0">Arrastra o selecciona archivos (PDF)</span>
+                            <span v-else>{{ form.documentos.length }} archivos seleccionados</span>
+                            <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
                         </div>
+
+                        <button v-if="form.documentos.length > 0" @click.prevent="openDocumentModal"
+                            class="view-documents-btn">
+                            Ver Documentos
+                        </button>
                     </div>
                 </div>
 
@@ -147,6 +152,21 @@
                 <button @click="closeModal">Aceptar</button>
             </div>
         </div>
+        <!-- Modal para mostrar los documentos cargados -->
+        <div v-if="showDocumentModal" class="modal-overlay2">
+            <div class="modal2">
+                <h2>Documentos Cargados</h2>
+                <div class="document-list2">
+                    <div v-for="(doc, index) in form.documentos" :key="index" class="document-item2">
+                        <span>{{ doc.name }}</span>
+                        <button @click="removeDocument(index)" class="remove-btn2">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </div>
+                </div>
+                <button @click="closeDocumentModal">Cerrar</button>
+            </div>
+        </div>
     </div>
 </template>
 
@@ -163,45 +183,76 @@ export default {
                 direccion: "",            // Dirección
                 correo: "",               // Correo electrónico
                 cuentaBancaria: "",       // Cuenta bancaria
-                documentoProveedor: null, // Documento relacionado (archivo)
+                documentos: [],           // Documentos relacionados (archivos)
             },
             menus: {
                 homeMenu: false,
                 proveedorMenu: false,
                 settingsMenu: false,
             },
-            showModal: false
-
+            showModal: false,
+            showDocumentModal: false, // Controla la visibilidad del modal de documentos
+            errorMessage: "", // Mensaje de error
+            showAlertModal: false,
         };
     },
     methods: {
         goHome() {
             this.$router.push('home'); // Redirige a la página principal ("/").
         },
-        handleFileUpload(event) {
-            const file = event.target.files[0];
-            this.form.documentoProveedor = file; // Almacena el archivo en el formulario
+        openDocumentModal() {
+            this.showDocumentModal = true;
         },
-        handleDrop(event) {
-            const file = event.dataTransfer.files[0];
-            this.form.documentoProveedor = file; // Almacena el archivo en el formulario
+
+        // Método para cerrar el modal de documentos
+        closeDocumentModal() {
+            this.showDocumentModal = false;
         },
-        triggerFileInput() {
-            this.$refs.fileInput.click(); // Trigger del input file cuando se hace click en la dropzone
+
+        triggerFileInput(type) {
+            if (type === "documentos") {
+                this.$refs.fileInputDoc.click();
+            }
+        },
+        handleFileUpload(type) {
+            if (type === "documentos") {
+                const input = this.$refs.fileInputDoc;
+                const files = Array.from(input.files);
+                if (files.length + this.form.documentos.length > 7) {
+                    alert("Solo puedes cargar un máximo de 7 archivos.");
+                    return;
+                }
+                this.form.documentos = [...this.form.documentos, ...files];
+            }
+        },
+
+        // Método para eliminar un documento
+        removeDocument(index) {
+            this.form.documentos.splice(index, 1); // Elimina el documento del array
+        },
+        closeModal() {
+            this.showModal = false;
+            if (this.redirectOnClose) {
+                this.$router.push("/proveedor"); 
+            }
+        },
+
+        closeAlertModal() {
+            this.showAlertModal = false; // Cierra el modal de alerta
         },
         registerProveedor() {
             // Valida los campos necesarios
             if (!this.form.nombre || !this.form.apellidos || !this.form.tipoProveedor || !this.form.rfc || !this.form.direccion || !this.form.correo || !this.form.cuentaBancaria) {
                 alert("Por favor, completa todos los campos obligatorios.");
-
                 return;
             }
-            if (!this.form.documentoProveedor) {
-                alert("Por favor, agrega un documento relacionado.");
+            if (this.form.documentos.length === 0) {
+                alert("Por favor, agrega al menos un documento relacionado.");
                 return;
             }
 
             this.showModal = true;
+             this.redirectOnClose = true;
         },
         navigateTo(page) {
             console.log(`Navegando a ${page}`);
@@ -213,22 +264,81 @@ export default {
         hideMenu(menu) {
             this.menus[menu] = false;
         },
-
-        closeModal() {
-            this.showModal = false;
-            this.$router.push('/proveedor');
-        },
     },
 };
 </script>
-
-
 
 
 <style scoped>
 /* Aplicar Montserrat a todo el contenido */
 * {
     font-family: 'Montserrat', sans-serif;
+}
+
+
+.view-documents-btn {
+    display: flex;
+    justify-content: center;
+    position: relative;
+    width: 100%;
+    background-color: #691b31;
+    color: white;
+    border: none;
+    padding: 5px;
+    cursor: pointer;
+    border-radius: 5px;
+    margin-top: 2px;
+    font-size: 15px;
+}
+
+.modal-overlay2 {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    /* Asegúrate de que el modal esté por encima de otros elementos */
+}
+
+.modal2 {
+
+    background: white;
+    color: #691B31;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+}
+
+.modal-overlay2.show {
+    visibility: visible;
+}
+
+.modal2 button {
+    padding: 10px 20px;
+    background-color: #BC955B;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    margin-top: 10px;
+    cursor: pointer;
+
+}
+
+.modal2 button:hover {
+    background-color: #691B31;
+}
+
+
+.document-list2 {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 30px;
+    gap: 1px;
 }
 
 .modal {
@@ -403,7 +513,7 @@ form {
     padding-bottom: 80px;
     border-radius: 10px;
     width: 900px;
-    height: 250px;
+    height: 280px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
