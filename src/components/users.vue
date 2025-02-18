@@ -94,7 +94,7 @@
                         <td>{{ user.RFC }}</td>
                         <td>{{ user.CURP }}</td>
                         <td>{{ user.numero_trabajador }}</td>
-                        <td> {{ getDireccionText(user.direcion_pertenencia) }}</td>
+                        <td> {{ getDireccionText(user.direccion_pertenencia) }}</td>
                         <td>{{ user.departamento }}</td>
                         <td>{{ user.organo_superior }}</td>
                         <td>{{ formatDate(user.createdAt) }}</td>
@@ -148,7 +148,7 @@
                                 </div>
                                 <div>
                                     <label>Dirección de pertenencia:</label>
-                                    <select v-model="currentUser.direcion_pertenencia" required>
+                                    <select v-model="currentUser.direccion_pertenencia" required>
                                         <option value="" disabled>Selecciona una opción</option>
                                         <option v-for="direccion in direcciones" :value="direccion.value"
                                             :key="direccion.value">

@@ -24,7 +24,6 @@
             </div>
         </nav>
 
-
         <!-- Barra de navegación amarilla -->
         <div class="sub-navbar">
             <a href="/home" class="nav-item">Inicio</a>
@@ -40,8 +39,6 @@
                     <button @click="navigateTo('listaalmacen')">Asignar No.Inventario</button>
                     <button @click="navigateTo('reportes')">Generación de reportes</button>
                     <button @click="navigateTo('bienesnuevos')">Asignar resguardo</button>
-
-
                 </div>
             </div>
 
@@ -58,7 +55,6 @@
                     <button @click="navigateTo('poliza')">Polizas</button>
                 </div>
             </div>
-
         </div>
 
         <!-- Formulario -->
@@ -67,85 +63,73 @@
                 <div class="form-row">
                     <div class="form-field">
                         <label for="rol">Rol de usuario</label>
-
                         <select v-model="form.rol" required>
                             <option value="" disabled>Selecciona una opción</option>
                             <option value="Administrador">Administrador</option>
                             <option value="Inventario">Inventario</option>
-                            <option value="Almacen">Almacén</option>
-
+                            <option value="Almacenes">Almacenes</option>
                         </select>
                     </div>
                     <div class="form-field">
                         <label for="nombre">Nombre(s)</label>
-                        <input type="text" placeholder="" v-model="form.nombre" required />
-
+                        <input type="text" v-model="form.nombre" required />
                     </div>
                     <div class="form-field">
-                        <label for="apellido">Apellidos</label>
-                        <input type="text" placeholder="" v-model="form.apellidos" required />
-
+                        <label for="apellidos">Apellidos</label>
+                        <input type="text" v-model="form.apellidos" required />
                     </div>
                     <div class="form-field">
-                        <label for="rfc">RFC</label>
-                        <input type="text" placeholder="" minlength="13" maxlength="13" v-model="form.rfc"
-                            style="text-transform: uppercase;" required />
-
+                        <label for="RFC">RFC</label>
+                        <input type="text" v-model="form.RFC" minlength="13" maxlength="13" required
+                            style="text-transform: uppercase;" />
                     </div>
-                    
                 </div>
                 <div class="form-row">
                     <div class="form-field">
-                        <label for="numtrabajador">Num. Trabajador</label>
-                        <input type="number" placeholder="" min="0" v-model="form.numTrabajador" required />
-
+                        <label for="numero_trabajador">Num. Trabajador</label>
+                        <input type="number" v-model="form.numero_trabajador" min="0" required />
                     </div>
                     <div class="form-field">
-                        <label for="curp">CURP</label>
-                        <input type="text" placeholder="" minlength="18" maxlength="18" v-model="form.curp" required
+                        <label for="CURP">CURP</label>
+                        <input type="text" v-model="form.CURP" minlength="18" maxlength="18" required
                             style="text-transform: uppercase;" />
                     </div>
-
                     <div class="form-field">
-                        <label for="pertenencia">Direc. Pertenencia</label>
-
-                        <select v-model="form.direccion" required>
+                        <label for="direccion_pertenencia">Direc. Pertenencia</label>
+                        <select v-model="form.direccion_pertenencia" required>
                             <option value="" disabled>Selecciona una opción</option>
-                            <option value="direccion_general">Dirección General</option>
-                            <option value="direccion_coordinacion_financiera">Dirección de coordinación financiera y
-                                planeación</option>
-                            <option value="direccion_television">Dirección de televisión</option>
-                            <option value="direccion_noticias">Dirección de noticias</option>
-                            <option value="direccion_radio">Dirección de radio</option>
-                            <option value="direccion_ingenieria">Dirección de ingeniería</option>
-                            <option value="direccion_proyectos_estrategicos">Dirección de proyectos estratégicos
+                            <option value="Direccion General">Dirección General</option>
+                            <option value="Direccion de Coordinacion Financiera Y Planeacion">Dirección de Coordinación
+                                Financiera y Planeación</option>
+                            <option value="Direccion de Television">Dirección de Televisión</option>
+                            <option value="Direccion de Noticias">Dirección de Noticias</option>
+                            <option value="Direccion de Radio">Dirección de Radio</option>
+                            <option value="Direccion de Ingenieria">Dirección de Ingeniería</option>
+                            <option value="Direccion de Proyectos Estrategicos">Dirección de Proyectos Estratégicos
                             </option>
-                            <option value="organo_interno_control">Órgano interno de control</option>
-                            <option value="direccion_promocion_intercambio">Dirección de promoción e intercambio
+                            <option value="Organo Interno de Control">Órgano Interno de Control</option>
+                            <option value="Direccion de Promocion e Intercambio">Dirección de Promoción e Intercambio
                             </option>
-                            <option value="direccion_juridica">Dirección jurídica</option>
-                            <option value="direccion_vinculacion">Dirección de vinculación</option>
-                            <option value="estaciones_radio">Estaciones de radio</option>
+                            <option value="Direccion Juridica">Dirección Jurídica</option>
+                            <option value="Direccion de Vinculacion">Dirección de Vinculación</option>
+                            <option value="Estaciones de Radio">Estaciones de Radio</option>
                         </select>
                     </div>
                     <div class="form-field">
                         <label for="departamento">Departamento</label>
-                        <input type="text" placeholder="" v-model="form.departamento" required />
-
+                        <input type="text" v-model="form.departamento" required />
                     </div>
-                    
-
                 </div>
                 <div class="form-row">
                     <div class="form-field">
-                        <label for="organosuperior">Organo Superior</label>
-                        <input type="text" value="ORGANISMOS DESCENTRALIZADOS" placeholder="Organismo de Descentralizado" v-model="form.organosuperior" readonly />
-
+                        <label for="organo_superior">Organo Superior</label>
+                        <input type="text" value="Organismos Descentralizados" v-model="form.organo_superior"
+                            readonly />
                     </div>
                     <div class="form-field">
-                        <label for="areapresupuestal">Área Presupuestal</label>
-                        <input type="text" value="RADIO Y TELEVICION DE HIDALGO"
-                            placeholder="Radio y Televisión de Hidalgo" v-model="form.areapresupuestal" readonly />
+                        <label for="area_presupuestal">Área Presupuestal</label>
+                        <input type="text" value="RADIO Y TELEVISION DE HIDALGO" v-model="form.area_presupuestal"
+                            readonly />
                     </div>
                     <div class="form-field">
                         <label for="email">Correo electrónico</label>
@@ -159,24 +143,19 @@
                                 @click="showPassword = !showPassword"></i>
                         </div>
                     </div>
-
-                    
-
                 </div>
-
-
                 <div class="form-row">
                     <div class="form-field" style="margin-bottom: 15px;">
-                        <label for="confirmPassword">Confirmar Contraseña</label>
+                        <label for="confirm_password">Confirmar Contraseña</label>
                         <div class="input-wrapper">
-                            <input :type="showConfirmPassword ? 'text' : 'password'" v-model="form.confirmPassword"
+                            <input :type="showConfirmPassword ? 'text' : 'password'" v-model="form.confirm_password"
                                 required />
                             <i :class="showConfirmPassword ? 'fa fa-eye-slash' : 'fa fa-eye'"
                                 @click="showConfirmPassword = !showConfirmPassword"></i>
                         </div>
                     </div>
                     <!-- Campo Doc -->
-                    <div class="form-field">
+                    <!--  <div class="form-field">
                         <label for="documentos">Documentos</label>
                         <div class="dropzone" @drop.prevent="handleDrop('documentos')" @dragover.prevent
                             @click="triggerFileInput('documentos')">
@@ -193,8 +172,9 @@
                             Ver Documentos
                         </button>
                     </div>
-
+                -->
                     <!-- Campo Foto -->
+                    <!-- 
                     <div class="form-field">
                         <label for="documentoFoto">Foto</label>
                         <div class="dropzone" @drop.prevent="handleDrop('Foto')" @dragover.prevent
@@ -206,7 +186,7 @@
                             <span v-else>{{ form.documentoFoto.name }}</span>
                         </div>
                     </div>
-
+                -->
                 </div>
                 <div class="button-container">
                     <button class="boton" type="submit">
@@ -232,46 +212,30 @@
                 <button @click="closeModal">Aceptar</button>
             </div>
         </div>
-        <!-- Modal para mostrar los documentos cargados -->
-        <div v-if="showDocumentModal" class="modal-overlay2">
-            <div class="modal2">
-                <h2>Documentos Cargados</h2>
-                <div class="document-list2">
-                    <div v-for="(doc, index) in form.documentos" :key="index" class="document-item2">
-                        <span>{{ doc.name }}</span>
-                        <button @click="removeDocument(index)" class="remove-btn2">
-                            <i class="fas fa-trash-alt"></i>
-                        </button>
-                    </div>
-                </div>
-                <button @click="closeDocumentModal">Cerrar</button>
-            </div>
-        </div>
     </div>
 </template>
 
-
 <script>
-
+import axios from 'axios';
 
 export default {
     name: "RegisterPage",
     data() {
         return {
             form: {
+                rol: "",
                 nombre: "",
                 apellidos: "",
-                rfc: "",
-                numTrabajador: "",
-                curp: "",
-                direccion: "",
+                RFC: "",
+                numero_trabajador: "",
+                CURP: "",
+                direccion_pertenencia: "",
                 departamento: "",
-                areapresupuestal: "",
+                organo_superior: "Organismos Descentralizados",
+                area_presupuestal: "RADIO Y TELEVISION DE HIDALGO",
                 email: "",
                 password: "",
-                confirmPassword: "",
-                documentos: [], // Almacena el archivo INE
-                documentoFoto: null, // Almacena el archivo Foto
+                confirm_password: "",
             },
             showPassword: false,
             showConfirmPassword: false,
@@ -281,45 +245,86 @@ export default {
                 settingsMenu: false,
             },
             showModal: false,
-            showDocumentModal: false, // Controla la visibilidad del modal de documentos
-            errorMessage: "", // Mensaje de error
             showAlertModal: false,
+            alertMessageList: [],
         };
     },
     methods: {
         goHome() {
-            this.$router.push('home'); // Redirige a la página principal ("/"). Cambia el path si es necesario.
-        },
-        goBack() {
-            console.log("Regresar a la página anterior");
+            this.$router.push('home');
         },
         registerUser() {
             let errorMessages = [];
 
-            if (this.form.password !== this.form.confirmPassword) {
+            if (this.form.password !== this.form.confirm_password) {
                 errorMessages.push("Las contraseñas no coinciden.");
-            }
-            if (this.form.documentos.length === 0) {
-                errorMessages.push("Debes subir al menos un documento.");
-            }
-            if (!this.form.documentoFoto) {
-                errorMessages.push("Debes subir una foto.");
             }
 
             if (errorMessages.length > 0) {
-                this.alertMessageList = errorMessages;  // Set the error messages as a list
-                this.showAlertModal = true; // Show the alert modal
+                this.alertMessageList = errorMessages;
+                this.showAlertModal = true;
                 return;
             }
 
-            this.showModal = true; // Show the success modal
-            this.redirectOnClose = true; // Set redirection flag
+            // Verificar que todos los campos obligatorios tengan valores válidos antes de enviarlos
+            const requiredFields = [
+                "rol", "numero_trabajador", "nombre", "apellidos", "password",
+                "confirm_password", "departamento", "email", "RFC", "CURP",
+                "direccion_pertenencia", "organo_superior", "area_presupuestal"
+            ];
+
+            let hasErrors = false;
+            requiredFields.forEach(field => {
+                if (!this.form[field] || this.form[field] === "") {
+                    hasErrors = true;
+                    console.error(`El campo ${field} está vacío`);
+                }
+            });
+
+            if (hasErrors) {
+                this.alertMessageList = ["Todos los campos son obligatorios."];
+                this.showAlertModal = true;
+                return;
+            }
+
+            // Crear objeto con los datos en formato correcto
+            const userData = {
+                rol: this.form.rol,
+                numero_trabajador: parseInt(this.form.numero_trabajador),  // Asegurar número
+                nombre: this.form.nombre,
+                apellidos: this.form.apellidos,
+                password: this.form.password,
+                confirm_password: this.form.confirm_password,
+                departamento: this.form.departamento,
+                email: this.form.email,
+                RFC: this.form.RFC.toUpperCase(),  // Convertir a mayúsculas
+                CURP: this.form.CURP.toUpperCase(), // Convertir a mayúsculas
+                direccion_pertenencia: this.form.direccion_pertenencia,
+                organo_superior: this.form.organo_superior,
+                area_presupuestal: this.form.area_presupuestal,
+                fecha_registro: new Date().toISOString().split("T")[0],  // Formato YYYY-MM-DD
+            };
+
+            console.log("Enviando datos:", userData);
+
+            axios.post('http://localhost:3000/api/usuarios', userData, {
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+                .then(response => {
+                    console.log('Usuario registrado con éxito', response.data);
+                    this.showModal = true;
+                })
+                .catch(error => {
+                    console.error('Error al registrar usuario', error.response?.data || error);
+                    this.alertMessageList = ['Error al registrar usuario. Intenta de nuevo.'];
+                    this.showAlertModal = true;
+                });
         },
 
-
         navigateTo(page) {
-            console.log(`Navegando a ${page}`);
-            this.$router.push({ name: page }); // Asegúrate de que las rutas estén definidas con `name`.
+            this.$router.push({ name: page });
         },
         showMenu(menu) {
             this.menus[menu] = true;
@@ -327,51 +332,22 @@ export default {
         hideMenu(menu) {
             this.menus[menu] = false;
         },
-        // Método para abrir el modal de documentos
-        openDocumentModal() {
-            this.showDocumentModal = true;
-        },
-
-        // Método para cerrar el modal de documentos
-        closeDocumentModal() {
-            this.showDocumentModal = false;
-        },
-
-        triggerFileInput(type) {
-            if (type === "documentos") {
-                this.$refs.fileInputDoc.click();
-            } else if (type === "Foto") {
-                this.$refs.fileInputFoto.click();
-            }
-        },
-        handleFileUpload(type) {
-            if (type === "documentos") {
-                const input = this.$refs.fileInputDoc;
-                const files = Array.from(input.files);
-                if (files.length + this.form.documentos.length > 7) {
-                    alert("Solo puedes cargar un máximo de 7 archivos.");
-                    return;
-                }
-                this.form.documentos = [...this.form.documentos, ...files];
-            } else if (type === "Foto") {
-                this.form.documentoFoto = this.$refs.fileInputFoto.files[0];
-            }
-        },
-
-        // Método para eliminar un documento
-        removeDocument(index) {
-            this.form.documentos.splice(index, 1); // Elimina el documento del array
-        },
         closeModal() {
             this.showModal = false;
-            if (this.redirectOnClose) {
-                this.$router.push("/users"); // Redirects to the 'users' page
-            }
+            this.$router.push("/users");
         },
-
         closeAlertModal() {
-            this.showAlertModal = false; // Cierra el modal de alerta
+            this.showAlertModal = false;
         },
+        validateForm() {
+            for (let key in this.form) {
+                if (this.form[key] === "" || this.form[key] === null) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
     },
 };
 </script>
