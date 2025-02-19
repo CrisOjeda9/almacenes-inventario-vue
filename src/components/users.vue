@@ -99,11 +99,11 @@
                         <td>{{ user.departamento }}</td>
                         <td>{{ user.organo_superior }}</td>
                         <td>
-                           
+
                             <!-- Enlace para abrir la foto en una nueva pestaña -->
                             <a v-if="user.imagen" :href="getImageUrl(user.imagen)" target="_blank" class="btn-open">
-                                <img v-if="user.imagen" :src="getImageUrl(user.imagen)" style="width: 40px; height: 40px;" alt="Foto de perfil"
-                                class="user-photo" />                            </a>
+                                <img v-if="user.imagen" :src="getImageUrl(user.imagen)"
+                                    style="width: 40px; height: 40px;" alt="Foto de perfil" class="user-photo" /> </a>
                         </td>
 
                         <td>{{ formatDate(user.createdAt) }}</td>
@@ -141,7 +141,8 @@
                                 </div>
                                 <div>
                                     <label>RFC:</label>
-                                    <input v-model="currentUser.RFC" minlength="13" maxlength="13" type="text" />
+                                    <input v-model="currentUser.RFC" minlength="13" maxlength="13" type="text"
+                                        style="text-transform: uppercase;" />
                                 </div>
 
                             </div>
@@ -149,7 +150,8 @@
                             <div class="form-column">
                                 <div>
                                     <label>CURP:</label>
-                                    <input v-model="currentUser.CURP" minlength="18" maxlength="18" type="text" />
+                                    <input v-model="currentUser.CURP" minlength="18" maxlength="18" type="text"
+                                        style="text-transform: uppercase;" />
                                 </div>
                                 <div>
                                     <label>Número de trabajador:</label>
@@ -310,6 +312,9 @@ export default {
             this.isEditing = true;
         },
         saveChanges() {
+            // Convertir RFC y CURP a mayúsculas antes de guardar
+            this.currentUser.RFC = this.currentUser.RFC.toUpperCase();
+            this.currentUser.CURP = this.currentUser.CURP.toUpperCase();
             // Enviar la solicitud PUT a la API con el ID del usuario
             axios.put(`http://localhost:3000/api/usuarios/${this.currentUser.id}`, this.currentUser)
                 .then(() => {
