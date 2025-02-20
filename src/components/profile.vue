@@ -1,9 +1,7 @@
 <template>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
-
     <div class="container">
-        <!-- Menú de navegación -->
         <nav class="navbar">
             <div class="navbar-left">
                 <img src="../assets/LOGOS DORADOS-02.png" alt="Icono" class="navbar-icon" @click="goHome" width="50%"
@@ -24,46 +22,17 @@
             </div>
         </nav>
 
-
         <!-- Barra de navegación amarilla -->
         <div class="sub-navbar">
             <a href="/home" class="nav-item">Inicio</a>
             <a href="users" class="nav-item">Usuarios</a>
-            <div class="nav-item" @mouseenter="showMenu('homeMenu')" @mouseleave="hideMenu('homeMenu')">
-                Inventario
-                <span class="menu-icon">▼</span>
-                <div class="dropdown-menu" v-show="menus.homeMenu">
-                    <button @click="navigateTo('bajas')">Historial de bajas</button>
-                    <button @click="navigateTo('historialbienes')">Historial de bienes</button>
-                    <button @click="navigateTo('bajabien')">Baja de bienes</button>
-                    <button @click="navigateTo('resguardo')">Bienes sin resguardo</button>
-                    <button @click="navigateTo('listaalmacen')">Asignar No.Inventario</button>
-                    <button @click="navigateTo('reportes')">Generación de reportes</button>
-                    <button @click="navigateTo('bienesnuevos')">Asignar resguardo</button>
-                </div>
-            </div>
-
-            <div class="nav-item" @mouseenter="showMenu('profileMenu')" @mouseleave="hideMenu('profileMenu')">
-                Almacen
-                <span class="menu-icon">▼</span>
-                <div class="dropdown-menu" v-show="menus.profileMenu">
-                    <button @click="navigateTo('solicitudmaterial')">Solicitud de material</button>
-                    <button @click="navigateTo('bieninventario')">Agregar un bien para inventario</button>
-                    <button @click="navigateTo('existencia')">Entrada de existencias</button>
-                    <button @click="navigateTo('recepcionsolicitudes')">Recepcion de solicitudes</button>
-                    <button @click="navigateTo('proveedor')">Ver proveedores</button>
-                    <button @click="navigateTo('factura')">Facturas</button>
-                    <button @click="navigateTo('poliza')">Polizas</button>
-                </div>
-            </div>
-
-
+            <!-- Otras opciones de navegación -->
         </div>
 
         <!-- Formulario -->
         <div class="form-container">
-
             <form @submit.prevent="registerUser">
+                <!-- Botón de Cambiar Contraseña -->
                 <div class="button-password-change">
                     <button type="button"
                         style="background-color: #A02142; display: flex; align-items: center; gap: 8px;"
@@ -73,57 +42,49 @@
                     </button>
                 </div>
 
-
-
                 <div class="form-row">
                     <div class="form-field">
                         <label for="nombre">Nombre(s)</label>
-                        <input type="text" placeholder="" v-model="form.nombre" />
-
+                        <input type="text" v-model="form.nombre" disabled />
                     </div>
                     <div class="form-field">
                         <label for="apellido">Apellidos</label>
-                        <input type="text" placeholder="" v-model="form.apellidos" />
-
+                        <input type="text" v-model="form.apellidos" disabled />
                     </div>
                     <div class="form-field">
                         <label for="rfc">RFC</label>
-                        <input type="text" placeholder="" v-model="form.rfc" style="text-transform: uppercase;" />
-
+                        <input type="text" v-model="form.rfc" style="text-transform: uppercase;" disabled />
                     </div>
                 </div>
+
                 <div class="form-row">
                     <div class="form-field">
                         <label for="numtrabajador">Num. Trabajador</label>
-                        <input type="number" placeholder="" v-model="form.numTrabajador" />
-
+                        <input type="number" v-model="form.numTrabajador" disabled />
                     </div>
                     <div class="form-field">
                         <label for="curp">CURP</label>
-                        <input type="text" placeholder="" v-model="form.curp" style="text-transform: uppercase;" />
+                        <input type="text" v-model="form.curp" style="text-transform: uppercase;" disabled />
                     </div>
-
                     <div class="form-field">
                         <label for="pertenencia">Direc. Pertenencia</label>
-                        <input type="text" placeholder="" v-model="form.direccion" />
-
+                        <input type="text" v-model="form.direccion" disabled />
                     </div>
                 </div>
+
                 <div class="form-row">
                     <div class="form-field">
                         <label for="departamento">Departamento</label>
-                        <input type="text" placeholder="" v-model="form.departamento" />
-
+                        <input type="text" v-model="form.departamento" disabled />
                     </div>
-
                 </div>
+
                 <div class="button-container">
-                    <button class="boton" type="button" @click="login">
+                    <button class="boton" type="button" @click="logout">
                         Cerrar Sesión
                         <i class="fas fa-sign-out-alt icono-derecha"></i> <!-- Icono de ejemplo -->
                     </button>
                 </div>
-
             </form>
         </div>
     </div>
@@ -143,55 +104,57 @@ export default {
                 curp: "",
                 direccion: "",
                 departamento: "",
-
-            },
-            menus: {
-                homeMenu: false,
-                profileMenu: false,
-                settingsMenu: false,
             },
         };
     },
     mounted() {
-        this.loadUserName();
+        this.loadUserInfo();
     },
     methods: {
-        loadUserName() {
+        loadUserInfo() {
             const storedUserName = localStorage.getItem("userName");
             this.userName = storedUserName ? storedUserName : "Usuario desconocido";
+
+            const storedUserEmail = localStorage.getItem("userEmail");
+            if (storedUserEmail) {
+                this.fetchUserData(storedUserEmail);
+            }
+        },
+        async fetchUserData(email) {
+            try {
+                const response = await fetch('http://localhost:3000/api/usuarios');
+                const users = await response.json();
+                const user = users.find(u => u.email === email);
+
+                if (user) {
+                    this.form.nombre = user.nombre;
+                    this.form.apellidos = user.apellidos;
+                    this.form.rfc = user.RFC;
+                    this.form.numTrabajador = user.numero_trabajador;
+                    this.form.curp = user.CURP;
+                    this.form.direccion = user.direccion_pertenencia;
+                    this.form.departamento = user.departamento;
+                }
+            } catch (error) {
+                console.error("Error al cargar los datos del usuario", error);
+            }
         },
         goHome() {
-            this.$router.push('home'); // Redirige a la página principal ("/"). Cambia el path si es necesario.
+            this.$router.push('/home');
         },
-        goBack() {
-            console.log("Regresar a la página anterior");
-        },
-        registerUser() {
-            if (this.form.password !== this.form.confirmPassword) {
-                alert("Las contraseñas no coinciden");
-                return;
-            }
-            console.log("Usuario registrado:", this.form);
-        },
-        navigateTo(page) {
-            console.log(`Navegando a ${page}`);
-            this.$router.push({ name: page }); // Asegúrate de que las rutas estén definidas con `name`.
-        },
-        showMenu(menu) {
-            this.menus[menu] = true;
-        },
-        hideMenu(menu) {
-            this.menus[menu] = false;
+        logout() {
+            localStorage.removeItem('userName');
+            localStorage.removeItem('userEmail');
+            this.$router.push('/'); // Redirige a la página de login
         },
         changePassword() {
-            window.location.href = 'newpassword'; // Cambia la ruta según sea necesario
-        },
-        login() {
-            window.location.href = '/'; // Cambia la ruta según sea necesario
+            // Lógica para cambiar la contraseña
+            this.$router.push('/newpassword'); // Redirige a la página de cambio de contraseña
         }
-    },
+    }
 };
 </script>
+
 
 <style scoped>
 /* Aplicar Montserrat a todo el contenido */

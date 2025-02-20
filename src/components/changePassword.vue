@@ -15,7 +15,7 @@
             </div>
             <div class="navbar-right">
                 <div class="user-profile">
-                    <img src="../assets/UserHombre.png" alt="User Profile" class="profile-pic" />
+                    <img :src="profileImage" alt="User Profile" class="profile-pic" />
                     <div class="user-info">
                         <p>{{ userName }}</p> <!-- Nombre dinámico del usuario -->
                         <span><a href="profile" style="color: white;">Ver Perfil</a></span>
@@ -23,7 +23,6 @@
                 </div>
             </div>
         </nav>
-
 
         <!-- Barra de navegación amarilla -->
         <div class="sub-navbar">
@@ -40,12 +39,8 @@
                     <button @click="navigateTo('listaalmacen')">Asignar No.Inventario</button>
                     <button @click="navigateTo('reportes')">Generación de reportes</button>
                     <button @click="navigateTo('bienesnuevos')">Asignar resguardo</button>
-
-
-
                 </div>
             </div>
-
             <div class="nav-item" @mouseenter="showMenu('passwordMenu')" @mouseleave="hideMenu('passwordMenu')">
                 Almacen
                 <span class="menu-icon">▼</span>
@@ -59,18 +54,13 @@
                     <button @click="navigateTo('poliza')">Polizas</button>
                 </div>
             </div>
-
-
         </div>
 
         <!-- Formulario -->
         <div class="form-container">
             <form @submit.prevent="registerPassword">
-
-
-
                 <div class="form-field">
-                    <label for="actualpassword">Contraseña</label>
+                    <label for="actualpassword">Contraseña Actual</label>
                     <div class="input-wrapper">
                         <input :type="showPassword ? 'text' : 'password'" v-model="form.password" required />
                         <i :class="showPassword ? 'fa fa-eye-slash' : 'fa fa-eye'"
@@ -98,6 +88,10 @@
                 <button class="boton" type="submit">Guardar</button>
             </form>
         </div>
+        <!-- Contenedor de notificaciones -->
+        <div v-if="alertMessage" :class="alertClass" class="notification">
+            <i :class="alertIcon"></i> {{ alertMessage }}
+        </div>
     </div>
 </template>
 
@@ -106,17 +100,15 @@ export default {
     name: "changePassword",
     data() {
         return {
+            alertMessage: "",  // Mensaje de la alerta
+            alertClass: "",    // Clase de la alerta (ej. 'success' o 'error')
+            alertIcon: "",     // Icono para la alerta
             userName: "Cargando...", // Mensaje temporal
+            profileImage: "",  // URL de la imagen del usuario
             form: {
-                nombre: "",
-                apellidos: "",
-                rfc: "",
-                numTrabajador: "",
-                curp: "",
-                direccion: "",
-                departamento: "",
-                password: "",
-                confirmPassword: "",
+                password: "", // Contraseña actual
+                newpassword: "", // Nueva contraseña
+                confirmPassword: "", // Confirmación de nueva contraseña
             },
             showPassword: false,
             showConfirmPassword: false,
@@ -129,29 +121,135 @@ export default {
         };
     },
     mounted() {
-        this.loadUserName();
+        this.loadUserData();
     },
     methods: {
-        loadUserName() {
+        async loadUserData() {
             const storedUserName = localStorage.getItem("userName");
-            this.userName = storedUserName ? storedUserName : "Usuario desconocido";
+            const storedUserEmail = localStorage.getItem("userEmail");
+
+            if (storedUserName && storedUserEmail) {
+                this.userName = storedUserName;
+
+                try {
+                    // Obtener todos los usuarios de la API
+                    const response = await fetch('http://localhost:3000/api/usuarios');
+                    const users = await response.json();
+
+                    // Buscar el usuario logueado por email
+                    const user = users.find(u => u.email === storedUserEmail);
+
+                    if (user) {
+                        // Asignar el nombre del usuario
+                        this.userName = user.name || storedUserName;
+
+                        // Obtener la ruta completa de la imagen del usuario
+                        const imagePath = user.imagen; // Suponiendo que la API devuelve la ruta completa
+
+                        // Extraer el nombre del archivo de la ruta completa
+                        let imageFileName = imagePath.split('\\').pop(); // Extrae "radio2.jpg"
+
+                        // Eliminar la extensión del nombre del archivo
+                        if (imageFileName) {
+                            imageFileName = imageFileName.split('.').slice(0, -1).join('.'); // Elimina la extensión
+                        }
+
+                        if (imageFileName) {
+                            // Construir la URL completa para la imagen
+                            this.profileImage = `http://localhost:3000/api/users-files/${imageFileName}`;
+                        } else {
+                            // Usar una imagen por defecto si no hay imagen en la API
+                            this.profileImage = "../assets/UserHombre.png";
+                        }
+                    } else {
+                        this.profileImage = "../assets/UserHombre.png"; // Imagen por defecto
+                    }
+                } catch (error) {
+                    console.error('Error al cargar los datos del usuario:', error);
+                    this.profileImage = "../assets/UserHombre.png"; // Imagen por defecto en caso de error
+                }
+            } else {
+                this.userName = "Usuario desconocido";
+                this.profileImage = "../assets/UserHombre.png"; // Imagen por defecto
+            }
         },
         goHome() {
-            this.$router.push('home'); // Redirige a la página principal ("/"). Cambia el path si es necesario.
+            this.$router.push('home');
         },
-        goBack() {
-            console.log("Regresar a la página anterior");
+        showAlert(message, type) {
+            this.alertMessage = message;
+            if (type === "success") {
+                this.alertClass = "alert-success";
+                this.alertIcon = "fa fa-check-circle";
+            } else if (type === "error") {
+                this.alertClass = "alert-error";
+                this.alertIcon = "fa fa-times-circle";
+            } else {
+                this.alertClass = "alert-warning";
+                this.alertIcon = "fa fa-exclamation-circle";
+            }
+
+            // Ocultar la alerta después de 3 segundos
+            setTimeout(() => {
+                this.alertMessage = "";
+            }, 3000);
         },
-        registerPassword() {
-            if (this.form.password !== this.form.confirmPassword) {
-                alert("Las contraseñas no coinciden");
+        async registerPassword() {
+            if (this.form.newpassword !== this.form.confirmPassword) {
+                this.showAlert("Las contraseñas no coinciden", "error");
                 return;
             }
-            console.log("Usuario registrado:", this.form);
+
+            const email = localStorage.getItem("userEmail");
+            try {
+                // Obtener todos los usuarios de la API
+                const response = await fetch('http://localhost:3000/api/usuarios');
+                const users = await response.json();
+
+                // Buscar el usuario logueado por email
+                const user = users.find(u => u.email === email);
+
+                if (!user) {
+                    this.showAlert("Usuario no encontrado", "error");
+                    return;
+                }
+
+                // Verificar la contraseña actual
+                if (this.form.password !== user.password) {
+                    this.showAlert("La contraseña actual es incorrecta", "error");
+                    return;
+                }
+
+                // Realizar la solicitud PUT para actualizar la contraseña
+                const updateResponse = await fetch(`http://localhost:3000/api/usuarios/${user.id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        password: this.form.newpassword,
+                    }),
+                });
+
+                // Verificar si la respuesta fue exitosa
+                if (updateResponse.ok) {
+                    this.showAlert('Contraseña actualizada exitosamente', 'success');
+                    // Retrasar la redirección para mostrar la alerta
+                    setTimeout(() => {
+                        this.$router.push('/home');
+                    }, 2000);  // 2 segundos de retraso
+                } else {
+                    const error = await updateResponse.json();
+                    this.showAlert('Error al actualizar la contraseña: ' + (error.message || 'Error desconocido'), 'error');
+                }
+
+            } catch (error) {
+                console.error('Error en el servidor:', error);
+                this.showAlert('Error en el servidor: ' + error.message, 'error');
+            }
         },
         navigateTo(page) {
-            console.log(`Navegando a ${page}`);
-            this.$router.push({ name: page }); // Asegúrate de que las rutas estén definidas con `name`.
+            this.$router.push({ name: page });
         },
         showMenu(menu) {
             this.menus[menu] = true;
@@ -163,12 +261,71 @@ export default {
 };
 </script>
 
+
+
+
 <style scoped>
 /* Aplicar Montserrat a todo el contenido */
 * {
     font-family: 'Montserrat', sans-serif;
 }
 
+/* Estilo general para la notificación */
+.notification {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-size: 16px;
+    color: white;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    z-index: 999;
+    max-width: 80%;
+    opacity: 0;
+    animation: fadeIn 0.5s forwards;
+}
+
+/* Animación de aparición de la notificación */
+@keyframes fadeIn {
+    0% {
+        opacity: 0;
+        top: 0;
+    }
+
+    100% {
+        opacity: 1;
+        top: 20px;
+    }
+}
+
+/* Notificación de éxito */
+.alert-success {
+    background-color: #4CAF50;
+    /* Verde */
+}
+
+/* Notificación de error */
+.alert-error {
+    background-color: #f44336;
+    /* Rojo */
+}
+
+/* Notificación de advertencia */
+.alert-warning {
+    background-color: #ff9800;
+    /* Naranja */
+}
+
+/* Iconos de la alerta */
+.notification i {
+    margin-right: 10px;
+}
+
+/* ------------------------------------------------------------------------------*/
 .container {
     position: fixed;
     top: 0;
