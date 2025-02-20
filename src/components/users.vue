@@ -83,6 +83,7 @@
                         <th>Departamento</th>
                         <th>Organo Superior</th>
                         <th>Foto</th>
+                        <th>Identificación</th>
                         <th>Fecha de registro</th>
                         <th>Acciones</th>
                     </tr>
@@ -105,8 +106,27 @@
                                 <img v-if="user.imagen" :src="getImageUrl(user.imagen)"
                                     style="width: 40px; height: 40px;" alt="Foto de perfil" class="user-photo" /> </a>
                         </td>
+                        <td>
+                            <template v-if="user.identificacion">
+                                 <ul>
+                                    <li v-for="(file, index) in getPdfFiles(user.identificacion)" :key="index">
+                                        <!-- Aplicar truncateFileName al nombre del archivo -->
+                                        <a :href="file.url" target="_blank" :title="file.name">
+                                            {{ truncateFileName(file.name, 20) }}
+                                        </a>
+                                    </li>
+                                </ul>
+                            </template>
+                            <!-- Botón para descargar todos los archivos en un ZIP -->
+                            <button @click="downloadZip(user)" class="btn-download">
+                                <p class="textoDescarga">Descargar</p>
+                            </button>
+                        </td>
+
+
 
                         <td>{{ formatDate(user.createdAt) }}</td>
+
                         <td>
                             <button @click="editUser(user)" class="btn-edit">Editar</button>
                             <button @click="showDeleteModal(user.id)" class="btn-delete">Eliminar</button>
@@ -208,6 +228,9 @@
 
 <script>
 import axios from "axios";
+//import JSZip from 'jszip';
+// import { saveAs } from 'file-saver';
+
 
 export default {
     name: "userPage",
@@ -277,6 +300,78 @@ export default {
 
 
 
+        truncateFileName(name, maxLength) {
+            return name.length > maxLength ? name.substring(0, maxLength) + "..." : name;
+        },
+
+        // Método para obtener solo el nombre del archivo sin la extensión
+        getPdfName(pdfPath) {
+            const fileName = pdfPath.split('/').pop().split('\\').pop();  // Extrae solo el nombre del archivo
+            return fileName.split('.')[0]; // Devuelve solo el nombre sin la extensión .pdf
+        },
+        getPdfFiles(pdfPaths) {
+            if (!pdfPaths) return []; // Si no hay archivos, retorna un array vacío
+
+            return pdfPaths.split(';').map((path) => {
+                const fileName = path.split('/').pop().split('\\').pop(); // Extrae el nombre del archivo
+                const nameWithoutExtension = fileName.split('.').slice(0, -1).join('.'); // Quita la extensión
+
+                return {
+                    url: `http://localhost:3000/api/users-files/${nameWithoutExtension}`, // URL sin extensión para visualización
+                    downloadUrl: `http://localhost:3000/api/users-files/${fileName}`, // URL con extensión para descarga
+                    name: nameWithoutExtension // Nombre sin extensión
+                };
+            });
+        },
+        async downloadZip(user) {
+            try {
+                // Obtener los nombres de los archivos
+                const pdfFiles = this.getPdfFiles(user.identificacion);
+
+                // Extraer solo los nombres de los archivos con extensión
+                const fileNames = pdfFiles.map(file => {
+                    const fileNameWithExtension = file.name + '.pdf'; // Asegúrate de incluir la extensión
+                    return fileNameWithExtension;
+                });
+
+                // Enviar los nombres de los archivos a la API de descarga ZIP
+                const response = await fetch('http://localhost:3000/api/users/download-zip', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        files: fileNames
+                    })
+                });
+
+                // Verificar si la respuesta es exitosa
+                if (!response.ok) {
+                    throw new Error('Error al descargar el archivo ZIP');
+                }
+
+                // Convertir la respuesta a un blob
+                const blob = await response.blob();
+
+                // Verificar si el blob es un archivo ZIP válido
+                if (blob.type !== 'application/zip') {
+                    throw new Error('El archivo descargado no es un ZIP válido');
+                }
+
+                // Crear un enlace para descargar el archivo ZIP
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'archivos.zip';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Hubo un error al descargar el archivo ZIP. Por favor, inténtalo de nuevo.');
+            }
+        },
 
 
         formatDate(dateString) {
@@ -367,6 +462,45 @@ export default {
 /* Aplicar Montserrat a todo el contenido */
 * {
     font-family: 'Montserrat', sans-serif;
+}
+
+td ul {
+    list-style-type: none; /* Quita los puntos de la lista */
+    padding: 0;
+    margin: 0;
+}
+
+td ul li {
+    margin-bottom: 5px;
+    /* Espacio entre elementos */
+}
+
+td ul li a {
+    text-decoration: none;
+    color: #007bff;
+    font-weight: bold;
+}
+
+td ul li a:hover {
+    text-decoration: underline;
+}
+
+.btn-download {
+    display: flex;
+    text-align: center;
+    justify-content: center;
+    align-items: center;
+    border-radius: 10px;
+    width: 100%;
+    height: 20px;
+}
+
+.btn-download:hover {
+    background: #bc955b;
+}
+.textoDescarga{
+    font-size: 14px;
+
 }
 
 .titulo {
@@ -571,7 +705,7 @@ a {
 }
 
 .user-table {
-    width: 95%;
+    width: 110px;
     border-collapse: separate;
     border-spacing: 0;
     background-color: white;
