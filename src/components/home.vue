@@ -17,19 +17,21 @@
                 <div class="user-profile">
                     <img src="../assets/UserHombre.png" alt="User Profile" class="profile-pic" />
                     <div class="user-info">
-                        <p>Random user xd</p>
+                        <p>{{ userName }}</p> <!-- Nombre dinámico del usuario -->
                         <span><a href="profile" style="color: white;">Ver Perfil</a></span>
                     </div>
                 </div>
             </div>
         </nav>
 
-
-        <!-- Barra de navegación amarilla -->
+        <!-- Menú de navegación -->
         <div class="sub-navbar">
             <a href="/home" class="nav-item" style="color: #6f7271;">Inicio</a>
-            <a href="users" class="nav-item">Usuarios</a>
-            <div class="nav-item" @mouseenter="showMenu('homeMenu')" @mouseleave="hideMenu('homeMenu')">
+            <a v-if="userRole === 'Administrador'" href="users" class="nav-item">Usuarios</a>
+
+            <!-- Se muestra solo si es Administrador o Inventario -->
+            <div v-if="userRole === 'Inventario' || userRole === 'Administrador'" class="nav-item"
+                @mouseenter="showMenu('homeMenu')" @mouseleave="hideMenu('homeMenu')">
                 Inventario
                 <span class="menu-icon">▼</span>
                 <div class="dropdown-menu" v-show="menus.homeMenu">
@@ -37,51 +39,50 @@
                     <button @click="navigateTo('historialbienes')">Historial de bienes</button>
                     <button @click="navigateTo('bajabien')">Baja de bienes</button>
                     <button @click="navigateTo('resguardo')">Bienes sin resguardo</button>
-                    <button @click="navigateTo('listaalmacen')">Asignar No.Inventario</button>
+                    <button @click="navigateTo('listaalmacen')">Asignar No. Inventario</button>
                     <button @click="navigateTo('reportes')">Generación de reportes</button>
                     <button @click="navigateTo('bienesnuevos')">Asignar resguardo</button>
-
-
                 </div>
             </div>
 
-            <div class="nav-item" @mouseenter="showMenu('usersMenu')" @mouseleave="hideMenu('usersMenu')">
-                Almacen
+            <!-- Se muestra solo si es Almacenes o Administrador -->
+            <div v-if="userRole === 'Almacenes' || userRole === 'Administrador'" class="nav-item"
+                @mouseenter="showMenu('usersMenu')" @mouseleave="hideMenu('usersMenu')">
+                Almacén
                 <span class="menu-icon">▼</span>
                 <div class="dropdown-menu" v-show="menus.usersMenu">
                     <button @click="navigateTo('solicitudmaterial')">Solicitud de material</button>
                     <button @click="navigateTo('bieninventario')">Agregar un bien para inventario</button>
                     <button @click="navigateTo('existencia')">Entrada de existencias</button>
-                    <button @click="navigateTo('recepcionsolicitudes')">Recepcion de solicitudes</button>
+                    <button @click="navigateTo('recepcionsolicitudes')">Recepción de solicitudes</button>
                     <button @click="navigateTo('proveedor')">Ver proveedores</button>
                     <button @click="navigateTo('factura')">Facturas</button>
-                    <button @click="navigateTo('poliza')">Polizas</button>
+                    <button @click="navigateTo('poliza')">Pólizas</button>
                 </div>
             </div>
-
         </div>
+
         <div class="menu">
-            <!-- Botón 1: Control inventario -->
-            <div class="button-card" @click="navigateTo2('inventory')">
+            <!-- Control Inventario (solo Inventario y Administrador) -->
+            <div v-if="userRole === 'Inventario' || userRole === 'Administrador'" class="button-card"
+                @click="navigateTo2('inventory')">
                 <i class="fas fa-box"></i>
                 <span>Control inventario</span>
             </div>
 
-            <!-- Botón 3: Gestión de Usuarios -->
-            <div class="button-card" s @click="navigateTo2('users')">
+            <!-- Gestión de Usuarios (solo Administrador) -->
+            <div v-if="userRole === 'Administrador'" class="button-card" @click="navigateTo2('users')">
                 <i class="fas fa-users"></i>
                 <span>Gestión de Usuarios</span>
             </div>
 
-            <!-- Botón 4: Almacén -->
-            <div class="button-card" @click="navigateTo2('almacen')">
+            <!-- Almacén (solo Almacenes y Administrador) -->
+            <div v-if="userRole === 'Almacenes' || userRole === 'Administrador'" class="button-card"
+                @click="navigateTo2('almacen')">
                 <i class="fas fa-warehouse"></i>
                 <span>Almacén</span>
             </div>
         </div>
-
-
-
     </div>
 </template>
 
@@ -90,21 +91,29 @@ export default {
     name: "homePage",
     data() {
         return {
+            userName: "Cargando...", // Mensaje temporal
+
             menus: {
                 homeMenu: false,
                 usersMenu: false,
-                settingsMenu: false,
             },
+            userRole: localStorage.getItem('userRole') || '', // Obtener el rol desde el localStorage
         };
     },
+    mounted() {
+        this.loadUserName();
+    },
     methods: {
+        loadUserName() {
+            const storedUserName = localStorage.getItem("userName");
+            this.userName = storedUserName ? storedUserName : "Usuario desconocido";
+        },
         goBack() {
             console.log("Regresar a la página anterior");
         },
-
         navigateTo(page) {
             console.log(`Navegando a ${page}`);
-            this.$router.push({ name: page }); // Asegúrate de que las rutas estén definidas con `name`.
+            this.$router.push({ name: page });
         },
         showMenu(menu) {
             this.menus[menu] = true;
@@ -115,7 +124,7 @@ export default {
         navigateTo2(route) {
             this.$router.push({ name: route });
         }
-    },
+    }
 };
 </script>
 

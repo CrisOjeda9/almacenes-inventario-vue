@@ -61,7 +61,8 @@ const router = createRouter({
     {
       path: '/inventory',
       name: 'inventory',
-      component: inventoryPage, // Cambia el nombre aquí
+      component: inventoryPage,
+      meta: { role: 'Inventario' } // Cambia el nombre aquí
     },
     {
       path: '/almacen',
@@ -112,7 +113,7 @@ const router = createRouter({
     {
       path: '/newproveedor',
       name: 'newproveedor',
-      component:newProveedorPage,
+      component: newProveedorPage,
     },
     {
       path: '/newexistencia',
@@ -136,17 +137,17 @@ const router = createRouter({
     },
     {
       path: '/recepcionsolicitudes',
-      name:'recepcionsolicitudes',
+      name: 'recepcionsolicitudes',
       component: recepcionSolicitudesPage, // Cambia el nombre aquí
     },
     {
       path: '/versolicitudes',
-      name:'versolicitudes',
+      name: 'versolicitudes',
       component: versolicitudesPage, // Cambia el nombre aquí
     },
     {
       path: '/bienesnuevos',
-      name:'bienesnuevos',
+      name: 'bienesnuevos',
       component: bienesnuevosPage,
     },
     {
@@ -176,7 +177,7 @@ const router = createRouter({
     },
     {
       path: '/salidaexistencias',
-      name:'salidaexistencias',
+      name: 'salidaexistencias',
       component: salidaExistenciasPage, // Cambia el nombre aquí
     },
     {
@@ -186,5 +187,19 @@ const router = createRouter({
     }
   ],
 });
+// Middleware de autenticación
+router.beforeEach((to, from, next) => {
+  const userRole = localStorage.getItem('userRole');
 
+  if (to.meta.role) {
+    if (userRole === 'Administrador' || userRole === to.meta.role) {
+      next();
+    } else {
+      alert('No tienes permisos para acceder a esta página.');
+      next('/home');
+    }
+  } else {
+    next();
+  }
+});
 export default router;

@@ -81,7 +81,7 @@
                         <th>Num. trabajador</th>
                         <th>Direc. pertenencia</th>
                         <th>Departamento</th>
-                        <th>Organo Superior</th>
+                        <th>Correo</th>
                         <th>Foto</th>
                         <th>Identificación</th>
                         <th>Fecha de registro</th>
@@ -98,7 +98,7 @@
                         <td>{{ user.numero_trabajador }}</td>
                         <td> {{ getDireccionText(user.direccion_pertenencia) }}</td>
                         <td>{{ user.departamento }}</td>
-                        <td>{{ user.organo_superior }}</td>
+                        <td>{{ user.email }}</td>
                         <td>
 
                             <!-- Enlace para abrir la foto en una nueva pestaña -->
@@ -714,7 +714,7 @@ a {
     /* Redondear las esquinas de la tabla */
     overflow: hidden;
     /* Para que los bordes no sobresalgan */
-    font-size: 15px;
+    font-size: 13px;
 }
 
 .user-table th,

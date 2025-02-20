@@ -1,46 +1,55 @@
 <template>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
-
   <div class="login-container">
     <div class="login-card">
-      <div class="logo">
-      </div>
-      <img src="../assets/logoSistema.png" alt="">
+      <img src="../assets/logoSistema.png" alt="Logo">
       <h2>Inicia Sesión</h2>
       <p>Sistema Inventario y Almacén de Radio y Televisión de Hidalgo</p>
       <form @submit.prevent="login">
         <div class="input-group">
-          <label for="usuario">Usuario</label>
-          <input type="text" id="usuario" v-model="usuario" required />
+          <label for="usuario">Email</label>
+          <input type="email" id="usuario" v-model="email" required />
         </div>
         <div class="input-group">
           <label for="contrasena">Contraseña</label>
-          <input type="password" id="contrasena" v-model="contrasena" required />
+          <input type="password" id="contrasena" v-model="password" required />
         </div>
         <button type="submit" class="login-button">Siguiente</button>
       </form>
     </div>
   </div>
 </template>
-
 <script>
 export default {
   name: 'LoginPage',
   data() {
     return {
-      usuario: '',
-      contrasena: ''
+      email: '',
+      password: ''
     };
   },
   methods: {
-    login() {
-      if (this.usuario && this.contrasena) {
+    async login() {
+      try {
+        const response = await fetch('http://localhost:3000/api/usuarios');
+        const users = await response.json();
 
+        // Buscar usuario en la API
+        const user = users.find(u => u.email === this.email && u.password === this.password);
 
-        // Redirigir a otra vista
-        this.$router.push('/home'); // Cambia '/dashboard' por la ruta de tu vista destino
-      } else {
-        alert('Por favor, complete todos los campos.');
+        if (user) {
+          // Guardar en localStorage
+          localStorage.setItem('userRole', user.rol);
+          localStorage.setItem('userName', user.nombre);
+          localStorage.setItem('userEmail', user.email);
+
+          // Redirigir a home
+          this.$router.push('/home');
+        } else {
+          alert('Usuario o contraseña incorrectos');
+        }
+      } catch (error) {
+        console.error('Error al conectar con la API', error);
+        alert('Error en el servidor');
       }
     }
   }

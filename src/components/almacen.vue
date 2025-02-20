@@ -29,8 +29,12 @@
         <!-- Barra de navegación amarilla -->
         <div class="sub-navbar">
             <a href="/home" class="nav-item">Inicio</a>
-            <a href="users" class="nav-item">Usuarios</a>
-            <div class="nav-item" @mouseenter="showMenu('homeMenu')" @mouseleave="hideMenu('homeMenu')">
+
+            <!-- Mostrar solo si el usuario NO es de Almacén -->
+            <a v-if="userRole !== 'Almacén'" href="users" class="nav-item">Usuarios</a>
+
+            <div v-if="userRole !== 'Almacén'" class="nav-item" @mouseenter="showMenu('homeMenu')"
+                @mouseleave="hideMenu('homeMenu')">
                 Inventario
                 <span class="menu-icon">▼</span>
                 <div class="dropdown-menu" v-show="menus.homeMenu">
@@ -44,21 +48,23 @@
                 </div>
             </div>
 
-            <div class="nav-item" @mouseenter="showMenu('almacenMenu')" @mouseleave="hideMenu('almacenMenu')">
-                Almacen
+            <!-- Solo mostrar "Almacén" si el usuario tiene el rol de Almacén -->
+            <div v-if="userRole === 'Almacén'" class="nav-item" @mouseenter="showMenu('almacenMenu')"
+                @mouseleave="hideMenu('almacenMenu')">
+                Almacén
                 <span class="menu-icon">▼</span>
                 <div class="dropdown-menu" v-show="menus.almacenMenu">
                     <button @click="navigateTo('solicitudmaterial')">Solicitud de material</button>
                     <button @click="navigateTo('bieninventario')">Agregar un bien para inventario</button>
                     <button @click="navigateTo('existencia')">Entrada de existencias</button>
-                    <button @click="navigateTo('recepcionsolicitudes')">Recepcion de solicitudes</button>
+                    <button @click="navigateTo('recepcionsolicitudes')">Recepción de solicitudes</button>
                     <button @click="navigateTo('proveedor')">Ver proveedores</button>
                     <button @click="navigateTo('factura')">Facturas</button>
-                    <button @click="navigateTo('poliza')">Polizas</button>
+                    <button @click="navigateTo('poliza')">Pólizas</button>
                 </div>
             </div>
-
         </div>
+
         <div class="menu">
             <!-- Fila 1 -->
             <div class="button-card" @click="navigateTo2('solicitudmaterial')">
@@ -111,6 +117,8 @@ export default {
     name: "almacenPage",
     data() {
         return {
+            userRole: "Almacén", // Aquí asigna el rol del usuario dinámicamente
+
             menus: {
                 homeMenu: false,
                 almacenMenu: false,
