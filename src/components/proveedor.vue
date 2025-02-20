@@ -17,7 +17,7 @@
                 <div class="user-profile">
                     <img src="../assets/UserHombre.png" alt="User Profile" class="profile-pic" />
                     <div class="user-info">
-                        <p>Random user xd</p>
+                        <p>{{ userName }}</p> <!-- Nombre dinámico del usuario -->
                         <span><a href="profile" style="color: white;">Ver Perfil</a></span>
                     </div>
                 </div>
@@ -200,6 +200,7 @@ export default {
     name: "proveedorPage",
     data() {
         return {
+            userName: "Cargando...", // Mensaje temporal
             isDeleteModalVisible: false,
             menus: {
                 homeMenu: false,
@@ -275,7 +276,14 @@ export default {
             return this.filteredproveedor.slice(start, end);
         }
     },
+    mounted() {
+        this.loadUserName();
+    },
     methods: {
+        loadUserName() {
+            const storedUserName = localStorage.getItem("userName");
+            this.userName = storedUserName ? storedUserName : "Usuario desconocido";
+        },
         goHome() {
             this.$router.push('home'); // Redirige a la página principal ("/"). Cambia el path si es necesario.
         },

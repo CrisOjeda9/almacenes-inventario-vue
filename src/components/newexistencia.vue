@@ -17,7 +17,7 @@
                 <div class="user-profile">
                     <img src="../assets/UserHombre.png" alt="User Profile" class="profile-pic" />
                     <div class="user-info">
-                        <p>Random user xd</p>
+                        <p>{{ userName }}</p> <!-- Nombre dinámico del usuario -->
                         <span><a href="profile" style="color: white;">Ver Perfil</a></span>
                     </div>
                 </div>
@@ -231,6 +231,7 @@ export default {
     name: "newExistenciaPage",
     data() {
         return {
+            userName: "Cargando...",
             form: {
                 id: "",                     // ID del registro
                 numeroFactura: "",          // Número de factura
@@ -258,7 +259,14 @@ export default {
 
         };
     },
+    mounted() {
+        this.loadUserName();
+    },
     methods: {
+        loadUserName() {
+            const storedUserName = localStorage.getItem("userName");
+            this.userName = storedUserName ? storedUserName : "Usuario desconocido";
+        },
         openImageModal() {
             this.showImageModal = true;
         },

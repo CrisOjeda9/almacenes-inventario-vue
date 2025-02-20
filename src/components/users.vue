@@ -17,7 +17,7 @@
                 <div class="user-profile">
                     <img src="../assets/UserHombre.png" alt="User Profile" class="profile-pic" />
                     <div class="user-info">
-                        <p>Random user xd</p>
+                        <p>{{ userName }}</p> <!-- Nombre dinámico del usuario -->
                         <span><a href="profile" style="color: white;">Ver Perfil</a></span>
                     </div>
                 </div>
@@ -236,6 +236,7 @@ export default {
     name: "userPage",
     data() {
         return {
+            userName: "Cargando...", // Mensaje temporal
             direcciones: [
                 { value: 'Direccion General', text: 'Dirección General' },
                 { value: 'Direccion de Coordinacion Financiera Y Planeacion', text: 'Dirección de coordinación financiera y planeación' },
@@ -289,8 +290,13 @@ export default {
     },
     mounted() {
         this.fetchUsers();
+        this.loadUserName();
     },
     methods: {
+        loadUserName() {
+            const storedUserName = localStorage.getItem("userName");
+            this.userName = storedUserName ? storedUserName : "Usuario desconocido";
+        },
         getImageUrl(imagePath) {
             if (!imagePath) return ''; // Si no hay ruta, devolver una cadena vacía
             const baseUrl = 'http://localhost:3000/api/users-files'; // Ruta base correcta

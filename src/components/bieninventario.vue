@@ -17,7 +17,7 @@
                 <div class="user-profile">
                     <img src="../assets/UserHombre.png" alt="User Profile" class="profile-pic" />
                     <div class="user-info">
-                        <p>Random user xd</p>
+                        <p>{{ userName }}</p> <!-- Nombre dinámico del usuario -->
                         <span><a href="profile" style="color: white;">Ver Perfil</a></span>
                     </div>
                 </div>
@@ -167,6 +167,7 @@ export default {
     name: "BienPage",
     data() {
         return {
+            userName: "Cargando...", // Mensaje temporal
             form: {
                 tipoInventario: "",
                 inventario: "",
@@ -197,7 +198,14 @@ export default {
             }
         },
     },
+    mounted() {
+        this.loadUserName();
+    },
     methods: {
+        loadUserName() {
+            const storedUserName = localStorage.getItem("userName");
+            this.userName = storedUserName ? storedUserName : "Usuario desconocido";
+        },
         generateInventoryNumber() {
             // Generar un número de inventario único de 5 dígitos (incremental)
             this.form.inventario = this.inventarioCounter.toString().padStart(5, '0');
