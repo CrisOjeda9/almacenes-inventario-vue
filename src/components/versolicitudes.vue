@@ -18,7 +18,7 @@
             </div>
             <div class="navbar-right">
                 <div class="user-profile">
-                    <img src="../assets/UserHombre.png" alt="User Profile" class="profile-pic" />
+                    <img :src="profileImage" alt="User Profile" class="profile-pic" />
                     <div class="user-info">
                         <p>{{ userName }}</p> <!-- Nombre dinámico del usuario -->
                         <span><a href="profile" style="color: white;">Ver Perfil</a></span>
@@ -115,6 +115,7 @@ export default {
     data() {
         return {
             userName: "Cargando...", // Mensaje temporal
+            profileImage: "",  // URL de la imagen del usuario
             menus: {
                 homeMenu: false,
                 solicitudMenu: false,
@@ -150,12 +151,57 @@ export default {
         },
     },
     mounted() {
-        this.loadUserName();
+        this.loadUserData();
     },
     methods: {
-        loadUserName() {
+        async loadUserData() {
             const storedUserName = localStorage.getItem("userName");
-            this.userName = storedUserName ? storedUserName : "Usuario desconocido";
+            const storedUserEmail = localStorage.getItem("userEmail");
+
+            if (storedUserName && storedUserEmail) {
+                this.userName = storedUserName;
+
+                try {
+                    // Obtener todos los usuarios de la API
+                    const response = await fetch('http://localhost:3000/api/usuarios');
+                    const users = await response.json();
+
+                    // Buscar el usuario logueado por email
+                    const user = users.find(u => u.email === storedUserEmail);
+
+                    if (user) {
+                        // Asignar el nombre del usuario
+                        this.userName = user.name || storedUserName;
+
+                        // Obtener la ruta completa de la imagen del usuario
+                        const imagePath = user.imagen; // Suponiendo que la API devuelve la ruta completa
+
+                        // Extraer el nombre del archivo de la ruta completa
+                        let imageFileName = imagePath.split('\\').pop(); // Extrae "radio2.jpg"
+
+                        // Eliminar la extensión del nombre del archivo
+                        if (imageFileName) {
+                            imageFileName = imageFileName.split('.').slice(0, -1).join('.'); // Elimina la extensión
+                        }
+
+                        if (imageFileName) {
+                            // Construir la URL completa para la imagen
+                            this.profileImage = `http://localhost:3000/api/users-files/${imageFileName}`;
+                        } else {
+                            // Usar una imagen por defecto si no hay imagen en la API
+                            this.profileImage = "../assets/UserHombre.png";
+                        }
+                    } else {
+                        this.profileImage = "../assets/UserHombre.png"; // Imagen por defecto
+                    }
+                } catch (error) {
+                    console.error('Error al cargar los datos del usuario:', error);
+                    this.profileImage = "../assets/UserHombre.png"; // Imagen por defecto en caso de error
+                }
+            } else {
+                this.userName = "Usuario desconocido";
+                this.profileImage = "../assets/UserHombre.png"; // Imagen por defecto
+            }
         },
         goHome() {
             this.$router.push('home'); // Redirige a la página principal ("/"). Cambia el path si es necesario.
