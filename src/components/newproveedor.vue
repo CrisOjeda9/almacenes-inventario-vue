@@ -100,6 +100,12 @@
                         <input type="text" id="direccion" placeholder=""
                             v-model="form.direccion" required />
                     </div>
+                    <!-- Telefono -->
+                    <div class="form-field">
+                        <label for="telefono">Telefono</label>
+                        <input type="text" id="telefono" placeholder=""
+                            v-model="form.telefono" required />
+                    </div>
 
                     <!-- Correo Electrónico -->
                     <div class="form-field">
@@ -184,6 +190,7 @@ export default {
                 tipoProveedor: "",        // Tipo de proveedor (físico/moral)
                 rfc: "",                  // RFC del proveedor
                 direccion: "",            // Dirección
+                telefono: "",            // Telefono
                 correo: "",               // Correo electrónico
                 cuentaBancaria: "",       // Cuenta bancaria
                 documentos: [],           // Documentos relacionados (archivos)
@@ -297,7 +304,7 @@ export default {
         },
         registerProveedor() {
             // Valida los campos necesarios
-            if (!this.form.nombre || !this.form.apellidos || !this.form.tipoProveedor || !this.form.rfc || !this.form.direccion || !this.form.correo || !this.form.cuentaBancaria) {
+            if (!this.form.nombre || !this.form.apellidos || !this.form.tipoProveedor || !this.form.rfc || !this.form.direccion || !this.form.telefono || !this.form.correo || !this.form.cuentaBancaria) {
                 alert("Por favor, completa todos los campos obligatorios.");
                 return;
             }
