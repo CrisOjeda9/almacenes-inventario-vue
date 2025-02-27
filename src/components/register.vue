@@ -72,68 +72,52 @@
                     </div>
                     <div class="form-field">
                         <label for="nombre">Nombre(s)</label>
-                        <input type="text" v-model="form.nombre" required />
+                        <input type="text" v-model="form.nombre" @input="filterUsers" required />
+                        <ul v-if="filteredUsers.length > 0" class="autocomplete-list">
+                            <li v-for="user in filteredUsers" :key="user.nombre" @click="selectUser(user)">
+                                {{ user.nombre }}
+                            </li>
+                        </ul>
                     </div>
                     <div class="form-field">
                         <label for="apellidos">Apellidos</label>
-                        <input type="text" v-model="form.apellidos" required />
+                        <input type="text" v-model="form.apellidos" readonly style="background-color: #dcddcd;" />
                     </div>
                     <div class="form-field">
                         <label for="RFC">RFC</label>
-                        <input type="text" v-model="form.RFC" minlength="13" maxlength="13" required
-                            style="text-transform: uppercase;" />
+                        <input type="text" v-model="form.RFC" readonly style="background-color: #dcddcd;" />
                     </div>
                 </div>
                 <div class="form-row">
                     <div class="form-field">
                         <label for="numero_trabajador">Num. Trabajador</label>
-                        <input type="number" v-model="form.numero_trabajador" min="0" required />
+                        <input type="number" v-model="form.numero_trabajador" readonly style="background-color: #dcddcd;" />
                     </div>
                     <div class="form-field">
                         <label for="CURP">CURP</label>
-                        <input type="text" v-model="form.CURP" minlength="18" maxlength="18" required
-                            style="text-transform: uppercase;" />
+                        <input type="text" v-model="form.CURP" readonly style="background-color: #dcddcd;" />
                     </div>
                     <div class="form-field">
                         <label for="direccion_pertenencia">Direc. Pertenencia</label>
-                        <select v-model="form.direccion_pertenencia" required>
-                            <option value="" disabled>Selecciona una opción</option>
-                            <option value="Direccion General">Dirección General</option>
-                            <option value="Direccion de Coordinacion Financiera Y Planeacion">Dirección de Coordinación
-                                Financiera y Planeación</option>
-                            <option value="Direccion de Television">Dirección de Televisión</option>
-                            <option value="Direccion de Noticias">Dirección de Noticias</option>
-                            <option value="Direccion de Radio">Dirección de Radio</option>
-                            <option value="Direccion de Ingenieria">Dirección de Ingeniería</option>
-                            <option value="Direccion de Proyectos Estrategicos">Dirección de Proyectos Estratégicos
-                            </option>
-                            <option value="Organo Interno de Control">Órgano Interno de Control</option>
-                            <option value="Direccion de Promocion e Intercambio">Dirección de Promoción e Intercambio
-                            </option>
-                            <option value="Direccion Juridica">Dirección Jurídica</option>
-                            <option value="Direccion de Vinculacion">Dirección de Vinculación</option>
-                            <option value="Estaciones de Radio">Estaciones de Radio</option>
-                        </select>
+                        <input type="text" v-model="form.direccion_pertenencia" readonly style="background-color: #dcddcd;" />
                     </div>
                     <div class="form-field">
                         <label for="departamento">Departamento</label>
-                        <input type="text" v-model="form.departamento" required />
+                        <input type="text" v-model="form.departamento" readonly style="background-color: #dcddcd;" />
                     </div>
                 </div>
                 <div class="form-row">
                     <div class="form-field">
                         <label for="organo_superior">Organo Superior</label>
-                        <input type="text" value="Organismos Descentralizados" v-model="form.organo_superior"
-                            readonly />
+                        <input type="text" v-model="form.organo_superior"  style="background-color: #dcddcd;" />
                     </div>
                     <div class="form-field">
                         <label for="area_presupuestal">Área Presupuestal</label>
-                        <input type="text" value="RADIO Y TELEVISION DE HIDALGO" v-model="form.area_presupuestal"
-                            readonly />
+                        <input type="text" v-model="form.area_presupuestal" readonly style="background-color: #dcddcd;" />
                     </div>
                     <div class="form-field">
                         <label for="email">Correo electrónico</label>
-                        <input type="email" v-model="form.email" required />
+                        <input type="email" v-model="form.email" readonly style="background-color: #dcddcd;" />
                     </div>
                     <div class="form-field">
                         <label for="password">Contraseña</label>
@@ -156,33 +140,19 @@
                     </div>
                     <!-- Campo Doc -->
                     <div class="form-field">
-                        <label for="identificacion">identificacion</label>
-                        <div class="dropzone" @drop.prevent="handleDrop('identificacion')" @dragover.prevent
-                            @click="triggerFileInput('identificacion')">
-                            <input type="file" id="identificacion" ref="fileInputDoc"
-                                @change="handleFileUpload('identificacion')" accept=".pdf" multiple />
-                            <i class="fas fa-cloud-upload-alt"></i>
-                            <span v-if="form.identificacion.length === 0">Arrastra o selecciona archivos (PDF)</span>
-                            <span v-else>{{ form.identificacion.length }} archivos seleccionados</span>
-                            <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
+                        <label for="identificacion">Identificación</label>
+                        <div class="dropzone" style="background-color: #dcddcd;">
+                            <span>{{ form.identificacion ? form.identificacion.split('/').pop() : 'No se ha seleccionado ninguna foto'
+                                }}</span>
                         </div>
-
-                        <button type="button" v-if="form.identificacion.length > 0" @click="openDocumentModal"
-                            class="view-documents-btn">
-                            Ver identificacion
-                        </button>
                     </div>
 
                     <!-- Campo Foto -->
                     <div class="form-field">
                         <label for="imagen">Foto</label>
-                        <div class="dropzone" @drop.prevent="handleDrop('Foto')" @dragover.prevent
-                            @click="triggerFileInput('Foto')">
-                            <input type="file" id="imagen" ref="fileInputFoto" @change="handleFileUpload('Foto')"
-                                accept=".jpg,.png" />
-                            <i class="fas fa-cloud-upload-alt"></i>
-                            <span v-if="!form.imagen">Arrastra o selecciona una imagen (JPG, PNG)</span>
-                            <span v-else>{{ form.imagen.name }}</span>
+                        <div class="dropzone" style="background-color: #dcddcd;">
+                            <span>{{ form.imagen ? form.imagen.split('/').pop() : 'No se ha seleccionado ninguna foto'
+                                }}</span>
                         </div>
                     </div>
                 </div>
@@ -210,29 +180,10 @@
                 <button @click="closeModal">Aceptar</button>
             </div>
         </div>
-
-
-        <!-- Modal para mostrar los identificacion cargados -->
-        <div v-if="showDocumentModal" class="modal-overlay2">
-            <div class="modal2">
-                <h2>identificacion Cargados</h2>
-                <div class="document-list2">
-                    <div v-for="(doc, index) in form.identificacion" :key="index" class="document-item2">
-                        <span>{{ doc.name }}</span>
-                        <button @click="removeDocument(index)" class="remove-btn2">
-                            <i class="fas fa-trash-alt"></i>
-                        </button>
-                    </div>
-                </div>
-                <button @click="closeDocumentModal">Cerrar</button>
-            </div>
-        </div>
     </div>
 </template>
 
 <script>
-import axios from 'axios';
-
 export default {
     name: "RegisterPage",
     data() {
@@ -253,8 +204,8 @@ export default {
                 email: "",
                 password: "",
                 confirm_password: "",
-                identificacion: [], // Almacena el archivo INE
-                imagen: null, // Almacena el archivo Foto
+                identificacion: "", // Ruta del archivo de identificación
+                imagen: "", // Ruta de la imagen
             },
             showPassword: false,
             showConfirmPassword: false,
@@ -266,141 +217,74 @@ export default {
             showModal: false,
             showAlertModal: false,
             alertMessageList: [],
+            users: [
+                {
+                    nombre: "Juan Gómez Cruz",
+                    apellidos: "Gómez Cruz",
+                    RFC: "JUAP921214ABC",
+                    numero_trabajador: "12345",
+                    CURP: "JUAP921214HDFGH01",
+                    direccion_pertenencia: "Dirección General",
+                    departamento: "Administración",
+                    email: "juan.perez@example.com",
+                    identificacion: "/path/to/identificacion1.pdf",
+                    imagen: "/path/to/foto1.jpg",
+                },
+                {
+                    nombre: "María Martínez López",
+                    apellidos: "Martínez López",
+                    RFC: "MALO850701XYZ",
+                    numero_trabajador: "67890",
+                    CURP: "MALO850701MDFGH02",
+                    direccion_pertenencia: "Dirección de Televisión",
+                    departamento: "Producción",
+                    email: "maria.lopez@example.com",
+                    identificacion: "/path/to/identificacion2.pdf",
+                    imagen: "/path/to/foto2.jpg",
+                },
+            ],
+            filteredUsers: [],
         };
     },
-    mounted() {
-        this.loadUserData();
-    },
     methods: {
-        async loadUserData() {
-            const storedUserName = localStorage.getItem("userName");
-            const storedUserEmail = localStorage.getItem("userEmail");
-
-            if (storedUserName && storedUserEmail) {
-                this.userName = storedUserName;
-
-                try {
-                    // Obtener todos los usuarios de la API
-                    const response = await fetch('http://localhost:3000/api/usuarios');
-                    const users = await response.json();
-
-                    // Buscar el usuario logueado por email
-                    const user = users.find(u => u.email === storedUserEmail);
-
-                    if (user) {
-                        // Asignar el nombre del usuario
-                        this.userName = user.name || storedUserName;
-
-                        // Obtener la ruta completa de la imagen del usuario
-                        const imagePath = user.imagen; // Suponiendo que la API devuelve la ruta completa
-
-                        // Extraer el nombre del archivo de la ruta completa
-                        let imageFileName = imagePath.split('\\').pop(); // Extrae "radio2.jpg"
-
-                        // Eliminar la extensión del nombre del archivo
-                        if (imageFileName) {
-                            imageFileName = imageFileName.split('.').slice(0, -1).join('.'); // Elimina la extensión
-                        }
-
-                        if (imageFileName) {
-                            // Construir la URL completa para la imagen
-                            this.profileImage = `http://localhost:3000/api/users-files/${imageFileName}`;
-                        } else {
-                            // Usar una imagen por defecto si no hay imagen en la API
-                            this.profileImage = "../assets/UserHombre.png";
-                        }
-                    } else {
-                        this.profileImage = "../assets/UserHombre.png"; // Imagen por defecto
-                    }
-                } catch (error) {
-                    console.error('Error al cargar los datos del usuario:', error);
-                    this.profileImage = "../assets/UserHombre.png"; // Imagen por defecto en caso de error
-                }
+        filterUsers() {
+            if (this.form.nombre.trim() !== "") {
+                const searchTerm = this.form.nombre.toLowerCase();
+                this.filteredUsers = this.users
+                    .filter(user => user.nombre.toLowerCase().includes(searchTerm))
+                    .sort((a, b) => a.nombre.localeCompare(b.nombre));
             } else {
-                this.userName = "Usuario desconocido";
-                this.profileImage = "../assets/UserHombre.png"; // Imagen por defecto
+                this.filteredUsers = [];
             }
         },
-        goHome() {
-            this.$router.push('home');
+        selectUser(user) {
+            this.form.nombre = user.nombre;
+            this.form.apellidos = user.apellidos;
+            this.form.RFC = user.RFC;
+            this.form.numero_trabajador = user.numero_trabajador;
+            this.form.CURP = user.CURP;
+            this.form.direccion_pertenencia = user.direccion_pertenencia;
+            this.form.departamento = user.departamento;
+            this.form.email = user.email;
+            this.form.identificacion = user.identificacion;
+            this.form.imagen = user.imagen;
+            this.filteredUsers = [];
         },
         registerUser() {
-            let errorMessages = [];
-
-            // Validar que las contraseñas coincidan
             if (this.form.password !== this.form.confirm_password) {
-                errorMessages.push("Las contraseñas no coinciden.");
-            }
-
-            // Validar campos obligatorios
-            const requiredFields = [
-                "rol", "numero_trabajador", "nombre", "apellidos", "password",
-                "confirm_password", "departamento", "email", "RFC", "CURP",
-                "direccion_pertenencia", "organo_superior", "area_presupuestal",
-            ];
-
-            let hasErrors = false;
-            requiredFields.forEach(field => {
-                if (!this.form[field] || this.form[field] === "") {
-                    hasErrors = true;
-                    console.error(`El campo ${field} está vacío`);
-                }
-            });
-
-            if (hasErrors) {
-                this.alertMessageList = ["Todos los campos son obligatorios."];
+                this.alertMessageList = ["Las contraseñas no coinciden."];
                 this.showAlertModal = true;
                 return;
             }
-
-            // Crear un objeto FormData
-            const formData = new FormData();
-
-            // Agregar campos del formulario
-            formData.append('rol', this.form.rol);
-            formData.append('numero_trabajador', this.form.numero_trabajador);
-            formData.append('nombre', this.form.nombre);
-            formData.append('apellidos', this.form.apellidos);
-            formData.append('password', this.form.password);
-            formData.append('confirm_password', this.form.confirm_password);
-            formData.append('departamento', this.form.departamento);
-            formData.append('email', this.form.email);
-            formData.append('RFC', this.form.RFC.toUpperCase());
-            formData.append('CURP', this.form.CURP.toUpperCase());
-            formData.append('direccion_pertenencia', this.form.direccion_pertenencia);
-            formData.append('organo_superior', this.form.organo_superior);
-            formData.append('area_presupuestal', this.form.area_presupuestal);
-            formData.append('fecha_registro', new Date().toISOString().split("T")[0]);
-
-            // Agregar archivos de identificación (PDFs)
-            if (this.form.identificacion.length > 0) {
-                this.form.identificacion.forEach((file) => { // Eliminamos 'index' porque no se usa
-                    formData.append('identificacion', file); // Nombre del campo: 'identificacion'
-                });
-            }
-
-            // Agregar archivo de imagen (JPG/PNG)
-            if (this.form.imagen) {
-                formData.append('imagen', this.form.imagen); // Nombre del campo: 'imagen'
-            }
-
-            // Enviar los datos a la API
-            axios.post('http://localhost:3000/api/usuarios', formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data' // Importante para enviar archivos
-                }
-            })
-                .then(response => {
-                    console.log('Usuario registrado con éxito', response.data);
-                    this.showModal = true;
-                })
-                .catch(error => {
-                    console.error('Error al registrar usuario', error.response?.data || error);
-                    this.alertMessageList = ['Error al registrar usuario. Intenta de nuevo.'];
-                    this.showAlertModal = true;
-                });
+            this.showModal = true;
         },
-
+        closeModal() {
+            this.showModal = false;
+            this.$router.push("/users");
+        },
+        closeAlertModal() {
+            this.showAlertModal = false;
+        },
         navigateTo(page) {
             this.$router.push({ name: page });
         },
@@ -410,65 +294,10 @@ export default {
         hideMenu(menu) {
             this.menus[menu] = false;
         },
-        closeModal() {
-            this.showModal = false;
-            this.$router.push("/users");
-        },
-        closeAlertModal() {
-            this.showAlertModal = false;
-        },
-        validateForm() {
-            for (let key in this.form) {
-                if (this.form[key] === "" || this.form[key] === null) {
-                    return false;
-                }
-            }
-            return true;
-        },
-        openDocumentModal() {
-            this.showDocumentModal = true;
-            this.$forceUpdate(); // Forzar la actualización
-        },
-
-
-        closeDocumentModal() {
-            this.showDocumentModal = false;
-            this.$forceUpdate();  // Asegura que la vista se actualice correctamente
-        },
-        triggerFileInput(type) {
-            if (type === "identificacion") {
-                this.$refs.fileInputDoc.click();
-            } else if (type === "Foto") {
-                this.$refs.fileInputFoto.click();
-            }
-        },
-        handleFileUpload(type) {
-            if (type === "identificacion") {
-                const input = this.$refs.fileInputDoc;
-                const files = Array.from(input.files); // Convierte FileList a un array
-
-                // Validar el límite de 7 archivos
-                if (files.length + this.form.identificacion.length > 7) {
-                    this.errorMessage = "Solo puedes cargar un máximo de 7 archivos.";
-                    return;
-                }
-
-                // Agregar los archivos al array
-                this.form.identificacion = [...this.form.identificacion, ...files];
-                this.errorMessage = ""; // Limpiar el mensaje de error
-            } else if (type === "Foto") {
-                this.form.imagen = this.$refs.fileInputFoto.files[0];
-            }
-        },
-
-        // Método para eliminar un documento
-        removeDocument(index) {
-            this.form.identificacion.splice(index, 1); // Elimina el documento del array
-        },
-
     },
 };
 </script>
+
 
 <style scoped>
 /* Aplicar Montserrat a todo el contenido */
@@ -844,5 +673,30 @@ a {
 
 .dropzone input[type="file"] {
     display: none;
+}
+
+.autocomplete-list {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+    border: 1px solid #ccc;
+    border-top: none;
+    max-height: 150px;
+    overflow-y: auto;
+    position: absolute;
+    width: 300px;
+    background-color: #A02142;
+    z-index: 1000;
+    color: white;
+}
+
+.autocomplete-list li {
+    padding: 8px;
+    cursor: pointer;
+}
+
+.autocomplete-list li:hover {
+    background-color: #dcdcdc;
+    color: #691B31;
 }
 </style>
