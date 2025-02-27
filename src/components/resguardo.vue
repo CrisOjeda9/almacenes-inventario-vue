@@ -28,8 +28,8 @@
         <!-- Barra de navegación amarilla -->
         <div class="sub-navbar">
             <a href="/home" class="nav-item">Inicio</a>
-            <a href="users" class="nav-item">Usuarios</a>
-            <div class="nav-item" @mouseenter="showMenu('homeMenu')" @mouseleave="hideMenu('homeMenu')">
+            <a v-if="userRole === 'Administrador'" href="users" class="nav-item">Usuarios</a>
+            <div v-if="userRole === 'Inventario' || userRole === 'Administrador'" class="nav-item" @mouseenter="showMenu('homeMenu')" @mouseleave="hideMenu('homeMenu')">
                 Inventario
                 <span class="menu-icon">▼</span>
                 <div class="dropdown-menu" v-show="menus.homeMenu">
@@ -48,7 +48,7 @@
                 </div>
             </div>
 
-            <div class="nav-item" @mouseenter="showMenu('resguardoMenu')" @mouseleave="hideMenu('resguardoMenu')">
+            <div v-if="userRole === 'Almacen' || userRole === 'Administrador'" class="nav-item" @mouseenter="showMenu('resguardoMenu')" @mouseleave="hideMenu('resguardoMenu')">
                 Almacen
                 <span class="menu-icon">▼</span>
                 <div class="dropdown-menu" v-show="menus.resguardoMenu">
@@ -140,6 +140,7 @@ export default {
     name: "resguardoPage",
     data() {
         return {
+            userRole: localStorage.getItem('userRole') || '', // Obtener el rol desde el localStorage
             userName: "Cargando...", // Mensaje temporal
             profileImage: "",  // URL de la imagen del usuario
 

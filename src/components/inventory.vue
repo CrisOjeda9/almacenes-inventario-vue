@@ -29,8 +29,8 @@
         <!-- Barra de navegación amarilla -->
         <div class="sub-navbar">
             <a href="/home" class="nav-item">Inicio</a>
-            <a href="users" class="nav-item">Usuarios</a>
-            <div class="nav-item" @mouseenter="showMenu('homeMenu')" @mouseleave="hideMenu('homeMenu')">
+            <a a v-if="userRole === 'Administrador'" href="users" class="nav-item">Usuarios</a>
+            <div v-if="userRole === 'Inventario' || userRole === 'Administrador'" class="nav-item" @mouseenter="showMenu('homeMenu')" @mouseleave="hideMenu('homeMenu')">
                 Inventario
                 <span class="menu-icon">▼</span>
                 <div class="dropdown-menu" v-show="menus.homeMenu">
@@ -46,7 +46,7 @@
                 </div>
             </div>
 
-            <div class="nav-item" @mouseenter="showMenu('inventoryMenu')" @mouseleave="hideMenu('inventoryMenu')">
+            <div v-if="userRole === 'Almacen' || userRole === 'Administrador'" class="nav-item" @mouseenter="showMenu('inventoryMenu')" @mouseleave="hideMenu('inventoryMenu')">
                 Almacen
                 <span class="menu-icon">▼</span>
                 <div class="dropdown-menu" v-show="menus.inventoryMenu">
@@ -129,6 +129,8 @@ export default {
                 inventoryMenu: false,
                 settingsMenu: false,
             },
+            userRole: localStorage.getItem('userRole') || '', // Obtener el rol desde el localStorage
+
         };
     },
     mounted() {
@@ -183,7 +185,7 @@ export default {
                 this.userName = "Usuario desconocido";
                 this.profileImage = "../assets/UserHombre.png"; // Imagen por defecto
             }
-        },
+        },  
         goHome() {
             this.$router.push('home'); // Redirige a la página principal ("/"). Cambia el path si es necesario.
         },

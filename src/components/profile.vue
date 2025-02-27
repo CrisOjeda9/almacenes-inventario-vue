@@ -97,6 +97,7 @@ export default {
     name: "ProfilePage",
     data() {
         return {
+            userRole: localStorage.getItem('userRole') || '', // Obtener el rol desde el localStorage
             userName: "Cargando...", // Mensaje temporal
             profileImage: "",  // URL de la imagen del usuario
             form: {
@@ -111,7 +112,9 @@ export default {
         };
     },
     mounted() {
+        this.loadUserInfo();
         this.loadUserData();
+
     },
     methods: {
         async loadUserData() {
@@ -161,6 +164,15 @@ export default {
             } else {
                 this.userName = "Usuario desconocido";
                 this.profileImage = "../assets/UserHombre.png"; // Imagen por defecto
+            }
+        },
+        loadUserInfo() {
+            const storedUserName = localStorage.getItem("userName");
+            this.userName = storedUserName ? storedUserName : "Usuario desconocido";
+
+            const storedUserEmail = localStorage.getItem("userEmail");
+            if (storedUserEmail) {
+                this.fetchUserData(storedUserEmail);
             }
         },
         async fetchUserData(email) {

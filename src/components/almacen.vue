@@ -31,9 +31,9 @@
             <a href="/home" class="nav-item">Inicio</a>
 
             <!-- Mostrar solo si el usuario NO es de Almacén -->
-            <a v-if="userRole !== 'Almacén'" href="users" class="nav-item">Usuarios</a>
+            <a v-if="userRole === 'Administrador'" href="users" class="nav-item">Usuarios</a>
 
-            <div v-if="userRole !== 'Almacén'" class="nav-item" @mouseenter="showMenu('homeMenu')"
+            <div v-if="userRole === 'Inventario' || userRole === 'Administrador'" class="nav-item" @mouseenter="showMenu('homeMenu')"
                 @mouseleave="hideMenu('homeMenu')">
                 Inventario
                 <span class="menu-icon">▼</span>
@@ -49,7 +49,7 @@
             </div>
 
             <!-- Solo mostrar "Almacén" si el usuario tiene el rol de Almacén -->
-            <div v-if="userRole === 'Almacén'" class="nav-item" @mouseenter="showMenu('almacenMenu')"
+            <div v-if="userRole === 'Almacenes' || userRole === 'Administrador'" class="nav-item" @mouseenter="showMenu('almacenMenu')"
                 @mouseleave="hideMenu('almacenMenu')">
                 Almacén
                 <span class="menu-icon">▼</span>
@@ -117,7 +117,7 @@ export default {
     name: "almacenPage",
     data() {
         return {
-            userRole: "Almacén", // Aquí asigna el rol del usuario dinámicamente
+            userRole: localStorage.getItem('userRole') || '', // Obtener el rol desde el localStorage
             userName: "Cargando...", // Mensaje temporal
             profileImage: "",  // URL de la imagen del usuario
 
