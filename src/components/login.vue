@@ -16,6 +16,10 @@
         <button type="submit" class="login-button">Siguiente</button>
       </form>
     </div>
+    <!-- Contenedor de notificaciones -->
+    <div v-if="alertMessage" :class="alertClass" class="notification">
+      <i :class="alertIcon"></i> {{ alertMessage }}
+    </div>
   </div>
 </template>
 <script>
@@ -23,6 +27,9 @@ export default {
   name: 'LoginPage',
   data() {
     return {
+      alertMessage: "",  // Mensaje de la alerta
+      alertClass: "",    // Clase de la alerta (ej. 'success' o 'error')
+      alertIcon: "",     // Icono para la alerta
       email: '',
       password: ''
     };
@@ -45,13 +52,33 @@ export default {
           // Redirigir a home
           this.$router.push('/home');
         } else {
-          alert('Usuario o contraseña incorrectos');
+          this.showAlert("Usuario o contraseña incorrectos", "error");
+                return;
         }
       } catch (error) {
         console.error('Error al conectar con la API', error);
-        alert('Error en el servidor');
+        this.showAlert('Error en el servidor: ' + error.message, 'error');
       }
-    }
+    },
+    showAlert(message, type) {
+      this.alertMessage = message;
+      if (type === "success") {
+        this.alertClass = "alert-success";
+        this.alertIcon = "fa fa-check-circle";
+      } else if (type === "error") {
+        this.alertClass = "alert-error";
+        this.alertIcon = "fa fa-times-circle";
+      } else {
+        this.alertClass = "alert-warning";
+        this.alertIcon = "fa fa-exclamation-circle";
+      }
+
+      // Ocultar la alerta después de 3 segundos
+      setTimeout(() => {
+        this.alertMessage = "";
+      }, 3000);
+    },
+    
   }
 };
 </script>
@@ -73,6 +100,60 @@ body {
   font-family: 'Montserrat', sans-serif;
 }
 
+/* Estilo general para la notificación */
+.notification {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-size: 16px;
+    color: white;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    z-index: 999;
+    max-width: 80%;
+    opacity: 0;
+    animation: fadeIn 0.5s forwards;
+}
+
+/* Animación de aparición de la notificación */
+@keyframes fadeIn {
+    0% {
+        opacity: 0;
+        top: 0;
+    }
+
+    100% {
+        opacity: 1;
+        top: 20px;
+    }
+}
+
+/* Notificación de éxito */
+.alert-success {
+    background-color: #4CAF50;
+    /* Verde */
+}
+
+/* Notificación de error */
+.alert-error {
+    background-color: #f44336;
+    /* Rojo */
+}
+
+/* Notificación de advertencia */
+.alert-warning {
+    background-color: #ff9800;
+    /* Naranja */
+}
+
+/* Iconos de la alerta */
+.notification i {
+    margin-right: 10px;
+}
 
 
 .login-container {
