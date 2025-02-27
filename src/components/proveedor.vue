@@ -28,7 +28,8 @@
         <div class="sub-navbar">
             <a href="/home" class="nav-item">Inicio</a>
             <a v-if="userRole === 'Administrador'" href="users" class="nav-item">Usuarios</a>
-            <div v-if="userRole === 'Inventario' || userRole === 'Administrador'" class="nav-item" @mouseenter="showMenu('homeMenu')" @mouseleave="hideMenu('homeMenu')">
+            <div v-if="userRole === 'Inventario' || userRole === 'Administrador'" class="nav-item"
+                @mouseenter="showMenu('homeMenu')" @mouseleave="hideMenu('homeMenu')">
                 Inventario
                 <span class="menu-icon">▼</span>
                 <div class="dropdown-menu" v-show="menus.homeMenu">
@@ -42,7 +43,8 @@
                 </div>
             </div>
 
-            <div v-if="userRole === 'Almacenes' || userRole === 'Administrador'" class="nav-item" @mouseenter="showMenu('proveedorMenu')" @mouseleave="hideMenu('proveedorMenu')">
+            <div v-if="userRole === 'Almacenes' || userRole === 'Administrador'" class="nav-item"
+                @mouseenter="showMenu('proveedorMenu')" @mouseleave="hideMenu('proveedorMenu')">
                 Almacen
                 <span class="menu-icon">▼</span>
                 <div class="dropdown-menu" v-show="menus.proveedorMenu">
@@ -80,7 +82,7 @@
                         <th>RFC</th>
                         <th>Dirección</th>
                         <th>Teléfono</th>
-                        <th>Correo Electronico</th>
+                        <th>email Electronico</th>
                         <th>Cuenta Bancaria</th>
                         <th>Documento</th>
                         <th>Fecha de registro</th>
@@ -91,21 +93,30 @@
                     <tr v-for="proveedor in paginatedproveedor" :key="proveedor.id">
                         <td>{{ proveedor.nombre }}</td>
                         <td>{{ proveedor.apellidos }}</td>
-                        <td>{{ proveedor.tipoProveedor }}</td>
-                        <td>{{ proveedor.rfc }}</td>
+                        <td>{{ proveedor.tipo_proveedor }}</td>
+                        <td>{{ proveedor.RFC }}</td>
                         <td>{{ proveedor.direccion }}</td>
                         <td>{{ proveedor.telefono }}</td>
-                        <td>{{ proveedor.correo }}</td>
-                        <td>{{ proveedor.cuentaBancaria }}</td>
+                        <td>{{ proveedor.email }}</td>
+                        <td>{{ proveedor.cuenta_bancaria }}</td>
                         <td>
-                            <!-- Botón de descarga por cada documento -->
-                            <a :href="'/ruta/del/archivo/' + proveedor.documento" download>
-                                <button class="btn-download">
-                                    <i class="fas fa-download"></i>
-                                </button>
-                            </a>
+                            <template v-if="proveedor.archivos">
+                                <ul>
+                                    <li v-for="(file, index) in getPdfFiles(proveedor.archivos)" :key="index">
+                                        <!-- Aplicar truncateFileName al nombre del archivo -->
+                                        <a :href="file.url" target="_blank" :title="file.name">
+                                            {{ truncateFileName(file.name, 20) }}
+                                        </a>
+                                    </li>
+                                </ul>
+                            </template>
+                            <!-- Botón para descargar todos los archivos en un ZIP -->
+                            <button @click="downloadZip(proveedor)" class="btn-download">
+                                <p class="textoDescarga">Descargar</p>
+                            </button>
                         </td>
-                        <td>{{ proveedor.fechaRegistro }}</td>
+                        <td>{{ formatDate(proveedor.createdAt) }}</td>
+
                         <td>
                             <button @click="editproveedor(proveedor)" class="btn-edit">Editar</button>
                             <button @click="showDeleteModal(proveedor.id)" class="btn-delete">Eliminar</button>
@@ -132,7 +143,7 @@
                                 </div>
                                 <div style="width: 85%; margin-left: 0px;">
                                     <label>Tipo de Proveedor:</label>
-                                    <select v-model="currentProveedor.tipoProveedor" class="form-input">
+                                    <select v-model="currentProveedor.tipo_proveedor" class="form-input">
                                         <option value="" disabled>Selecciona el tipo de proveedor</option>
                                         <option value="fisico">Físico</option>
                                         <option value="moral">Moral</option>
@@ -140,7 +151,7 @@
                                 </div>
                                 <div>
                                     <label>RFC:</label>
-                                    <input v-model="currentProveedor.rfc" type="text" />
+                                    <input v-model="currentProveedor.RFC" type="text" />
                                 </div>
 
                             </div>
@@ -155,12 +166,12 @@
                                     <input v-model="currentProveedor.telefono" type="text" />
                                 </div>
                                 <div>
-                                    <label>Correo Electrónico:</label>
-                                    <input v-model="currentProveedor.correo" type="email" class='email' />
+                                    <label>email Electrónico:</label>
+                                    <input v-model="currentProveedor.email" type="email" class='email' />
                                 </div>
                                 <div>
                                     <label>Cuenta Bancaria:</label>
-                                    <input v-model="currentProveedor.cuentaBancaria" type="text" />
+                                    <input v-model="currentProveedor.cuenta_bancaria" type="text" />
                                 </div>
 
                             </div>
@@ -196,6 +207,9 @@
 </template>
 
 <script>
+import axios from 'axios';
+
+
 export default {
     name: "proveedorPage",
     data() {
@@ -213,59 +227,21 @@ export default {
             currentPage: 1,
             proveedorPerPage: 10,
             isEditing: false, // Controla si estamos en modo de edición
-            currentProveedor: {
-                nombre: "",
-                apellidos: "",
-                tipoProveedor: "", // Físico o Moral
-                rfc: "",
-                direccion: "",
-                telefono: "",
-                correo: "",
-                cuentaBancaria: "",
-                fechaRegistro: "",
-            }, // Objeto para almacenar el proveedor que se está editando
-            proveedor: [
-                {
-                    id: 1,
-                    nombre: "Juan",
-                    apellidos: "Pérez",
-                    tipoProveedor: "físico",
-                    rfc: "JUPR890123ABC",
-                    direccion: "Calle Principal 123, Ciudad",
-                    telefono: "555-123-4567",
-                    correo: "juan.perez@example.com",
-                    cuentaBancaria: "1234567890",
-                    documento: "asdasdad",
-                    fechaRegistro: "2024-01-15",
-                },
-                {
-                    id: 2,
-                    nombre: "Jose",
-                    apellidos: "Ramos",
-                    tipoProveedor: "moral",
-                    rfc: "XYZ123456DEF",
-                    direccion: "Av. Secundaria 456, Ciudad",
-                    telefono: "555-987-6543",
-                    correo: "contacto@xyz.com",
-                    cuentaBancaria: "0987654321",
-                    documento: "asdasdad",
-                    fechaRegistro: "2024-01-20",
-                }
-            ]
+            proveedor: [], // Lista de proveedores
         };
     },
     computed: {
         filteredproveedor() {
             const query = this.searchQuery.toLowerCase();
             return this.proveedor.filter(proveedor => {
-                return proveedor.nombre.toLowerCase().includes(query) ||
-                    proveedor.apellidos.toLowerCase().includes(query) ||
-                    proveedor.tipoProveedor.toLowerCase().includes(query) ||
-                    proveedor.rfc.toLowerCase().includes(query) ||
-                    proveedor.direccion.toLowerCase().includes(query) ||
-                    proveedor.telefono.toLowerCase().includes(query) ||
-                    proveedor.correo.toLowerCase().includes(query) ||
-                    proveedor.cuentaBancaria.toLowerCase().includes(query);
+                return (proveedor.nombre && proveedor.nombre.toLowerCase().includes(query)) ||
+                    (proveedor.apellidos && proveedor.apellidos.toLowerCase().includes(query)) ||
+                    (proveedor.tipo_proveedor && proveedor.tipo_proveedor.toLowerCase().includes(query)) ||
+                    (proveedor.RFC && proveedor.RFC.toLowerCase().includes(query)) ||
+                    (proveedor.direccion && proveedor.direccion.toLowerCase().includes(query)) ||
+                    (proveedor.email && proveedor.email.toLowerCase().includes(query)) ||
+                    (proveedor.telefono.toString().toLowerCase().includes(query)) ||
+                    (proveedor.cuenta_bancaria && proveedor.cuenta_bancaria.toLowerCase().includes(query));
             });
         },
 
@@ -280,6 +256,7 @@ export default {
     },
     mounted() {
         this.loadUserData();
+        this.loadProveedores();  // Cargar los proveedores desde la API
     },
     methods: {
         async loadUserData() {
@@ -304,10 +281,10 @@ export default {
                         // Obtener la ruta completa de la imagen del usuario
                         const imagePath = user.imagen; // Suponiendo que la API devuelve la ruta completa
 
-                        // Extraer el nombre del archivo de la ruta completa
+                        // Extraer el nombre del archivos de la ruta completa
                         let imageFileName = imagePath.split('\\').pop(); // Extrae "radio2.jpg"
 
-                        // Eliminar la extensión del nombre del archivo
+                        // Eliminar la extensión del nombre del archivos
                         if (imageFileName) {
                             imageFileName = imageFileName.split('.').slice(0, -1).join('.'); // Elimina la extensión
                         }
@@ -330,6 +307,21 @@ export default {
                 this.userName = "Usuario desconocido";
                 this.profileImage = "../assets/UserHombre.png"; // Imagen por defecto
             }
+        },
+        // Nueva función para cargar los proveedores usando axios
+        async loadProveedores() {
+            try {
+                const response = await axios.get('http://localhost:3000/api/proveedor');
+                this.proveedor = response.data; // Asignar los datos obtenidos a la lista de proveedores
+            } catch (error) {
+                console.error('Error al cargar los proveedores:', error);
+            }
+        },
+
+        formatDate(dateString) {
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            const date = new Date(dateString);
+            return date.toLocaleDateString('es-MX', options);
         },
         goHome() {
             this.$router.push('home'); // Redirige a la página principal ("/"). Cambia el path si es necesario.
@@ -378,14 +370,28 @@ export default {
             this.deleteId = id;
             this.isDeleteModalVisible = true;
         },
-        confirmDelete() {
-            const index = this.proveedor.findIndex(proveedor => proveedor.id === this.deleteId);
-            if (index !== -1) {
-                this.proveedor.splice(index, 1);
+        async confirmDelete() {
+            try {
+                // Hacer la solicitud DELETE a la API
+                await axios.delete(`http://localhost:3000/api/proveedor/${this.deleteId}`);
+
+                // Si la eliminación es exitosa, eliminar el proveedor de la lista local
+                const index = this.proveedor.findIndex(proveedor => proveedor.id === this.deleteId);
+                if (index !== -1) {
+                    this.proveedor.splice(index, 1); // Eliminar proveedor de la lista
+                }
+
+                // Cerrar el modal y resetear la id de eliminación
+                this.isDeleteModalVisible = false;
+                this.deleteId = null;
+
+                // Opcional: Puedes mostrar un mensaje de éxito aquí si lo deseas.
+            } catch (error) {
+                console.error('Error al eliminar el proveedor:', error);
+                // Puedes mostrar un mensaje de error si lo deseas
             }
-            this.isDeleteModalVisible = false;
-            this.deleteId = null;
         },
+
         cancelDelete() {
             this.isDeleteModalVisible = false;
             this.deleteId = null;
@@ -393,8 +399,81 @@ export default {
         redirectToAddproveedor() {
             this.$router.push('/newproveedor');
         },
+        truncateFileName(name, maxLength) {
+            return name.length > maxLength ? name.substring(0, maxLength) + "..." : name;
+        },
+
+        // Método para obtener solo el nombre del archivo sin la extensión
+        getPdfName(pdfPath) {
+            const fileName = pdfPath.split('/').pop().split('\\').pop();  // Extrae solo el nombre del archivo
+            return fileName.split('.')[0]; // Devuelve solo el nombre sin la extensión .pdf
+        },
+        getPdfFiles(pdfPaths) {
+            if (!pdfPaths) return []; // Si no hay archivos, retorna un array vacío
+
+            return pdfPaths.split(';').map((path) => {
+                const fileName = path.split('/').pop().split('\\').pop(); // Extrae el nombre del archivo
+                const nameWithoutExtension = fileName.split('.').slice(0, -1).join('.'); // Quita la extensión
+
+                return {
+                    url: `http://localhost:3000/api/proveedores-files/${nameWithoutExtension}`, // URL sin extensión para visualización
+                    downloadUrl: `http://localhost:3000/api/proveedores-files/${fileName}`, // URL con extensión para descarga
+                    name: nameWithoutExtension // Nombre sin extensión
+                };
+            });
+        },
+        async downloadZip(proveedor) {
+            try {
+                // Obtener los nombres de los archivos
+                const pdfFiles = this.getPdfFiles(proveedor.archivos);
+
+                // Extraer solo los nombres de los archivos con extensión
+                const fileNames = pdfFiles.map(file => {
+                    const fileNameWithExtension = file.name + '.pdf'; // Asegúrate de incluir la extensión
+                    return fileNameWithExtension;
+                });
+
+                // Enviar los nombres de los archivos a la API de descarga ZIP
+                const response = await fetch('http://localhost:3000/api/proveedores/download-zip', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        files: fileNames
+                    })
+                });
+
+                // Verificar si la respuesta es exitosa
+                if (!response.ok) {
+                    throw new Error('Error al descargar el archivo ZIP');
+                }
+
+                // Convertir la respuesta a un blob
+                const blob = await response.blob();
+
+                // Verificar si el blob es un archivo ZIP válido
+                if (blob.type !== 'application/zip') {
+                    throw new Error('El archivo descargado no es un ZIP válido');
+                }
+
+                // Crear un enlace para descargar el archivo ZIP
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'archivos.zip';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Hubo un error al descargar el archivo ZIP. Por favor, inténtalo de nuevo.');
+            }
+        },
     }
 };
+
 </script>
 
 
@@ -402,6 +481,49 @@ export default {
 /* Aplicar Montserrat a todo el contenido */
 * {
     font-family: 'Montserrat', sans-serif;
+}
+
+
+td ul {
+    list-style-type: none;
+    /* Quita los puntos de la lista */
+    padding: 0;
+    margin: 0;
+}
+
+td ul li {
+    margin-bottom: 5px;
+    /* Espacio entre elementos */
+}
+
+td ul li a {
+    text-decoration: none;
+    color: #007bff;
+    font-weight: bold;
+}
+
+td ul li a:hover {
+    text-decoration: underline;
+}
+
+
+.btn-download {
+    display: flex;
+    text-align: center;
+    justify-content: center;
+    align-items: center;
+    border-radius: 10px;
+    width: 100%;
+    height: 20px;
+}
+
+.btn-download:hover {
+    background: #bc955b;
+}
+
+.textoDescarga {
+    font-size: 14px;
+
 }
 
 .titulo {
