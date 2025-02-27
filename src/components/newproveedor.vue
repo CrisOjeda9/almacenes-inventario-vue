@@ -103,7 +103,7 @@
                     <!-- Telefono -->
                     <div class="form-field">
                         <label for="telefono">Telefono</label>
-                        <input type="text" id="telefono" placeholder=""
+                        <input type="tel" id="telefono" placeholder=""
                             v-model="form.telefono" required />
                     </div>
 
