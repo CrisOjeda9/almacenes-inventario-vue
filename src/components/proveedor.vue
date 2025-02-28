@@ -458,11 +458,14 @@ export default {
                     throw new Error('El archivo descargado no es un ZIP válido');
                 }
 
+                // Crear un nombre de archivo basado en el nombre y apellidos del proveedor
+                const nombreArchivo = `${proveedor.nombre}_${proveedor.apellidos}.zip`.replace(/\s+/g, '_'); // Reemplazar espacios con guiones bajos
+
                 // Crear un enlace para descargar el archivo ZIP
                 const url = window.URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = 'archivos.zip';
+                a.download = nombreArchivo; // Usar el nombre formateado
                 document.body.appendChild(a);
                 a.click();
                 document.body.removeChild(a);
@@ -471,7 +474,7 @@ export default {
                 console.error('Error:', error);
                 alert('Hubo un error al descargar el archivo ZIP. Por favor, inténtalo de nuevo.');
             }
-        },
+        }
     }
 };
 
