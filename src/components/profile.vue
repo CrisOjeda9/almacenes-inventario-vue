@@ -27,8 +27,37 @@
         <!-- Barra de navegación amarilla -->
         <div class="sub-navbar">
             <a href="/home" class="nav-item">Inicio</a>
-            <a href="users" class="nav-item">Usuarios</a>
-            <!-- Otras opciones de navegación -->
+            <a v-if="userRole === 'Administrador'" href="users" class="nav-item">Usuarios</a>
+            <div v-if="userRole === 'Inventario' || userRole === 'Administrador'" class="nav-item"
+                @mouseenter="showMenu('homeMenu')" @mouseleave="hideMenu('homeMenu')">
+                Inventario
+                <span class="menu-icon">▼</span>
+                <div class="dropdown-menu" v-show="menus.homeMenu">
+                    <button @click="navigateTo('bajas')">Historial de bajas</button>
+                    <button @click="navigateTo('historialbienes')">Historial de bienes</button>
+                    <button @click="navigateTo('bajabien')">Baja de bienes</button>
+                    <button @click="navigateTo('resguardo')">Bienes sin resguardo</button>
+                    <button @click="navigateTo('listaalmacen')">Asignar No.Inventario</button>
+                    <button @click="navigateTo('bienesnuevos')">Asignar resguardo</button>
+                    <button @click="navigateTo('liberarbien')">Liberar Bien</button>
+                    <button @click="navigateTo('reportes')">Generación de reportes</button>
+                </div>
+            </div>
+
+            <div v-if="userRole === 'Almacenes' || userRole === 'Administrador'" class="nav-item"
+                @mouseenter="showMenu('proveedorMenu')" @mouseleave="hideMenu('proveedorMenu')">
+                Almacen
+                <span class="menu-icon">▼</span>
+                <div class="dropdown-menu" v-show="menus.proveedorMenu">
+                    <button @click="navigateTo('solicitudmaterial')">Solicitud de material</button>
+                    <button @click="navigateTo('bieninventario')">Agregar un bien para inventario</button>
+                    <button @click="navigateTo('existencia')">Entrada de artículos</button>
+                    <button @click="navigateTo('recepcionsolicitudes')">Recepcion de solicitudes</button>
+                    <button @click="navigateTo('proveedor')">Ver proveedores</button>
+                    <button @click="navigateTo('factura')">Facturas</button>
+                    <button @click="navigateTo('poliza')">Polizas</button>
+                </div>
+            </div>
         </div>
 
         <!-- Formulario -->
@@ -109,6 +138,11 @@ export default {
                 direccion: "",
                 departamento: "",
             },
+            menus: {
+                homeMenu: false,
+                proveedorMenu: false,
+                settingsMenu: false,
+            },
         };
     },
     mounted() {
@@ -117,6 +151,12 @@ export default {
 
     },
     methods: {
+        showMenu(menu) {
+            this.menus[menu] = true;
+        },
+        hideMenu(menu) {
+            this.menus[menu] = false;
+        },
         async loadUserData() {
             const storedUserName = localStorage.getItem("userName");
             const storedUserEmail = localStorage.getItem("userEmail");

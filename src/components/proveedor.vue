@@ -146,8 +146,8 @@
                                     <label>Tipo de Proveedor:</label>
                                     <select v-model="currentProveedor.tipo_proveedor" class="form-input">
                                         <option value="" disabled>Selecciona el tipo de proveedor</option>
-                                        <option value="fisico">Físico</option>
-                                        <option value="moral">Moral</option>
+                                        <option value="Fisico">Físico</option>
+                                        <option value="Moral">Moral</option>
                                     </select>
                                 </div>
                                 <div>

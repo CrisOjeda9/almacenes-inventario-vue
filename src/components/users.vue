@@ -295,6 +295,10 @@ export default {
         this.loadUserData();
     },
     methods: {
+        navigateTo(page) {
+            this.$router.push({name: page});
+        },
+
         async loadUserData() {
             const storedUserName = localStorage.getItem("userName");
             const storedUserEmail = localStorage.getItem("userEmail");
