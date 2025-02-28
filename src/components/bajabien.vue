@@ -37,8 +37,9 @@
                     <button @click="navigateTo('bajabien')" style="background-color: #ddc9a3; color: #691b31; border-radius: 4px;">Baja de bienes</button>
                     <button @click="navigateTo('resguardo')">Bienes sin resguardo</button>
                     <button @click="navigateTo('listaalmacen')">Asignar No.Inventario</button>
-                    <button @click="navigateTo('reportes')">Generación de reportes</button>
                     <button @click="navigateTo('bienesnuevos')">Asignar resguardo</button>
+                    <button @click="navigateTo('liberarbien')">Liberar Bien</button>
+                    <button @click="navigateTo('reportes')">Generación de reportes</button>
 
 
                 </div>
@@ -50,7 +51,7 @@
                 <div class="dropdown-menu" v-show="menus.bajabienMenu">
                     <button @click="navigateTo('solicitudmaterial')">Solicitud de material</button>
                     <button @click="navigateTo('bieninventario')">Agregar un bien para inventario</button>
-                    <button @click="navigateTo('existencia')">Entrada de existencias</button>
+                    <button @click="navigateTo('existencia')">Entrada de artículos</button>
                     <button @click="navigateTo('recepcionsolicitudes')">Recepcion de solicitudes</button>
                     <button @click="navigateTo('proveedor')">Ver proveedores</button>
                     <button @click="navigateTo('factura')">Facturas</button>
