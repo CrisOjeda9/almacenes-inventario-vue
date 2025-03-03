@@ -99,15 +99,20 @@
                         <input type="text" v-model="form.CURP" readonly style="background-color: #dcddcd;" />
                     </div>
                     <div class="form-field">
+                        <label for="nivel">Nivel</label>
+                        <input type="text" v-model="form.nivel" readonly style="background-color: #dcddcd;" />
+                    </div>
+                    <div class="form-field">
                         <label for="direccion_pertenencia">Direc. Pertenencia</label>
                         <input type="text" v-model="form.direccion_pertenencia" readonly style="background-color: #dcddcd;" />
                     </div>
+                    
+                </div>
+                <div class="form-row">
                     <div class="form-field">
                         <label for="departamento">Departamento</label>
                         <input type="text" v-model="form.departamento" readonly style="background-color: #dcddcd;" />
                     </div>
-                </div>
-                <div class="form-row">
                     <div class="form-field">
                         <label for="organo_superior">Organo Superior</label>
                         <input type="text" v-model="form.organo_superior"  style="background-color: #dcddcd;" />
@@ -120,6 +125,9 @@
                         <label for="email">Correo electrónico</label>
                         <input type="email" v-model="form.email" readonly style="background-color: #dcddcd;" />
                     </div>
+                    
+                </div>
+                <div class="form-row">
                     <div class="form-field">
                         <label for="password">Contraseña</label>
                         <div class="input-wrapper">
@@ -128,8 +136,6 @@
                                 @click="showPassword = !showPassword"></i>
                         </div>
                     </div>
-                </div>
-                <div class="form-row">
                     <div class="form-field" style="margin-bottom: 15px;">
                         <label for="confirm_password">Confirmar Contraseña</label>
                         <div class="input-wrapper">
@@ -198,6 +204,7 @@ export default {
                 RFC: "",
                 numero_trabajador: "",
                 CURP: "",
+                nivel:"",
                 direccion_pertenencia: "",
                 departamento: "",
                 organo_superior: "Organismos Descentralizados",
@@ -225,6 +232,7 @@ export default {
                     RFC: "JUAP921214ABC",
                     numero_trabajador: "12345",
                     CURP: "JUAP921214HDFGH01",
+                    nivel:"11A",
                     direccion_pertenencia: "Dirección General",
                     departamento: "Administración",
                     email: "juan.perez@example.com",
@@ -237,6 +245,7 @@ export default {
                     RFC: "MALO850701XYZ",
                     numero_trabajador: "67890",
                     CURP: "MALO850701MDFGH02",
+                    nivel:"12B",
                     direccion_pertenencia: "Dirección de Televisión",
                     departamento: "Producción",
                     email: "maria.lopez@example.com",
@@ -264,6 +273,7 @@ export default {
             this.form.RFC = user.RFC;
             this.form.numero_trabajador = user.numero_trabajador;
             this.form.CURP = user.CURP;
+            this.form.nivel = user.nivel;
             this.form.direccion_pertenencia = user.direccion_pertenencia;
             this.form.departamento = user.departamento;
             this.form.email = user.email;
