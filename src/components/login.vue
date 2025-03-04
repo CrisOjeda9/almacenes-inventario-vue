@@ -22,6 +22,7 @@
     </div>
   </div>
 </template>
+
 <script>
 export default {
   name: 'LoginPage',
@@ -31,29 +32,43 @@ export default {
       alertClass: "",    // Clase de la alerta (ej. 'success' o 'error')
       alertIcon: "",     // Icono para la alerta
       email: '',
-      password: ''
+      password: '',
+      personas: [],      // Lista de personas para obtener el email
+      usuarios: []       // Lista de usuarios para obtener la contraseña y relacionar con personas
     };
   },
   methods: {
     async login() {
       try {
-        const response = await fetch('http://localhost:3000/api/usuarios');
-        const users = await response.json();
+        // Obtener las personas y los usuarios de las respectivas APIs
+        const [personasResponse, usuariosResponse] = await Promise.all([
+          fetch('http://localhost:3000/api/personas'),
+          fetch('http://localhost:3000/api/usuarios')
+        ]);
 
-        // Buscar usuario en la API
-        const user = users.find(u => u.email === this.email && u.password === this.password);
+        this.personas = await personasResponse.json();
+        this.usuarios = await usuariosResponse.json();
 
-        if (user) {
-          // Guardar en localStorage
-          localStorage.setItem('userRole', user.rol);
-          localStorage.setItem('userName', user.nombre);
-          localStorage.setItem('userEmail', user.email);
+        // Buscar la persona que coincida con el email ingresado
+        const persona = this.personas.find(p => p.email === this.email);
 
-          // Redirigir a home
-          this.$router.push('/home');
+        if (persona) {
+          // Buscar el usuario correspondiente a esa persona usando el id_persona
+          const usuario = this.usuarios.find(u => u.id_persona === persona.id);
+
+          if (usuario && usuario.password === this.password) {
+            // Guardar en localStorage
+            localStorage.setItem('userRole', usuario.rol);
+            localStorage.setItem('userName', persona.nombre);
+            localStorage.setItem('userEmail', persona.email);
+
+            // Redirigir a home
+            this.$router.push('/home');
+          } else {
+            this.showAlert("Usuario o contraseña incorrectos", "error");
+          }
         } else {
-          this.showAlert("Usuario o contraseña incorrectos", "error");
-                return;
+          this.showAlert("El correo electrónico no está registrado", "error");
         }
       } catch (error) {
         console.error('Error al conectar con la API', error);
@@ -78,10 +93,10 @@ export default {
         this.alertMessage = "";
       }, 3000);
     },
-    
   }
 };
 </script>
+
 <style>
 body {
   margin: 0;

@@ -79,9 +79,11 @@
                         <th>Apellidos</th>
                         <th>RFC</th>
                         <th>CURP</th>
+                        <th>Nivel</th>
                         <th>Num. trabajador</th>
                         <th>Direc. pertenencia</th>
                         <th>Departamento</th>
+                        <th>Cargo</th>
                         <th>Correo</th>
                         <th>Foto</th>
                         <th>Identificación</th>
@@ -96,9 +98,11 @@
                         <td>{{ user.apellidos }}</td>
                         <td>{{ user.RFC }}</td>
                         <td>{{ user.CURP }}</td>
+                        <td>{{ user.nivel }}</td>
                         <td>{{ user.numero_trabajador }}</td>
                         <td> {{ getDireccionText(user.direccion_pertenencia) }}</td>
                         <td>{{ user.departamento }}</td>
+                        <td>{{ user.cargo }}</td>
                         <td>{{ user.email }}</td>
                         <td>
 
@@ -109,7 +113,7 @@
                         </td>
                         <td>
                             <template v-if="user.identificacion">
-                                 <ul>
+                                <ul>
                                     <li v-for="(file, index) in getPdfFiles(user.identificacion)" :key="index">
                                         <!-- Aplicar truncateFileName al nombre del archivo -->
                                         <a :href="file.url" target="_blank" :title="file.name">
@@ -271,14 +275,16 @@ export default {
         filtereduser() {
             const query = this.searchQuery.toLowerCase();
             return this.user.filter(user => {
-                return user.nombre.toString().toLowerCase().includes(query) ||
-                    user.rol.toString().toLowerCase().includes(query) ||
-                    user.apellidos.toString().toLowerCase().includes(query) ||
-                    user.CURP.toString().toLowerCase().includes(query) ||
-                    user.numero_trabajador.toString().toLowerCase().includes(query) ||
-                    user.direccion_pertenencia.toString().toLowerCase().includes(query) ||
-                    user.departamento.toString().toLowerCase().includes(query) ||
-                    user.RFC.toString().toLowerCase().includes(query);
+                return (
+                    (user.nombre && user.nombre.toString().toLowerCase().includes(query)) ||
+                    (user.rol && user.rol.toString().toLowerCase().includes(query)) ||
+                    (user.apellidos && user.apellidos.toString().toLowerCase().includes(query)) ||
+                    (user.CURP && user.CURP.toString().toLowerCase().includes(query)) ||
+                    (user.numero_trabajador && user.numero_trabajador.toString().toLowerCase().includes(query)) ||
+                    (user.direccion_pertenencia && user.direccion_pertenencia.toString().toLowerCase().includes(query)) ||
+                    (user.departamento && user.departamento.toString().toLowerCase().includes(query)) ||
+                    (user.RFC && user.RFC.toString().toLowerCase().includes(query))
+                );
             });
         },
         totalPages() {
@@ -296,7 +302,7 @@ export default {
     },
     methods: {
         navigateTo(page) {
-            this.$router.push({name: page});
+            this.$router.push({ name: page });
         },
 
         async loadUserData() {
@@ -436,16 +442,49 @@ export default {
             const date = new Date(dateString);
             return date.toLocaleDateString('es-MX', options); // Usando la configuración en español de México
         },
-        fetchUsers() {
-            // Hacer una solicitud GET a la API para obtener los usuarios
-            axios.get('http://localhost:3000/api/usuarios') // Sustituye 'URL_DE_TU_API' con la URL real de tu API
-                .then(response => {
-                    // Asignar los usuarios obtenidos a la propiedad user
-                    this.user = response.data; // Ajusta esta línea según la estructura de tu respuesta de API
-                })
-                .catch(error => {
-                    console.error("Hubo un error al obtener los usuarios: ", error);
+        async fetchUsers() {
+            try {
+                // Obtener todos los usuarios de la API
+                const usersResponse = await axios.get('http://localhost:3000/api/usuarios');
+                const users = usersResponse.data;
+
+                // Obtener todos los datos de personas
+                const personsResponse = await axios.get('http://localhost:3000/api/personas');
+                const persons = personsResponse.data;
+
+                // Combinar los datos de los usuarios con los datos de las personas
+                this.user = users.map(user => {
+                    // Encontrar la persona correspondiente a cada usuario
+                    const person = persons.find(p => p.id === user.id_persona);
+
+                    if (person) {
+                        // Combinar los datos de la persona con el usuario
+                        return {
+                            ...user,
+                            nombre: person.nombre,
+                            apellidos: person.apellidos,
+                            numero_trabajador: person.numero_trabajador,
+                            email: person.email,
+                            departamento: person.departamento,
+                            identificacion: person.identificacion,
+                            RFC: person.RFC,
+                            CURP: person.CURP,
+                            direccion_pertenencia: person.direccion_pertenencia,
+                            organo_superior: person.organo_superior,
+                            area_presupuestal: person.area_presupuestal,
+                            cargo: person.cargo,
+                            nivel: person.nivel,
+                            fecha_registro: person.fecha_registro,
+                            imagen: person.imagen, // Imagen de la persona
+                        };
+                    } else {
+                        // Si no se encuentra la persona, solo devolver los datos del usuario
+                        return user;
+                    }
                 });
+            } catch (error) {
+                console.error("Hubo un error al obtener los usuarios y las personas:", error);
+            }
         },
         showMenu(menuName) {
             this.menus[menuName] = true;
@@ -522,7 +561,8 @@ export default {
 }
 
 td ul {
-    list-style-type: none; /* Quita los puntos de la lista */
+    list-style-type: none;
+    /* Quita los puntos de la lista */
     padding: 0;
     margin: 0;
 }
@@ -555,7 +595,8 @@ td ul li a:hover {
 .btn-download:hover {
     background: #bc955b;
 }
-.textoDescarga{
+
+.textoDescarga {
     font-size: 14px;
 
 }

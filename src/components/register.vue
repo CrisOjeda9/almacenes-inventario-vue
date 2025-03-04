@@ -61,6 +61,7 @@
         <!-- Formulario -->
         <div class="form-container">
             <form @submit.prevent="registerUser">
+                <!-- Primera fila de campos -->
                 <div class="form-row">
                     <div class="form-field">
                         <label for="rol">Rol de usuario</label>
@@ -73,10 +74,10 @@
                     </div>
                     <div class="form-field">
                         <label for="nombre">Nombre(s)</label>
-                        <input type="text" v-model="form.nombre" @input="filterUsers" required />
+                        <input type="text" v-model="searchName" @input="filterUsers" required />
                         <ul v-if="filteredUsers.length > 0" class="autocomplete-list">
-                            <li v-for="user in filteredUsers" :key="user.nombre" @click="selectUser(user)">
-                                {{ user.nombre }}
+                            <li v-for="user in filteredUsers" :key="user.id" @click="selectUser(user)">
+                                {{ user.nombre }} {{ user.apellidos }}
                             </li>
                         </ul>
                     </div>
@@ -89,10 +90,13 @@
                         <input type="text" v-model="form.RFC" readonly style="background-color: #dcddcd;" />
                     </div>
                 </div>
+
+                <!-- Segunda fila de campos -->
                 <div class="form-row">
                     <div class="form-field">
                         <label for="numero_trabajador">Num. Trabajador</label>
-                        <input type="number" v-model="form.numero_trabajador" readonly style="background-color: #dcddcd;" />
+                        <input type="number" v-model="form.numero_trabajador" readonly
+                            style="background-color: #dcddcd;" />
                     </div>
                     <div class="form-field">
                         <label for="CURP">CURP</label>
@@ -103,11 +107,17 @@
                         <input type="text" v-model="form.nivel" readonly style="background-color: #dcddcd;" />
                     </div>
                     <div class="form-field">
-                        <label for="direccion_pertenencia">Direc. Pertenencia</label>
-                        <input type="text" v-model="form.direccion_pertenencia" readonly style="background-color: #dcddcd;" />
+                        <label for="cargo">Cargo</label>
+                        <input type="text" v-model="form.cargo" readonly style="background-color: #dcddcd;" />
                     </div>
-                    
+                    <div class="form-field">
+                        <label for="direccion_pertenencia">Direc. Pertenencia</label>
+                        <input type="text" v-model="form.direccion_pertenencia" readonly
+                            style="background-color: #dcddcd;" />
+                    </div>
                 </div>
+
+                <!-- Tercera fila de campos -->
                 <div class="form-row">
                     <div class="form-field">
                         <label for="departamento">Departamento</label>
@@ -115,19 +125,37 @@
                     </div>
                     <div class="form-field">
                         <label for="organo_superior">Organo Superior</label>
-                        <input type="text" v-model="form.organo_superior"  style="background-color: #dcddcd;" />
+                        <input type="text" v-model="form.organo_superior" readonly style="background-color: #dcddcd;" />
                     </div>
                     <div class="form-field">
                         <label for="area_presupuestal">Área Presupuestal</label>
-                        <input type="text" v-model="form.area_presupuestal" readonly style="background-color: #dcddcd;" />
+                        <input type="text" v-model="form.area_presupuestal" readonly
+                            style="background-color: #dcddcd;" />
                     </div>
                     <div class="form-field">
                         <label for="email">Correo electrónico</label>
                         <input type="email" v-model="form.email" readonly style="background-color: #dcddcd;" />
                     </div>
-                    
                 </div>
+
+                <!-- Cuarta fila de campos -->
                 <div class="form-row">
+
+                    <!-- Campo Doc -->
+                    <div class="form-field">
+                        <label for="identificacion">Identificación</label>
+                        <div class="dropzone" style="background-color: #dcddcd;">
+                            <span>{{ form.identificacion ? form.identificacion.split('/').pop() : 'No se ha seleccionadoninguna foto' }}</span>
+                        </div>
+                    </div>
+                    <!-- Campo Foto -->
+                    <div class="form-field">
+                        <label for="imagen">Foto</label>
+                        <div class="dropzone" style="background-color: #dcddcd;">
+                            <span>{{ form.imagen ? form.imagen.split('/').pop() : 'No se ha seleccionado ninguna foto'
+                            }}</span>
+                        </div>
+                    </div>
                     <div class="form-field">
                         <label for="password">Contraseña</label>
                         <div class="input-wrapper">
@@ -145,24 +173,9 @@
                                 @click="showConfirmPassword = !showConfirmPassword"></i>
                         </div>
                     </div>
-                    <!-- Campo Doc -->
-                    <div class="form-field">
-                        <label for="identificacion">Identificación</label>
-                        <div class="dropzone" style="background-color: #dcddcd;">
-                            <span>{{ form.identificacion ? form.identificacion.split('/').pop() : 'No se ha seleccionado ninguna foto'
-                                }}</span>
-                        </div>
-                    </div>
-
-                    <!-- Campo Foto -->
-                    <div class="form-field">
-                        <label for="imagen">Foto</label>
-                        <div class="dropzone" style="background-color: #dcddcd;">
-                            <span>{{ form.imagen ? form.imagen.split('/').pop() : 'No se ha seleccionado ninguna foto'
-                                }}</span>
-                        </div>
-                    </div>
                 </div>
+
+                <!-- Botón de registro -->
                 <div class="button-container">
                     <button class="boton" type="submit">
                         <i class="fas fa-user"></i> Registrar
@@ -170,6 +183,7 @@
                 </div>
             </form>
         </div>
+
         <div v-if="showAlertModal" class="modal">
             <div class="modal-content">
                 <h2>¡Error!</h2>
@@ -190,123 +204,153 @@
     </div>
 </template>
 
-<script>
+<script>import axios from 'axios';
+
 export default {
     name: "RegisterPage",
     data() {
         return {
-            userName: "Cargando...", // Mensaje temporal
-            profileImage: "",  // URL de la imagen del usuario
+            searchName: "", // Campo para buscar nombres
             form: {
-                rol: "",
-                nombre: "",
-                apellidos: "",
-                RFC: "",
-                numero_trabajador: "",
-                CURP: "",
-                nivel:"",
-                direccion_pertenencia: "",
-                departamento: "",
-                organo_superior: "Organismos Descentralizados",
-                area_presupuestal: "RADIO Y TELEVISION DE HIDALGO",
-                email: "",
-                password: "",
-                confirm_password: "",
-                identificacion: "", // Ruta del archivo de identificación
-                imagen: "", // Ruta de la imagen
+                rol: "", // Rol del usuario
+                password: "", // Contraseña
+                confirm_password: "", // Confirmación de contraseña
+                id: "", // ID de la persona seleccionada
+                nombre: "", // Nombre de la persona
+                apellidos: "", // Apellidos de la persona
+                RFC: "", // RFC de la persona
+                numero_trabajador: "", // Número de trabajador
+                CURP: "", // CURP de la persona
+                nivel: "", // Nivel
+                cargo: "", // Cargo
+                direccion_pertenencia: "", // Dirección de pertenencia
+                departamento: "", // Departamento
+                organo_superior: "", // Organo superior
+                area_presupuestal: "", // ��rea presupuestal
+                email: "", // Correo electrónico
             },
-            showPassword: false,
-            showConfirmPassword: false,
             menus: {
                 homeMenu: false,
-                usersMenu: false,
+                proveedorMenu: false,
                 settingsMenu: false,
             },
-            showModal: false,
-            showAlertModal: false,
-            alertMessageList: [],
-            users: [
-                {
-                    nombre: "Juan Gómez Cruz",
-                    apellidos: "Gómez Cruz",
-                    RFC: "JUAP921214ABC",
-                    numero_trabajador: "12345",
-                    CURP: "JUAP921214HDFGH01",
-                    nivel:"11A",
-                    direccion_pertenencia: "Dirección General",
-                    departamento: "Administración",
-                    email: "juan.perez@example.com",
-                    identificacion: "/path/to/identificacion1.pdf",
-                    imagen: "/path/to/foto1.jpg",
-                },
-                {
-                    nombre: "María Martínez López",
-                    apellidos: "Martínez López",
-                    RFC: "MALO850701XYZ",
-                    numero_trabajador: "67890",
-                    CURP: "MALO850701MDFGH02",
-                    nivel:"12B",
-                    direccion_pertenencia: "Dirección de Televisión",
-                    departamento: "Producción",
-                    email: "maria.lopez@example.com",
-                    identificacion: "/path/to/identificacion2.pdf",
-                    imagen: "/path/to/foto2.jpg",
-                },
-            ],
-            filteredUsers: [],
+            showPassword: false, // Mostrar/ocultar contraseña
+            showConfirmPassword: false, // Mostrar/ocultar confirmación de contraseña
+            showModal: false, // Modal de éxito
+            showAlertModal: false, // Modal de error
+            alertMessageList: [], // Mensajes de error
+            personas: [], // Lista de personas obtenidas de la API
+            filteredUsers: [], // Lista filtrada de personas
         };
     },
+    mounted() {
+        this.loadPersonas(); // Cargar la lista de personas al montar el componente
+    },
     methods: {
+        // Cargar la lista de personas desde la API
+        async loadPersonas() {
+            try {
+                const response = await axios.get('http://localhost:3000/api/personas');
+                this.personas = response.data; // Asignar la lista de personas
+            } catch (error) {
+                console.error('Error al cargar personas', error);
+                this.alertMessageList = ['Error al cargar la lista de personas.'];
+                this.showAlertModal = true;
+            }
+        },
+
+        // Filtrar personas por nombre
         filterUsers() {
-            if (this.form.nombre.trim() !== "") {
-                const searchTerm = this.form.nombre.toLowerCase();
-                this.filteredUsers = this.users
-                    .filter(user => user.nombre.toLowerCase().includes(searchTerm))
+            if (this.searchName.trim() !== "") {
+                const searchTerm = this.searchName.toLowerCase();
+                this.filteredUsers = this.personas
+                    .filter(persona => persona.nombre.toLowerCase().includes(searchTerm))
                     .sort((a, b) => a.nombre.localeCompare(b.nombre));
             } else {
                 this.filteredUsers = [];
             }
         },
-        selectUser(user) {
-            this.form.nombre = user.nombre;
-            this.form.apellidos = user.apellidos;
-            this.form.RFC = user.RFC;
-            this.form.numero_trabajador = user.numero_trabajador;
-            this.form.CURP = user.CURP;
-            this.form.nivel = user.nivel;
-            this.form.direccion_pertenencia = user.direccion_pertenencia;
-            this.form.departamento = user.departamento;
-            this.form.email = user.email;
-            this.form.identificacion = user.identificacion;
-            this.form.imagen = user.imagen;
-            this.filteredUsers = [];
+
+        selectUser(persona) {
+            this.form.id = persona.id;
+            this.form.nombre = persona.nombre;
+            this.form.apellidos = persona.apellidos;
+            this.form.RFC = persona.RFC;
+            this.form.numero_trabajador = persona.numero_trabajador;
+            this.form.CURP = persona.CURP;
+            this.form.nivel = persona.nivel;
+            this.form.cargo = persona.cargo;
+            this.form.direccion_pertenencia = persona.direccion_pertenencia;
+            this.form.departamento = persona.departamento;
+            this.form.organo_superior = persona.organo_superior; // CORREGIDO: `this.from.organo_superior` estaba mal escrito
+            this.form.area_presupuestal = persona.area_presupuestal;
+            this.form.email = persona.email;
+
+            // **Nuevas asignaciones para identificación y foto**
+            this.form.identificacion = persona.identificacion || "No disponible";
+            this.form.imagen = persona.imagen || "No disponible";
+
+           
+
+            this.searchName = `${persona.nombre}`; // Mostrar el nombre en el campo de búsqueda
+            this.filteredUsers = []; // Ocultar la lista de sugerencias
         },
-        registerUser() {
-            if (this.form.password !== this.form.confirm_password) {
-                this.alertMessageList = ["Las contraseñas no coinciden."];
-                this.showAlertModal = true;
-                return;
-            }
-            this.showModal = true;
-        },
+
+
+
+
+        // Registrar usuario
+async registerUser() {
+    // Validar que todos los campos estén llenos
+    const requiredFields = ["rol", "password", "confirm_password", "id"];
+    const emptyFields = requiredFields.filter(field => !this.form[field]);
+
+    if (emptyFields.length > 0) {
+        this.alertMessageList = ["Todos los campos son obligatorios."];
+        this.showAlertModal = true;
+        return;
+    }
+
+    // Validar que las contraseñas coincidan
+    if (this.form.password !== this.form.confirm_password) {
+        this.alertMessageList = ["Las contraseñas no coinciden."];
+        this.showAlertModal = true;
+        return;
+    }
+
+    // Crear el objeto de datos para enviar a la API de usuarios
+    const userData = {
+        rol: this.form.rol,
+        password: this.form.password, // En un entorno real, esto debería estar hasheado
+        id_persona: this.form.id, // ID de la persona seleccionada
+    };
+
+    // Enviar los datos a la API de usuarios
+    try {
+        const response = await axios.post('http://localhost:3000/api/usuarios', userData);
+        console.log('Usuario registrado con éxito', response.data);
+        this.showModal = true; // Mostrar modal de éxito
+    } catch (error) {
+        console.error('Error al registrar usuario', error.response?.data || error);
+        this.alertMessageList = ['Error al registrar usuario. Intenta de nuevo.'];
+        this.showAlertModal = true; // Mostrar modal de error
+    }
+},
+
+
+        // Cerrar modal de éxito
         closeModal() {
             this.showModal = false;
-            this.$router.push("/users");
+            this.$router.push("/users"); // Redirigir a la lista de usuarios
         },
+
+        // Cerrar modal de error
         closeAlertModal() {
             this.showAlertModal = false;
         },
-        navigateTo(page) {
-            this.$router.push({ name: page });
-        },
-        showMenu(menu) {
-            this.menus[menu] = true;
-        },
-        hideMenu(menu) {
-            this.menus[menu] = false;
-        },
     },
 };
+
 </script>
 
 

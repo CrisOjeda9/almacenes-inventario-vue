@@ -89,7 +89,7 @@
                     <!-- RFC -->
                     <div class="form-field">
                         <label for="RFC">RFC</label>
-                        <input type="text" v-model="form.RFC" minlength="13" maxlength="13" required />
+                        <input type="text" v-model="form.RFC" minlength="13" maxlength="13" style="text-transform: uppercase;" required />
                     </div>
                 </div>
 

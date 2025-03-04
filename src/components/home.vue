@@ -116,7 +116,7 @@ export default {
 
                 try {
                     // Obtener todos los usuarios de la API
-                    const response = await fetch('http://localhost:3000/api/usuarios');
+                    const response = await fetch('http://localhost:3000/api/personas');
                     const users = await response.json();
 
                     // Buscar el usuario logueado por email
@@ -146,7 +146,7 @@ export default {
                         }
                     } else {
                         this.profileImage = "../assets/UserHombre.png"; // Imagen por defecto
-                    } 
+                    }
                 } catch (error) {
                     console.error('Error al cargar los datos del usuario:', error);
                     this.profileImage = "../assets/UserHombre.png"; // Imagen por defecto en caso de error
