@@ -234,6 +234,10 @@ export default {
                 console.error("Error al cargar los datos del usuario", error);
             }
         },
+        navigateTo(page) {
+            console.log(`Navegando a ${page}`);
+            this.$router.push({ name: page }); // Asegúrate de que las rutas estén definidas con `name`.
+        },
         goHome() {
             this.$router.push('/home');
         },

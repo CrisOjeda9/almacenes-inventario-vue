@@ -327,7 +327,7 @@ export default {
 
                 try {
                     // Obtener todos los usuarios de la API
-                    const response = await fetch('http://localhost:3000/api/usuarios');
+                    const response = await fetch('http://localhost:3000/api/personas');
                     const users = await response.json();
 
                     // Buscar el usuario logueado por email

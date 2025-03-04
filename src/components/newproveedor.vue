@@ -89,7 +89,8 @@
                     <!-- RFC -->
                     <div class="form-field">
                         <label for="RFC">RFC</label>
-                        <input type="text" v-model="form.RFC" minlength="13" maxlength="13" style="text-transform: uppercase;" required />
+                        <input type="text" v-model="form.RFC" minlength="13" maxlength="13"
+                            style="text-transform: uppercase;" required />
                     </div>
                 </div>
 
@@ -152,7 +153,7 @@
         <!-- Modal -->
         <div v-if="showModal" class="modal">
             <div class="modal-content">
-                <h2>Proveedor registrado con éxito</h2>
+                <h2>Proveedor registrado con éxito.</h2>
                 <button @click="closeModal">Aceptar</button>
             </div>
         </div>
@@ -202,7 +203,7 @@ export default {
                 proveedorMenu: false,
                 settingsMenu: false,
             },
-            showModal: false,
+            showModal: false, // Modal de éxito
             showDocumentModal: false, // Controla la visibilidad del modal de archivos
             errorMessage: "", // Mensaje de error
             showAlertModal: false,
@@ -221,7 +222,7 @@ export default {
 
                 try {
                     // Obtener todos los usuarios de la API
-                    const response = await fetch('http://localhost:3000/api/usuarios');
+                    const response = await fetch('http://localhost:3000/api/personas');
                     const users = await response.json();
 
                     // Buscar el usuario logueado por email
@@ -281,8 +282,7 @@ export default {
                 const files = Array.from(input.files); // Convierte FileList a un array
 
                 // Validar el límite de 7 archivos
-                if (files.length + this.form.archivos.length > 7) {
-                    this.errorMessage = "Solo puedes cargar un máximo de 7 archivos.";
+                if (files.length + this.form.archivos.length > 10) {
                     return;
                 }
 
@@ -300,11 +300,10 @@ export default {
         removeDocument(index) {
             this.form.archivos.splice(index, 1); // Elimina el documento del array
         },
+        // Cerrar modal de éxito
         closeModal() {
             this.showModal = false;
-            if (this.redirectOnClose) {
-                this.$router.push("/proveedor");
-            }
+            this.$router.push("/proveedor"); // Redirigir a la lista de usuarios
         },
 
         closeAlertModal() {
@@ -329,9 +328,6 @@ export default {
                 formData.append("email", this.form.email);
                 formData.append("cuenta_bancaria", this.form.cuenta_bancaria);
 
-
-                
-
                 this.form.archivos.forEach((file) => {
                     formData.append('archivos', file);
                 });
@@ -340,15 +336,16 @@ export default {
                     headers: { "Content-Type": "multipart/form-data" }
                 });
 
-                alert("Proveedor registrado con éxito");
-                this.$router.push("/proveedor");
+                // Mostrar el modal en lugar de la alerta
+                this.showModal = true;
+
             } catch (error) {
                 console.error("Error al enviar los datos:", error);
                 alert("Hubo un error al registrar el proveedor");
             }
         },
 
-        
+
         triggerFileInput(type) {
             if (type === "archivos") {
                 this.$refs.fileInputDoc.click();
