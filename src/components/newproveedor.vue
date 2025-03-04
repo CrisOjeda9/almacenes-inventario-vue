@@ -172,6 +172,10 @@
                 <button @click="closeDocumentModal">Cerrar</button>
             </div>
         </div>
+        <!-- Contenedor de notificaciones -->
+        <div v-if="alertMessage" :class="alertClass" class="notification">
+            <i :class="alertIcon"></i> {{ alertMessage }}
+        </div>
     </div>
 </template>
 
@@ -184,6 +188,9 @@ export default {
     name: "newProveedorPage",
     data() {
         return {
+            alertMessage: "",  // Mensaje de la alerta
+            alertClass: "",    // Clase de la alerta (ej. 'success' o 'error')
+            alertIcon: "",     // Icono para la alerta
             userRole: localStorage.getItem('userRole') || '', // Obtener el rol desde el localStorage
             userName: "Cargando...", // Mensaje temporal
             profileImage: "",  // URL de la imagen del usuario
@@ -275,14 +282,33 @@ export default {
         },
 
 
+        showAlert(message, type) {
+            this.alertMessage = message;
+            if (type === "success") {
+                this.alertClass = "alert-success";
+                this.alertIcon = "fa fa-check-circle";
+            } else if (type === "error") {
+                this.alertClass = "alert-error";
+                this.alertIcon = "fa fa-times-circle";
+            } else {
+                this.alertClass = "alert-warning";
+                this.alertIcon = "fa fa-exclamation-circle";
+            }
+
+            // Ocultar la alerta después de 3 segundos
+            setTimeout(() => {
+                this.alertMessage = "";
+            }, 3000);
+        },
 
         handleFileUpload(type) {
             if (type === "archivos") {
                 const input = this.$refs.fileInputDoc;
                 const files = Array.from(input.files); // Convierte FileList a un array
 
-                // Validar el límite de 7 archivos
+                // Validar el límite de 10 archivos
                 if (files.length + this.form.archivos.length > 10) {
+                    this.showAlert("No se pueden subir más de 10 archivos", "error");
                     return;
                 }
 
@@ -310,10 +336,11 @@ export default {
             this.showAlertModal = false; // Cierra el modal de alerta+
         },
 
+
         async registerProveedor() {
             if (!this.form.nombre || !this.form.apellidos || !this.form.tipo_proveedor || !this.form.RFC ||
                 !this.form.direccion || !this.form.telefono || !this.form.email || !this.form.cuenta_bancaria) {
-                alert("Por favor, completa todos los campos obligatorios.");
+                this.showAlert("Por favor, completa todos los campos obligatorios.", "error");
                 return;
             }
 
@@ -341,7 +368,7 @@ export default {
 
             } catch (error) {
                 console.error("Error al enviar los datos:", error);
-                alert("Hubo un error al registrar el proveedor");
+                this.showAlert("Hubo un error al registrar el proveedor", "error");
             }
         },
 
@@ -371,6 +398,62 @@ export default {
 /* Aplicar Montserrat a todo el contenido */
 * {
     font-family: 'Montserrat', sans-serif;
+}
+
+
+/* Estilo general para la notificación */
+.notification {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-size: 16px;
+    color: white;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    z-index: 999;
+    max-width: 80%;
+    opacity: 0;
+    animation: fadeIn 0.5s forwards;
+}
+
+/* Animación de aparición de la notificación */
+@keyframes fadeIn {
+    0% {
+        opacity: 0;
+        top: 0;
+    }
+
+    100% {
+        opacity: 1;
+        top: 20px;
+    }
+}
+
+/* Notificación de éxito */
+.alert-success {
+    background-color: #4CAF50;
+    /* Verde */
+}
+
+/* Notificación de error */
+.alert-error {
+    background-color: #f44336;
+    /* Rojo */
+}
+
+/* Notificación de advertencia */
+.alert-warning {
+    background-color: #ff9800;
+    /* Naranja */
+}
+
+/* Iconos de la alerta */
+.notification i {
+    margin-right: 10px;
 }
 
 
