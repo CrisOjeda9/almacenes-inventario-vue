@@ -203,15 +203,23 @@ export default {
 
             const email = localStorage.getItem("userEmail");
             try {
-                // Obtener todos los usuarios de la API
-                const response = await fetch('http://localhost:3000/api/usuarios');
-                const users = await response.json();
+                // Primero, buscar en tb_personas para obtener el id_persona
+                const personasResponse = await fetch('http://localhost:3000/api/personas');
+                const personas = await personasResponse.json();
+                const persona = personas.find(p => p.email === email);
 
-                // Buscar el usuario logueado por email
-                const user = users.find(u => u.email === email);
+                if (!persona) {
+                    this.showAlert("Usuario no encontrado en tb_personas", "error");
+                    return;
+                }
+
+                // Luego, buscar en tb_usuarios usando el id_persona
+                const usersResponse = await fetch('http://localhost:3000/api/usuarios');
+                const users = await usersResponse.json();
+                const user = users.find(u => u.id_persona === persona.id);
 
                 if (!user) {
-                    this.showAlert("Usuario no encontrado", "error");
+                    this.showAlert("Usuario no encontrado en tb_usuarios", "error");
                     return;
                 }
 
