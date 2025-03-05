@@ -171,8 +171,9 @@ export default {
                     const user = users.find(u => u.email === storedUserEmail);
 
                     if (user) {
-                        // Asignar el nombre del usuario
-                        this.userName = user.name || storedUserName;
+                        // Concatenar nombre y apellidos
+                        const fullName = `${user.nombre || storedUserName} ${user.apellidos || ""}`.trim();
+                        this.userName = fullName;
 
                         // Obtener la ruta completa de la imagen del usuario
                         const imagePath = user.imagen; // Suponiendo que la API devuelve la ruta completa

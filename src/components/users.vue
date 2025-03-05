@@ -133,83 +133,13 @@
                         <td>{{ formatDate(user.createdAt) }}</td>
 
                         <td>
-                            <button @click="editUser(user)" class="btn-edit">Editar</button>
                             <button @click="showDeleteModal(user.id)" class="btn-delete">Eliminar</button>
                         </td>
                     </tr>
                 </tbody>
             </table>
 
-            <!-- Modal de Edición -->
-            <div v-if="isEditing" class="edit-modal">
-                <div class="modal-content">
-                    <h3>Editar Usuario</h3>
-                    <form @submit.prevent="saveChanges" class="edit-form">
-                        <div class="contenedorformulario">
-                            <div class="form-column">
-                                <div style="width: 91%;">
-                                    <label for="rol">Rol de usuario</label>
-                                    <select v-model="currentUser.rol" required>
-                                        <option value="" disabled>Selecciona una opción</option>
-                                        <option value="Administrador">Administrador</option>
-                                        <option value="Inventario">Inventario</option>
-                                        <option value="Almacen">Almacén</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label>Nombre(s):</label>
-                                    <input v-model="currentUser.nombre" type="text" />
-                                </div>
-                                <div>
-                                    <label>Apellidos:</label>
-                                    <input v-model="currentUser.apellidos" type="text" />
-                                </div>
-                                <div>
-                                    <label>RFC:</label>
-                                    <input v-model="currentUser.RFC" minlength="13" maxlength="13" type="text"
-                                        style="text-transform: uppercase;" />
-                                </div>
-
-                            </div>
-
-                            <div class="form-column">
-                                <div>
-                                    <label>CURP:</label>
-                                    <input v-model="currentUser.CURP" minlength="18" maxlength="18" type="text"
-                                        style="text-transform: uppercase;" />
-                                </div>
-                                <div>
-                                    <label>Número de trabajador:</label>
-                                    <input v-model="currentUser.numero_trabajador" type="text" />
-                                </div>
-                                <div>
-                                    <label>Dirección de pertenencia:</label>
-                                    <select v-model="currentUser.direccion_pertenencia" required>
-                                        <option value="" disabled>Selecciona una opción</option>
-                                        <option v-for="direccion in direcciones" :value="direccion.value"
-                                            :key="direccion.value">
-                                            {{ direccion.text }}
-                                        </option>
-                                    </select>
-                                </div>
-
-                                <div>
-                                    <label>Departamento:</label>
-                                    <input v-model="currentUser.departamento" type="text" />
-                                </div>
-
-
-                            </div>
-                        </div>
-
-                        <!-- Botones debajo del formulario -->
-                        <div class="form-buttons">
-                            <button type="submit" class="save-btn">Guardar cambios</button>
-                            <button @click="cancelEdit" type="button" class="cancel-btn">Cancelar</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
+            
 
             <!-- Modal de Confirmación de Eliminación -->
             <div v-if="isDeleteModalVisible" class="modal-overlay">
@@ -267,7 +197,6 @@ export default {
             searchQuery: '',
             currentPage: 1,
             userPerPage: 10,
-            isEditing: false, // Para controlar si estamos en modo de edición
             user: [], // Vacío al principio, se llenará con los datos de la API
         };
     },
@@ -321,8 +250,9 @@ export default {
                     const user = users.find(u => u.email === storedUserEmail);
 
                     if (user) {
-                        // Asignar el nombre del usuario
-                        this.userName = user.name || storedUserName;
+                        // Concatenar nombre y apellidos
+                        const fullName = `${user.nombre || storedUserName} ${user.apellidos || ""}`.trim();
+                        this.userName = fullName;
 
                         // Obtener la ruta completa de la imagen del usuario
                         const imagePath = user.imagen; // Suponiendo que la API devuelve la ruta completa
@@ -495,30 +425,7 @@ export default {
         redirectToAdduser() {
             this.$router.push("/register");
         },
-        cancelEdit() {
-            this.isEditing = false;
-        },
-        editUser(user) {
-            this.currentUser = { ...user };
-            this.isEditing = true;
-        },
-        saveChanges() {
-            // Convertir RFC y CURP a mayúsculas antes de guardar
-            this.currentUser.RFC = this.currentUser.RFC.toUpperCase();
-            this.currentUser.CURP = this.currentUser.CURP.toUpperCase();
-            // Enviar la solicitud PUT a la API con el ID del usuario
-            axios.put(`http://localhost:3000/api/usuarios/${this.currentUser.id}`, this.currentUser)
-                .then(() => {
-                    // Actualizar la lista de usuarios para reflejar los cambios
-                    this.isEditing = false;
-                    this.fetchUsers();
-                    alert("Usuario actualizado exitosamente.");
-                })
-                .catch(error => {
-                    console.error("Error al guardar los cambios: ", error);
-                    alert("Hubo un error al actualizar el usuario.");
-                });
-        },
+        
 
         showDeleteModal(userId) {
             this.selectedUserId = userId;

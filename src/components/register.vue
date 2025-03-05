@@ -153,7 +153,7 @@
                         <label for="imagen">Foto</label>
                         <div class="dropzone" style="background-color: #dcddcd;">
                             <span>{{ form.imagen ? form.imagen.split('/').pop() : 'No se ha seleccionado ninguna foto'
-                            }}</span>
+                                }}</span>
                         </div>
                     </div>
                     <div class="form-field">
@@ -201,6 +201,10 @@
                 <button @click="closeModal">Aceptar</button>
             </div>
         </div>
+        <!-- Contenedor de notificaciones -->
+        <div v-if="alertMessage" :class="alertClass" class="notification">
+            <i :class="alertIcon"></i> {{ alertMessage }}
+        </div>
     </div>
 </template>
 
@@ -210,6 +214,9 @@ export default {
     name: "RegisterPage",
     data() {
         return {
+            alertMessage: "",  // Mensaje de la alerta
+            alertClass: "",    // Clase de la alerta (ej. 'success' o 'error')
+            alertIcon: "",     // Icono para la alerta
             searchName: "", // Campo para buscar nombres
             form: {
                 rol: "", // Rol del usuario
@@ -290,52 +297,69 @@ export default {
             this.form.identificacion = persona.identificacion || "No disponible";
             this.form.imagen = persona.imagen || "No disponible";
 
-           
+
 
             this.searchName = `${persona.nombre}`; // Mostrar el nombre en el campo de búsqueda
             this.filteredUsers = []; // Ocultar la lista de sugerencias
+        },
+        showAlert(message, type) {
+            this.alertMessage = message;
+            if (type === "success") {
+                this.alertClass = "alert-success";
+                this.alertIcon = "fa fa-check-circle";
+            } else if (type === "error") {
+                this.alertClass = "alert-error";
+                this.alertIcon = "fa fa-times-circle";
+            } else {
+                this.alertClass = "alert-warning";
+                this.alertIcon = "fa fa-exclamation-circle";
+            }
+
+            // Ocultar la alerta después de 3 segundos
+            setTimeout(() => {
+                this.alertMessage = "";
+            }, 3000);
         },
 
 
 
 
         // Registrar usuario
-async registerUser() {
-    // Validar que todos los campos estén llenos
-    const requiredFields = ["rol", "password", "confirm_password", "id"];
-    const emptyFields = requiredFields.filter(field => !this.form[field]);
+        async registerUser() {
+            // Validar que todos los campos estén llenos
+            const requiredFields = ["rol", "password", "confirm_password", "id"];
+            const emptyFields = requiredFields.filter(field => !this.form[field]);
 
-    if (emptyFields.length > 0) {
-        this.alertMessageList = ["Todos los campos son obligatorios."];
-        this.showAlertModal = true;
-        return;
-    }
+            if (emptyFields.length > 0) {
+                this.alertMessageList = ["Todos los campos son obligatorios."];
+                this.showAlertModal = true;
+                return;
+            }
 
-    // Validar que las contraseñas coincidan
-    if (this.form.password !== this.form.confirm_password) {
-        this.alertMessageList = ["Las contraseñas no coinciden."];
-        this.showAlertModal = true;
-        return;
-    }
+            // Validar que las contraseñas coincidan
+            if (this.form.password !== this.form.confirm_password) {
+                this.showAlert("Las contraseña no coinciden.");
+                return;
+            }
 
-    // Crear el objeto de datos para enviar a la API de usuarios
-    const userData = {
-        rol: this.form.rol,
-        password: this.form.password, // En un entorno real, esto debería estar hasheado
-        id_persona: this.form.id, // ID de la persona seleccionada
-    };
+            // Crear el objeto de datos para enviar a la API de usuarios
+            const userData = {
+                rol: this.form.rol,
+                password: this.form.password, // En un entorno real, esto debería estar hasheado
+                id_persona: this.form.id, // ID de la persona seleccionada
+            };
 
-    // Enviar los datos a la API de usuarios
-    try {
-        const response = await axios.post('http://localhost:3000/api/usuarios', userData);
-        console.log('Usuario registrado con éxito', response.data);
-        this.showModal = true; // Mostrar modal de éxito
-    } catch (error) {
-        console.error('Error al registrar usuario', error.response?.data || error);
-        this.alertMessageList = ['Error al registrar usuario. Intenta de nuevo.'];
-        this.showAlertModal = true; // Mostrar modal de error
-    }
-},
+            // Enviar los datos a la API de usuarios
+            try {
+                const response = await axios.post('http://localhost:3000/api/usuarios', userData);
+                console.log('Usuario registrado con éxito', response.data);
+                this.showModal = true; // Mostrar modal de éxito
+            } catch (error) {
+                console.error('Error al registrar usuario', error.response?.data || error);
+                this.alertMessageList = ['Error al registrar usuario. Intenta de nuevo.'];
+                this.showAlertModal = true; // Mostrar modal de error
+            }
+        },
 
 
         // Cerrar modal de éxito
@@ -358,6 +382,61 @@ async registerUser() {
 /* Aplicar Montserrat a todo el contenido */
 * {
     font-family: 'Montserrat', sans-serif;
+}
+
+/* Estilo general para la notificación */
+.notification {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-size: 16px;
+    color: white;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    z-index: 999;
+    max-width: 80%;
+    opacity: 0;
+    animation: fadeIn 0.5s forwards;
+}
+
+/* Animación de aparición de la notificación */
+@keyframes fadeIn {
+    0% {
+        opacity: 0;
+        top: 0;
+    }
+
+    100% {
+        opacity: 1;
+        top: 20px;
+    }
+}
+
+/* Notificación de éxito */
+.alert-success {
+    background-color: #4CAF50;
+    /* Verde */
+}
+
+/* Notificación de error */
+.alert-error {
+    background-color: #f44336;
+    /* Rojo */
+}
+
+/* Notificación de advertencia */
+.alert-warning {
+    background-color: #ff9800;
+    /* Naranja */
+}
+
+/* Iconos de la alerta */
+.notification i {
+    margin-right: 10px;
 }
 
 .view-documents-btn {
