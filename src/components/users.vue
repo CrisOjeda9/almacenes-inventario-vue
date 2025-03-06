@@ -122,7 +122,6 @@
                                     </li>
                                 </ul>
                             </template>
-                            <!-- Botón para descargar todos los archivos en un ZIP -->
                             <button @click="downloadZip(user)" class="btn-download">
                                 <p class="textoDescarga">Descargar</p>
                             </button>
@@ -139,7 +138,7 @@
                 </tbody>
             </table>
 
-            
+
 
             <!-- Modal de Confirmación de Eliminación -->
             <div v-if="isDeleteModalVisible" class="modal-overlay">
@@ -311,58 +310,48 @@ export default {
 
                 return {
                     url: `http://localhost:3000/api/users-files/${nameWithoutExtension}`, // URL sin extensión para visualización
-                    downloadUrl: `http://localhost:3000/api/users-files/${fileName}`, // URL con extensión para descarga
+                    downloadUrl: `http://localhost:3000/api/users-files/${nameWithoutExtension}`, // URL sin extensión para descarga
                     name: nameWithoutExtension // Nombre sin extensión
                 };
             });
         },
+
         async downloadZip(user) {
             try {
-                // Obtener los nombres de los archivos
+                // Obtener los archivos PDF
                 const pdfFiles = this.getPdfFiles(user.identificacion);
 
-                // Extraer solo los nombres de los archivos con extensión
-                const fileNames = pdfFiles.map(file => {
-                    const fileNameWithExtension = file.name + '.pdf'; // Asegúrate de incluir la extensión
-                    return fileNameWithExtension;
-                });
-
-                // Enviar los nombres de los archivos a la API de descarga ZIP
-                const response = await fetch('http://localhost:3000/api/users/download-zip', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        files: fileNames
-                    })
-                });
-
-                // Verificar si la respuesta es exitosa
-                if (!response.ok) {
-                    throw new Error('Error al descargar el archivo ZIP');
+                // Verificar si hay archivos para descargar
+                if (pdfFiles.length === 0) {
+                    alert("No hay archivos para descargar.");
+                    return;
                 }
 
-                // Convertir la respuesta a un blob
-                const blob = await response.blob();
+                // Descargar cada archivo PDF individualmente
+                for (const file of pdfFiles) {
+                    // Hacer una solicitud a la API para obtener el archivo
+                    const response = await fetch(file.downloadUrl); // Usar la URL de descarga sin extensión
 
-                // Verificar si el blob es un archivo ZIP válido
-                if (blob.type !== 'application/zip') {
-                    throw new Error('El archivo descargado no es un ZIP válido');
+                    // Verificar si la respuesta es exitosa
+                    if (!response.ok) {
+                        throw new Error(`Error al obtener el archivo: ${response.statusText}`);
+                    }
+
+                    // Convertir la respuesta a un Blob
+                    const blob = await response.blob();
+
+                    // Crear un enlace para descargar el archivo
+                    const link = document.createElement('a');
+                    link.href = URL.createObjectURL(blob); // Crear una URL temporal para el Blob
+                    link.download = file.name + '.pdf'; // Nombre del archivo con extensión
+                    document.body.appendChild(link);
+                    link.click(); // Simular clic para iniciar la descarga
+                    document.body.removeChild(link); // Eliminar el enlace del DOM
+                    URL.revokeObjectURL(link.href); // Liberar la URL temporal
                 }
-
-                // Crear un enlace para descargar el archivo ZIP
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = 'archivos.zip';
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                window.URL.revokeObjectURL(url);
             } catch (error) {
                 console.error('Error:', error);
-                alert('Hubo un error al descargar el archivo ZIP. Por favor, inténtalo de nuevo.');
+                alert('Hubo un error al descargar los archivos PDF. Por favor, inténtalo de nuevo.');
             }
         },
 
@@ -425,7 +414,7 @@ export default {
         redirectToAdduser() {
             this.$router.push("/register");
         },
-        
+
 
         showDeleteModal(userId) {
             this.selectedUserId = userId;

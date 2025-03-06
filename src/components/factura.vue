@@ -28,7 +28,8 @@
         <div class="sub-navbar">
             <a href="/home" class="nav-item">Inicio</a>
             <a v-if="userRole === 'Administrador'" href="users" class="nav-item">Usuarios</a>
-            <div v-if="userRole === 'Inventario' || userRole === 'Administrador'" class="nav-item" @mouseenter="showMenu('homeMenu')" @mouseleave="hideMenu('homeMenu')">
+            <div v-if="userRole === 'Inventario' || userRole === 'Administrador'" class="nav-item"
+                @mouseenter="showMenu('homeMenu')" @mouseleave="hideMenu('homeMenu')">
                 Inventario
                 <span class="menu-icon">▼</span>
                 <div class="dropdown-menu" v-show="menus.homeMenu">
@@ -43,7 +44,8 @@
                 </div>
             </div>
 
-            <div v-if="userRole === 'Almacenes' || userRole === 'Administrador'" class="nav-item" @mouseenter="showMenu('facturaMenu')" @mouseleave="hideMenu('facturaMenu')">
+            <div v-if="userRole === 'Almacenes' || userRole === 'Administrador'" class="nav-item"
+                @mouseenter="showMenu('facturaMenu')" @mouseleave="hideMenu('facturaMenu')">
                 Almacen
                 <span class="menu-icon">▼</span>
                 <div class="dropdown-menu" v-show="menus.facturaMenu">
@@ -95,27 +97,36 @@
                 </thead>
                 <tbody>
                     <tr v-for="factura in paginatedfactura" :key="factura.id">
-                        <td>{{ factura.tipoAlta }}</td>
-                        <td>{{ factura.tipoDocumento }}</td>
-                        <td>{{ factura.fechaAdquisicion }}</td>
-                        <td>{{ factura.nofactura }}</td>
-                        <td>{{ factura.tipocomra }}</td>
+                        <td>{{ factura.tipo_alta }}</td>
+                        <td>{{ factura.tipo_documento_ampara }}</td>
+                        <td>{{ formatDate(factura.fecha_adquisicion) }}</td>
+                        <td>{{ factura.numero_de_factura }}</td>
+                        <td>{{ factura.tipo_compra }}</td>
                         <td>{{ factura.concepto }}</td>
-                        <td>{{ factura.fechafactura }}</td>
-                        <td>{{ factura.proveedor }}</td>
+                        <td>{{ formatDate(factura.fecha_factura) }}</td>
+                        <td>{{ getNombreProveedor(factura.id_proveedor) }}</td>
+                        <!-- Aquí se muestra el nombre del proveedor -->
                         <td>{{ factura.cantidad }}</td>
-                        <td>{{ factura.preciounitario }}</td>
-                        <td>{{ factura.totalsiniva }}</td>
+                        <td>{{ factura.precio_unitario }}</td>
+                        <td>{{ factura.sub_total }}</td>
                         <td>{{ factura.iva }}</td>
-                        <td>{{ factura.totalconiva }}</td>
+                        <td>{{ factura.total }}</td>
                         <td>
-                            <a :href="'/ruta/del/archivo/' + factura.archivodocumento" download>
-                                <button class="btn-download">
-                                    <i class="fas fa-download"></i>
-                                </button>
-                            </a>
+                            <template v-if="factura.archivo_pdf">
+                                <ul>
+                                    <li v-for="(file, index) in getPdfFiles(factura.archivo_pdf)" :key="index">
+                                        <!-- Aplicar truncateFileName al nombre del archivo -->
+                                        <a :href="file.url" target="_blank" :title="file.name">
+                                            {{ truncateFileName(file.name, 20) }}
+                                        </a>
+                                    </li>
+                                </ul>
+                            </template>
+                            <button @click="downloadZip(factura)" class="btn-download">
+                                <p class="textoDescarga">Descargar</p>
+                            </button>
                         </td>
-                        <td>{{ factura.registrationDate }}</td>
+                        <td>{{ formatDate(factura.createdAt) }}</td>
                         <td>
                             <button @click="editfactura(factura)" class="btn-edit">Editar</button>
                             <button @click="showDeleteModal(factura.id)" class="btn-delete">Eliminar</button>
@@ -134,19 +145,19 @@
                             <div class="form-column">
                                 <div>
                                     <label>Tipo de alta:</label>
-                                    <input v-model="currentFactura.tipoAlta" type="text" />
+                                    <input v-model="currentFactura.tipo_alta" type="text" />
                                 </div>
                                 <div>
                                     <label>Tipo de documento que ampara:</label>
-                                    <input v-model="currentFactura.tipoDocumento" type="text" />
+                                    <input v-model="currentFactura.tipo_documento_ampara" type="text" />
                                 </div>
                                 <div>
                                     <label>Factura No.:</label>
-                                    <input v-model="currentFactura.nofactura" type="text" />
+                                    <input v-model="currentFactura.numero_de_factura" type="text" />
                                 </div>
                                 <div>
                                     <label>Tipo de compra:</label>
-                                    <input v-model="currentFactura.tipocomra" type="text" />
+                                    <input v-model="currentFactura.tipo_compra" type="text" />
                                 </div>
                                 <div>
                                     <label>Concepto:</label>
@@ -154,7 +165,8 @@
                                 </div>
                                 <div style="width: 100%;">
                                     <label>Proveedor: (Selecciona uno)</label>
-                                    <select v-model="currentFactura.proveedor" style="height: 35px; width: 320px;" class="form-input">
+                                    <select v-model="currentFactura.proveedor" style="height: 35px; width: 320px;"
+                                        class="form-input">
                                         <option value="" disabled selected>Selecciona un proveedor</option>
                                         <option value="Proveedor 1">Proveedor 1</option>
                                         <option value="Proveedor 2">Proveedor 2</option>
@@ -170,14 +182,14 @@
                             <!-- Segunda columna del formulario -->
                             <div class="form-column">
 
-                               
+
                                 <div>
                                     <label>Precio unitario:</label>
-                                    <input v-model="currentFactura.preciounitario" type="text" />
+                                    <input v-model="currentFactura.precio_unitario" type="text" />
                                 </div>
                                 <div>
                                     <label>Total sin IVA:</label>
-                                    <input v-model="currentFactura.totalsiniva" type="text" />
+                                    <input v-model="currentFactura.sub_total" type="text" />
                                 </div>
                                 <div>
                                     <label>IVA:</label>
@@ -188,20 +200,20 @@
                                     <input v-model="currentFactura.totalconiva" type="text" />
                                 </div>
                                 <div class="contenedor-dropzone">
-                                    <label for="archivodocumento">Documento (PDF, JPG, PNG)</label>
+                                    <label for="archivo_pdf">Documento (PDF, JPG, PNG)</label>
                                     <div class="dropzone" @drop.prevent="handleDrop" @dragover.prevent
                                         @click="triggerFileInput">
                                         <!-- Campo de subida de archivo -->
-                                        <input type="file" id="archivodocumento" ref="fileInput"
-                                            @change="handleFileChange" accept=".pdf,.jpg,.png" style="display: none;" />
+                                        <input type="file" id="archivo_pdf" ref="fileInput" @change="handleFileChange"
+                                            accept=".pdf,.jpg,.png" style="display: none;" />
 
                                         <!-- Ícono y mensaje -->
                                         <i class="fas fa-cloud-upload-alt"></i>
-                                        <span v-if="!currentFactura.archivodocumento">
+                                        <span v-if="!currentFactura.archivo_pdf">
                                             Arrastra aquí o haz clic para subir un archivo
                                         </span>
                                         <span v-else>
-                                            Archivo seleccionado: {{ currentFactura.archivodocumento.name }}
+                                            Archivo seleccionado: {{ currentFactura.archivo_pdf.name }}
                                         </span>
                                     </div>
                                 </div>
@@ -244,10 +256,9 @@ export default {
     name: "facturaPage",
     data() {
         return {
-            userRole: localStorage.getItem('userRole') || '', // Obtener el rol desde el localStorage
-            userName: "Cargando...", // Mensaje temporal
-            profileImage: "",  // URL de la imagen del usuario
-
+            userRole: localStorage.getItem('userRole') || '',
+            userName: "Cargando...",
+            profileImage: "",
             isDeleteModalVisible: false,
             menus: {
                 homeMenu: false,
@@ -257,50 +268,33 @@ export default {
             searchQuery: '',
             currentPage: 1,
             facturaPerPage: 10,
-            isEditing: false, // Para controlar si estamos en modo de edición
+            isEditing: false,
             currentFactura: {
-                proveedor: "", // Debe estar vacío para que se seleccione la opción "Selecciona"
-
-            }, // Objeto para almacenar la póliza que se está editando
-            factura: [
-                {
-                    id: 1,
-                    tipoAlta: "Alta",
-                    tipoDocumento: "Factura de compra",
-                    fechaAdquisicion: "2024-01-05",
-                    nofactura: "121212",
-                    tipocomra: "Seguro contra incendios",
-                    concepto: "Edificio principal",
-                    fechafactura: "2024-01-01",
-                    proveedor: "Anual",
-                    cantidad: "Premium",
-                    preciounitario: "$5,000",
-                    totalsiniva: "$1,000,000",
-                    iva: "30 días",
-                    totalconiva: "Daños preexistentes",
-                    archivodocumento: "asdadasda",
-                    registrationDate: "2024-01-15"
-                }
-
-            ]
+                proveedor: "",
+            },
+            proveedores: [], // Ensure this is initialized as an empty array
+            facturas: [] // Ensure this is initialized as an empty array
         };
     },
     computed: {
         filteredfactura() {
             const query = this.searchQuery.toLowerCase();
-            return this.factura.filter(factura => {
-                return factura.tipoAlta.toString().toLowerCase().includes(query) ||
-                    factura.tipoDocumento.toLowerCase().includes(query) ||
-                    factura.nofactura.toLowerCase().includes(query) ||
-                    factura.tipocomra.toLowerCase().includes(query) ||
-                    factura.concepto.toLowerCase().includes(query) ||
-                    factura.fechafactura.toLowerCase().includes(query) ||
-                    factura.proveedor.toLowerCase().includes(query) ||
-                    factura.cantidad.toLowerCase().includes(query) ||
-                    factura.preciounitario.toLowerCase().includes(query) ||
-                    factura.totalsiniva.toLowerCase().includes(query) ||
-                    factura.iva.toLowerCase().includes(query) ||
-                    factura.totalconiva.toLowerCase().includes(query);
+            return this.facturas.filter(factura => {
+                const nombreProveedor = this.getNombreProveedor(factura.id_proveedor)?.toLowerCase() || '';
+                return (
+                    (factura.tipo_alta?.toString() || '').toLowerCase().includes(query) ||
+                    (factura.tipo_documento_ampara || '').toLowerCase().includes(query) ||
+                    (factura.numero_de_factura || '').toLowerCase().includes(query) ||
+                    (factura.tipo_compra || '').toLowerCase().includes(query) ||
+                    (factura.concepto || '').toLowerCase().includes(query) ||
+                    (factura.fechafactura || '').toLowerCase().includes(query) ||
+                    nombreProveedor.includes(query) || // Buscar por nombre del proveedor
+                    (factura.cantidad?.toString() || '').toLowerCase().includes(query) ||
+                    (factura.precio_unitario?.toString() || '').toLowerCase().includes(query) ||
+                    (factura.sub_total?.toString() || '').toLowerCase().includes(query) ||
+                    (factura.iva?.toString() || '').toLowerCase().includes(query) ||
+                    (factura.totalconiva?.toString() || '').toLowerCase().includes(query)
+                );
             });
         },
 
@@ -316,8 +310,15 @@ export default {
     },
     mounted() {
         this.loadUserData();
+        this.fetchProveedores();
+        this.fetchFacturas();
     },
     methods: {
+        formatDate(dateString) {
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            const date = new Date(dateString);
+            return date.toLocaleDateString('es-MX', options); // Usando la configuración en español de México
+        },
         async loadUserData() {
             const storedUserName = localStorage.getItem("userName");
             const storedUserEmail = localStorage.getItem("userEmail");
@@ -368,19 +369,109 @@ export default {
                 this.profileImage = "../assets/UserHombre.png"; // Imagen por defecto
             }
         },
+        async fetchProveedores() {
+            try {
+                const response = await fetch("http://localhost:3000/api/proveedor");
+                if (!response.ok) {
+                    throw new Error("Error al obtener proveedores");
+                }
+                this.proveedores = await response.json();
+            } catch (error) {
+                console.error("Error al cargar los proveedores:", error);
+            }
+        },
+        async fetchFacturas() {
+            try {
+                const response = await fetch("http://localhost:3000/api/facturas");
+                if (!response.ok) {
+                    throw new Error("Error al obtener facturas");
+                }
+                this.facturas = await response.json();
+            } catch (error) {
+                console.error("Error al cargar las facturas:", error);
+            }
+        },
+        getNombreProveedor(idProveedor) {
+            const proveedor = this.proveedores.find(prov => prov.id === idProveedor);
+            return proveedor ? `${proveedor.nombre} ${proveedor.apellidos}` : "Proveedor desconocido";
+        },
         triggerFileInput() {
             this.$refs.fileInput.click(); // Abre el explorador de archivos al hacer clic
         },
+        truncateFileName(name, maxLength) {
+            return name.length > maxLength ? name.substring(0, maxLength) + "..." : name;
+        },
+
+        // Método para obtener solo el nombre del archivo sin la extensión
+        getPdfName(pdfPath) {
+            const fileName = pdfPath.split('/').pop().split('\\').pop();  // Extrae solo el nombre del archivo
+            return fileName.split('.')[0]; // Devuelve solo el nombre sin la extensión .pdf
+        },
+        
+        getPdfFiles(pdfPaths) {
+            if (!pdfPaths) return []; // Si no hay archivos, retorna un array vacío
+
+            return pdfPaths.split(';').map((path) => {
+                const fileName = path.split('/').pop().split('\\').pop(); // Extrae el nombre del archivo
+                const nameWithoutExtension = fileName.split('.').slice(0, -1).join('.'); // Quita la extensión
+
+                return {
+                    url: `http://localhost:3000/api/facturas-files/${nameWithoutExtension}`, // URL sin extensión para visualización
+                    downloadUrl: `http://localhost:3000/api/facturas-files/${nameWithoutExtension}`, // URL sin extensión para descarga
+                    name: nameWithoutExtension // Nombre sin extensión
+                };
+            });
+        },
+
+        async downloadZip(factura) {
+            try {
+                // Obtener los archivos PDF
+                const pdfFiles = this.getPdfFiles(factura.archivo_pdf);
+
+                // Verificar si hay archivos para descargar
+                if (pdfFiles.length === 0) {
+                    alert("No hay archivos para descargar.");
+                    return;
+                }
+
+                // Descargar cada archivo PDF individualmente
+                for (const file of pdfFiles) {
+                    // Hacer una solicitud a la API para obtener el archivo
+                    const response = await fetch(file.downloadUrl); // Usar la URL de descarga sin extensión
+
+                    // Verificar si la respuesta es exitosa
+                    if (!response.ok) {
+                        throw new Error(`Error al obtener el archivo: ${response.statusText}`);
+                    }
+
+                    // Convertir la respuesta a un Blob
+                    const blob = await response.blob();
+
+                    // Crear un enlace para descargar el archivo
+                    const link = document.createElement('a');
+                    link.href = URL.createObjectURL(blob); // Crear una URL temporal para el Blob
+                    link.download = file.name + '.pdf'; // Nombre del archivo con extensión
+                    document.body.appendChild(link);
+                    link.click(); // Simular clic para iniciar la descarga
+                    document.body.removeChild(link); // Eliminar el enlace del DOM
+                    URL.revokeObjectURL(link.href); // Liberar la URL temporal
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Hubo un error al descargar los archivos PDF. Por favor, inténtalo de nuevo.');
+            }
+        },
+
         handleFileChange(event) {
             const file = event.target.files[0];
             if (file) {
-                this.currentFactura.archivodocumento = file; // Guarda el archivo en el estado actual
+                this.currentFactura.archivo_pdf = file; // Guarda el archivo en el estado actual
             }
         },
         handleDrop(event) {
             const file = event.dataTransfer.files[0];
             if (file) {
-                this.currentFactura.archivodocumento = file; // Guarda el archivo arrastrado en el estado actual
+                this.currentFactura.archivo_pdf = file; // Guarda el archivo arrastrado en el estado actual
             }
         },
         goHome() {
@@ -457,6 +548,47 @@ export default {
 /* Aplicar Montserrat a todo el contenido */
 * {
     font-family: 'Montserrat', sans-serif;
+}
+
+td ul {
+    list-style-type: none;
+    /* Quita los puntos de la lista */
+    padding: 0;
+    margin: 0;
+}
+
+td ul li {
+    margin-bottom: 5px;
+    /* Espacio entre elementos */
+}
+
+td ul li a {
+    text-decoration: none;
+    color: #007bff;
+    font-weight: bold;
+}
+
+td ul li a:hover {
+    text-decoration: underline;
+}
+
+.btn-download {
+    display: flex;
+    text-align: center;
+    justify-content: center;
+    align-items: center;
+    border-radius: 10px;
+    width: 100%;
+    height: 20px;
+}
+
+.btn-download:hover {
+    background: #bc955b;
+}
+
+.textoDescarga {
+    font-size: 14px;
+
 }
 
 .titulo {
@@ -657,6 +789,7 @@ label {
 a {
     text-decoration: none;
 }
+
 /* Contenedor responsivo */
 .contenedor-tabla {
     width: 100%;
@@ -664,13 +797,16 @@ a {
     align-items: center;
     justify-content: center;
     flex-direction: column;
-    overflow-x: auto; /* Habilita desplazamiento horizontal */
+    overflow-x: auto;
+    /* Habilita desplazamiento horizontal */
 }
 
 /* Tabla principal */
 .factura-table {
-    width: 100%; /* Ocupa todo el ancho disponible */
-    max-width: 1200px; /* Limita el ancho máximo */
+    width: 100%;
+    /* Ocupa todo el ancho disponible */
+    max-width: 1200px;
+    /* Limita el ancho máximo */
     border-collapse: separate;
     border-spacing: 0;
     background-color: white;
@@ -678,14 +814,16 @@ a {
     font-size: 15px;
     border-radius: 15px;
     overflow: hidden;
-    table-layout: auto; /* Ajusta el ancho según el contenido */
+    table-layout: auto;
+    /* Ajusta el ancho según el contenido */
 }
 
 .factura-table th,
 .factura-table td {
     padding: 10px;
     text-align: center;
-    word-wrap: break-word; /* Permite el ajuste de palabras largas */
+    word-wrap: break-word;
+    /* Permite el ajuste de palabras largas */
 }
 
 .factura-table th {
@@ -706,7 +844,8 @@ a {
     padding: 5px 15px;
     border: none;
     cursor: pointer;
-    width: 100%; /* Botones se ajustan al ancho */
+    width: 100%;
+    /* Botones se ajustan al ancho */
 }
 
 .btn-edit {

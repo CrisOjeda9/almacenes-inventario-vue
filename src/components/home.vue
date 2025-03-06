@@ -153,7 +153,7 @@ export default {
                     this.profileImage = "../assets/UserHombre.png"; // Imagen por defecto en caso de error
                 }
             } else {
-                this.userName = "Usuario desconocido";
+                this.userName = "Usuario desconocido"   ;
                 this.profileImage = "../assets/UserHombre.png"; // Imagen por defecto
             }
         },

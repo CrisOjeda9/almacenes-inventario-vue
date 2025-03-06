@@ -28,7 +28,8 @@
         <div class="sub-navbar">
             <a href="/home" class="nav-item">Inicio</a>
             <a v-if="userRole === 'Administrador'" href="users" class="nav-item">Usuarios</a>
-            <div v-if="userRole === 'Inventario' || userRole === 'Administrador'" class="nav-item" @mouseenter="showMenu('homeMenu')" @mouseleave="hideMenu('homeMenu')">
+            <div v-if="userRole === 'Inventario' || userRole === 'Administrador'" class="nav-item"
+                @mouseenter="showMenu('homeMenu')" @mouseleave="hideMenu('homeMenu')">
                 Inventario
                 <span class="menu-icon">▼</span>
                 <div class="dropdown-menu" v-show="menus.homeMenu">
@@ -40,12 +41,11 @@
                     <button @click="navigateTo('bienesnuevos')">Asignar resguardo</button>
                     <button @click="navigateTo('liberarbien')">Liberar Bien</button>
                     <button @click="navigateTo('reportes')">Generación de reportes</button>
-
-
                 </div>
             </div>
 
-            <div v-if="userRole === 'Almacenes' || userRole === 'Administrador'" class="nav-item" @mouseenter="showMenu('facturaMenu')" @mouseleave="hideMenu('facturaMenu')">
+            <div v-if="userRole === 'Almacenes' || userRole === 'Administrador'" class="nav-item"
+                @mouseenter="showMenu('facturaMenu')" @mouseleave="hideMenu('facturaMenu')">
                 Almacen
                 <span class="menu-icon">▼</span>
                 <div class="dropdown-menu" v-show="menus.facturaMenu">
@@ -63,127 +63,115 @@
 
         <!-- Formulario -->
         <div class="form-container">
-            <form @submit.prevent="registerFactura">
+            <form @submit.prevent="submitFactura">
                 <div class="form-row">
                     <!-- Tipo de alta -->
                     <div class="form-field">
                         <label for="tipoAlta">Tipo de alta</label>
-                        <select id="tipoAlta" v-model="form.tipoAlta" required>
+                        <select id="tipoAlta" v-model="form.tipo_alta" required>
                             <option value="" disabled>Selecciona una opción</option>
-                            <option value="compra">Compra (CM)</option>
-                            <option value="donacion">Donacion (DN)</option>
-                            <option value="comodato">Comodato (CO)</option>
+                            <option value="Compra (CM)">Compra (CM)</option>
+                            <option value="DDomacion (DN)">Donacion (DN)</option>
+                            <option value="Comodato (CO)">Comodato (CO)</option>
                         </select>
                     </div>
-                    <!-- Tipo de alta -->
+                    <!-- Tipo de documento que ampara -->
                     <div class="form-field">
                         <label for="tipoDocumentoAmpara">Tipo de doc. que ampara</label>
-                        <select id="tipoDocumentoAmpara" v-model="form.tipoDocumentoAmpara" required>
+                        <select id="tipoDocumentoAmpara" v-model="form.tipo_documento_ampara" required>
                             <option value="" disabled>Selecciona una opción</option>
-                            <option value="contrato">Contrato de Comodato (CO)</option>
-                            <option value="cd">CD</option>
-                            <option value="conprobante">Comprobante Fiscal Digital por Internet (CFDI)</option>
+                            <option value="Contrato De Comodato (CO)">Contrato de Comodato (CO)</option>
+                            <option value="Comprobante Fiscal Digital por Internet (CFDI)">Comprobante Fiscal Digital
+                                por
+                                Internet (CFDI)</option>
                         </select>
                     </div>
-                    <!-- Fecha de aduisicion -->
+                    <!-- Fecha de adquisición -->
                     <div class="form-field">
                         <label for="fechaAdquisicion">Fecha de Adquisición</label>
-                        <input type="date" id="fechaAdquisicion" v-model="form.fechaAdquisicion" required />
+                        <input type="date" id="fechaAdquisicion" v-model="form.fecha_adquisicion" required />
                     </div>
                     <!-- No. Factura -->
                     <div class="form-field">
-                        <label for="numfactura">No. Factura</label>
-                        <input type="number" min="0" id="numfactura" placeholder="" v-model="form.numFactura"
-                            required />
+                        <label for="numero_de_factura">No. Factura</label>
+                        <input type="number" min="0" id="numero_de_factura" placeholder=""
+                            v-model="form.numero_de_factura" required />
                     </div>
-
-
-
-
-
-
                 </div>
 
                 <div class="form-row">
                     <!-- Tipo de Compra -->
                     <div class="form-field">
                         <label for="tipoCompra">Tipo de compra</label>
-                        <select id="tipoCompra" v-model="form.tipoCompra" required>
+                        <select id="tipoCompra" v-model="form.tipo_compra" required>
                             <option value="" disabled>Selecciona una opción</option>
-                            <option value="estatal">Estatal</option>
-                            <option value="presupuestal">Presupuestal</option>
+                            <option value="Presupuesto">Presupuesto</option>
+                            <option value="Estatal">Estatal</option>
                         </select>
                     </div>
                     <!-- Concepto -->
                     <div class="form-field">
                         <label for="concepto">Concepto</label>
-                        <input type="text" id="concepto" placeholder="" v-model="form.concepto"
-                            minlength="3" maxlength="100" style="text-transform: uppercase;" required />
+                        <input type="text" id="concepto" placeholder="" v-model="form.concepto" minlength="3"
+                            maxlength="100" style="text-transform: uppercase;" required />
                     </div>
                     <!-- Fecha de Factura -->
                     <div class="form-field">
                         <label for="fechaFactura">Fecha de Factura</label>
-                        <input type="date" id="fechaFactura" v-model="form.fechaFactura" required />
+                        <input type="date" id="fechaFactura" v-model="form.fecha_factura" required />
                     </div>
                     <!-- Cantidad -->
                     <div class="form-field">
                         <label for="cantidad">Cantidad</label>
-                        <input type="number" min="0" id="cantidad" placeholder="" v-model="form.cantidad"
-                            required />
+                        <input type="number" min="0" id="cantidad" placeholder="" v-model="form.cantidad" required />
                     </div>
-
                 </div>
 
                 <div class="form-row">
-
-
-
                     <!-- Precio Unitario -->
                     <div class="form-field">
                         <label for="precioUnitario">Precio Unitario</label>
                         <input type="number" id="precioUnitario" step="0.01" placeholder=""
-                            v-model="form.precioUnitario" min="0" required />
+                            v-model="form.precio_unitario" min="0" required />
                     </div>
-                    <!-- Precio Total sin IVA -->
+                    <!-- Subtotal -->
                     <div class="form-field">
-                        <label for="precioTotalSinIVA">Precio total sin IVA</label>
-                        <input type="number" id="precioTotalSinIVA" step="0.01" placeholder=""
-                            v-model="form.precioTotalSinIVA" min="0" required />
+                        <label for="subTotal">Subtotal</label>
+                        <input type="number" id="subTotal" step="0.01" placeholder="" v-model="form.sub_total" min="0"
+                            required />
                     </div>
                     <!-- IVA -->
                     <div class="form-field">
                         <label for="iva">IVA</label>
-                        <input type="number" id="iva" step="0.01" placeholder="" v-model="form.iva" min="0"
+                        <input type="number" id="iva" step="0.01" placeholder="" v-model="form.iva" min="0" required />
+                    </div>
+                    <!-- Total -->
+                    <div class="form-field">
+                        <label for="total">Total</label>
+                        <input type="number" id="total" step="0.01" placeholder="" v-model="form.total" min="0"
                             required />
                     </div>
-                    <!-- Precio Total con IVA -->
-                    <div class="form-field">
-                        <label for="precioTotalConIVA">Precio total con IVA</label>
-                        <input type="number" id="precioTotalConIVA" step="0.01" placeholder=""
-                            v-model="form.precioTotalConIVA" min="0" required />
-                    </div>
-
                 </div>
 
                 <div class="form-row">
                     <!-- Proveedor -->
                     <div class="form-field">
-                        <label for="proveedor">Proveedor</label>
-                        <select id="proveedor" v-model="form.proveedor" required>
+                        <label for="id_proveedor">Proveedor</label>
+                        <select id="id_proveedor" v-model="form.id_proveedor" required>
                             <option value="" disabled>Selecciona una opción</option>
-                            <option value="carlos">Carlos Martin Hernandez de Jesus</option>
-                            <option value="carlos">Myriam Valderrabano Cortes</option>
-                            <option value="carlos">Cristian Eduardo Ojeda Gayosso</option>
+                            <option v-for="proveedor in proveedores" :key="proveedor.id" :value="proveedor.id">
+                                {{ proveedor.nombre }} {{ proveedor.apellidos }}
+                            </option>
                         </select>
                     </div>
                     <!-- Documento de Factura -->
                     <div class="form-field">
-                        <label for="documentofactura">Documento de Factura</label>
+                        <label for="archivo_pdf">Documento de Factura</label>
                         <div class="dropzone" @drop.prevent="handleDrop" @dragover.prevent @click="triggerFileInput">
-                            <input type="file" id="documentofactura" ref="fileInput" @change="handleFileUpload"
+                            <input type="file" id="archivo_pdf" ref="fileInput" @change="handleFileUpload"
                                 accept=".pdf,.jpg,.png" />
-                            <span v-if="!form.documentofactura">Arrastra o selecciona un archivo (PDF)</span>
-                            <span v-else>{{ form.documentofactura.name }}</span>
+                            <span v-if="!form.archivo_pdf">Arrastra o selecciona un archivo (PDF)</span>
+                            <span v-else>{{ form.archivo_pdf.name }}</span>
                         </div>
                     </div>
                 </div>
@@ -214,19 +202,19 @@ export default {
             userName: "Cargando...", // Mensaje temporal
             profileImage: "",  // URL de la imagen del usuario
             form: {
-                tipoAlta: "", // Asegúrate de que esté vacío por defecto
-                tipoDocumentoAmpara: "", // Asegúrate de que esté vacío por defecto
-                numfactura: "",           // No. Factura
-                tipoCompra: "", // Asegúrate de que esté vacío por defecto
+                tipo_alta: "", // Asegúrate de que esté vacío por defecto
+                tipo_documento_ampara: "", // Asegúrate de que esté vacío por defecto
+                numero_de_factura: "",           // No. Factura
+                tipo_compra: "", // Asegúrate de que esté vacío por defecto
                 concepto: "",             // Concepto
-                fechafactura: "",         // Fecha de Factura
-                proveedor: "",            // Proveedor
-                cantidad: 0,              // Cantidad
-                preciounitario: 0.0,      // Precio Unitario
-                preciosiniva: 0.0,        // Precio total sin IVA
-                iva: 0.0,                 // IVA
-                precioconiva: 0.0,        // Precio total con IVA
-                documentofactura: null, // Almacena el archivo seleccionado
+                fecha_factura: "",         // Fecha de Factura
+                id_proveedor: "",            // Proveedor
+                cantidad: "",              // Cantidad
+                precio_unitario: "",      // Precio Unitario
+                sub_total: "",        // Subtotal
+                iva: "",                 // IVA
+                total: "",        // Total
+                archivo_pdf: null, // Almacena el archivo seleccionado
             },
 
             showPassword: false,
@@ -236,12 +224,15 @@ export default {
                 facturaMenu: false,
                 settingsMenu: false,
             },
-            showModal: false
+            showModal: false,
+            proveedores: [] // Lista de proveedores
 
         };
     },
     mounted() {
         this.loadUserData();
+        this.fetchProveedores();
+
     },
     methods: {
         async loadUserData() {
@@ -294,16 +285,28 @@ export default {
                 this.profileImage = "../assets/UserHombre.png"; // Imagen por defecto
             }
         },
+        async fetchProveedores() {
+            try {
+                const response = await fetch("http://localhost:3000/api/proveedor");
+                if (!response.ok) {
+                    throw new Error("Error al obtener proveedores");
+                }
+                const data = await response.json();
+                this.proveedores = data;
+            } catch (error) {
+                console.error("Error al cargar los proveedores:", error);
+            }
+        },
         goHome() {
             this.$router.push('home'); // Redirige a la página principal ("/"). Cambia el path si es necesario.
         },
         handleFileUpload(event) {
             const file = event.target.files[0];
-            this.form.documentofactura = file; // Almacena el archivo en el formulario
+            this.form.archivo_pdf = file; // Almacena el archivo en el formulario
         },
         handleDrop(event) {
             const file = event.dataTransfer.files[0];
-            this.form.documentofactura = file; // Almacena el archivo en el formulario
+            this.form.archivo_pdf = file; // Almacena el archivo en el formulario
         },
         triggerFileInput() {
             this.$refs.fileInput.click(); // Trigger el input file cuando se hace click en la dropzone
@@ -311,14 +314,55 @@ export default {
         goBack() {
             console.log("Regresar a la página anterior");
         },
-        registerFactura() {
-            if (this.form.password !== this.form.confirmPassword) {
-                alert("Las contraseñas no coinciden");
-                return;
-            }
-            console.log("Factura registrada:", this.form);
-            this.showModal = true;
+        async submitFactura() {
+            try {
+                const formData = new FormData();
 
+                // Normalizar el valor de tipo_alta
+                const tipoAlta = this.form.tipo_alta.trim(); // Eliminar espacios adicionales
+                if (!["Compra (CM)", "Domacion (DN)", "Comodato (CO)"].includes(tipoAlta)) {
+                    throw new Error("El valor de tipo_alta no es válido");
+                }
+                formData.append('tipo_alta', tipoAlta);
+
+                // Agregar campos al FormData
+                formData.append('tipo_documento_ampara', this.form.tipo_documento_ampara);
+                formData.append('fecha_adquisicion', this.form.fecha_adquisicion);
+                formData.append('numero_de_factura', String(this.form.numero_de_factura)); // Convertir a cadena
+                formData.append('tipo_compra', this.form.tipo_compra);
+                formData.append('concepto', this.form.concepto);
+                formData.append('fecha_factura', this.form.fecha_factura);
+                formData.append('id_proveedor', Number(this.form.id_proveedor));
+                formData.append('cantidad', parseFloat(this.form.cantidad)); // Convertir a número
+                formData.append('precio_unitario', parseFloat(this.form.precio_unitario)); // Convertir a número
+                formData.append('sub_total', parseFloat(this.form.sub_total)); // Convertir a número
+                formData.append('iva', parseFloat(this.form.iva)); // Convertir a número
+                formData.append('total', parseFloat(this.form.total)); // Convertir a número
+
+                // Agregar el archivo PDF
+                if (this.form.archivo_pdf) {
+                    formData.append('archivo_pdf', this.form.archivo_pdf);
+                }
+
+                // Enviar la solicitud a la API
+                const response = await fetch("http://localhost:3000/api/facturas", {
+                    method: "POST",
+                    body: formData,
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json(); // Obtener detalles del error
+                    console.error("Detalles del error:", errorData);
+                    throw new Error(errorData.message || "Error al enviar la factura");
+                }
+
+                // Mostrar el modal de éxito
+                this.showModal = true;
+
+            } catch (error) {
+                console.error("Error al enviar la factura:", error);
+                alert(`Hubo un error al enviar la factura: ${error.message}`);
+            }
         },
         navigateTo(page) {
             console.log(`Navegando a ${page}`);
@@ -332,12 +376,11 @@ export default {
         },
         closeModal() {
             this.showModal = false;
-            this.$router.push('/factura');
+            this.$router.push('/factura'); // Redirige a la página de facturas
         },
     },
 };
 </script>
-
 
 <style scoped>
 /* Aplicar Montserrat a todo el contenido */
