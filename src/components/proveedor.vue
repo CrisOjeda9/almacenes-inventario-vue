@@ -83,7 +83,7 @@
                         <th>RFC</th>
                         <th>Dirección</th>
                         <th>Teléfono</th>
-                        <th>email Electronico</th>
+                        <th>Correo Electronico</th>
                         <th>Cuenta Bancaria</th>
                         <th>Documento</th>
                         <th>Fecha de registro</th>
@@ -142,7 +142,7 @@
                                     <label>Apellidos:</label>
                                     <input v-model="currentProveedor.apellidos" type="text" />
                                 </div>
-                                <div style="width: 85%; margin-left: 0px;">
+                                <div style="width: 100%; margin-left: 0px;">
                                     <label>Tipo de Proveedor:</label>
                                     <select v-model="currentProveedor.tipo_proveedor" class="form-input">
                                         <option value="" disabled>Selecciona el tipo de proveedor</option>
@@ -176,6 +176,31 @@
                                 </div>
 
                             </div>
+                            <!-- Tercera columna (Archivos) -->
+                            <div class="form-column">
+                                <div class="form-field">
+                                    <label for="archivos">Archivos</label>
+                                    <div class="dropzone" @drop.prevent="handleDrop('archivos')" @dragover.prevent
+                                        @click="triggerFileInput('archivos')">
+                                        <input type="file" id="archivos" ref="fileInputDoc"
+                                            @change="handleFileUpload('archivos')" accept=".pdf" multiple />
+                                        <i class="fas fa-cloud-upload-alt"></i>
+                                        <span v-if="currentProveedor.archivos.length === 0">Arrastra o selecciona
+                                            archivos
+                                            (PDF)</span>
+                                        <span v-else>{{ currentProveedor.archivos.length }} archivos
+                                            seleccionados</span>
+                                        <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
+                                    </div>
+                                    <button type="button" v-if="currentProveedor.archivos.length > 0"
+                                        @click="openDocumentModal" class="view-documents-btn">
+                                        Ver archivos
+                                    </button>
+                                </div>
+                            </div>
+
+
+
                         </div>
 
                         <!-- Botones debajo del formulario -->
@@ -204,17 +229,46 @@
                 <button @click="nextPage" :disabled="currentPage === totalPages">Siguiente</button>
             </div>
         </div>
+        <!-- Modal para mostrar los archivos cargados -->
+        <div v-if="showDocumentModal" class="modal-overlay2">
+            <div class="modal2">
+                <h2>Archivos Cargados</h2>
+                <div class="document-list2">
+                    <div v-for="(doc, index) in currentProveedor.archivos" :key="index" class="document-item2">
+                        <!-- Mostrar solo el nombre del archivo sin la ruta -->
+                        <span>{{ getFileName(doc) }}</span>
+                        <button @click="removeDocument(index)" class="remove-btn2">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </div>
+                </div>
+                <button @click="closeDocumentModal">Cerrar</button>
+            </div>
+        </div>
+        <!-- Contenedor de notificaciones -->
+        <div v-if="alertMessage" :class="alertClass" class="notification">
+            <i :class="alertIcon"></i> {{ alertMessage }}
+        </div>
     </div>
 </template>
 
 <script>
 import axios from 'axios';
 
-
 export default {
     name: "proveedorPage",
     data() {
         return {
+            alertMessage: "",  // Mensaje de la alerta
+            alertClass: "",    // Clase de la alerta (ej. 'success' o 'error')
+            alertIcon: "",     // Icono para la alerta
+            isEditing: false, // Controla si estamos en modo de edición
+            currentProveedor: {
+                archivos: [], // Archivos del proveedor
+            },
+            showDocumentModal: false, // Controla la visibilidad del modal de archivos
+            errorMessage: "", // Mensaje de error
+
             userRole: localStorage.getItem('userRole') || '', // Obtener el rol desde el localStorage
             userName: "Cargando...", // Mensaje temporal
             profileImage: "",  // URL de la imagen del usuario
@@ -227,8 +281,9 @@ export default {
             searchQuery: '',
             currentPage: 1,
             proveedorPerPage: 10,
-            isEditing: false, // Controla si estamos en modo de edición
             proveedor: [], // Lista de proveedores
+            archivosAEliminar: [], // Lista de archivos marcados para eliminación
+
         };
     },
     computed: {
@@ -283,10 +338,10 @@ export default {
                         // Obtener la ruta completa de la imagen del usuario
                         const imagePath = user.imagen; // Suponiendo que la API devuelve la ruta completa
 
-                        // Extraer el nombre del archivos de la ruta completa
+                        // Extraer el nombre del archivo de la ruta completa
                         let imageFileName = imagePath.split('\\').pop(); // Extrae "radio2.jpg"
 
-                        // Eliminar la extensión del nombre del archivos
+                        // Eliminar la extensión del nombre del archivo
                         if (imageFileName) {
                             imageFileName = imageFileName.split('.').slice(0, -1).join('.'); // Elimina la extensión
                         }
@@ -310,7 +365,6 @@ export default {
                 this.profileImage = "../assets/UserHombre.png"; // Imagen por defecto
             }
         },
-        // Nueva función para cargar los proveedores usando axios
         async loadProveedores() {
             try {
                 const response = await axios.get('http://localhost:3000/api/proveedor');
@@ -353,16 +407,15 @@ export default {
         },
         editproveedor(proveedor) {
             this.currentProveedor = { ...proveedor };
+            // Convertir archivos existentes a un formato manejable
+            if (proveedor.archivos) {
+                this.currentProveedor.archivos = proveedor.archivos.split(';').map(file => file.trim());
+            } else {
+                this.currentProveedor.archivos = [];
+            }
             this.isEditing = true;
         },
-        saveChanges() {
-            const index = this.proveedor.findIndex(proveedor => proveedor.id === this.currentProveedor.id);
-            if (index !== -1) {
-                this.proveedor[index] = { ...this.currentProveedor };
-                this.isEditing = false;
-                this.currentProveedor = {}; // Limpiar el objeto
-            }
-        },
+
         cancelEdit() {
             this.isEditing = false;
             this.currentProveedor = {}; // Limpiar el objeto
@@ -403,6 +456,16 @@ export default {
         },
         truncateFileName(name, maxLength) {
             return name.length > maxLength ? name.substring(0, maxLength) + "..." : name;
+        },
+        getFileName(file) {
+            if (typeof file === 'string') {
+                // Si es una cadena (ruta), extraer el nombre del archivo
+                return file.split('/').pop().split('\\').pop();
+            } else if (file instanceof File) {
+                // Si es un objeto File, devolver el nombre del archivo
+                return file.name;
+            }
+            return ''; // En caso de que no sea ni una cadena ni un objeto File
         },
 
         // Método para obtener solo el nombre del archivo sin la extensión
@@ -475,10 +538,171 @@ export default {
                 console.error('Error:', error);
                 alert('Hubo un error al descargar el archivo ZIP. Por favor, inténtalo de nuevo.');
             }
-        }
-    }
-};
+        },
+        showAlert(message, type) {
+            this.alertMessage = message;
+            if (type === "success") {
+                this.alertClass = "alert-success";
+                this.alertIcon = "fa fa-check-circle";
+            } else if (type === "error") {
+                this.alertClass = "alert-error";
+                this.alertIcon = "fa fa-times-circle";
+            } else {
+                this.alertClass = "alert-warning";
+                this.alertIcon = "fa fa-exclamation-circle";
+            }
 
+            // Ocultar la alerta después de 3 segundos
+            setTimeout(() => {
+                this.alertMessage = "";
+            }, 3000);
+        },
+        // Método para activar el input de archivo
+        triggerFileInput(type) {
+            if (type === "archivos") {
+                this.$refs.fileInputDoc.click(); // Simula un clic en el input de archivo
+            }
+        },
+
+        // Método para manejar la selección de archivos
+        handleFileUpload(type) {
+            if (type === "archivos") {
+                const input = this.$refs.fileInputDoc;
+                const files = Array.from(input.files); // Convierte FileList a un array
+
+                // Validar el límite de 10 archivos
+                if (files.length + this.currentProveedor.archivos.length > 10) {
+                    this.showAlert("No se pueden subir más de 10 archivos", "error");
+                    return;
+                }
+
+                // Agregar los archivos al array
+                this.currentProveedor.archivos = [...this.currentProveedor.archivos, ...files];
+                this.errorMessage = ""; // Limpiar el mensaje de error
+            }
+        },
+        // Método para eliminar un archivo del servidor
+        async deleteFile(fileName) {
+            try {
+                // Obtener el ID del proveedor actual
+                const proveedorId = this.currentProveedor.id;
+
+                // Enviar la solicitud DELETE al backend
+                await axios.delete(`http://localhost:3000/api/proveedor/${proveedorId}/archivos`, {
+                    data: { fileName: fileName } // Enviar el nombre del archivo en el cuerpo
+                });
+
+                // Eliminar el archivo de la lista local
+                const index = this.currentProveedor.archivos.findIndex(file => {
+                    if (typeof file === 'string') {
+                        return file.includes(fileName);
+                    } else if (file instanceof File) {
+                        return file.name === fileName;
+                    }
+                    return false;
+                });
+
+                if (index !== -1) {
+                    this.currentProveedor.archivos.splice(index, 1);
+                }
+
+                // Mostrar una notificación de éxito
+                this.showAlert("Archivo eliminado correctamente", "success");
+            } catch (error) {
+                console.error("Error al eliminar el archivo:", error);
+                this.showAlert("Hubo un error al eliminar el archivo", "error");
+            }
+        },
+        removeDocument(index) {
+            const file = this.currentProveedor.archivos[index];
+
+            // Extraer el nombre del archivo
+            let fileName;
+            if (typeof file === 'string') {
+                // Si es una cadena (ruta), extraer el nombre del archivo
+                fileName = file.split('/').pop().split('\\').pop(); // Extrae "archivo1.pdf"
+            } else if (file instanceof File) {
+                // Si es un objeto File, obtener el nombre directamente
+                fileName = file.name;
+            } else {
+                console.error("Formato de archivo no válido:", file);
+                return;
+            }
+
+            // Agregar el archivo a la lista de archivos a eliminar
+            this.archivosAEliminar.push(fileName);
+
+            // Eliminar el archivo de la lista local
+            this.currentProveedor.archivos.splice(index, 1);
+        },
+
+
+
+        // Método para abrir el modal de visualización de archivos
+        openDocumentModal() {
+            this.showDocumentModal = true;
+        },
+
+        // Método para cerrar el modal de visualización de archivos
+        closeDocumentModal() {
+            this.showDocumentModal = false;
+        },
+
+        // Método para guardar los cambios
+        // Método para guardar los cambios
+        async saveChanges() {
+            try {
+                // 1. Enviar los cambios generales del proveedor
+                const formData = new FormData();
+                formData.append("nombre", this.currentProveedor.nombre);
+                formData.append("apellidos", this.currentProveedor.apellidos);
+                formData.append("tipo_proveedor", this.currentProveedor.tipo_proveedor);
+                formData.append("RFC", this.currentProveedor.RFC);
+                formData.append("direccion", this.currentProveedor.direccion);
+                formData.append("telefono", this.currentProveedor.telefono);
+                formData.append("email", this.currentProveedor.email);
+                formData.append("cuenta_bancaria", this.currentProveedor.cuenta_bancaria);
+
+                // Enviar la solicitud PUT a la API para actualizar el proveedor
+                await axios.put(`http://localhost:3000/api/proveedor/${this.currentProveedor.id}`, formData, {
+                    headers: { "Content-Type": "multipart/form-data" }
+                });
+
+                // 2. Eliminar los archivos marcados para eliminación
+                if (this.archivosAEliminar.length > 0) {
+                    for (const fileName of this.archivosAEliminar) {
+                        await axios.delete(`http://localhost:3000/api/proveedor/${this.currentProveedor.id}/archivos`, {
+                            data: { fileName: fileName }
+                        });
+                    }
+                    this.archivosAEliminar = []; // Limpiar la lista de archivos a eliminar
+                }
+
+                // 3. Agregar los archivos nuevos
+                const nuevosArchivos = this.currentProveedor.archivos.filter(file => file instanceof File);
+                if (nuevosArchivos.length > 0) {
+                    const archivosFormData = new FormData();
+                    nuevosArchivos.forEach((file) => {
+                        archivosFormData.append('archivos', file);
+                    });
+
+                    // Enviar los archivos nuevos al backend
+                    await axios.post(`http://localhost:3000/api/proveedor/${this.currentProveedor.id}/archivos`, archivosFormData, {
+                        headers: { "Content-Type": "multipart/form-data" }
+                    });
+                }
+
+                // Cerrar el modal y recargar los proveedores
+                this.isEditing = false;
+                this.loadProveedores();
+                this.showAlert("Proveedor actualizado con éxito", "success");
+            } catch (error) {
+                console.error("Error al actualizar el proveedor:", error);
+                this.showAlert("Hubo un error al actualizar el proveedor", "error");
+            }
+        },
+    },
+};
 </script>
 
 
@@ -488,6 +712,185 @@ export default {
     font-family: 'Montserrat', sans-serif;
 }
 
+.dropzone {
+    position: relative;
+    border: 2px dashed #007bff;
+    border-radius: 8px;
+    background-color: #f8f9fa;
+    padding: 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+    height: 170px;
+    margin-bottom: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.dropzone:hover {
+    background-color: #e3f2fd;
+    border-color: #0056b3;
+}
+
+.dropzone input[type="file"] {
+    display: none;
+}
+
+.dropzone i {
+    font-size: 32px;
+    color: #007bff;
+    margin-bottom: 10px;
+}
+
+.dropzone span {
+    display: block;
+    font-size: 14px;
+    color: #555;
+}
+
+.dropzone p.error-message {
+    color: red;
+    font-size: 12px;
+    margin-top: 5px;
+}
+
+form .view-documents-btn {
+    background-color: #a02142;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 5px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.view-documents-btn:hover {
+    background-color: #218838;
+}
+
+/* Estilo general para la notificación */
+.notification {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-size: 16px;
+    color: white;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    z-index: 999;
+    max-width: 80%;
+    opacity: 0;
+    animation: fadeIn 0.5s forwards;
+}
+
+/* Animación de aparición de la notificación */
+@keyframes fadeIn {
+    0% {
+        opacity: 0;
+        top: 0;
+    }
+
+    100% {
+        opacity: 1;
+        top: 20px;
+    }
+}
+
+/* Notificación de éxito */
+.alert-success {
+    background-color: #4CAF50;
+    /* Verde */
+}
+
+/* Notificación de error */
+.alert-error {
+    background-color: #f44336;
+    /* Rojo */
+}
+
+/* Notificación de advertencia */
+.alert-warning {
+    background-color: #ff9800;
+    /* Naranja */
+}
+
+/* Iconos de la alerta */
+.notification i {
+    margin-right: 10px;
+}
+
+
+.view-documents-btn {
+    display: flex;
+    justify-content: center;
+    position: relative;
+    width: 100%;
+    background-color: #691b31;
+    color: white;
+    border: none;
+    padding: 5px;
+    cursor: pointer;
+    border-radius: 5px;
+    margin-top: 2px;
+    font-size: 15px;
+}
+
+.modal-overlay2 {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    /* Asegúrate de que el modal esté por encima de otros elementos */
+}
+
+.modal2 {
+
+    background: white;
+    color: #691B31;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+}
+
+.modal-overlay2.show {
+    visibility: visible;
+}
+
+.modal2 button {
+    padding: 10px 20px;
+    background-color: #BC955B;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    margin-top: 10px;
+    cursor: pointer;
+
+}
+
+.modal2 button:hover {
+    background-color: #691B31;
+}
+
+
+.document-list2 {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 30px;
+    gap: 1px;
+}
 
 td ul {
     list-style-type: none;
@@ -889,8 +1292,8 @@ a {
     background: #691B31;
     padding: 10px;
     border-radius: 25px;
-    width: 80%;
-    max-width: 800px;
+    width: 100%;
+    max-width: 900px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
 }
 
@@ -898,7 +1301,7 @@ form {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    gap: 20px;
+    gap: 60px;
 }
 
 
@@ -906,6 +1309,7 @@ form {
     display: flex;
     justify-content: center;
     align-items: center;
+    gap: 10px;
 }
 
 form .form-column {
@@ -946,9 +1350,6 @@ button[type="submit"] {
     background-color: #4CAF50;
 }
 
-button[type="button"] {
-    background-color: #f44336;
-}
 
 .form-buttons button:hover {
     background-color: #45a049;
