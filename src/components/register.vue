@@ -153,7 +153,7 @@
                         <label for="imagen">Foto</label>
                         <div class="dropzone" style="background-color: #dcddcd;">
                             <span>{{ form.imagen ? form.imagen.split('/').pop() : 'No se ha seleccionado ninguna foto'
-                                }}</span>
+                            }}</span>
                         </div>
                     </div>
                     <div class="form-field">
@@ -214,6 +214,8 @@ export default {
     name: "RegisterPage",
     data() {
         return {
+            userName: "Cargando...", // Mensaje temporal
+            profileImage: "",  // URL de la imagen del usuario
             alertMessage: "",  // Mensaje de la alerta
             alertClass: "",    // Clase de la alerta (ej. 'success' o 'error')
             alertIcon: "",     // Icono para la alerta
@@ -252,6 +254,7 @@ export default {
     },
     mounted() {
         this.loadPersonas(); // Cargar la lista de personas al montar el componente
+        this.loadUserData();
     },
     methods: {
         // Cargar la lista de personas desde la API
@@ -263,6 +266,56 @@ export default {
                 console.error('Error al cargar personas', error);
                 this.alertMessageList = ['Error al cargar la lista de personas.'];
                 this.showAlertModal = true;
+            }
+        },
+        async loadUserData() {
+            const storedUserName = localStorage.getItem("userName");
+            const storedUserEmail = localStorage.getItem("userEmail");
+
+            if (storedUserName && storedUserEmail) {
+                this.userName = storedUserName;
+
+                try {
+                    // Obtener todos los usuarios de la API
+                    const response = await fetch('http://localhost:3000/api/personas');
+                    const users = await response.json();
+
+                    // Buscar el usuario logueado por email
+                    const user = users.find(u => u.email === storedUserEmail);
+
+                    if (user) {
+                        // Concatenar nombre y apellidos
+                        const fullName = `${user.nombre || storedUserName} ${user.apellidos || ""}`.trim();
+                        this.userName = fullName;
+
+                        // Obtener la ruta completa de la imagen del usuario
+                        const imagePath = user.imagen; // Suponiendo que la API devuelve la ruta completa
+
+                        // Extraer el nombre del archivo de la ruta completa
+                        let imageFileName = imagePath.split('\\').pop(); // Extrae "radio2.jpg"
+
+                        // Eliminar la extensión del nombre del archivo
+                        if (imageFileName) {
+                            imageFileName = imageFileName.split('.').slice(0, -1).join('.'); // Elimina la extensión
+                        }
+
+                        if (imageFileName) {
+                            // Construir la URL completa para la imagen
+                            this.profileImage = `http://localhost:3000/api/users-files/${imageFileName}`;
+                        } else {
+                            // Usar una imagen por defecto si no hay imagen en la API
+                            this.profileImage = "../assets/UserHombre.png";
+                        }
+                    } else {
+                        this.profileImage = "../assets/UserHombre.png"; // Imagen por defecto
+                    }
+                } catch (error) {
+                    console.error('Error al cargar los datos del usuario:', error);
+                    this.profileImage = "../assets/UserHombre.png"; // Imagen por defecto en caso de error
+                }
+            } else {
+                this.userName = "Usuario desconocido";
+                this.profileImage = "../assets/UserHombre.png"; // Imagen por defecto
             }
         },
 
@@ -361,6 +414,15 @@ export default {
             }
         },
 
+        navigateTo(page) {
+            this.$router.push({ name: page });
+        },
+        showMenu(menuName) {
+            this.menus[menuName] = true;
+        },
+        hideMenu(menuName) {
+            this.menus[menuName] = false;
+        },
 
         // Cerrar modal de éxito
         closeModal() {
