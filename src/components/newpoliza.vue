@@ -28,7 +28,8 @@
         <div class="sub-navbar">
             <a href="/home" class="nav-item">Inicio</a>
             <a v-if="userRole === 'Administrador'" href="users" class="nav-item">Usuarios</a>
-            <div v-if="userRole === 'Inventario' || userRole === 'Administrador'" class="nav-item" @mouseenter="showMenu('homeMenu')" @mouseleave="hideMenu('homeMenu')">
+            <div v-if="userRole === 'Inventario' || userRole === 'Administrador'" class="nav-item"
+                @mouseenter="showMenu('homeMenu')" @mouseleave="hideMenu('homeMenu')">
                 Inventario
                 <span class="menu-icon">▼</span>
                 <div class="dropdown-menu" v-show="menus.homeMenu">
@@ -45,7 +46,8 @@
                 </div>
             </div>
 
-            <div v-if="userRole === 'Almacenes' || userRole === 'Administrador'" class="nav-item" @mouseenter="showMenu('polizaMenu')" @mouseleave="hideMenu('polizaMenu')">
+            <div v-if="userRole === 'Almacenes' || userRole === 'Administrador'" class="nav-item"
+                @mouseenter="showMenu('polizaMenu')" @mouseleave="hideMenu('polizaMenu')">
                 Almacen
                 <span class="menu-icon">▼</span>
                 <div class="dropdown-menu" v-show="menus.polizaMenu">
@@ -68,8 +70,7 @@
                     <!-- Descripción -->
                     <div class="form-field">
                         <label for="descripcion">Descripción</label>
-                        <input type="text" id="descripcion" placeholder=""
-                            v-model="form.descripcion" required />
+                        <input type="text" id="descripcion" placeholder="" v-model="form.descripcion" required />
                     </div>
 
                     <!-- Cobertura -->
@@ -81,8 +82,17 @@
                     <!-- Tipo de Póliza -->
                     <div class="form-field">
                         <label for="tipo">Tipo de Póliza</label>
-                        <input type="text" id="tipo" placeholder="" v-model="form.tipo"
-                            required />
+                        <select id="tipo" v-model="form.tipo" required>
+                            <option value="">Seleccione un tipo</option>
+                            <option value="Egresos">Egresos</option>
+                            <option value="Presupuestales">Presupuestales</option>
+                            <option value="Donaciones">Donaciones</option>
+                            <option value="Cheques">Cheques</option>
+                            <option value="Ingresos">Ingresos</option>
+                            <option value="Transferencias">Transferencias</option>
+                            <option value="Retenciones">Retenciones</option>
+                            <option value="Depositos">Depósitos</option>
+                        </select>
                     </div>
 
                     <!-- Calidad -->
@@ -96,21 +106,21 @@
                     <!-- Deducible -->
                     <div class="form-field">
                         <label for="deducible">Deducible</label>
-                        <input type="number" step="0.01" id="deducible" placeholder="" v-model="form.deducible"
-                            min="0" required />
+                        <input type="number" step="0.01" id="deducible" placeholder="" v-model="form.deducible" min="0"
+                            required />
                     </div>
 
                     <!-- Prima -->
                     <div class="form-field">
                         <label for="prima">Prima</label>
-                        <input type="number" step="0.01" id="prima" placeholder="" v-model="form.prima"
-                            min="0" required />
+                        <input type="number" step="0.01" id="prima" placeholder="" v-model="form.prima" min="0"
+                            required />
                     </div>
-                     <!-- Cantidad -->
-                     <div class="form-field">
+                    <!-- Cantidad -->
+                    <div class="form-field">
                         <label for="cantidad">Cantidad</label>
-                        <input type="number" step="0.01" id="cantidad" placeholder="" v-model="form.cantidad"
-                            min="0" required />
+                        <input type="number" step="0.01" id="cantidad" placeholder="" v-model="form.cantidad" min="0"
+                            required />
                     </div>
 
                     <!-- Limite de indemnización -->
@@ -120,9 +130,9 @@
                             v-model="form.limites_indemnizacion" min="0" required />
                     </div>
 
-                    
 
-                    
+
+
                 </div>
 
                 <div class="form-row">
@@ -130,15 +140,15 @@
                     <!-- Periodo de Validación -->
                     <div class="form-field">
                         <label for="periodo_vigencia">Periodo de Validación</label>
-                        <input type="number" min="0" id="periodo_vigencia" placeholder="" v-model="form.periodo_vigencia"
-                            required />
+                        <input type="text" min="0" id="periodo_vigencia" placeholder=""
+                            v-model="form.periodo_vigencia" required />
                     </div>
 
                     <!-- Clausulas de exclusion -->
                     <div class="form-field">
                         <label for="clausulas_exclusion">Cláusulas de exclusion</label>
-                        <input type="text" id="clausulas_exclusion" placeholder=""
-                            v-model="form.clausulas_exclusion" required />
+                        <input type="text" id="clausulas_exclusion" placeholder="" v-model="form.clausulas_exclusion"
+                            required />
                     </div>
 
                     <!-- Fecha de Póliza -->
@@ -147,14 +157,13 @@
                         <input type="date" id="fecha" v-model="form.fecha" required />
                     </div>
 
-                    
+
 
                     <!-- Documento de Poliza -->
                     <div class="form-field">
                         <label for="archivo">Documento de Poliza</label>
                         <div class="dropzone" @drop.prevent="handleDrop" @dragover.prevent @click="triggerFileInput">
-                            <input type="file" id="archivo" ref="fileInput" @change="handleFileUpload"
-                                accept=".pdf" />
+                            <input type="file" id="archivo" ref="fileInput" @change="handleFileUpload" accept=".pdf" />
                             <i class="fas fa-cloud-upload-alt"></i>
                             <span v-if="!form.archivo">Arrastra o selecciona un archivo (PDF)</span>
                             <span v-else>{{ form.archivo.name }}</span>
@@ -192,8 +201,8 @@ export default {
                 tipo: "",             // Concepto
                 calidad: "",         // Fecha de Factura
                 deducible: "",
-                prima:"", 
-                cantidad:"",           
+                prima: "",
+                cantidad: "",
                 limites_indemnizacion: 0,              // Cantidad
                 periodo_vigencia: "",      // Precio Unitario
                 clausulas_exclusion: "",        // Precio total sin IVA
