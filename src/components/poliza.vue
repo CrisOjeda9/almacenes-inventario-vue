@@ -81,11 +81,13 @@
                         <th>Tipo de poliza</th>
                         <th>Calidad</th>
                         <th>Deducible</th>
+                        <th>Prima</th>
+                        <th>Cantidad</th>
                         <th>Limite de indemnización</th>
-                        <th>Periodo de validacion</th>
-                        <th>Clausulas de exclusion</th>
+                        <th>Periodo de validación</th>
+                        <th>Clausulas de clausulas_exclusion</th>
                         <th>Fecha de poliza</th>
-                        <th>Documento</th>
+                        <th>archivo</th>
                         <th>Fecha de registro</th>
                         <th>Acciones</th>
 
@@ -95,22 +97,24 @@
                     <tr v-for="poliza in paginatedpoliza" :key="poliza.id">
                         <td>{{ poliza.descripcion }}</td>
                         <td>{{ poliza.cobertura }}</td>
-                        <td>{{ poliza.tipopoliza }}</td>
+                        <td>{{ poliza.tipo }}</td>
                         <td>{{ poliza.calidad }}</td>
                         <td>{{ poliza.deducible }}</td>
-                        <td>{{ poliza.indemnizacion }}</td>
-                        <td>{{ poliza.validacion }}</td>
-                        <td>{{ poliza.exclusion }}</td>
-                        <td>{{ poliza.fechapoliza }}</td>
+                        <td>{{ poliza.prima }}</td>
+                        <td>{{ poliza.cantidad }}</td>
+                        <td>{{ poliza.limites_indemnizacion }}</td>
+                        <td>{{ poliza.periodo_vigencia }}</td>
+                        <td>{{ poliza.clausulas_exclusion }}</td>
+                        <td>{{ poliza.fecha }}</td>
                         <td>
-                            <!-- Botón de descarga por cada documento -->
-                            <a :href="'/ruta/del/archivo/' + poliza.documento" download>
+                            <!-- Botón de descarga por cada archivo -->
+                            <a :href="'/ruta/del/archivo/' + poliza.archivo" download>
                                 <button class="btn-download">
                                     <i class="fas fa-download"></i>
                                 </button>
                             </a>
                         </td>
-                        <td>{{ poliza.registrationDate }}</td>
+                        <td>{{ formatDate(poliza.createdAt) }}</td>
                         <td>
                             <button @click="editpoliza(poliza)" class="btn-edit">Editar</button>
                             <button @click="showDeleteModal(poliza.id)" class="btn-delete">Eliminar</button>
@@ -136,7 +140,7 @@
                                 </div>
                                 <div>
                                     <label>Tipo de póliza:</label>
-                                    <input v-model="currentPoliza.tipopoliza" type="text" />
+                                    <input v-model="currentPoliza.tipo" type="text" />
                                 </div>
                                 <div>
                                     <label>Calidad:</label>
@@ -151,19 +155,19 @@
                             <div class="form-column">
                                 <div>
                                     <label>Límite de indemnización:</label>
-                                    <input v-model="currentPoliza.indemnizacion" type="text" />
+                                    <input v-model="currentPoliza.limites_indemnizacion" type="text" />
                                 </div>
                                 <div>
                                     <label>Periodo de validación:</label>
-                                    <input v-model="currentPoliza.validacion" type="text" />
+                                    <input v-model="currentPoliza.periodo_vigencia" type="text" />
                                 </div>
                                 <div>
                                     <label>Cláusulas de exclusión:</label>
-                                    <input v-model="currentPoliza.exclusion" type="text" />
+                                    <input v-model="currentPoliza.clausulas_exclusion" type="text" />
                                 </div>
                                 <div>
                                     <label>Fecha de póliza:</label>
-                                    <input v-model="currentPoliza.fechapoliza" type="date" />
+                                    <input v-model="currentPoliza.fecha" type="date" />
                                 </div>
                             </div>
                         </div>
@@ -215,36 +219,7 @@ export default {
             polizaPerPage: 10,
             isEditing: false, // Para controlar si estamos en modo de edición
             currentPoliza: {}, // Objeto para almacenar la póliza que se está editando
-            poliza: [
-                {
-                    id: 1,
-                    descripcion: "Seguro contra incendios",
-                    cobertura: "Edificio principal",
-                    tipopoliza: "Anual",
-                    calidad: "Premium",
-                    deducible: "$5,000",
-                    indemnizacion: "$1,000,000",
-                    validacion: "30 días",
-                    exclusion: "Daños preexistentes",
-                    fechapoliza: "2024-01-01",
-                    documento: "asdadasda",
-                    registrationDate: "2024-01-15"
-                },
-                {
-                    id: 2,
-                    descripcion: "Seguro de vehículos",
-                    cobertura: "Flotilla corporativa",
-                    tipopoliza: "Semestral",
-                    calidad: "Económica",
-                    deducible: "$2,000",
-                    indemnizacion: "$500,000",
-                    validacion: "15 días",
-                    exclusion: "Uso no autorizado",
-                    fechapoliza: "2024-01-10",
-                    documento: "asdadasda",
-                    registrationDate: "2024-01-16"
-                }
-            ]
+            poliza: [], // Inicializar como un array vacío
         };
     },
     computed: {
@@ -253,7 +228,7 @@ export default {
             return this.poliza.filter(poliza => {
                 return poliza.descripcion.toLowerCase().includes(query) ||
                     poliza.cobertura.toLowerCase().includes(query) ||
-                    poliza.tipopoliza.toLowerCase().includes(query) ||
+                    poliza.tipo.toLowerCase().includes(query) ||
                     poliza.calidad.toLowerCase().includes(query);
             });
         },
@@ -268,8 +243,14 @@ export default {
     },
     mounted() {
         this.loadUserData();
+        this.fetchPolizas();
     },
     methods: {
+        formatDate(dateString) {
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            const date = new Date(dateString);
+            return date.toLocaleDateString('es-MX', options); // Usando la configuración en español de México
+        },
         async loadUserData() {
             const storedUserName = localStorage.getItem("userName");
             const storedUserEmail = localStorage.getItem("userEmail");
@@ -320,6 +301,17 @@ export default {
                 this.profileImage = "../assets/UserHombre.png"; // Imagen por defecto
             }
         },
+        async fetchPolizas() {
+            try {
+                const response = await fetch("http://localhost:3000/api/polizas");
+                if (!response.ok) {
+                    throw new Error("Error al obtener pólizas");
+                }
+                this.poliza = await response.json(); // Asignar los datos a this.poliza
+            } catch (error) {
+                console.error("Error al cargar las pólizas:", error);
+            }
+        },
         goHome() {
             this.$router.push('home'); // Redirige a la página principal ("/"). Cambia el path si es necesario.
         },
@@ -335,7 +327,6 @@ export default {
         goBack() {
             window.history.back();
         },
-
         prevPage() {
             if (this.currentPage > 1) {
                 this.currentPage--;
@@ -362,7 +353,6 @@ export default {
             this.isEditing = false;
             this.currentPoliza = {}; // Limpiar el objeto
         },
-
         showDeleteModal(id) {
             this.deleteId = id;
             this.isDeleteModalVisible = true;
@@ -383,9 +373,6 @@ export default {
             // Aquí defines la ruta a la que quieres redirigir al hacer clic en el botón
             this.$router.push('/newpoliza');
         },
-
-
-
     }
 };
 </script>
