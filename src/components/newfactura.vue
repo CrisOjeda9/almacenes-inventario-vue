@@ -71,7 +71,7 @@
                         <select id="tipoAlta" v-model="form.tipo_alta" required>
                             <option value="" disabled>Selecciona una opción</option>
                             <option value="Compra (CM)">Compra (CM)</option>
-                            <option value="DDomacion (DN)">Donacion (DN)</option>
+                            <option value="Donacion (DN)">Donacion (DN)</option>
                             <option value="Comodato (CO)">Comodato (CO)</option>
                         </select>
                     </div>
@@ -320,7 +320,7 @@ export default {
 
                 // Normalizar el valor de tipo_alta
                 const tipoAlta = this.form.tipo_alta.trim(); // Eliminar espacios adicionales
-                if (!["Compra (CM)", "Domacion (DN)", "Comodato (CO)"].includes(tipoAlta)) {
+                if (!["Compra (CM)", "Donacion (DN)", "Comodato (CO)"].includes(tipoAlta)) {
                     throw new Error("El valor de tipo_alta no es válido");
                 }
                 formData.append('tipo_alta', tipoAlta);

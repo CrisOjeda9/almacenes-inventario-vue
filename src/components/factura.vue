@@ -302,7 +302,9 @@ export default {
                 { value: 'Comprobante Fiscal Digital por Internet (CFDI)', label: 'Comprobante Fiscal Digital por Internet (CFDI)' }
             ],
             proveedores: [], // Ensure this is initialized as an empty array
-            facturas: [] // Ensure this is initialized as an empty array
+            facturas: [], // Ensure this is initialized as an empty array
+
+            selectedFile: null, // Variable para almacenar el archivo temporalmente
         };
     },
     computed: {
@@ -491,18 +493,7 @@ export default {
             }
         },
 
-        handleFileChange(event) {
-            const files = event.target.files;
-            if (files.length > 1) {
-                this.errorMessage = "Solo se permite subir un archivo.";
-                return;
-            }
-            this.errorMessage = ''; // Limpiar el mensaje de error si no hay error
-            const file = files[0];
-            if (file) {
-                this.currentFactura.archivo_pdf = file.name; // Guarda solo el nombre del archivo
-            }
-        },
+
         handleDrop(event) {
             const files = event.dataTransfer.files;
             if (files.length > 1) {
@@ -541,17 +532,23 @@ export default {
                 this.currentPage++;
             }
         },
-        editfactura(factura) {
-            this.currentFactura = { ...factura }; // Copiar los datos de la factura seleccionada
+        // Método para manejar el cambio de archivo
+        // Método para manejar el cambio de archivo (solo almacena el archivo)
+        handleFileChange(event) {
+            const files = event.target.files;
+            if (files.length === 0) return; // Si no hay archivos, no hacer nada
 
-            // Si hay un archivo actual, extraer solo el nombre del archivo
-            if (this.currentFactura.archivo_pdf) {
-                const fileName = this.currentFactura.archivo_pdf.split('/').pop().split('\\').pop(); // Extraer solo el nombre del archivo
-                this.currentFactura.archivo_pdf = fileName; // Guardar solo el nombre del archivo
-            }
-
-            this.isEditing = true; // Abrir el modal de edición
+            this.selectedFile = files[0]; // Guardamos el archivo temporalmente
         },
+
+        // Método para editar una factura
+        editfactura(factura) {
+            this.currentFactura = { ...factura }; // Copiar datos de la factura
+            this.isEditing = true; // Abrir el modal de edición
+            this.selectedFile = null; // Resetear archivo seleccionado
+        },
+
+        // Método para guardar cambios (incluyendo la subida del archivo si existe)
         async saveChanges() {
             try {
                 // 1. Actualizar los datos de la factura
@@ -564,18 +561,17 @@ export default {
                 });
 
                 if (!response.ok) {
-                    const errorData = await response.json(); // Obtener detalles del error del backend
+                    const errorData = await response.json();
                     throw new Error(errorData.message || 'Error al actualizar la factura');
                 }
 
-                // 2. Subir el archivo si existe
-                const fileInput = this.$refs.fileInput;
-                if (fileInput && fileInput.files.length > 0) {
+                // 2. Subir el archivo si se seleccionó uno
+                if (this.selectedFile) {
                     const formData = new FormData();
-                    formData.append('archivo_pdf', fileInput.files[0]); // Asegúrate de usar 'archivo_pdf' como nombre del campo
+                    formData.append('archivo_pdf', this.selectedFile);
 
                     const fileResponse = await fetch(`http://localhost:3000/api/facturas/${this.currentFactura.id}/reemplazar-archivo`, {
-                        method: 'PUT', // Usamos PUT para reemplazar el archivo
+                        method: 'PUT',
                         body: formData,
                     });
 
@@ -588,9 +584,10 @@ export default {
                 alert('Factura actualizada correctamente.');
 
                 // Recargar la lista de facturas y cerrar el modal
-                await this.fetchFacturas(); // Asegúrate de recargar los datos
+                await this.fetchFacturas();
                 this.isEditing = false;
                 this.currentFactura = {};
+                this.selectedFile = null; // Limpiar el archivo seleccionado después de guardar
             } catch (error) {
                 console.error('Error:', error);
                 alert(error.message || 'Hubo un error al actualizar la factura. Por favor, inténtalo de nuevo.');
