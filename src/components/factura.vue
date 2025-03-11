@@ -265,6 +265,10 @@
                 <button @click="nextPage" :disabled="currentPage === totalPages">Siguiente</button>
             </div>
         </div>
+        <!-- Contenedor de notificaciones -->
+        <div v-if="alertMessage" :class="alertClass" class="notification">
+            <i :class="alertIcon"></i> {{ alertMessage }}
+        </div>
     </div>
 </template>
 
@@ -273,6 +277,9 @@ export default {
     name: "facturaPage",
     data() {
         return {
+            alertMessage: "",  // Mensaje de la alerta
+            alertClass: "",    // Clase de la alerta (ej. 'success' o 'error')
+            alertIcon: "",     // Icono para la alerta
             userRole: localStorage.getItem('userRole') || '',
             userName: "Cargando...",
             profileImage: "",
@@ -401,6 +408,24 @@ export default {
                 this.profileImage = "../assets/UserHombre.png"; // Imagen por defecto
             }
         },
+        showAlert(message, type) {
+            this.alertMessage = message;
+            if (type === "success") {
+                this.alertClass = "alert-success";
+                this.alertIcon = "fa fa-check-circle";
+            } else if (type === "error") {
+                this.alertClass = "alert-error";
+                this.alertIcon = "fa fa-times-circle";
+            } else {
+                this.alertClass = "alert-warning";
+                this.alertIcon = "fa fa-exclamation-circle";
+            }
+
+            // Ocultar la alerta después de 3 segundos
+            setTimeout(() => {
+                this.alertMessage = "";
+            }, 3000);
+        },
         async fetchProveedores() {
             try {
                 const response = await fetch("http://localhost:3000/api/proveedor");
@@ -462,7 +487,7 @@ export default {
 
                 // Verificar si hay archivos para descargar
                 if (pdfFiles.length === 0) {
-                    alert("No hay archivos para descargar.");
+                    this.showAlert("No hay archivos para descargar", "error");
                     return;
                 }
 
@@ -490,7 +515,7 @@ export default {
                 }
             } catch (error) {
                 console.error('Error:', error);
-                alert('Hubo un error al descargar los archivos PDF. Por favor, inténtalo de nuevo.');
+                this.showAlert('Hubo un error al descargar los archivos PDF. Por favor, inténtalo de nuevo',"error");
             }
         },
 
@@ -586,7 +611,7 @@ export default {
         }
 
         // Mensaje de éxito
-        alert('Factura actualizada correctamente.');
+        this.showAlert('Factura actualizada correctamente',"success");
 
         // Recargar la lista de facturas y cerrar el modal
         await this.fetchFacturas();
@@ -596,7 +621,7 @@ export default {
         this.selectedFile = null; // Limpiar el archivo seleccionado después de guardar
     } catch (error) {
         console.error('Error:', error);
-        alert(error.message || 'Hubo un error al actualizar la factura. Por favor, inténtalo de nuevo.');
+        this.showAlert(error.message || 'Hubo un error al actualizar la factura. Por favor, inténtalo de nuevo', "error");
     }
 },
         cancelEdit() {
@@ -619,10 +644,12 @@ export default {
                 }
 
                 // Si la eliminación fue exitosa, actualiza la lista de facturas
+                // Mostrar una notificación de éxito
+                this.showAlert("Factura eliminada correctamente", "success");
                 this.fetchFacturas();
             } catch (error) {
                 console.error('Error:', error);
-                alert('Hubo un error al eliminar la factura. Por favor, inténtalo de nuevo.');
+                this.showAlert('Hubo un error al eliminar la factura. Por favor, inténtalo de nuevo', "error");
             } finally {
                 this.isDeleteModalVisible = false;
                 this.deleteId = null;
@@ -647,6 +674,61 @@ export default {
 /* Aplicar Montserrat a todo el contenido */
 * {
     font-family: 'Montserrat', sans-serif;
+}
+
+/* Estilo general para la notificación */
+.notification {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-size: 16px;
+    color: white;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    z-index: 999;
+    max-width: 80%;
+    opacity: 0;
+    animation: fadeIn 0.5s forwards;
+}
+
+/* Animación de aparición de la notificación */
+@keyframes fadeIn {
+    0% {
+        opacity: 0;
+        top: 0;
+    }
+
+    100% {
+        opacity: 1;
+        top: 20px;
+    }
+}
+
+/* Notificación de éxito */
+.alert-success {
+    background-color: #4CAF50;
+    /* Verde */
+}
+
+/* Notificación de error */
+.alert-error {
+    background-color: #f44336;
+    /* Rojo */
+}
+
+/* Notificación de advertencia */
+.alert-warning {
+    background-color: #ff9800;
+    /* Naranja */
+}
+
+/* Iconos de la alerta */
+.notification i {
+    margin-right: 10px;
 }
 
 td ul {
