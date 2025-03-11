@@ -180,12 +180,13 @@
                                 </div>
                                 <div style="width: 100%;">
                                     <label>Proveedor: (Selecciona uno)</label>
-                                    <select v-model="currentFactura.proveedor" style="height: 35px; width: 320px;"
+                                    <select v-model="currentFactura.id_proveedor" style="height: 40px; width: 320px;"
                                         class="form-input">
-                                        <option value="" disabled selected>Selecciona un proveedor</option>
-                                        <option value="Proveedor 1">Proveedor 1</option>
-                                        <option value="Proveedor 2">Proveedor 2</option>
-                                        <option value="Proveedor 3">Proveedor 3</option>
+                                        <option value="" disabled>Selecciona una opción</option>
+                                        <option v-for="proveedor in proveedores" :key="proveedor.id"
+                                            :value="proveedor.id">
+                                            {{ proveedor.nombre }} {{ proveedor.apellidos }}
+                                        </option>
                                     </select>
                                 </div>
                                 <div>
@@ -544,55 +545,60 @@ export default {
         // Método para editar una factura
         editfactura(factura) {
             this.currentFactura = { ...factura }; // Copiar datos de la factura
+            this.currentFactura.id_proveedor = factura.id_proveedor; // Asegurar que el id_proveedor se copie
             this.isEditing = true; // Abrir el modal de edición
             this.selectedFile = null; // Resetear archivo seleccionado
         },
 
         // Método para guardar cambios (incluyendo la subida del archivo si existe)
         async saveChanges() {
-            try {
-                // 1. Actualizar los datos de la factura
-                const response = await fetch(`http://localhost:3000/api/facturas/${this.currentFactura.id}`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(this.currentFactura),
-                });
+    try {
+        // 1. Actualizar los datos de la factura
+        const response = await fetch(`http://localhost:3000/api/facturas/${this.currentFactura.id}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                ...this.currentFactura,
+                id_proveedor: this.currentFactura.id_proveedor // Asegurar que el id_proveedor se envíe
+            }),
+        });
 
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.message || 'Error al actualizar la factura');
-                }
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Error al actualizar la factura');
+        }
 
-                // 2. Subir el archivo si se seleccionó uno
-                if (this.selectedFile) {
-                    const formData = new FormData();
-                    formData.append('archivo_pdf', this.selectedFile);
+        // 2. Subir el archivo si se seleccionó uno
+        if (this.selectedFile) {
+            const formData = new FormData();
+            formData.append('archivo_pdf', this.selectedFile);
 
-                    const fileResponse = await fetch(`http://localhost:3000/api/facturas/${this.currentFactura.id}/reemplazar-archivo`, {
-                        method: 'PUT',
-                        body: formData,
-                    });
+            const fileResponse = await fetch(`http://localhost:3000/api/facturas/${this.currentFactura.id}/reemplazar-archivo`, {
+                method: 'PUT',
+                body: formData,
+            });
 
-                    if (!fileResponse.ok) {
-                        throw new Error('Error al subir el archivo');
-                    }
-                }
-
-                // Mensaje de éxito
-                alert('Factura actualizada correctamente.');
-
-                // Recargar la lista de facturas y cerrar el modal
-                await this.fetchFacturas();
-                this.isEditing = false;
-                this.currentFactura = {};
-                this.selectedFile = null; // Limpiar el archivo seleccionado después de guardar
-            } catch (error) {
-                console.error('Error:', error);
-                alert(error.message || 'Hubo un error al actualizar la factura. Por favor, inténtalo de nuevo.');
+            if (!fileResponse.ok) {
+                throw new Error('Error al subir el archivo');
             }
-        },
+        }
+
+        // Mensaje de éxito
+        alert('Factura actualizada correctamente.');
+
+        // Recargar la lista de facturas y cerrar el modal
+        await this.fetchFacturas();
+        await this.fetchProveedores();
+        this.isEditing = false;
+        this.currentFactura = {};
+        this.selectedFile = null; // Limpiar el archivo seleccionado después de guardar
+    } catch (error) {
+        console.error('Error:', error);
+        alert(error.message || 'Hubo un error al actualizar la factura. Por favor, inténtalo de nuevo.');
+    }
+},
         cancelEdit() {
             this.isEditing = false;
             this.currentFactura = {}; // Limpiar el objeto
