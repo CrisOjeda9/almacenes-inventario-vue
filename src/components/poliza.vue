@@ -486,16 +486,16 @@ export default {
             this.selectedFile = files[0]; // Guardamos el archivo temporalmente
         },
 
-        // Método para editar una factura
+        // Método para editar una poliza
         editpoliza(poliza) {
-            this.currentPoliza = { ...poliza }; // Copiar datos de la factura
+            this.currentPoliza = { ...poliza }; // Copiar datos de la poliza
             this.isEditing = true; // Abrir el modal de edición
             this.selectedFile = null; // Resetear archivo seleccionado
         },
 
         async saveChanges() {
             try {
-                // 1. Actualizar los datos de la factura
+                // 1. Actualizar los datos de la poliza
                 const response = await fetch(`http://localhost:3000/api/polizas/${this.currentPoliza.id}`, {
                     method: 'PUT',
                     headers: {
@@ -535,7 +535,7 @@ export default {
                 this.selectedFile = null; // Limpiar el archivo seleccionado después de guardar
             } catch (error) {
                 console.error('Error:', error);
-                this.showAlert(error.message || 'Hubo un error al actualizar la factura. Por favor, inténtalo de nuevo', "error");
+                this.showAlert(error.message || 'Hubo un error al actualizar la poliza. Por favor, inténtalo de nuevo', "error");
             }
         },
         cancelEdit() {
