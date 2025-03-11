@@ -70,13 +70,13 @@
                     <!-- Descripción -->
                     <div class="form-field">
                         <label for="descripcion">Descripción</label>
-                        <input type="text" id="descripcion" placeholder="" v-model="form.descripcion" required />
+                        <input type="text" id="descripcion" v-model="form.descripcion" required />
                     </div>
 
                     <!-- Cobertura -->
                     <div class="form-field">
                         <label for="cobertura">Cobertura</label>
-                        <input type="text" id="cobertura" placeholder="" v-model="form.cobertura" required />
+                        <input type="text" id="cobertura" v-model="form.cobertura" required />
                     </div>
 
                     <!-- Tipo de Póliza -->
@@ -98,7 +98,7 @@
                     <!-- Calidad -->
                     <div class="form-field">
                         <label for="calidad">Calidad</label>
-                        <input type="text" id="calidad" placeholder="" v-model="form.calidad" required />
+                        <input type="text" id="calidad" v-model="form.calidad" required />
                     </div>
                 </div>
 
@@ -106,49 +106,39 @@
                     <!-- Deducible -->
                     <div class="form-field">
                         <label for="deducible">Deducible</label>
-                        <input type="number" step="0.01" id="deducible" placeholder="" v-model="form.deducible" min="0"
-                            required />
+                        <input type="number" step="0.01" id="deducible" v-model="form.deducible" min="0" required />
                     </div>
 
                     <!-- Prima -->
                     <div class="form-field">
                         <label for="prima">Prima</label>
-                        <input type="number" step="0.01" id="prima" placeholder="" v-model="form.prima" min="0"
-                            required />
+                        <input type="number" step="0.01" id="prima" v-model="form.prima" min="0" required />
                     </div>
+
                     <!-- Cantidad -->
                     <div class="form-field">
                         <label for="cantidad">Cantidad</label>
-                        <input type="number" step="0.01" id="cantidad" placeholder="" v-model="form.cantidad" min="0"
-                            required />
+                        <input type="number" step="0.01" id="cantidad" v-model="form.cantidad" min="0" required />
                     </div>
 
-                    <!-- Limite de indemnización -->
+                    <!-- Límite de indemnización -->
                     <div class="form-field">
                         <label for="limites_indemnizacion">Límite de indemnización</label>
-                        <input type="number" step="0.01" id="limites_indemnizacion" placeholder=""
-                            v-model="form.limites_indemnizacion" min="0" required />
+                        <input type="text" id="limites_indemnizacion" v-model="form.limites_indemnizacion" required />
                     </div>
-
-
-
-
                 </div>
 
                 <div class="form-row">
-
                     <!-- Periodo de Validación -->
                     <div class="form-field">
                         <label for="periodo_vigencia">Periodo de Validación</label>
-                        <input type="text" min="0" id="periodo_vigencia" placeholder=""
-                            v-model="form.periodo_vigencia" required />
+                        <input type="date" id="periodo_vigencia" v-model="form.periodo_vigencia" required />
                     </div>
 
-                    <!-- Clausulas de exclusion -->
+                    <!-- Clausulas de exclusión -->
                     <div class="form-field">
-                        <label for="clausulas_exclusion">Cláusulas de exclusion</label>
-                        <input type="text" id="clausulas_exclusion" placeholder="" v-model="form.clausulas_exclusion"
-                            required />
+                        <label for="clausulas_exclusion">Cláusulas de exclusión</label>
+                        <input type="text" id="clausulas_exclusion" v-model="form.clausulas_exclusion" required />
                     </div>
 
                     <!-- Fecha de Póliza -->
@@ -188,6 +178,8 @@
 </template>
 
 <script>
+import axios from "axios"; // Importar axios para hacer solicitudes HTTP
+
 export default {
     name: "newPolizaPage",
     data() {
@@ -196,33 +188,30 @@ export default {
             userName: "Cargando...", // Mensaje temporal
             profileImage: "",  // URL de la imagen del usuario
             form: {
-                descripcion: "",           // No. Factura
-                cobertura: "", // Asegúrate de que esté vacío por defecto
-                tipo: "",             // Concepto
-                calidad: "",         // Fecha de Factura
+                descripcion: "",
+                cobertura: "",
+                tipo: "",
+                calidad: "",
                 deducible: "",
                 prima: "",
                 cantidad: "",
-                limites_indemnizacion: 0,              // Cantidad
-                periodo_vigencia: "",      // Precio Unitario
-                clausulas_exclusion: "",        // Precio total sin IVA
-                fecha: "",                 // IVA
+                limites_indemnizacion: "",
+                periodo_vigencia: "",
+                clausulas_exclusion: "",
+                fecha: "",
                 archivo: null, // Almacena el archivo seleccionado
             },
-
-            showPassword: false,
-            showConfirmPassword: false,
             menus: {
                 homeMenu: false,
                 polizaMenu: false,
                 settingsMenu: false,
             },
-            showModal: false
-
+            showModal: false, // Controla la visibilidad del modal de éxito
+            errorMessage: "", // Mensaje de error
         };
     },
     mounted() {
-        this.loadUserData();
+        this.loadUserData(); // Cargar datos del usuario al montar el componente
     },
     methods: {
         async loadUserData() {
@@ -276,42 +265,96 @@ export default {
             }
         },
         goHome() {
-            this.$router.push('home'); // Redirige a la página principal ("/"). Cambia el path si es necesario.
+            this.$router.push('home'); // Redirige a la página principal
         },
         handleFileUpload(event) {
-            const file = event.target.files[0];
-            this.form.archivo = file; // Almacena el archivo en el formulario
+            const file = event.target.files[0]; // Obtener el primer archivo seleccionado
+            if (file && file.type === "application/pdf") { // Validar que sea un PDF
+                this.form.archivo = file; // Almacena el archivo en el formulario
+                this.errorMessage = ""; // Limpiar el mensaje de error
+            } else {
+                this.errorMessage = "Por favor, selecciona un archivo PDF válido.";
+                this.form.archivo = null; // Limpiar el archivo seleccionado
+            }
         },
         handleDrop(event) {
-            const file = event.dataTransfer.files[0];
-            this.form.archivo = file; // Almacena el archivo en el formulario
+            event.preventDefault(); // Prevenir el comportamiento por defecto
+            const file = event.dataTransfer.files[0]; // Obtener el primer archivo arrastrado
+            if (file && file.type === "application/pdf") { // Validar que sea un PDF
+                this.form.archivo = file; // Almacena el archivo en el formulario
+                this.errorMessage = ""; // Limpiar el mensaje de error
+            } else {
+                this.errorMessage = "Por favor, arrastra un archivo PDF válido.";
+                this.form.archivo = null; // Limpiar el archivo seleccionado
+            }
         },
         triggerFileInput() {
-            this.$refs.fileInput.click(); // Trigger el input file cuando se hace click en la dropzone
+            this.$refs.fileInput.click(); // Simula un clic en el input de archivo
         },
-        goBack() {
-            console.log("Regresar a la página anterior");
-        },
-        registerPoliza() {
-            if (this.form.password !== this.form.confirmPassword) {
-                alert("Las contraseñas no coinciden");
-                return;
+        async registerPoliza() {
+            try {
+                // Validar que todos los campos obligatorios estén completos
+                if (!this.form.descripcion || !this.form.cobertura || !this.form.tipo || !this.form.calidad ||
+                    !this.form.deducible || !this.form.prima || !this.form.cantidad || !this.form.limites_indemnizacion ||
+                    !this.form.periodo_vigencia || !this.form.clausulas_exclusion || !this.form.fecha || !this.form.archivo) {
+                    this.errorMessage = "Por favor, completa todos los campos obligatorios.";
+                    return;
+                }
+
+                // Crear un objeto FormData para enviar los datos del formulario
+                const formData = new FormData();
+                formData.append("descripcion", this.form.descripcion);
+                formData.append("cobertura", this.form.cobertura);
+                formData.append("tipo", this.form.tipo);
+                formData.append("calidad", this.form.calidad);
+                formData.append("deducible", this.form.deducible);
+                formData.append("prima", this.form.prima);
+                formData.append("cantidad", this.form.cantidad);
+                formData.append("limites_indemnizacion", this.form.limites_indemnizacion);
+                formData.append("periodo_vigencia", this.form.periodo_vigencia);
+                formData.append("clausulas_exclusion", this.form.clausulas_exclusion);
+                formData.append("fecha", this.form.fecha);
+
+                // Agregar el archivo al FormData si existe
+                if (this.form.archivo) {
+                    formData.append("archivo", this.form.archivo);
+                }
+
+                // Enviar la solicitud POST a la API
+                const response = await axios.post("http://localhost:3000/api/polizas", formData, {
+                    headers: {
+                        "Content-Type": "multipart/form-data", // Especificar el tipo de contenido
+                    },
+                });
+
+                // Mostrar el modal de éxito si la solicitud es exitosa
+                if (response.status === 201) {
+                    this.showModal = true;
+                    this.errorMessage = ""; // Limpiar el mensaje de error
+                }
+            } catch (error) {
+                console.error("Error al registrar la póliza:", error);
+                if (error.response) {
+                    // Mostrar el mensaje de error del servidor
+                    this.errorMessage = error.response.data.message || "Hubo un error al registrar la póliza.";
+                } else {
+                    this.errorMessage = "Hubo un error al registrar la póliza. Por favor, inténtalo de nuevo.";
+                }
             }
-            this.showModal = true;
         },
         navigateTo(page) {
             console.log(`Navegando a ${page}`);
-            this.$router.push({ name: page }); // Asegúrate de que las rutas estén definidas con `name`.
+            this.$router.push({ name: page }); // Navegar a una página específica
         },
         showMenu(menu) {
-            this.menus[menu] = true;
+            this.menus[menu] = true; // Mostrar el menú desplegable
         },
         hideMenu(menu) {
-            this.menus[menu] = false;
+            this.menus[menu] = false; // Ocultar el menú desplegable
         },
         closeModal() {
             this.showModal = false;
-            this.$router.push('/poliza');
+            this.$router.push('/poliza'); // Redirigir a la página de pólizas
         },
     },
 };
