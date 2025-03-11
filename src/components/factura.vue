@@ -145,11 +145,21 @@
                             <div class="form-column">
                                 <div>
                                     <label>Tipo de alta:</label>
-                                    <input v-model="currentFactura.tipo_alta" type="text" />
+                                    <select v-model="currentFactura.tipo_alta" class="form-input">
+                                        <option value="" disabled selected>Selecciona un tipo de alta</option>
+                                        <option v-for="tipo in tiposAlta" :key="tipo.value" :value="tipo.value">
+                                            {{ tipo.label }}
+                                        </option>
+                                    </select>
                                 </div>
                                 <div>
                                     <label>Tipo de documento que ampara:</label>
-                                    <input v-model="currentFactura.tipo_documento_ampara" type="text" />
+                                    <select v-model="currentFactura.tipo_documento_ampara" class="form-input">
+                                        <option value="" disabled selected>Selecciona un tipo de documento</option>
+                                        <option v-for="tipo in tipoAmpara" :key="tipo.value" :value="tipo.value">
+                                            {{ tipo.label }}
+                                        </option>
+                                    </select>
                                 </div>
                                 <div>
                                     <label>Factura No.:</label>
@@ -157,7 +167,12 @@
                                 </div>
                                 <div>
                                     <label>Tipo de compra:</label>
-                                    <input v-model="currentFactura.tipo_compra" type="text" />
+                                    <select v-model="currentFactura.tipo_compra" class="form-input">
+                                        <option value="" disabled selected>Selecciona un tipo de compra</option>
+                                        <option v-for="tipo in tiposCompra" :key="tipo.value" :value="tipo.value">
+                                            {{ tipo.label }}
+                                        </option>
+                                    </select>
                                 </div>
                                 <div>
                                     <label>Concepto:</label>
@@ -197,7 +212,7 @@
                                 </div>
                                 <div>
                                     <label>Total con IVA:</label>
-                                    <input v-model="currentFactura.totalconiva" type="text" />
+                                    <input v-model="currentFactura.total" type="text" />
                                 </div>
                                 <div class="contenedor-dropzone">
                                     <label for="archivo_pdf">Documento (PDF, JPG, PNG)</label>
@@ -205,7 +220,7 @@
                                         @click="triggerFileInput">
                                         <!-- Campo de subida de archivo -->
                                         <input type="file" id="archivo_pdf" ref="fileInput" @change="handleFileChange"
-                                            accept=".pdf,.jpg,.png" style="display: none;" />
+                                            accept=".pdf,.jpg,.png" style="display: none;" multiple />
 
                                         <!-- Ícono y mensaje -->
                                         <i class="fas fa-cloud-upload-alt"></i>
@@ -213,9 +228,10 @@
                                             Arrastra aquí o haz clic para subir un archivo
                                         </span>
                                         <span v-else>
-                                            Archivo seleccionado: {{ currentFactura.archivo_pdf.name }}
+                                            Archivo: {{ currentFactura.archivo_pdf }}
                                         </span>
                                     </div>
+                                    <span v-if="errorMessage" class="error-message">{{ errorMessage }}</span>
                                 </div>
                             </div>
 
@@ -272,6 +288,19 @@ export default {
             currentFactura: {
                 proveedor: "",
             },
+            tiposAlta: [ // Opciones para el campo "Tipo de alta"
+                { value: 'Compra (CM)', label: 'Compra (CM)' },
+                { value: 'Donacion (DN)', label: 'Donacion (DN)' },
+                { value: 'Comodato (CO)', label: 'Comodato (CO)' }
+            ],
+            tiposCompra: [ // Opciones para el campo "Tipo de compra"
+                { value: 'Presupuesto', label: 'Presupuesto' },
+                { value: 'Estatal', label: 'Estatal' }
+            ],
+            tipoAmpara: [ // Opciones para el campo "Tipo de documento que ampara"
+                { value: 'Contrato De Comodato (CO)', label: 'Contrato De Comodato (CO)' },
+                { value: 'Comprobante Fiscal Digital por Internet (CFDI)', label: 'Comprobante Fiscal Digital por Internet (CFDI)' }
+            ],
             proveedores: [], // Ensure this is initialized as an empty array
             facturas: [] // Ensure this is initialized as an empty array
         };
@@ -407,7 +436,7 @@ export default {
             const fileName = pdfPath.split('/').pop().split('\\').pop();  // Extrae solo el nombre del archivo
             return fileName.split('.')[0]; // Devuelve solo el nombre sin la extensión .pdf
         },
-        
+
         getPdfFiles(pdfPaths) {
             if (!pdfPaths) return []; // Si no hay archivos, retorna un array vacío
 
@@ -463,15 +492,27 @@ export default {
         },
 
         handleFileChange(event) {
-            const file = event.target.files[0];
+            const files = event.target.files;
+            if (files.length > 1) {
+                this.errorMessage = "Solo se permite subir un archivo.";
+                return;
+            }
+            this.errorMessage = ''; // Limpiar el mensaje de error si no hay error
+            const file = files[0];
             if (file) {
-                this.currentFactura.archivo_pdf = file; // Guarda el archivo en el estado actual
+                this.currentFactura.archivo_pdf = file.name; // Guarda solo el nombre del archivo
             }
         },
         handleDrop(event) {
-            const file = event.dataTransfer.files[0];
+            const files = event.dataTransfer.files;
+            if (files.length > 1) {
+                this.errorMessage = "Solo se permite subir un archivo.";
+                return;
+            }
+            this.errorMessage = ''; // Limpiar el mensaje de error si no hay error
+            const file = files[0];
             if (file) {
-                this.currentFactura.archivo_pdf = file; // Guarda el archivo arrastrado en el estado actual
+                this.currentFactura.archivo_pdf = file.name; // Guarda solo el nombre del archivo
             }
         },
         goHome() {
@@ -501,15 +542,58 @@ export default {
             }
         },
         editfactura(factura) {
-            this.currentFactura = { ...factura };
-            this.isEditing = true;
+            this.currentFactura = { ...factura }; // Copiar los datos de la factura seleccionada
+
+            // Si hay un archivo actual, extraer solo el nombre del archivo
+            if (this.currentFactura.archivo_pdf) {
+                const fileName = this.currentFactura.archivo_pdf.split('/').pop().split('\\').pop(); // Extraer solo el nombre del archivo
+                this.currentFactura.archivo_pdf = fileName; // Guardar solo el nombre del archivo
+            }
+
+            this.isEditing = true; // Abrir el modal de edición
         },
-        saveChanges() {
-            const index = this.factura.findIndex(factura => factura.id === this.currentFactura.id);
-            if (index !== -1) {
-                this.factura[index] = { ...this.currentFactura };
+        async saveChanges() {
+            try {
+                // 1. Actualizar los datos de la factura
+                const response = await fetch(`http://localhost:3000/api/facturas/${this.currentFactura.id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(this.currentFactura),
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json(); // Obtener detalles del error del backend
+                    throw new Error(errorData.message || 'Error al actualizar la factura');
+                }
+
+                // 2. Subir el archivo si existe
+                const fileInput = this.$refs.fileInput;
+                if (fileInput && fileInput.files.length > 0) {
+                    const formData = new FormData();
+                    formData.append('archivo_pdf', fileInput.files[0]); // Asegúrate de usar 'archivo_pdf' como nombre del campo
+
+                    const fileResponse = await fetch(`http://localhost:3000/api/facturas/${this.currentFactura.id}/reemplazar-archivo`, {
+                        method: 'PUT', // Usamos PUT para reemplazar el archivo
+                        body: formData,
+                    });
+
+                    if (!fileResponse.ok) {
+                        throw new Error('Error al subir el archivo');
+                    }
+                }
+
+                // Mensaje de éxito
+                alert('Factura actualizada correctamente.');
+
+                // Recargar la lista de facturas y cerrar el modal
+                await this.fetchFacturas(); // Asegúrate de recargar los datos
                 this.isEditing = false;
-                this.currentFactura = {}; // Limpiar el objeto
+                this.currentFactura = {};
+            } catch (error) {
+                console.error('Error:', error);
+                alert(error.message || 'Hubo un error al actualizar la factura. Por favor, inténtalo de nuevo.');
             }
         },
         cancelEdit() {
@@ -521,13 +605,25 @@ export default {
             this.deleteId = id;
             this.isDeleteModalVisible = true;
         },
-        confirmDelete() {
-            const index = this.factura.findIndex(factura => factura.id === this.deleteId);
-            if (index !== -1) {
-                this.factura.splice(index, 1);
+        async confirmDelete() {
+            try {
+                const response = await fetch(`http://localhost:3000/api/facturas/${this.deleteId}`, {
+                    method: 'DELETE',
+                });
+
+                if (!response.ok) {
+                    throw new Error('Error al eliminar la factura');
+                }
+
+                // Si la eliminación fue exitosa, actualiza la lista de facturas
+                this.fetchFacturas();
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Hubo un error al eliminar la factura. Por favor, inténtalo de nuevo.');
+            } finally {
+                this.isDeleteModalVisible = false;
+                this.deleteId = null;
             }
-            this.isDeleteModalVisible = false;
-            this.deleteId = null;
         },
         cancelDelete() {
             this.isDeleteModalVisible = false;
@@ -811,7 +907,7 @@ a {
     border-spacing: 0;
     background-color: white;
     color: #691B31;
-    font-size: 15px;
+    font-size: 14px;
     border-radius: 15px;
     overflow: hidden;
     table-layout: auto;
@@ -1013,6 +1109,13 @@ form .form-column {
     background-color: #dcdcdc;
     color: #691B31;
     width: 300px;
+}
+
+.form-column select {
+    background-color: #dcdcdc;
+    color: #691B31;
+    width: 315px;
+    height: 36px;
 }
 
 .form-column label {
