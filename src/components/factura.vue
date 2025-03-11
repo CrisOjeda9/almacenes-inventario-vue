@@ -886,11 +886,12 @@ a {
 /* Contenedor responsivo */
 .contenedor-tabla {
     width: 100%;
+    min-height: 600px;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-direction: column;
-    overflow-x: auto;
+    overflow: hidden;
     /* Habilita desplazamiento horizontal */
 }
 
