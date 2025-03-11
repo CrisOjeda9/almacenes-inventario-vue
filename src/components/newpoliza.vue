@@ -80,8 +80,8 @@
 
                     <!-- Tipo de Póliza -->
                     <div class="form-field">
-                        <label for="tipopoliza">Tipo de Póliza</label>
-                        <input type="text" id="tipopoliza" placeholder="" v-model="form.tipopoliza"
+                        <label for="tipo">Tipo de Póliza</label>
+                        <input type="text" id="tipo" placeholder="" v-model="form.tipo"
                             required />
                     </div>
 
@@ -100,50 +100,64 @@
                             min="0" required />
                     </div>
 
+                    <!-- Prima -->
+                    <div class="form-field">
+                        <label for="prima">Prima</label>
+                        <input type="number" step="0.01" id="prima" placeholder="" v-model="form.prima"
+                            min="0" required />
+                    </div>
+                     <!-- Cantidad -->
+                     <div class="form-field">
+                        <label for="cantidad">Cantidad</label>
+                        <input type="number" step="0.01" id="cantidad" placeholder="" v-model="form.cantidad"
+                            min="0" required />
+                    </div>
+
                     <!-- Limite de indemnización -->
                     <div class="form-field">
-                        <label for="indemnizacion">Límite de indemnización</label>
-                        <input type="number" step="0.01" id="indemnizacion" placeholder=""
-                            v-model="form.indemnizacion" min="0" required />
+                        <label for="limites_indemnizacion">Límite de indemnización</label>
+                        <input type="number" step="0.01" id="limites_indemnizacion" placeholder=""
+                            v-model="form.limites_indemnizacion" min="0" required />
                     </div>
 
-                    <!-- Periodo de Validación -->
-                    <div class="form-field">
-                        <label for="validacion">Periodo de Validación</label>
-                        <input type="number" min="0" id="validacion" placeholder="" v-model="form.validacion"
-                            required />
-                    </div>
+                    
 
-                    <!-- Clausulas de Exclusion -->
-                    <div class="form-field">
-                        <label for="exclusion">Cláusulas de Exclusion</label>
-                        <input type="text" id="exclusion" placeholder=""
-                            v-model="form.exclusion" required />
-                    </div>
+                    
                 </div>
 
                 <div class="form-row">
-                    <!-- Fecha de Póliza -->
+
+                    <!-- Periodo de Validación -->
                     <div class="form-field">
-                        <label for="fechapoliza">Fecha de Póliza</label>
-                        <input type="date" id="fechapoliza" v-model="form.fechapoliza" required />
+                        <label for="periodo_vigencia">Periodo de Validación</label>
+                        <input type="number" min="0" id="periodo_vigencia" placeholder="" v-model="form.periodo_vigencia"
+                            required />
                     </div>
 
-                    <!-- Fecha de Registro -->
+                    <!-- Clausulas de exclusion -->
                     <div class="form-field">
-                        <label for="registrationDate">Fecha de Registro</label>
-                        <input type="date" id="registrationDate" v-model="form.registrationDate" required />
+                        <label for="clausulas_exclusion">Cláusulas de exclusion</label>
+                        <input type="text" id="clausulas_exclusion" placeholder=""
+                            v-model="form.clausulas_exclusion" required />
                     </div>
+
+                    <!-- Fecha de Póliza -->
+                    <div class="form-field">
+                        <label for="fecha">Fecha de Póliza</label>
+                        <input type="date" id="fecha" v-model="form.fecha" required />
+                    </div>
+
+                    
 
                     <!-- Documento de Poliza -->
                     <div class="form-field">
-                        <label for="documentopoliza">Documento de Poliza</label>
+                        <label for="archivo">Documento de Poliza</label>
                         <div class="dropzone" @drop.prevent="handleDrop" @dragover.prevent @click="triggerFileInput">
-                            <input type="file" id="documentopoliza" ref="fileInput" @change="handleFileUpload"
-                                accept=".pdf,.jpg,.png" />
+                            <input type="file" id="archivo" ref="fileInput" @change="handleFileUpload"
+                                accept=".pdf" />
                             <i class="fas fa-cloud-upload-alt"></i>
-                            <span v-if="!form.documentopoliza">Arrastra o selecciona un archivo (PDF)</span>
-                            <span v-else>{{ form.documentopoliza.name }}</span>
+                            <span v-if="!form.archivo">Arrastra o selecciona un archivo (PDF)</span>
+                            <span v-else>{{ form.archivo.name }}</span>
                         </div>
                     </div>
                 </div>
@@ -175,14 +189,16 @@ export default {
             form: {
                 descripcion: "",           // No. Factura
                 cobertura: "", // Asegúrate de que esté vacío por defecto
-                tipopoliza: "",             // Concepto
+                tipo: "",             // Concepto
                 calidad: "",         // Fecha de Factura
-                deducible: "",            // Proveedor
-                indemnizacion: 0,              // Cantidad
-                validacion: "",      // Precio Unitario
-                exclusion: "",        // Precio total sin IVA
-                fechapoliza: "",                 // IVA
-                documentopoliza: null, // Almacena el archivo seleccionado
+                deducible: "",
+                prima:"", 
+                cantidad:"",           
+                limites_indemnizacion: 0,              // Cantidad
+                periodo_vigencia: "",      // Precio Unitario
+                clausulas_exclusion: "",        // Precio total sin IVA
+                fecha: "",                 // IVA
+                archivo: null, // Almacena el archivo seleccionado
             },
 
             showPassword: false,
@@ -255,11 +271,11 @@ export default {
         },
         handleFileUpload(event) {
             const file = event.target.files[0];
-            this.form.documentopoliza = file; // Almacena el archivo en el formulario
+            this.form.archivo = file; // Almacena el archivo en el formulario
         },
         handleDrop(event) {
             const file = event.dataTransfer.files[0];
-            this.form.documentopoliza = file; // Almacena el archivo en el formulario
+            this.form.archivo = file; // Almacena el archivo en el formulario
         },
         triggerFileInput() {
             this.$refs.fileInput.click(); // Trigger el input file cuando se hace click en la dropzone
