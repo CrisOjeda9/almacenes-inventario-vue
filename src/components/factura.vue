@@ -229,7 +229,7 @@
                                             Arrastra aquí o haz clic para subir un archivo
                                         </span>
                                         <span v-else>
-                                            Archivo: {{ currentFactura.archivo_pdf }}
+                                            Archivo: {{ getFileName(currentFactura.archivo_pdf) }}
                                         </span>
                                     </div>
                                     <span v-if="errorMessage" class="error-message">{{ errorMessage }}</span>
@@ -353,6 +353,10 @@ export default {
         this.fetchFacturas();
     },
     methods: {
+        getFileName(fullPath) {
+            // Extrae solo el nombre del archivo de la ruta completa
+            return fullPath.split('/').pop().split('\\').pop();
+        },
         formatDate(dateString) {
             const options = { year: 'numeric', month: 'long', day: 'numeric' };
             const date = new Date(dateString);

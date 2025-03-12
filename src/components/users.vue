@@ -150,12 +150,13 @@
                     </div>
                 </div>
             </div>
-            <!-- Paginación -->
-            <div class="pagination">
-                <button @click="prevPage" :disabled="currentPage === 1">Anterior</button>
-                <span>Pagina {{ currentPage }} de {{ totalPages }}</span>
-                <button @click="nextPage" :disabled="currentPage === totalPages">Siguiente</button>
-            </div>
+
+        </div>
+        <!-- Paginación -->
+        <div class="pagination">
+            <button @click="prevPage" :disabled="currentPage === 1">Anterior</button>
+            <span>Pagina <br> {{ currentPage }} de {{ totalPages }}</span>
+            <button @click="nextPage" :disabled="currentPage === totalPages">Siguiente</button>
         </div>
     </div>
 </template>
@@ -518,6 +519,7 @@ td ul li a:hover {
     overflow-x: hidden;
 }
 
+
 /* Menú de navegación */
 .navbar {
     position: 0;
@@ -699,16 +701,15 @@ a {
 }
 
 .user-table {
-    width: 110px;
+    width: 1400px;
+    max-width: 1400px;
     border-collapse: separate;
     border-spacing: 0;
     background-color: white;
     color: #691B31;
-    border-radius: 15px;
-    /* Redondear las esquinas de la tabla */
-    overflow: hidden;
-    /* Para que los bordes no sobresalgan */
-    font-size: 13px;
+    border-radius: 15px 15px 0 0; /* Solo redondear las esquinas superiores */
+    overflow: hidden; /* Para que los bordes no sobresalgan */
+    font-size: 14px;
 }
 
 .user-table th,
@@ -762,12 +763,31 @@ a {
 }
 
 .contenedor-tabla {
-    width: 100%;
+    width: 95%;
+    margin-left: 2.5%;
+    margin-right: 2.5%;
     display: flex;
-    align-items: center;
+    align-items: start;
     justify-content: center;
     display: flex;
     flex-direction: column;
+    overflow: auto;
+    border-radius: 15px 15px 0 0;
+}
+
+.pagination {
+    width: 100%;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.pagination button {
+    width: 130px;
+    height: 50px;
+    padding: 5px;
+
 }
 
 /* Barra de búsqueda */

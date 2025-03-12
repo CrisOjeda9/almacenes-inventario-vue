@@ -68,8 +68,8 @@
                 <div class="form-row">
                     <!-- ID -->
                     <div class="form-field">
-                        <label for="id">ID</label>
-                        <input type="number" min="0" id="id" placeholder="" v-model="form.id" required />
+                        <label for="numero_partida">Numero de partida</label>
+                        <input type="number" min="0" id="numero_partida" placeholder="" v-model="form.id" required />
                     </div>
 
                     <!-- Número de factura -->
@@ -236,7 +236,7 @@ export default {
             userName: "Cargando...",
             profileImage: "",  // URL de la imagen del usuario
             form: {
-                id: "",                     // ID del registro
+                numero_partida: "",                     // ID del registro
                 numeroFactura: "",          // Número de factura
                 numeroPartida: "",          // Número de partida (físico/moral)
                 nombre: "",                 // Nombre del artículo

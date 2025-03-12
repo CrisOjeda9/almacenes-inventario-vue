@@ -87,7 +87,7 @@
                         <th>Cantidad</th>
                         <th>Limite de indemnización</th>
                         <th>Periodo de validación</th>
-                        <th>Clausulas de clausulas_exclusion</th>
+                        <th>Clausulas de exclusion</th>
                         <th>Fecha de poliza</th>
                         <th>Documento</th>
                         <th>Fecha de registro</th>
@@ -147,9 +147,15 @@
                                     <label>Cobertura:</label>
                                     <input v-model="currentPoliza.cobertura" type="text" />
                                 </div>
-                                <div>
+                                <div style="width: 100%;">
                                     <label>Tipo de póliza:</label>
-                                    <input v-model="currentPoliza.tipo" type="text" />
+                                    <select v-model="currentPoliza.tipo" class="form-input">
+                                        <option value="">Seleccione una opción</option>
+                                        <option v-for="option in tipoPolizaOptions" :key="option.value"
+                                            :value="option.value">
+                                            {{ option.text }}
+                                        </option>
+                                    </select>
                                 </div>
                                 <div>
                                     <label>Calidad:</label>
@@ -187,12 +193,12 @@
                                     <input v-model="currentPoliza.fecha" type="date" />
                                 </div>
                                 <div class="contenedor-dropzone">
-                                    <label for="archivo">Documento (PDF, JPG, PNG)</label>
+                                    <label for="archivo">Documento (PDF)</label>
                                     <div class="dropzone" @drop.prevent="handleDrop" @dragover.prevent
                                         @click="triggerFileInput">
                                         <!-- Campo de subida de archivo -->
                                         <input type="file" id="archivo" ref="fileInput" @change="handleFileChange"
-                                            accept=".pdf,.jpg,.png" style="display: none;" multiple />
+                                            accept=".pdf" style="display: none;" multiple />
 
                                         <!-- Ícono y mensaje -->
                                         <i class="fas fa-cloud-upload-alt"></i>
@@ -200,7 +206,7 @@
                                             Arrastra aquí o haz clic para subir un archivo
                                         </span>
                                         <span v-else>
-                                            Archivo: {{ currentPoliza.archivo }}
+                                            Archivo: {{ getFileName(currentPoliza.archivo) }}
                                         </span>
                                     </div>
                                     <span v-if="errorMessage" class="error-message">{{ errorMessage }}</span>
@@ -263,6 +269,16 @@ export default {
             isEditing: false, // Para controlar si estamos en modo de edición
             currentPoliza: {}, // Objeto para almacenar la póliza que se está editando
             poliza: [], // Inicializar como un array vacío
+            tipoPolizaOptions: [
+                { value: 'Egresos', text: 'Egresos' },
+                { value: 'Presupuestales', text: 'Presupuestales' },
+                { value: 'Donaciones', text: 'Donaciones' },
+                { value: 'Cheques', text: 'Cheques' },
+                { value: 'Ingresos', text: 'Ingresos' },
+                { value: 'Transferencias', text: 'Transferencias' },
+                { value: 'Retenciones', text: 'Retenciones' },
+                { value: 'Depositos', text: 'Depositos' },
+            ],
         };
     },
     computed: {
@@ -289,6 +305,10 @@ export default {
         this.fetchPolizas();
     },
     methods: {
+        getFileName(fullPath) {
+            // Extrae solo el nombre del archivo de la ruta completa
+            return fullPath.split('/').pop().split('\\').pop();
+        },
         formatDate(dateString) {
             const options = { year: 'numeric', month: 'long', day: 'numeric' };
             const date = new Date(dateString);
@@ -502,7 +522,8 @@ export default {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        ...this.currentPoliza                    }),
+                        ...this.currentPoliza
+                    }),
                 });
 
                 if (!response.ok) {
@@ -587,6 +608,14 @@ export default {
 }
 
 
+.form-input {
+    width: 85%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 25px;
+    box-sizing: border-box;
+    background-color: #dcdcdc;
+}
 /* Estilo general para la notificación */
 .notification {
     position: fixed;
@@ -686,6 +715,7 @@ td ul li a {
 td ul li a:hover {
     text-decoration: underline;
 }
+
 .titulo {
     font-size: 30px;
     font-weight: 100;

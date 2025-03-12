@@ -74,7 +74,7 @@
             </div>
             <div class="button-card" @click="navigateTo2('existencia')">
                 <i class="fas fa-arrow-circle-down"></i> <!-- Ícono de entrada de existencias -->
-                <span>Entrada de existencias</span>
+                <span>Entrada de Artículos</span>
             </div>
             <div class="button-card" @click="navigateTo2('bieninventario')">
                 <i class="fas fa-plus-circle"></i> <!-- Ícono de agregar un bien para inventario -->
