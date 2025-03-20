@@ -67,59 +67,51 @@
                 <div class="form-row">
                     <!-- Tipo de alta -->
                     <div class="form-field">
-                        <label for="tipoAlta">Tipo de alta</label>
-                        <select id="tipoAlta" v-model="form.tipo_alta" required>
+                        <label for="tipo_compra">Tipo de compra</label>
+                        <select id="tipo_compra" v-model="form.tipo_compra" required>
                             <option value="" disabled>Selecciona una opción</option>
-                            <option value="Compra (CM)">Compra (CM)</option>
-                            <option value="Donacion (DN)">Donacion (DN)</option>
-                            <option value="Comodato (CO)">Comodato (CO)</option>
+                            <option value="Directa">Directa</option>
+                            <option value="Licitacion">Licitacion</option>
+                            <option value="Invitacion">Invitacion</option>
                         </select>
                     </div>
                     <!-- Tipo de documento que ampara -->
+                    <!-- Documento de Factura -->
                     <div class="form-field">
-                        <label for="tipoDocumentoAmpara">Tipo de doc. que ampara</label>
-                        <select id="tipoDocumentoAmpara" v-model="form.tipo_documento_ampara" required>
-                            <option value="" disabled>Selecciona una opción</option>
-                            <option value="Contrato De Comodato (CO)">Contrato de Comodato (CO)</option>
-                            <option value="Comprobante Fiscal Digital por Internet (CFDI)">Comprobante Fiscal Digital
-                                por
-                                Internet (CFDI)</option>
-                        </select>
+                        <label for="contrato_compra">Contrato de compra</label>
+                        <div class="dropzone" @drop.prevent="handleDropContrato" @dragover.prevent
+                            @click="triggerFileInputContrato">
+                            <input type="file" id="contrato_compra" ref="fileInputContrato"
+                                @change="handleFileUploadContrato" accept=".pdf" />
+                            <span v-if="!form.contrato_compra">Arrastra o selecciona un archivo (PDF)</span>
+                            <span v-else>{{ form.contrato_compra.name }}</span>
+                        </div>
                     </div>
                     <!-- Fecha de adquisición -->
                     <div class="form-field">
                         <label for="fechaAdquisicion">Fecha de Adquisición</label>
                         <input type="date" id="fechaAdquisicion" v-model="form.fecha_adquisicion" required />
                     </div>
+
+                </div>
+
+                <div class="form-row">
                     <!-- No. Factura -->
                     <div class="form-field">
                         <label for="numero_de_factura">No. Factura</label>
                         <input type="number" min="0" id="numero_de_factura" placeholder=""
                             v-model="form.numero_de_factura" required />
                     </div>
-                </div>
-
-                <div class="form-row">
                     <!-- Tipo de Compra -->
                     <div class="form-field">
-                        <label for="tipoCompra">Tipo de compra</label>
-                        <select id="tipoCompra" v-model="form.tipo_compra" required>
+                        <label for="tipo_presupuesto">Tipo de Presupuesto</label>
+                        <select id="tipo_presupuesto" v-model="form.tipo_presupuesto" required>
                             <option value="" disabled>Selecciona una opción</option>
-                            <option value="Presupuesto">Presupuesto</option>
-                            <option value="Estatal">Estatal</option>
+                            <option value="Ingresos Propios">Ingresos Propios</option>
+                            <option value="Recurso Estatal">Recurso Estatal</option>
                         </select>
                     </div>
-                    <!-- Concepto -->
-                    <div class="form-field">
-                        <label for="concepto">Concepto</label>
-                        <input type="text" id="concepto" placeholder="" v-model="form.concepto" minlength="3"
-                            maxlength="100" style="text-transform: uppercase;" required />
-                    </div>
-                    <!-- Fecha de Factura -->
-                    <div class="form-field">
-                        <label for="fechaFactura">Fecha de Factura</label>
-                        <input type="date" id="fechaFactura" v-model="form.fecha_factura" required />
-                    </div>
+
                     <!-- Cantidad -->
                     <div class="form-field">
                         <label for="cantidad">Cantidad</label>
@@ -128,16 +120,11 @@
                 </div>
 
                 <div class="form-row">
-                    <!-- Precio Unitario -->
+
+                    <!-- sub_total -->
                     <div class="form-field">
-                        <label for="precioUnitario">Precio Unitario</label>
-                        <input type="number" id="precioUnitario" step="0.01" placeholder=""
-                            v-model="form.precio_unitario" min="0" required />
-                    </div>
-                    <!-- Subtotal -->
-                    <div class="form-field">
-                        <label for="subTotal">Subtotal</label>
-                        <input type="number" id="subTotal" step="0.01" placeholder="" v-model="form.sub_total" min="0"
+                        <label for="sub_total">Sub Total</label>
+                        <input type="number" id="sub_total" step="0.01" placeholder="" v-model="form.sub_total" min="0"
                             required />
                     </div>
                     <!-- IVA -->
@@ -165,11 +152,13 @@
                         </select>
                     </div>
                     <!-- Documento de Factura -->
+
                     <div class="form-field">
                         <label for="archivo_pdf">Documento de Factura</label>
-                        <div class="dropzone" @drop.prevent="handleDrop" @dragover.prevent @click="triggerFileInput">
-                            <input type="file" id="archivo_pdf" ref="fileInput" @change="handleFileUpload"
-                                accept=".pdf,.jpg,.png" />
+                        <div class="dropzone" @drop.prevent="handleDropFactura" @dragover.prevent
+                            @click="triggerFileInputFactura">
+                            <input type="file" id="archivo_pdf" ref="fileInputFactura" @change="handleFileUploadFactura"
+                                accept=".pdf" />
                             <span v-if="!form.archivo_pdf">Arrastra o selecciona un archivo (PDF)</span>
                             <span v-else>{{ form.archivo_pdf.name }}</span>
                         </div>
@@ -202,21 +191,19 @@ export default {
             userName: "Cargando...", // Mensaje temporal
             profileImage: "",  // URL de la imagen del usuario
             form: {
-                tipo_alta: "", // Asegúrate de que esté vacío por defecto
-                tipo_documento_ampara: "", // Asegúrate de que esté vacío por defecto
-                numero_de_factura: "",           // No. Factura
-                tipo_compra: "", // Asegúrate de que esté vacío por defecto
-                concepto: "",             // Concepto
-                fecha_factura: "",         // Fecha de Factura
-                id_proveedor: "",            // Proveedor
-                cantidad: "",              // Cantidad
-                precio_unitario: "",      // Precio Unitario
-                sub_total: "",        // Subtotal
-                iva: "",                 // IVA
-                total: "",        // Total
-                archivo_pdf: null, // Almacena el archivo seleccionado
+                tipo_compra: "", // Tipo de compra
+                contrato_compra: null, // Archivo PDF del contrato de compra
+                fecha_adquisicion: "", // Fecha de adquisición
+                numero_de_factura: "", // Número de factura
+                tipo_presupuesto: "", // Tipo de presupuesto
+                id_proveedor: "", // ID del proveedor
+                cantidad: "", // Cantidad
+                sub_total: "", // Subtotal
+                iva: "", // IVA
+                total: "", // Total
+                archivo_pdf: null, // Archivo PDF de la factura
             },
-
+            
             showPassword: false,
             showConfirmPassword: false,
             menus: {
@@ -224,17 +211,34 @@ export default {
                 facturaMenu: false,
                 settingsMenu: false,
             },
-            showModal: false,
-            proveedores: [] // Lista de proveedores
-
+            showModal: false, // Modal de éxito
+            proveedores: [], // Lista de proveedores
         };
+    },
+    watch: {
+        // Watcher para calcular el IVA y el Total cuando cambia el subtotal
+        "form.sub_total": function (newVal) {
+            if (newVal && !isNaN(newVal)) {
+                const subtotal = parseFloat(newVal);
+                const iva = subtotal * 0.16; // Calcular el IVA (16% del subtotal)
+                const total = subtotal + iva; // Calcular el Total (subtotal + IVA)
+
+                // Actualizar los campos de IVA y Total
+                this.form.iva = iva.toFixed(2); // Redondear a 2 decimales
+                this.form.total = total.toFixed(2); // Redondear a 2 decimales
+            } else {
+                // Si el subtotal no es válido, limpiar los campos de IVA y Total
+                this.form.iva = "";
+                this.form.total = "";
+            }
+        },
     },
     mounted() {
         this.loadUserData();
         this.fetchProveedores();
-
     },
     methods: {
+        // Cargar datos del usuario
         async loadUserData() {
             const storedUserName = localStorage.getItem("userName");
             const storedUserEmail = localStorage.getItem("userEmail");
@@ -285,6 +289,8 @@ export default {
                 this.profileImage = "../assets/UserHombre.png"; // Imagen por defecto
             }
         },
+
+        // Obtener lista de proveedores
         async fetchProveedores() {
             try {
                 const response = await fetch("http://localhost:3000/api/proveedor");
@@ -297,49 +303,71 @@ export default {
                 console.error("Error al cargar los proveedores:", error);
             }
         },
-        goHome() {
-            this.$router.push('home'); // Redirige a la página principal ("/"). Cambia el path si es necesario.
-        },
-        handleFileUpload(event) {
+
+        // Manejo del archivo del contrato de compra
+        handleFileUploadContrato(event) {
             const file = event.target.files[0];
-            this.form.archivo_pdf = file; // Almacena el archivo en el formulario
+            if (file && file.type === "application/pdf") {
+                this.form.contrato_compra = file; // Almacena el archivo en el formulario
+            } else {
+                alert("Por favor, selecciona un archivo PDF válido para el contrato de compra.");
+            }
         },
-        handleDrop(event) {
+        handleDropContrato(event) {
             const file = event.dataTransfer.files[0];
-            this.form.archivo_pdf = file; // Almacena el archivo en el formulario
+            if (file && file.type === "application/pdf") {
+                this.form.contrato_compra = file; // Almacena el archivo en el formulario
+            } else {
+                alert("Por favor, arrastra un archivo PDF válido para el contrato de compra.");
+            }
         },
-        triggerFileInput() {
-            this.$refs.fileInput.click(); // Trigger el input file cuando se hace click en la dropzone
+        triggerFileInputContrato() {
+            this.$refs.fileInputContrato.click(); // Abre el input de archivo para el contrato
         },
-        goBack() {
-            console.log("Regresar a la página anterior");
+
+        // Manejo del archivo de la factura
+        handleFileUploadFactura(event) {
+            const file = event.target.files[0];
+            if (file && file.type === "application/pdf") {
+                this.form.archivo_pdf = file; // Almacena el archivo en el formulario
+            } else {
+                alert("Por favor, selecciona un archivo PDF válido para la factura.");
+            }
         },
+        handleDropFactura(event) {
+            const file = event.dataTransfer.files[0];
+            if (file && file.type === "application/pdf") {
+                this.form.archivo_pdf = file; // Almacena el archivo en el formulario
+            } else {
+                alert("Por favor, arrastra un archivo PDF válido para la factura.");
+            }
+        },
+        triggerFileInputFactura() {
+            this.$refs.fileInputFactura.click(); // Abre el input de archivo para la factura
+        },
+
+        // Envío del formulario
         async submitFactura() {
             try {
                 const formData = new FormData();
 
-                // Normalizar el valor de tipo_alta
-                const tipoAlta = this.form.tipo_alta.trim(); // Eliminar espacios adicionales
-                if (!["Compra (CM)", "Donacion (DN)", "Comodato (CO)"].includes(tipoAlta)) {
-                    throw new Error("El valor de tipo_alta no es válido");
-                }
-                formData.append('tipo_alta', tipoAlta);
-
                 // Agregar campos al FormData
-                formData.append('tipo_documento_ampara', this.form.tipo_documento_ampara);
-                formData.append('fecha_adquisicion', this.form.fecha_adquisicion);
-                formData.append('numero_de_factura', String(this.form.numero_de_factura)); // Convertir a cadena
                 formData.append('tipo_compra', this.form.tipo_compra);
-                formData.append('concepto', this.form.concepto);
-                formData.append('fecha_factura', this.form.fecha_factura);
-                formData.append('id_proveedor', Number(this.form.id_proveedor));
-                formData.append('cantidad', parseFloat(this.form.cantidad)); // Convertir a número
-                formData.append('precio_unitario', parseFloat(this.form.precio_unitario)); // Convertir a número
-                formData.append('sub_total', parseFloat(this.form.sub_total)); // Convertir a número
-                formData.append('iva', parseFloat(this.form.iva)); // Convertir a número
-                formData.append('total', parseFloat(this.form.total)); // Convertir a número
+                formData.append('fecha_adquisicion', this.form.fecha_adquisicion);
+                formData.append('numero_de_factura', this.form.numero_de_factura);
+                formData.append('tipo_presupuesto', this.form.tipo_presupuesto);
+                formData.append('id_proveedor', this.form.id_proveedor);
+                formData.append('cantidad', this.form.cantidad);
+                formData.append('sub_total', this.form.sub_total);
+                formData.append('iva', this.form.iva);
+                formData.append('total', this.form.total);
 
-                // Agregar el archivo PDF
+                // Agregar el archivo del contrato de compra
+                if (this.form.contrato_compra) {
+                    formData.append('contrato_compra', this.form.contrato_compra);
+                }
+
+                // Agregar el archivo de la factura
                 if (this.form.archivo_pdf) {
                     formData.append('archivo_pdf', this.form.archivo_pdf);
                 }
@@ -364,16 +392,8 @@ export default {
                 alert(`Hubo un error al enviar la factura: ${error.message}`);
             }
         },
-        navigateTo(page) {
-            console.log(`Navegando a ${page}`);
-            this.$router.push({ name: page }); // Asegúrate de que las rutas estén definidas con `name`.
-        },
-        showMenu(menu) {
-            this.menus[menu] = true;
-        },
-        hideMenu(menu) {
-            this.menus[menu] = false;
-        },
+
+        // Cerrar el modal y redirigir
         closeModal() {
             this.showModal = false;
             this.$router.push('/factura'); // Redirige a la página de facturas
