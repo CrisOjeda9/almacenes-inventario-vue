@@ -29,7 +29,8 @@
         <div class="sub-navbar">
             <a href="/home" class="nav-item">Inicio</a>
             <a v-if="userRole === 'Administrador'" href="users" class="nav-item">Usuarios</a>
-            <div v-if="userRole === 'Inventario' || userRole === 'Administrador'" class="nav-item" @mouseenter="showMenu('homeMenu')" @mouseleave="hideMenu('homeMenu')">
+            <div v-if="userRole === 'Inventario' || userRole === 'Administrador'" class="nav-item"
+                @mouseenter="showMenu('homeMenu')" @mouseleave="hideMenu('homeMenu')">
                 Inventario
                 <span class="menu-icon">▼</span>
                 <div class="dropdown-menu" v-show="menus.homeMenu">
@@ -44,7 +45,8 @@
                 </div>
             </div>
 
-            <div v-if="userRole === 'Almacenes' || userRole === 'Administrador'" class="nav-item" @mouseenter="showMenu('existenciaMenu')" @mouseleave="hideMenu('existenciaMenu')">
+            <div v-if="userRole === 'Almacenes' || userRole === 'Administrador'" class="nav-item"
+                @mouseenter="showMenu('existenciaMenu')" @mouseleave="hideMenu('existenciaMenu')">
                 Almacen
                 <span class="menu-icon">▼</span>
                 <div class="dropdown-menu" v-show="menus.existenciaMenu">
@@ -77,16 +79,14 @@
             <table class="existencia-table">
                 <thead>
                     <tr>
-                        <th>ID</th>
-                        <th>Número de factura</th>
-                        <th>Número de partida</th>
-                        <th>Nombre</th>
-                        <th>Importe sin IVA</th>
+                        <th>Núm. factura</th>
+                        <th>Núm. partida</th>
+                        <th>Descripcion</th>
+                        <th>Precio Unitario</th>
                         <th>IVA</th>
                         <th>Importe con IVA</th>
                         <th>Cantidad</th>
                         <th>Unidad de medida</th>
-                        <th>Ubicación en almacén</th>
                         <th>Total de ingreso</th>
                         <th>Foto artículo</th>
                         <th>Fecha de registro</th>
@@ -95,23 +95,22 @@
                 </thead>
                 <tbody>
                     <tr v-for="existencia in paginatedExistencias" :key="existencia.id">
-                        <td>{{ existencia.id }}</td>
-                        <td>{{ existencia.numeroFactura }}</td>
-                        <td>{{ existencia.numeroPartida }}</td>
-                        <td>{{ existencia.nombre }}</td>
-                        <td>{{ existencia.importeSinIVA }}</td>
+
+                        <td>{{ existencia.numero_factura }}</td>
+                        <td>{{ getNumeroPartida(existencia.id_objetogasto) }}</td>
+                        <td>{{ existencia.descripcion }}</td>
+                        <td>{{ existencia.precio_unitario }}</td>
                         <td>{{ existencia.iva }}</td>
-                        <td>{{ existencia.importeConIVA }}</td>
+                        <td>{{ existencia.importe_con_iva }}</td>
                         <td>{{ existencia.cantidad }}</td>
-                        <td>{{ existencia.unidadMedida }}</td>
-                        <td>{{ existencia.ubicacionAlmacen }}</td>
-                        <td>{{ existencia.totalIngreso }}</td>
+                        <td>{{ existencia.unidad_medida }}</td>
+                        <td>{{ existencia.total_ingreso }}</td>
                         <td>
-                            <button @click="openModal(existencia.fotoArticulo)" class="btn-download">
+                            <button @click="openModal(existencia.foto_articulo)" class="btn-download">
                                 <i class="fas fa-eye"></i>
                             </button>
                         </td>
-                        <td>{{ existencia.fechaRegistro }}</td>
+                        <td>{{ formatDate(existencia.createdAt) }}</td>
                         <td>
                             <button @click="editExistencia(existencia)" class="btn-edit">Editar</button>
                             <button @click="showDeleteModal(existencia.id)" class="btn-delete">Eliminar</button>
@@ -129,28 +128,24 @@
                             <!-- Primera columna -->
                             <div class="form-column">
                                 <div>
-                                    <label>ID:</label>
-                                    <input v-model="currentExistencia.id" type="text" disabled />
-                                </div>
-                                <div>
                                     <label>Número de factura:</label>
-                                    <input v-model="currentExistencia.numeroFactura" type="text" />
+                                    <input v-model="currentExistencia.numero_factura" type="text" />
                                 </div>
                                 <div>
                                     <label>Número de partida:</label>
-                                    <input v-model="currentExistencia.numeroPartida" type="text" />
+                                    <input v-model="currentExistencia.id_objetogasto" type="text" />
                                 </div>
                                 <div>
-                                    <label>Nombre:</label>
-                                    <input v-model="currentExistencia.nombre" type="text" />
+                                    <label>Descripcion:</label>
+                                    <input v-model="currentExistencia.descripcion" type="text" />
                                 </div>
                             </div>
 
                             <!-- Segunda columna -->
                             <div class="form-column">
                                 <div>
-                                    <label>Importe sin IVA:</label>
-                                    <input v-model="currentExistencia.importeSinIVA" type="text" />
+                                    <label>Precio Unitario:</label>
+                                    <input v-model="currentExistencia.precio_unitario" type="text" />
                                 </div>
                                 <div>
                                     <label>IVA:</label>
@@ -158,22 +153,22 @@
                                 </div>
                                 <div>
                                     <label>Importe con IVA:</label>
-                                    <input v-model="currentExistencia.importeConIVA" type="text" />
+                                    <input v-model="currentExistencia.importe_con_iva" type="text" />
                                 </div>
-                                <label for="fotoArticulo">Foto artículo</label>
+                                <label for="foto_articulo">Foto artículo</label>
                                 <div class="dropzone" @drop.prevent="handleDrop" @dragover.prevent
                                     @click="triggerFileInput">
-                                    <input type="file" id="updateFotoArticulo" ref="fileInput"
+                                    <input type="file" id="updatefoto_articulo" ref="fileInput"
                                         @change="handleFileChange" accept="image/*" multiple style="display: none;" />
                                     <i class="fas fa-cloud-upload-alt"></i>
-                                    <span v-if="currentExistencia.fotoArticulo.length === 0">Arrastra o selecciona
+                                    <span v-if="currentExistencia.foto_articulo.length === 0">Arrastra o selecciona
                                         imágenes (JPG, PNG)</span>
-                                    <span v-else>{{ currentExistencia.fotoArticulo.length }} imágenes
+                                    <span v-else>{{ currentExistencia.foto_articulo.length }} imágenes
                                         seleccionadas</span>
                                 </div>
                                 <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
-                                <button v-if="currentExistencia.fotoArticulo.length > 0" @click.prevent="openImageModal"
-                                    class="view-images-btn">
+                                <button v-if="currentExistencia.foto_articulo.length > 0"
+                                    @click.prevent="openImageModal" class="view-images-btn">
                                     Ver Imágenes
                                 </button>
                             </div>
@@ -186,7 +181,7 @@
                                 </div>
                                 <div>
                                     <label>Unidad de medida:</label>
-                                    <select v-model="currentExistencia.unidadMedida" class="form-input">
+                                    <select v-model="currentExistencia.unidad_medida" class="form-input">
                                         <option value="" disabled>Selecciona una opción</option>
                                         <option value="piezas">Piezas</option>
                                         <option value="paquetes">Paquetes</option>
@@ -198,13 +193,10 @@
                                         <option value="bultos">Bultos</option>
                                     </select>
                                 </div>
-                                <div>
-                                    <label>Ubicación en almacén:</label>
-                                    <input v-model="currentExistencia.ubicacionAlmacen" type="text" />
-                                </div>
+
                                 <div>
                                     <label>Total de ingreso:</label>
-                                    <input v-model="currentExistencia.totalIngreso" type="text" />
+                                    <input v-model="currentExistencia.total_ingreso" type="text" />
                                 </div>
                             </div>
                         </div>
@@ -223,7 +215,8 @@
                 <div class="modal3">
                     <h2>Imágenes seleccionadas</h2>
                     <div class="image-preview-container3">
-                        <div v-for="(img, index) in currentExistencia.fotoArticulo" :key="index" class="image-preview3">
+                        <div v-for="(img, index) in currentExistencia.foto_articulo" :key="index"
+                            class="image-preview3">
                             <div class="image-container3">
                                 <img :src="getImageUrl(img)" :alt="img.name" class="image-preview-img3" />
                                 <button @click="removeImage(index)" class="remove-btn">
@@ -276,12 +269,14 @@
 </template>
 
 <script>
+import axios from 'axios'; // Importar Axios para hacer solicitudes HTTP
+
 export default {
     name: "existenciaPage",
     data() {
         return {
             userRole: localStorage.getItem('userRole') || '', // Obtener el rol desde el localStorage
-            userName: "Cargando...", // Mensaje temporal,
+            userName: "Cargando...", // Mensaje temporal
             profileImage: "",  // URL de la imagen del usuario
             isDeleteModalVisible: false,
             menus: {
@@ -297,50 +292,14 @@ export default {
             itemToRemove: null,
             isEditing: false,
             currentExistencia: {
-                fotoArticulo: [],
+                foto_articulo: [],
             },
             errorMessage: "",
             showImageModal: false,
-            existencias: [
-                {
-                    id: 1,
-                    numeroFactura: "FAC-202301",
-                    numeroPartida: "12345",
-                    nombre: "Producto A",
-                    importeSinIVA: "$10,000",
-                    iva: "$1,600",
-                    importeConIVA: "$11,600",
-                    cantidad: "100",
-                    unidadMedida: "Piezas",
-                    ubicacionAlmacen: "Almacén 1 - Estante 3",
-                    totalIngreso: "100",
-                    fotoArticulo: [
-                        "https://cdn.milenio.com/uploads/media/2022/02/22/radio-y-television-de-hidalgo.jpg", // Ruta completa
-                        "https://www.cronicahidalgo.com/sitio/wp-content/uploads/2024/09/p5-RTVH.jpg", // Ruta completa
-                        "https://lasillarota.com/u/fotografias/m/2023/1/24/f768x1-394120_394247_15.jpg", // Ruta completa
-                    ],
-                    fechaRegistro: "2024-01-01"
-                },
-                {
-                    id: 2,
-                    numeroFactura: "FAC-202302",
-                    numeroPartida: "67890",
-                    nombre: "Producto B",
-                    importeSinIVA: "$5,000",
-                    iva: "$800",
-                    importeConIVA: "$5,800",
-                    cantidad: "50",
-                    unidadMedida: "Cajas",
-                    ubicacionAlmacen: "Almacén 2 - Estante 5",
-                    totalIngreso: "50",
-                    fotoArticulo: [
-                        require("@/assets/radio-y-television-de-hidalgo.jpg"), // Ruta relativa usando require
-                        require("@/assets/radio.jpeg"), // Ruta relativa usando require
-                        require("@/assets/radio2.jpg"), // Ruta relativa usando require
-                    ],
-                    fechaRegistro: "2024-01-02"
-                }
-            ]
+            existencias: [], // Lista de artículos obtenidos de la API
+            objetosGasto: [], // Lista de objetos de gasto obtenidos de la API
+            deleteId: null, // ID del artículo a eliminar
+            isLoading: true, // Indicador de carga
         };
     },
     computed: {
@@ -348,9 +307,16 @@ export default {
             const query = this.searchQuery.toLowerCase();
             return this.existencias.filter(existencia => {
                 return (
-                    existencia.numeroFactura.toLowerCase().includes(query) ||
-                    existencia.nombre.toLowerCase().includes(query) ||
-                    existencia.ubicacionAlmacen.toLowerCase().includes(query)
+                    existencia.numero_factura?.toLowerCase().includes(query) || // Usar encadenamiento opcional
+                    existencia.numero_partida?.toLowerCase().includes(query) || // Usar encadenamiento opcional
+                    existencia.precio_unitario?.toLowerCase().includes(query) || // Usar encadenamiento opcional
+                    existencia.total_iva?.toLowerCase().includes(query) || // Usar encadenamiento opcional
+                    existencia.importe_con_iva?.toLowerCase().includes(query) || // Usar encadenamiento opcional
+                    existencia.cantidad?.toLowerCase().includes(query) || // Usar encadenamiento opcional
+                    existencia.unidad_medida?.toLowerCase().includes(query) || // Usar encadenamiento opcional
+                    existencia.total_ingreso?.toLowerCase().includes(query) || // Usar encadenamiento opcional
+                    existencia.fecha_registro?.toLowerCase().includes(query) || // Usar encadenamiento opcional
+                    existencia.descripcion?.toLowerCase().includes(query)      // Usar encadenamiento opcional
                 );
             });
         },
@@ -365,8 +331,61 @@ export default {
     },
     mounted() {
         this.loadUserData();
+        this.loadExistencias(); // Cargar los artículos al montar el componente
+        this.loadObjetosGasto(); // Cargar los objetos de gasto al montar el componente
     },
     methods: {
+
+        formatDate(dateString) {
+            if (!dateString) return "N/A"; // Si no hay fecha, devuelve "N/A"
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            const date = new Date(dateString);
+            return date.toLocaleDateString('es-MX', options); // Usando la configuración en español de México
+        },
+        // Cargar los artículos desde la API
+        async loadExistencias() {
+            try {
+                const response = await axios.get('http://localhost:3000/api/articulos');
+                console.log('Datos cargados:', response.data); // Verificar los datos cargados
+                this.existencias = response.data
+                    .map(articulo => ({
+                        ...articulo,
+                        foto_articulo: articulo.foto_articulo ? this.extractFileNames(articulo.foto_articulo) : [] // Extraer nombres de archivos
+                    }))
+                    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)); // Ordenar por fecha descendente
+                console.log('Datos procesados:', this.existencias); // Verificar los datos procesados
+            } catch (error) {
+                console.error('Error al cargar los artículos:', error);
+            } finally {
+                this.isLoading = false; // Desactivar el indicador de carga
+            }
+        },
+        // Extraer nombres de archivos de las rutas completas y eliminar la extensión
+        extractFileNames(filePaths) {
+            return filePaths.split(';').map(path => {
+                // Extraer el nombre del archivo de la ruta completa
+                const fileName = path.split('\\').pop(); // Extrae "lista.png", "person_128dp_691B31_FILL0_wght400_GRAD0_opsz48.png", etc.
+                // Eliminar la extensión del archivo
+                return fileName.split('.').slice(0, -1).join('.'); // Elimina la extensión
+            });
+        },
+        // Cargar los objetos de gasto desde la API
+        async loadObjetosGasto() {
+            try {
+                const response = await axios.get('http://localhost:3000/api/objetoGastos');
+                this.objetosGasto = response.data; // Guardar los objetos de gasto en la lista
+            } catch (error) {
+                console.error('Error al cargar los objetos de gasto:', error);
+            }
+        },
+        // Obtener el número de partida a partir del id_objetogasto
+        getNumeroPartida(idObjetogasto) {
+            const objetoGasto = this.objetosGasto.find(
+                (objeto) => objeto.id === idObjetogasto
+            );
+            return objetoGasto ? objetoGasto.numero_partida : "N/A";
+        },
+        // Cargar los datos del usuario
         async loadUserData() {
             const storedUserName = localStorage.getItem("userName");
             const storedUserEmail = localStorage.getItem("userEmail");
@@ -417,14 +436,23 @@ export default {
                 this.profileImage = "../assets/UserHombre.png"; // Imagen por defecto
             }
         },
+        // Obtener la URL completa de la imagen sin extensión
+        getImageUrl(fileName) {
+            if (!fileName) return ''; // Asegúrate de que fileName no esté vacío
+            return `http://localhost:3000/api/articulos-files/${fileName}`;
+        },
+        // Abrir el modal con las imágenes
         openModal(fotos) {
-            this.modalImages = fotos.map(foto => this.getImageUrl(foto)); // Asegúrate de obtener la URL correcta
+            // Filtrar solo las imágenes que son cadenas (nombres de archivos)
+            this.modalImages = fotos.filter(foto => typeof foto === 'string');
             this.showModal = true;
         },
+        // Cerrar el modal
         closeModal() {
             this.showModal = false;
             this.modalImages = [];
         },
+        // Métodos adicionales (abrir/cerrar modales, paginación, etc.)
         triggerFileInput() {
             this.$refs.fileInput.click();
         },
@@ -432,45 +460,68 @@ export default {
             const files = Array.from(event.target.files);
             const validFiles = files.filter(file => this.isImage(file));
 
-            if (validFiles.length + this.currentExistencia.fotoArticulo.length > 10) {
+            if (validFiles.length + this.currentExistencia.foto_articulo.length > 10) {
                 this.errorMessage = "Solo puedes subir hasta 10 imágenes.";
                 return;
             }
 
-            this.currentExistencia.fotoArticulo.push(...validFiles);
+            // Generar URLs temporales para las imágenes nuevas
+            validFiles.forEach(file => {
+                file.preview = URL.createObjectURL(file); // Crear una URL temporal
+            });
+
+            this.currentExistencia.foto_articulo.push(...validFiles);
             this.errorMessage = "";
         },
+
         handleDrop(event) {
             const files = Array.from(event.dataTransfer.files);
             const validFiles = files.filter(file => this.isImage(file));
 
-            if (validFiles.length + this.currentExistencia.fotoArticulo.length > 10) {
+            if (validFiles.length + this.currentExistencia.foto_articulo.length > 10) {
                 this.errorMessage = "Solo puedes subir hasta 10 imágenes.";
                 return;
             }
 
-            this.currentExistencia.fotoArticulo.push(...validFiles);
+            // Generar URLs temporales para las imágenes nuevas
+            validFiles.forEach(file => {
+                file.preview = URL.createObjectURL(file); // Crear una URL temporal
+            });
+
+            this.currentExistencia.foto_articulo.push(...validFiles);
             this.errorMessage = "";
         },
+
         isImage(file) {
             return file.type.startsWith("image/");
         },
-        getImageUrl(file) {
-            if (typeof file === 'string') {
-                // Si es una ruta de archivo (string), devuélvela directamente
-                return file;
-            } else if (file instanceof File || file instanceof Blob) {
-                // Si es un archivo (File o Blob), crea una URL temporal
-                return URL.createObjectURL(file);
-            } else {
-                console.error("Tipo de archivo no soportado:", file);
-                return ''; // Manejo de error
+
+
+        async removeImage(index) {
+            try {
+                // Obtener el nombre del archivo a eliminar
+                const fileName = this.currentExistencia.foto_articulo[index];
+
+                // Realizar la solicitud DELETE a la API
+                await axios.delete(`http://localhost:3000/api/articulos/${this.currentExistencia.id}/archivo`, {
+                    data: { fileName } // Enviar el nombre del archivo en el cuerpo de la solicitud
+                });
+
+                // Eliminar la imagen de la lista local
+                this.currentExistencia.foto_articulo.splice(index, 1);
+
+                // Recargar los datos de la tabla
+                await this.loadExistencias();
+
+                alert('Imagen eliminada correctamente');
+            } catch (error) {
+                console.error('Error al eliminar la imagen:', error);
+                alert("Hubo un error al eliminar la imagen. Inténtalo de nuevo.");
             }
         },
-        removeImage(index) {
-            this.currentExistencia.fotoArticulo.splice(index, 1);
-        },
         openImageModal() {
+            // Filtrar solo las imágenes que son cadenas (nombres de archivos)
+            this.modalImages = this.currentExistencia.foto_articulo.filter(foto => typeof foto === 'string');
             this.showImageModal = true;
         },
         closeImageModal() {
@@ -502,36 +553,93 @@ export default {
             }
         },
         editExistencia(existencia) {
+            // Guardar una copia de las imágenes originales
+            this.originalImages = [...existencia.foto_articulo];
             this.currentExistencia = { ...existencia };
             this.isEditing = true;
         },
-        saveChanges() {
-            const index = this.existencias.findIndex(
-                existencia => existencia.id === this.currentExistencia.id
-            );
-            if (index !== -1) {
-                this.existencias[index] = { ...this.currentExistencia };
-                this.isEditing = false;
-                this.currentExistencia = {}; // Limpiar el objeto
-            }
-        },
+
         cancelEdit() {
             this.isEditing = false;
-            this.currentExistencia = {}; // Limpiar el objeto
+            // Restablecer las imágenes a su estado original
+            this.currentExistencia.foto_articulo = [...this.originalImages];
         },
+        async saveChanges() {
+            try {
+                // 1. Actualizar los datos generales del artículo
+                const formData = new FormData();
+                formData.append('numero_factura', this.currentExistencia.numero_factura);
+                formData.append('id_objetogasto', this.currentExistencia.id_objetogasto);
+                formData.append('descripcion', this.currentExistencia.descripcion);
+                formData.append('precio_unitario', this.currentExistencia.precio_unitario);
+                formData.append('iva', this.currentExistencia.iva);
+                formData.append('importe_con_iva', this.currentExistencia.importe_con_iva);
+                formData.append('cantidad', this.currentExistencia.cantidad);
+                formData.append('unidad_medida', this.currentExistencia.unidad_medida);
+                formData.append('total_ingreso', this.currentExistencia.total_ingreso);
+
+                // Enviar la solicitud PUT para actualizar el artículo
+                await axios.put(`http://localhost:3000/api/articulos/${this.currentExistencia.id}`, formData, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data'
+                    }
+                });
+
+                // 2. Agregar los archivos nuevos (imágenes)
+                const nuevosArchivos = this.currentExistencia.foto_articulo.filter(file => file instanceof File);
+                if (nuevosArchivos.length > 0) {
+                    const archivosFormData = new FormData();
+                    nuevosArchivos.forEach((file) => {
+                        archivosFormData.append('foto_articulo', file); // Cambiar 'archivos' a 'foto_articulo'
+                    });
+
+                    // Enviar la solicitud POST para agregar los archivos
+                    await axios.post(`http://localhost:3000/api/articulos/${this.currentExistencia.id}/archivo`, archivosFormData, {
+                        headers: {
+                            'Content-Type': 'multipart/form-data'
+                        }
+                    });
+                }
+
+                // Recargar los datos después de guardar los cambios
+                await this.loadExistencias();
+
+                // Cerrar el modal de edición y limpiar el formulario
+                this.isEditing = false;
+                this.currentExistencia = {};
+                alert('Artículo actualizado correctamente');
+            } catch (error) {
+                console.error('Error al actualizar el artículo:', error);
+                alert("Hubo un error al actualizar el artículo. Inténtalo de nuevo.");
+            }
+        },
+
         showDeleteModal(id) {
             this.deleteId = id;
             this.isDeleteModalVisible = true;
         },
-        confirmDelete() {
-            const index = this.existencias.findIndex(
-                existencia => existencia.id === this.deleteId
-            );
-            if (index !== -1) {
-                this.existencias.splice(index, 1);
+        async confirmDelete() {
+            try {
+                // Realizar la solicitud DELETE a la API
+                await axios.delete(`http://localhost:3000/api/articulos/${this.deleteId}`);
+
+                // Eliminar el artículo de la lista local
+                const index = this.existencias.findIndex(
+                    existencia => existencia.id === this.deleteId
+                );
+                if (index !== -1) {
+                    this.existencias.splice(index, 1);
+                }
+
+                // Cerrar el modal de confirmación
+                this.isDeleteModalVisible = false;
+                this.deleteId = null;
+
+                // Mostrar un mensaje de éxito (opcional)
+            } catch (error) {
+                console.error('Error al eliminar el artículo:', error);
+                alert("Hubo un error al eliminar el artículo. Inténtalo de nuevo.");
             }
-            this.isDeleteModalVisible = false;
-            this.deleteId = null;
         },
         cancelDelete() {
             this.isDeleteModalVisible = false;
@@ -550,6 +658,13 @@ export default {
 /* Aplicar Montserrat a todo el contenido */
 * {
     font-family: 'Montserrat', sans-serif;
+}
+
+input[type="text"],
+input[type="date"] {
+    padding: 8px;
+    border-radius: 25px;
+    border: 1px solid #ccc;
 }
 
 .btn-download {
