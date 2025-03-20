@@ -300,6 +300,8 @@ export default {
             objetosGasto: [], // Lista de objetos de gasto obtenidos de la API
             deleteId: null, // ID del artículo a eliminar
             isLoading: true, // Indicador de carga
+            imagesToDelete: [], // Lista temporal de imágenes a eliminar
+
         };
     },
     computed: {
@@ -497,27 +499,16 @@ export default {
         },
 
 
-        async removeImage(index) {
-            try {
-                // Obtener el nombre del archivo a eliminar
-                const fileName = this.currentExistencia.foto_articulo[index];
+        removeImage(index) {
+            const img = this.currentExistencia.foto_articulo[index];
 
-                // Realizar la solicitud DELETE a la API
-                await axios.delete(`http://localhost:3000/api/articulos/${this.currentExistencia.id}/archivo`, {
-                    data: { fileName } // Enviar el nombre del archivo en el cuerpo de la solicitud
-                });
-
-                // Eliminar la imagen de la lista local
-                this.currentExistencia.foto_articulo.splice(index, 1);
-
-                // Recargar los datos de la tabla
-                await this.loadExistencias();
-
-                alert('Imagen eliminada correctamente');
-            } catch (error) {
-                console.error('Error al eliminar la imagen:', error);
-                alert("Hubo un error al eliminar la imagen. Inténtalo de nuevo.");
+            // Si es una imagen existente (no un archivo nuevo), agregarla a la lista de imágenes a eliminar
+            if (typeof img === 'string') {
+                this.imagesToDelete.push(img); // Agregar a la lista temporal
             }
+
+            // Eliminar la imagen de la lista local
+            this.currentExistencia.foto_articulo.splice(index, 1);
         },
         openImageModal() {
             // Filtrar solo las imágenes que son cadenas (nombres de archivos)
@@ -561,12 +552,22 @@ export default {
 
         cancelEdit() {
             this.isEditing = false;
-            // Restablecer las imágenes a su estado original
-            this.currentExistencia.foto_articulo = [...this.originalImages];
+            this.imagesToDelete = []; // Limpiar la lista temporal
+            this.currentExistencia.foto_articulo = [...this.originalImages]; // Restablecer las imágenes
         },
         async saveChanges() {
             try {
-                // 1. Actualizar los datos generales del artículo
+                // 1. Eliminar las imágenes marcadas para eliminación
+                if (this.imagesToDelete.length > 0) {
+                    for (const img of this.imagesToDelete) {
+                        await axios.delete(`http://localhost:3000/api/articulos/${this.currentExistencia.id}/archivo`, {
+                            data: { fileName: img.split('/').pop() } // Enviar el nombre del archivo
+                        });
+                    }
+                    this.imagesToDelete = []; // Limpiar la lista temporal
+                }
+
+                // 2. Actualizar los datos generales del artículo
                 const formData = new FormData();
                 formData.append('numero_factura', this.currentExistencia.numero_factura);
                 formData.append('id_objetogasto', this.currentExistencia.id_objetogasto);
@@ -585,12 +586,12 @@ export default {
                     }
                 });
 
-                // 2. Agregar los archivos nuevos (imágenes)
+                // 3. Agregar los archivos nuevos (imágenes)
                 const nuevosArchivos = this.currentExistencia.foto_articulo.filter(file => file instanceof File);
                 if (nuevosArchivos.length > 0) {
                     const archivosFormData = new FormData();
                     nuevosArchivos.forEach((file) => {
-                        archivosFormData.append('foto_articulo', file); // Cambiar 'archivos' a 'foto_articulo'
+                        archivosFormData.append('foto_articulo', file);
                     });
 
                     // Enviar la solicitud POST para agregar los archivos
