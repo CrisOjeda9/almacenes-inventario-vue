@@ -546,14 +546,23 @@ export default {
         editExistencia(existencia) {
             // Guardar una copia de las imágenes originales
             this.originalImages = [...existencia.foto_articulo];
-            this.currentExistencia = { ...existencia };
+            this.currentExistencia = { ...existencia, foto_articulo: [...existencia.foto_articulo] }; // Copiar las imágenes
             this.isEditing = true;
         },
 
         cancelEdit() {
             this.isEditing = false;
-            this.imagesToDelete = []; // Limpiar la lista temporal
-            this.currentExistencia.foto_articulo = [...this.originalImages]; // Restablecer las imágenes
+            this.currentExistencia.foto_articulo = [...this.originalImages]; // Restaurar las imágenes originales
+            this.imagesToDelete = []; // Limpiar la lista temporal de imágenes a eliminar
+            this.errorMessage = ""; // Limpiar mensajes de error
+
+            // Resetear el input de archivo
+            if (this.$refs.fileInput) {
+                this.$refs.fileInput.value = ""; // Limpiar el valor del input
+            }
+
+            // Recargar la lista de artículos (opcional)
+            this.loadExistencias();
         },
         async saveChanges() {
             try {
