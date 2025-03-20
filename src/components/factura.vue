@@ -77,16 +77,13 @@
             <table class="factura-table">
                 <thead>
                     <tr>
-                        <th>Tipo de alta</th>
-                        <th>Tipo de documento que ampara</th>
+                        <th>Tipo de compra</th>
+                        <th>Contrato de compra</th>
                         <th>Fecha de adquisición</th>
                         <th>No. Factura</th>
-                        <th>Tipo de compra</th>
-                        <th>Concepto</th>
-                        <th>Fecha de Factura</th>
+                        <th>Tipo de Presupuesto</th>
                         <th>Nombre Proveedor</th>
                         <th>Cantidad</th>
-                        <th>Precio Unitario</th>
                         <th>Precio total sin IVA</th>
                         <th>IVA</th>
                         <th>Precio total con IVA</th>
@@ -97,32 +94,43 @@
                 </thead>
                 <tbody>
                     <tr v-for="factura in paginatedfactura" :key="factura.id">
-                        <td>{{ factura.tipo_alta }}</td>
-                        <td>{{ factura.tipo_documento_ampara }}</td>
-                        <td>{{ formatDate(factura.fecha_adquisicion) }}</td>
-                        <td>{{ factura.numero_de_factura }}</td>
                         <td>{{ factura.tipo_compra }}</td>
-                        <td>{{ factura.concepto }}</td>
-                        <td>{{ formatDate(factura.fecha_factura) }}</td>
-                        <td>{{ getNombreProveedor(factura.id_proveedor) }}</td>
-                        <!-- Aquí se muestra el nombre del proveedor -->
-                        <td>{{ factura.cantidad }}</td>
-                        <td>{{ factura.precio_unitario }}</td>
-                        <td>{{ factura.sub_total }}</td>
-                        <td>{{ factura.iva }}</td>
-                        <td>{{ factura.total }}</td>
                         <td>
-                            <template v-if="factura.archivo_pdf">
+                            <!-- Mostrar archivos de contrato_compra -->
+                            <template v-if="factura.contrato_compra">
                                 <ul>
-                                    <li v-for="(file, index) in getPdfFiles(factura.archivo_pdf)" :key="index">
-                                        <!-- Aplicar truncateFileName al nombre del archivo -->
+                                    <li v-for="(file, index) in getPdfFiles(factura.contrato_compra)" :key="index">
                                         <a :href="file.url" target="_blank" :title="file.name">
                                             {{ truncateFileName(file.name, 20) }}
                                         </a>
                                     </li>
                                 </ul>
                             </template>
-                            <button @click="downloadZip(factura)" class="btn-download">
+                            <button @click="downloadZip(factura, 'contrato_compra')" class="btn-download">
+                                <p class="textoDescarga">Descargar</p>
+                            </button>
+                        </td>
+                        <td>{{ formatDate(factura.fecha_adquisicion) }}</td>
+                        <td>{{ factura.numero_de_factura }}</td>
+                        <td>{{ factura.tipo_presupuesto }}</td>
+                        <td>{{ getNombreProveedor(factura.id_proveedor) }}</td>
+                        <!-- Aquí se muestra el nombre del proveedor -->
+                        <td>{{ factura.cantidad }}</td>
+                        <td>{{ factura.sub_total }}</td>
+                        <td>{{ factura.iva }}</td>
+                        <td>{{ factura.total }}</td>
+                        <td>
+                            <!-- Mostrar archivos de archivo_pdf -->
+                            <template v-if="factura.archivo_pdf">
+                                <ul>
+                                    <li v-for="(file, index) in getPdfFiles(factura.archivo_pdf)" :key="index">
+                                        <a :href="file.url" target="_blank" :title="file.name">
+                                            {{ truncateFileName(file.name, 20) }}
+                                        </a>
+                                    </li>
+                                </ul>
+                            </template>
+                            <button @click="downloadZip(factura, 'archivo_pdf')" class="btn-download">
                                 <p class="textoDescarga">Descargar</p>
                             </button>
                         </td>
@@ -144,8 +152,8 @@
                             <!-- Primera columna del formulario -->
                             <div class="form-column">
                                 <div>
-                                    <label>Tipo de alta:</label>
-                                    <select v-model="currentFactura.tipo_alta" class="form-input">
+                                    <label>Tipo de compra:</label>
+                                    <select v-model="currentFactura.tipo_compra" class="form-input">
                                         <option value="" disabled selected>Selecciona un tipo de alta</option>
                                         <option v-for="tipo in tiposAlta" :key="tipo.value" :value="tipo.value">
                                             {{ tipo.label }}
@@ -153,8 +161,8 @@
                                     </select>
                                 </div>
                                 <div>
-                                    <label>Tipo de documento que ampara:</label>
-                                    <select v-model="currentFactura.tipo_documento_ampara" class="form-input">
+                                    <label>Contrato de compra</label>
+                                    <select v-model="currentFactura.contrato_compra" class="form-input">
                                         <option value="" disabled selected>Selecciona un tipo de documento</option>
                                         <option v-for="tipo in tipoAmpara" :key="tipo.value" :value="tipo.value">
                                             {{ tipo.label }}
@@ -166,17 +174,13 @@
                                     <input v-model="currentFactura.numero_de_factura" type="text" />
                                 </div>
                                 <div>
-                                    <label>Tipo de compra:</label>
-                                    <select v-model="currentFactura.tipo_compra" class="form-input">
+                                    <label>Tipo de presupuesto:</label>
+                                    <select v-model="currentFactura.tipo_presupuesto" class="form-input">
                                         <option value="" disabled selected>Selecciona un tipo de compra</option>
                                         <option v-for="tipo in tiposCompra" :key="tipo.value" :value="tipo.value">
                                             {{ tipo.label }}
                                         </option>
                                     </select>
-                                </div>
-                                <div>
-                                    <label>Concepto:</label>
-                                    <input v-model="currentFactura.concepto" type="text" />
                                 </div>
                                 <div style="width: 100%;">
                                     <label>Proveedor: (Selecciona uno)</label>
@@ -199,10 +203,7 @@
                             <div class="form-column">
 
 
-                                <div>
-                                    <label>Precio unitario:</label>
-                                    <input v-model="currentFactura.precio_unitario" type="text" />
-                                </div>
+
                                 <div>
                                     <label>Total sin IVA:</label>
                                     <input v-model="currentFactura.sub_total" type="text" />
@@ -322,11 +323,9 @@ export default {
                 const nombreProveedor = this.getNombreProveedor(factura.id_proveedor)?.toLowerCase() || '';
                 return (
                     (factura.tipo_alta?.toString() || '').toLowerCase().includes(query) ||
-                    (factura.tipo_documento_ampara || '').toLowerCase().includes(query) ||
+                    (factura.contrato_compra || '').toLowerCase().includes(query) ||
                     (factura.numero_de_factura || '').toLowerCase().includes(query) ||
                     (factura.tipo_compra || '').toLowerCase().includes(query) ||
-                    (factura.concepto || '').toLowerCase().includes(query) ||
-                    (factura.fechafactura || '').toLowerCase().includes(query) ||
                     nombreProveedor.includes(query) || // Buscar por nombre del proveedor
                     (factura.cantidad?.toString() || '').toLowerCase().includes(query) ||
                     (factura.precio_unitario?.toString() || '').toLowerCase().includes(query) ||
@@ -484,44 +483,44 @@ export default {
             });
         },
 
-        async downloadZip(factura) {
-            try {
-                // Obtener los archivos PDF
-                const pdfFiles = this.getPdfFiles(factura.archivo_pdf);
+        async downloadZip(factura, field = 'archivo_pdf') {
+    try {
+        // Obtener los archivos PDF del campo especificado (archivo_pdf o contrato_compra)
+        const pdfFiles = this.getPdfFiles(factura[field]);
 
-                // Verificar si hay archivos para descargar
-                if (pdfFiles.length === 0) {
-                    this.showAlert("No hay archivos para descargar", "error");
-                    return;
-                }
+        // Verificar si hay archivos para descargar
+        if (pdfFiles.length === 0) {
+            this.showAlert("No hay archivos para descargar", "error");
+            return;
+        }
 
-                // Descargar cada archivo PDF individualmente
-                for (const file of pdfFiles) {
-                    // Hacer una solicitud a la API para obtener el archivo
-                    const response = await fetch(file.downloadUrl); // Usar la URL de descarga sin extensión
+        // Descargar cada archivo PDF individualmente
+        for (const file of pdfFiles) {
+            // Hacer una solicitud a la API para obtener el archivo
+            const response = await fetch(file.downloadUrl); // Usar la URL de descarga sin extensión
 
-                    // Verificar si la respuesta es exitosa
-                    if (!response.ok) {
-                        throw new Error(`Error al obtener el archivo: ${response.statusText}`);
-                    }
-
-                    // Convertir la respuesta a un Blob
-                    const blob = await response.blob();
-
-                    // Crear un enlace para descargar el archivo
-                    const link = document.createElement('a');
-                    link.href = URL.createObjectURL(blob); // Crear una URL temporal para el Blob
-                    link.download = file.name + '.pdf'; // Nombre del archivo con extensión
-                    document.body.appendChild(link);
-                    link.click(); // Simular clic para iniciar la descarga
-                    document.body.removeChild(link); // Eliminar el enlace del DOM
-                    URL.revokeObjectURL(link.href); // Liberar la URL temporal
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                this.showAlert('Hubo un error al descargar los archivos PDF. Por favor, inténtalo de nuevo',"error");
+            // Verificar si la respuesta es exitosa
+            if (!response.ok) {
+                throw new Error(`Error al obtener el archivo: ${response.statusText}`);
             }
-        },
+
+            // Convertir la respuesta a un Blob
+            const blob = await response.blob();
+
+            // Crear un enlace para descargar el archivo
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob); // Crear una URL temporal para el Blob
+            link.download = file.name + '.pdf'; // Nombre del archivo con extensión
+            document.body.appendChild(link);
+            link.click(); // Simular clic para iniciar la descarga
+            document.body.removeChild(link); // Eliminar el enlace del DOM
+            URL.revokeObjectURL(link.href); // Liberar la URL temporal
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        this.showAlert('Hubo un error al descargar los archivos PDF. Por favor, inténtalo de nuevo', "error");
+    }
+},
 
 
         handleDrop(event) {
@@ -581,53 +580,53 @@ export default {
 
         // Método para guardar cambios (incluyendo la subida del archivo si existe)
         async saveChanges() {
-    try {
-        // 1. Actualizar los datos de la factura
-        const response = await fetch(`http://localhost:3000/api/facturas/${this.currentFactura.id}`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                ...this.currentFactura,
-                id_proveedor: this.currentFactura.id_proveedor // Asegurar que el id_proveedor se envíe
-            }),
-        });
+            try {
+                // 1. Actualizar los datos de la factura
+                const response = await fetch(`http://localhost:3000/api/facturas/${this.currentFactura.id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        ...this.currentFactura,
+                        id_proveedor: this.currentFactura.id_proveedor // Asegurar que el id_proveedor se envíe
+                    }),
+                });
 
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.message || 'Error al actualizar la factura');
-        }
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Error al actualizar la factura');
+                }
 
-        // 2. Subir el archivo si se seleccionó uno
-        if (this.selectedFile) {
-            const formData = new FormData();
-            formData.append('archivo_pdf', this.selectedFile);
+                // 2. Subir el archivo si se seleccionó uno
+                if (this.selectedFile) {
+                    const formData = new FormData();
+                    formData.append('archivo_pdf', this.selectedFile);
 
-            const fileResponse = await fetch(`http://localhost:3000/api/facturas/${this.currentFactura.id}/reemplazar-archivo`, {
-                method: 'PUT',
-                body: formData,
-            });
+                    const fileResponse = await fetch(`http://localhost:3000/api/facturas/${this.currentFactura.id}/reemplazar-archivo`, {
+                        method: 'PUT',
+                        body: formData,
+                    });
 
-            if (!fileResponse.ok) {
-                throw new Error('Error al subir el archivo');
+                    if (!fileResponse.ok) {
+                        throw new Error('Error al subir el archivo');
+                    }
+                }
+
+                // Mensaje de éxito
+                this.showAlert('Factura actualizada correctamente', "success");
+
+                // Recargar la lista de facturas y cerrar el modal
+                await this.fetchFacturas();
+                await this.fetchProveedores();
+                this.isEditing = false;
+                this.currentFactura = {};
+                this.selectedFile = null; // Limpiar el archivo seleccionado después de guardar
+            } catch (error) {
+                console.error('Error:', error);
+                this.showAlert(error.message || 'Hubo un error al actualizar la factura. Por favor, inténtalo de nuevo', "error");
             }
-        }
-
-        // Mensaje de éxito
-        this.showAlert('Factura actualizada correctamente',"success");
-
-        // Recargar la lista de facturas y cerrar el modal
-        await this.fetchFacturas();
-        await this.fetchProveedores();
-        this.isEditing = false;
-        this.currentFactura = {};
-        this.selectedFile = null; // Limpiar el archivo seleccionado después de guardar
-    } catch (error) {
-        console.error('Error:', error);
-        this.showAlert(error.message || 'Hubo un error al actualizar la factura. Por favor, inténtalo de nuevo', "error");
-    }
-},
+        },
         cancelEdit() {
             this.isEditing = false;
             this.currentFactura = {}; // Limpiar el objeto

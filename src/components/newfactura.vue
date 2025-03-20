@@ -130,12 +130,12 @@
                     <!-- IVA -->
                     <div class="form-field">
                         <label for="iva">IVA</label>
-                        <input type="number" id="iva" step="0.01" placeholder="" v-model="form.iva" min="0" required />
+                        <input type="number" id="iva" step="0.01" placeholder="" v-model="form.iva" readonly min="0" required />
                     </div>
                     <!-- Total -->
                     <div class="form-field">
                         <label for="total">Total</label>
-                        <input type="number" id="total" step="0.01" placeholder="" v-model="form.total" min="0"
+                        <input type="number" id="total" step="0.01" placeholder="" v-model="form.total" readonly min="0"
                             required />
                     </div>
                 </div>
