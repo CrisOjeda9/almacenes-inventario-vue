@@ -265,6 +265,10 @@
                 <button @click="closeModal">Cerrar</button>
             </div>
         </div>
+        <!-- Contenedor de notificaciones -->
+        <div v-if="alertMessage" :class="alertClass" class="notification">
+            <i :class="alertIcon"></i> {{ alertMessage }}
+        </div>
     </div>
 </template>
 
@@ -275,6 +279,9 @@ export default {
     name: "existenciaPage",
     data() {
         return {
+            alertMessage: "",  // Mensaje de la alerta
+            alertClass: "",    // Clase de la alerta (ej. 'success' o 'error')
+            alertIcon: "",     // Icono para la alerta
             userRole: localStorage.getItem('userRole') || '', // Obtener el rol desde el localStorage
             userName: "Cargando...", // Mensaje temporal
             profileImage: "",  // URL de la imagen del usuario
@@ -337,6 +344,24 @@ export default {
         this.loadObjetosGasto(); // Cargar los objetos de gasto al montar el componente
     },
     methods: {
+        showAlert(message, type) {
+            this.alertMessage = message;
+            if (type === "success") {
+                this.alertClass = "alert-success";
+                this.alertIcon = "fa fa-check-circle";
+            } else if (type === "error") {
+                this.alertClass = "alert-error";
+                this.alertIcon = "fa fa-times-circle";
+            } else {
+                this.alertClass = "alert-warning";
+                this.alertIcon = "fa fa-exclamation-circle";
+            }
+
+            // Ocultar la alerta después de 3 segundos
+            setTimeout(() => {
+                this.alertMessage = "";
+            }, 3000);
+        },
 
         formatDate(dateString) {
             if (!dateString) return "N/A"; // Si no hay fecha, devuelve "N/A"
@@ -441,6 +466,11 @@ export default {
         // Obtener la URL completa de la imagen sin extensión
         getImageUrl(fileName) {
             if (!fileName) return ''; // Asegúrate de que fileName no esté vacío
+            // Si fileName es un objeto File, generar una URL temporal
+            if (fileName instanceof File) {
+                return URL.createObjectURL(fileName);
+            }
+            // Si fileName es una cadena, construir la URL completa con extensión
             return `http://localhost:3000/api/articulos-files/${fileName}`;
         },
         // Abrir el modal con las imágenes
@@ -467,7 +497,7 @@ export default {
                 return;
             }
 
-            // Generar URLs temporales para las imágenes nuevas
+            // Agregar las imágenes con su nombre completo (incluyendo extensión)
             validFiles.forEach(file => {
                 file.preview = URL.createObjectURL(file); // Crear una URL temporal
             });
@@ -485,7 +515,7 @@ export default {
                 return;
             }
 
-            // Generar URLs temporales para las imágenes nuevas
+            // Agregar las imágenes con su nombre completo (incluyendo extensión)
             validFiles.forEach(file => {
                 file.preview = URL.createObjectURL(file); // Crear una URL temporal
             });
@@ -617,10 +647,10 @@ export default {
                 // Cerrar el modal de edición y limpiar el formulario
                 this.isEditing = false;
                 this.currentExistencia = {};
-                alert('Artículo actualizado correctamente');
+                this.showAlert("Artículo actualizado correctamente", "success");
             } catch (error) {
                 console.error('Error al actualizar el artículo:', error);
-                alert("Hubo un error al actualizar el artículo. Inténtalo de nuevo.");
+                this.showAlert("Hubo un error al actualizar el artículo. Inténtalo de nuevo.", "error");
             }
         },
 
@@ -648,7 +678,7 @@ export default {
                 // Mostrar un mensaje de éxito (opcional)
             } catch (error) {
                 console.error('Error al eliminar el artículo:', error);
-                alert("Hubo un error al eliminar el artículo. Inténtalo de nuevo.");
+                this.showAlert("Hubo un error al eliminar el artículo. Inténtalo de nuevo.", "error");
             }
         },
         cancelDelete() {
@@ -668,6 +698,63 @@ export default {
 /* Aplicar Montserrat a todo el contenido */
 * {
     font-family: 'Montserrat', sans-serif;
+}
+
+
+
+/* Estilo general para la notificación */
+.notification {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-size: 16px;
+    color: white;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    z-index: 999;
+    max-width: 80%;
+    opacity: 0;
+    animation: fadeIn 0.5s forwards;
+}
+
+/* Animación de aparición de la notificación */
+@keyframes fadeIn {
+    0% {
+        opacity: 0;
+        top: 0;
+    }
+
+    100% {
+        opacity: 1;
+        top: 20px;
+    }
+}
+
+/* Notificación de éxito */
+.alert-success {
+    background-color: #4CAF50;
+    /* Verde */
+}
+
+/* Notificación de error */
+.alert-error {
+    background-color: #f44336;
+    /* Rojo */
+}
+
+/* Notificación de advertencia */
+.alert-warning {
+    background-color: #ff9800;
+    /* Naranja */
+}
+
+/* Iconos de la alerta */
+.notification i {
+    margin-right: 10px;
 }
 
 input[type="text"],
