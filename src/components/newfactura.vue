@@ -129,13 +129,14 @@
                     </div>
                     <!-- IVA -->
                     <div class="form-field">
-                        <label for="iva">IVA</label>
-                        <input type="number" id="iva" step="0.01" placeholder="" v-model="form.iva" readonly min="0" required />
+                        <label for="iva">IVA (16%)</label>
+                        <input type="number" id="iva" step="0.01" placeholder="" v-model="form.iva" readonly min="0" style="background-color: #dcddcd;"
+                            required />
                     </div>
                     <!-- Total -->
                     <div class="form-field">
                         <label for="total">Total</label>
-                        <input type="number" id="total" step="0.01" placeholder="" v-model="form.total" readonly min="0"
+                        <input type="number" id="total" step="0.01" placeholder="" v-model="form.total" readonly min="0" style="background-color: #dcddcd;"
                             required />
                     </div>
                 </div>
@@ -203,12 +204,12 @@ export default {
                 total: "", // Total
                 archivo_pdf: null, // Archivo PDF de la factura
             },
-            
+
             showPassword: false,
             showConfirmPassword: false,
             menus: {
                 homeMenu: false,
-                facturaMenu: false,
+                existenciaMenu: false,
                 settingsMenu: false,
             },
             showModal: false, // Modal de éxito
@@ -238,6 +239,16 @@ export default {
         this.fetchProveedores();
     },
     methods: {
+        navigateTo(page) {
+            console.log(`Navegando a ${page}`);
+            this.$router.push({ name: page }); // Asegúrate de que las rutas estén definidas con `name`.
+        },
+        showMenu(menu) {
+            this.menus[menu] = true;
+        },
+        hideMenu(menu) {
+            this.menus[menu] = false;
+        },
         // Cargar datos del usuario
         async loadUserData() {
             const storedUserName = localStorage.getItem("userName");
