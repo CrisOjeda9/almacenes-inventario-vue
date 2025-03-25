@@ -96,7 +96,7 @@
                 <tbody>
                     <tr v-for="existencia in paginatedExistencias" :key="existencia.id">
 
-                        <td>{{ existencia.numero_factura }}</td>
+                        <td>{{ existencia.id_factura }}</td>
                         <td>{{ getNumeroPartida(existencia.id_objetogasto) }}</td>
                         <td>{{ existencia.descripcion }}</td>
                         <td>{{ existencia.precio_unitario }}</td>
@@ -129,7 +129,7 @@
                             <div class="form-column">
                                 <div>
                                     <label>Número de factura:</label>
-                                    <input v-model="currentExistencia.numero_factura" type="text" />
+                                    <input v-model="currentExistencia.id_factura" type="text" />
                                 </div>
                                 <div>
                                     <label>Número de partida:</label>
@@ -608,7 +608,7 @@ export default {
 
                 // 2. Actualizar los datos generales del artículo
                 const formData = new FormData();
-                formData.append('numero_factura', this.currentExistencia.numero_factura);
+                formData.append('id_factura', this.currentExistencia.id_factura);
                 formData.append('id_objetogasto', this.currentExistencia.id_objetogasto);
                 formData.append('descripcion', this.currentExistencia.descripcion);
                 formData.append('precio_unitario', this.currentExistencia.precio_unitario);

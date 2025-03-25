@@ -77,8 +77,8 @@
 
                     <!-- Número de factura -->
                     <div class="form-field">
-                        <label for="numero_factura">Número de factura</label>
-                        <input type="number" min="0" id="numero_factura" placeholder="" v-model="form.numero_factura"
+                        <label for="id_factura">Número de factura</label>
+                        <input type="number" min="0" id="id_factura" placeholder="" v-model="form.id_factura"
                             required />
                     </div>
 
@@ -229,7 +229,7 @@ export default {
             form: {
                 id_objetogasto: "", // ID del objeto de gasto (se asignará automáticamente)
                 numero_partida: "", // Número de partida (ingresado por el usuario)
-                numero_factura: "", // Número de factura
+                id_factura: "", // Número de factura
                 descripcion: "", // descripcion del artículo
                 precio_unitario: "", // Importe sin IVA
                 iva: "", // IVA
@@ -405,7 +405,7 @@ export default {
             // Validar campos obligatorios
             const camposObligatorios = [
                 { campo: 'numero_partida', mensaje: 'Número de partida' },
-                { campo: 'numero_factura', mensaje: 'Número de factura' },
+                { campo: 'id_factura', mensaje: 'Número de factura' },
                 { campo: 'descripcion', mensaje: 'Descripcion del articulo' },
                 { campo: 'precio_unitario', mensaje: 'Importe sin IVA' },
                 { campo: 'iva', mensaje: 'IVA' },
@@ -436,7 +436,7 @@ export default {
             // Crear FormData para enviar archivos y datos
             const formData = new FormData();
             formData.append('id_objetogasto', this.form.id_objetogasto);
-            formData.append('numero_factura', this.form.numero_factura);
+            formData.append('id_factura', this.form.id_factura);
             formData.append('descripcion', this.form.descripcion);
             formData.append('precio_unitario', this.form.precio_unitario);
             formData.append('iva', this.form.iva);
