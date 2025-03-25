@@ -281,6 +281,16 @@ export default {
 
 }
 
+button {
+    width: 60%;
+    padding: 15px;
+    background: #870f33;
+    color: white;
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    font-size: 16px;
+}
 .form-field {
     flex: 1;
     margin-right:2%;
@@ -318,6 +328,7 @@ export default {
     display: flex;
     justify-content: center;
     align-items: center;
+    z-index: 1;
 }
 
 .modal-content {
