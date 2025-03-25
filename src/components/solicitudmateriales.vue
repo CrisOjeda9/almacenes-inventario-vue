@@ -28,7 +28,8 @@
         <div class="sub-navbar">
             <a href="/home" class="nav-item">Inicio</a>
             <a v-if="userRole === 'Administrador'" href="users" class="nav-item">Usuarios</a>
-            <div v-if="userRole === 'Inventario' || userRole === 'Administrador'" class="nav-item" @mouseenter="showMenu('homeMenu')" @mouseleave="hideMenu('homeMenu')">
+            <div v-if="userRole === 'Inventario' || userRole === 'Administrador'" class="nav-item"
+                @mouseenter="showMenu('homeMenu')" @mouseleave="hideMenu('homeMenu')">
                 Inventario
                 <span class="menu-icon">▼</span>
                 <div class="dropdown-menu" v-show="menus.homeMenu">
@@ -40,13 +41,11 @@
                     <button @click="navigateTo('bienesnuevos')">Asignar resguardo</button>
                     <button @click="navigateTo('liberarbien')">Liberar Bien</button>
                     <button @click="navigateTo('reportes')">Generación de reportes</button>
-
-
                 </div>
             </div>
 
-            <div v-if="userRole === 'Almacenes' || userRole === 'Administrador'" class="nav-item" @mouseenter="showMenu('solicitudMaterialMenu')"
-                @mouseleave="hideMenu('solicitudMaterialMenu')">
+            <div v-if="userRole === 'Almacenes' || userRole === 'Administrador'" class="nav-item"
+                @mouseenter="showMenu('solicitudMaterialMenu')" @mouseleave="hideMenu('solicitudMaterialMenu')">
                 Almacen
                 <span class="menu-icon">▼</span>
                 <div class="dropdown-menu" v-show="menus.solicitudMaterialMenu">
@@ -64,126 +63,102 @@
         </div>
 
         <div class="form-container">
-            <form @submit.prevent="addArticulo">
-                <div class="form-row">
-                    <div class="form-field">
-                        <label for="bien">Bien/Articulo</label>
-                        <select v-model="form.bien" @change="updateDescripcion" required>
-                            <option value="" disabled>Selecciona una opción</option>
-                            <option value="micrófono">Micrófono</option>
-                            <option value="cámara">Cámara</option>
-                            <option value="tripode">Trípode</option>
-                            <option value="transmisor">Transmisor</option>
-                            <option value="pantalla">Pantalla</option>
-                            <option value="audio">Audio</option>
-                            <option value="mezcladora">Mezcladora</option>
-                            <option value="monitor">Monitor</option>
-                            <option value="luces">Luces</option>
-                            <option value="controlador">Controlador</option>
-                        </select>
-                    </div>
-                    <div class="form-field">
-                        <label for="descripcion">Descripción</label>
-                        <input type="text" v-model="form.descripcion" readonly />
-                    </div>
-
-                    <button class="boton" type="submit">
-                        <i class="fas fa-plus"></i> Agregar artículo
-                    </button>
-
-                </div>
-
-                <div class="form-row">
-                    <div class="form-field">
-                        <label for="cantidad">Cantidad a solicitar</label>
-                        <input type="number" min="0" v-model="form.cantidad" required />
-                    </div>
-                    <div class="form-field">
-                        <label for="medida">Unidad de medida</label>
-                        <select v-model="form.medida" required>
-                            <option value="" disabled>Selecciona una opción</option>
-                            <option value="pieza">Pieza</option>
-                            <option value="metro">Metro</option>
-                            <option value="litro">Litro</option>
-                            <option value="kilogramo">Kilogramo</option>
-                            <option value="paquete">Paquete</option>
-                        </select>
-                    </div>
-                    <button class="boton2" type="button" @click="verSolicitudes">
-                        <i class="fas fa-eye"></i> Ver solicitudes enviadas
-                    </button>
-
-
-                </div>
-
+            <form @submit.prevent="submitForm">
                 <div class="contenedor-tabla">
+                    <!-- Nuevos campos agregados aquí -->
+                    <div class="form-header">
+                        <div class="form-field">
+                            <label for="direccionSolicitante">Dirección Solicitante</label>
+                            <select v-model="direccionSolicitante" required>
+                                <option value="" disabled>Seleccione una dirección</option>
+                                <option value="Dirección General">Dirección General</option>
+                                <option value="Dirección Administrativa">Dirección Administrativa</option>
+                                <option value="Dirección de Producción">Dirección de Producción</option>
+                                <option value="Dirección de Noticias">Dirección de Noticias</option>
+                                <option value="Dirección de Ingeniería">Dirección de Ingeniería</option>
+                            </select>
+                        </div>
+                        <div class="form-field">
+                            <label for="fechaSolicitud">Fecha de Salida</label>
+                            <input type="text" v-model="fechaFormateada" readonly />
+                        </div>
+                    </div>
                     <table class="solicitud-table">
                         <thead>
                             <tr>
-                                <th style="width: 10%;">Cantidad</th>
-                                <th style="width: 20%;">Unidad</th>
-                                <th style="width: 60%;">Descripción</th>
-                                <th style="width: 10%;">Editar</th>
+                                <th style="width: 10%;">N° Partida</th>
+                                <th style="width: 15%;">Unidad Medida</th>
+                                <th style="width: 50%;">Descripción del Material</th>
+                                <th style="width: 15%;">Cantidad Entregada</th>
+                                <th style="width: 10%;">Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr v-for="(item, index) in articulos" :key="index">
-                                <td style="width: 10%;">{{ item.cantidad }}</td>
-                                <td style="width: 20%;">{{ item.unidad }}</td>
-                                <td style="width: 60%;" class="descripcion">{{ item.descripcion }}</td>
-                                <td class="editar" style="width: 10%;">
-                                    <button type="button" @click="openEditModal(index)" class="btn-edit">
-                                        <i class="fas fa-edit"></i>
+                            <tr v-for="(item, index) in items" :key="index">
+                                <td>
+                                    <input type="text" v-model="item.numeroPartida" required />
+                                </td>
+                                <td>
+                                    <select v-model="item.unidadMedida" required>
+                                        <option value="" disabled>Seleccione</option>
+                                        <option value="Pieza">Pieza</option>
+                                        <option value="Paquete">Paquete</option>
+                                        <option value="Caja">Caja</option>
+                                        <option value="Rollo">Rollo</option>
+                                        <option value="Litro">Litro</option>
+                                        <option value="Metro">Metro</option>
+                                        <option value="Kilogramo">Kilogramo</option>
+                                        <option value="Juego">Juego</option>
+                                    </select>
+                                </td>
+                                <td>
+                                    <select v-model="item.descripcionMaterial" required>
+                                        <option value="" disabled>Seleccione material</option>
+                                        <option value="Pilas: Duracel AA">Pilas: Duracel AA</option>
+                                        <option value="Rollo: Papel de Baño">Rollo: Papel de Baño</option>
+                                        <option value="Cartucho: Tinta HP 62">Cartucho: Tinta HP 62</option>
+                                        <option value="Resma: Papel Bond A4">Resma: Papel Bond A4</option>
+                                        <option value="Caja: Clips metálicos">Caja: Clips metálicos</option>
+                                        <option value="Paquete: Plumas BIC">Paquete: Plumas BIC</option>
+                                        <option value="Juego: Destornilladores">Juego: Destornilladores</option>
+                                        <!-- Agrega más opciones según sea necesario -->
+                                    </select>
+                                </td>
+                                <td>
+                                    <input type="number" min="1" v-model="item.cantidadEntregada" required />
+                                </td>
+                                <td class="acciones">
+                                    <button v-if="index === items.length - 1 && isCurrentRowComplete(index)"
+                                        type="button" @click="addItem" class="btn-add"
+                                        :disabled="!isCurrentRowComplete(index)">
+                                        <i class="fas fa-plus"></i>
                                     </button>
-
+                                    <button v-if="items.length > 1" type="button" @click="removeItem(index)"
+                                        class="btn-delete">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
                                 </td>
                             </tr>
                         </tbody>
                     </table>
-                    <div v-if="showModal" class="modal">
-                        <div class="modal-content">
-                            <h2>Editar Artículo</h2>
-                            <label for="cantidad">Cantidad</label>
-                            <input type="number" v-model="editForm.cantidad" />
-                            <label for="unidad">Unidad</label>
-                            <select v-model="editForm.unidad">
-                                <option value="pieza">Pieza</option>
-                                <option value="metro">Metro</option>
-                                <option value="litro">Litro</option>
-                                <option value="kilogramo">Kilogramo</option>
-                                <option value="paquete">Paquete</option>
-                            </select>
-                            <label for="descripcion">Descripción</label>
-                            <input type="text" v-model="editForm.descripcion" />
-                            <div class="button-container" style="gap:20px ;">
-                                <button @click="updateArticulo">Guardar Cambios</button>
-                                <button @click="showModal = false" class="cancelar">Cancelar</button>
-                            </div>
-
-                        </div>
-                    </div>
                 </div>
+
                 <div class="button-container">
-                    <button class="boton" type="button" @click="registersolicitudMaterial">
-                        <i class="fas fa-user"></i> Enviar Solicitud
+                    <button class="boton" type="submit">
+                        <i class="fas fa-box-open"></i> Registrar Salida
                     </button>
                 </div>
 
                 <div v-if="showConfirmationModal" class="modal">
                     <div class="modal-content" style="background-color: white; color: #691b31;">
-                        <h2>Solicitud Enviada</h2>
-                        <p>Su solicitud ha sido enviada con éxito.</p>
+                        <h2>Salida Registrada</h2>
+                        <p>La salida de materiales ha sido registrada con éxito.</p>
                         <button @click="closeModal">Aceptar</button>
                     </div>
                 </div>
-
-
             </form>
-
-
         </div>
     </div>
-
 </template>
 
 <script>
@@ -191,15 +166,19 @@ export default {
     name: "solicitudMaterialPage",
     data() {
         return {
-            userRole: localStorage.getItem('userRole') || '', // Obtener el rol desde el localStorage
-            userName: "Cargando...", // Mensaje temporal
-            profileImage: "",  // URL de la imagen del usuario
-            form: {
-                bien: '',
-                cantidad: '',
-                medida: '',
-                descripcion: ''
-            },
+            direccionSolicitante: '',
+            fechaSolicitud: new Date(),
+            userRole: localStorage.getItem('userRole') || '',
+            userName: "Cargando...",
+            profileImage: "",
+            items: [
+                {
+                    bien: '',
+                    descripcion: '',
+                    cantidad: '',
+                    medida: ''
+                }
+            ],
             bienDescripcion: {
                 micrófono: "Equipo para capturar audio de alta calidad.",
                 cámara: "Dispositivo utilizado para grabación de video.",
@@ -217,137 +196,118 @@ export default {
                 solicitudMaterialMenu: false,
                 settingsMenu: false,
             },
-            articulos: [],
-            showModal: false,
-            editIndex: null,
-            editForm: {
-                cantidad: '',
-                unidad: '',
-                descripcion: ''
-            },
-
             showConfirmationModal: false,
-
         };
     },
-    mounted() {
-        this.loadUserData();
+    computed: {
+        fechaFormateada() {
+            const opciones = { day: 'numeric', month: 'long', year: 'numeric' };
+            return this.fechaSolicitud.toLocaleDateString('es-ES', opciones);
+        }
     },
     methods: {
-        async loadUserData() {
-            const storedUserName = localStorage.getItem("userName");
-            const storedUserEmail = localStorage.getItem("userEmail");
+        isCurrentRowComplete(index) {
+            const item = this.items[index];
+            return item.numeroPartida && item.unidadMedida &&
+                item.descripcionMaterial && item.cantidadEntregada;
+        },
 
-            if (storedUserName && storedUserEmail) {
-                this.userName = storedUserName;
-
-                try {
-                    // Obtener todos los usuarios de la API
-                    const response = await fetch('http://localhost:3000/api/personas');
-                    const users = await response.json();
-
-                    // Buscar el usuario logueado por email
-                    const user = users.find(u => u.email === storedUserEmail);
-
-                    if (user) {
-                        // Concatenar nombre y apellidos
-                        const fullName = `${user.nombre || storedUserName} ${user.apellidos || ""}`.trim();
-                        this.userName = fullName;
-
-                        // Obtener la ruta completa de la imagen del usuario
-                        const imagePath = user.imagen; // Suponiendo que la API devuelve la ruta completa
-
-                        // Extraer el nombre del archivo de la ruta completa
-                        let imageFileName = imagePath.split('\\').pop(); // Extrae "radio2.jpg"
-
-                        // Eliminar la extensión del nombre del archivo
-                        if (imageFileName) {
-                            imageFileName = imageFileName.split('.').slice(0, -1).join('.'); // Elimina la extensión
-                        }
-
-                        if (imageFileName) {
-                            // Construir la URL completa para la imagen
-                            this.profileImage = `http://localhost:3000/api/users-files/${imageFileName}`;
-                        } else {
-                            // Usar una imagen por defecto si no hay imagen en la API
-                            this.profileImage = "../assets/UserHombre.png";
-                        }
-                    } else {
-                        this.profileImage = "../assets/UserHombre.png"; // Imagen por defecto
-                    }
-                } catch (error) {
-                    console.error('Error al cargar los datos del usuario:', error);
-                    this.profileImage = "../assets/UserHombre.png"; // Imagen por defecto en caso de error
-                }
-            } else {
-                this.userName = "Usuario desconocido";
-                this.profileImage = "../assets/UserHombre.png"; // Imagen por defecto
+        addItem() {
+            if (this.isCurrentRowComplete(this.items.length - 1)) {
+                this.items.push({
+                    numeroPartida: '',
+                    unidadMedida: '',
+                    descripcionMaterial: '',
+                    cantidadEntregada: ''
+                });
             }
         },
-        updateDescripcion() {
-            // Asignar la descripción automática según el bien seleccionado
-            this.form.descripcion = this.bienDescripcion[this.form.bien] || '';
+
+        updateDescripcion(index) {
+            this.items[index].descripcion = this.bienDescripcion[this.items[index].bien] || '';
         },
-        registersolicitudMaterial() {
-            console.log("Solicitud de Material registrada:", this.articulos);
-            this.showConfirmationModal = true;
+
+
+
+        removeItem(index) {
+            if (this.items.length > 1) {
+                this.items.splice(index, 1);
+            }
         },
+
+        submitForm() {
+            if (this.items.every(item => this.isCurrentRowComplete(this.items.indexOf(item)))) {
+                console.log("Salida registrada:", this.items);
+                this.showConfirmationModal = true;
+            } else {
+                alert("Por favor complete todos los campos antes de registrar la salida.");
+            }
+        },
+
         closeModal() {
             this.showConfirmationModal = false;
-            this.$router.push('/recepcionsolicitudes'); // Reemplaza con la vista correcta
-        },
-        openEditModal(index) {
-            this.editIndex = index;
-            this.editForm = { ...this.articulos[index] };
-            this.showModal = true;
-        },
-        updateArticulo() {
-            if (this.editIndex !== null) {
-                this.articulos[this.editIndex] = { ...this.editForm };
-                this.showModal = false;
-                this.editIndex = null;
-            }
-        },
-
-        addArticulo() {
-            this.articulos.push({
-                cantidad: this.form.cantidad,
-                descripcion: this.form.descripcion,
-                unidad: this.form.medida  // Asegúrate de usar "medida" aquí
-            });
-
-            // Reiniciar los valores del formulario
-            this.form.cantidad = "";
-            this.form.descripcion = "";
-            this.form.medida = "";
+            this.$router.push('/recepcionsolicitudes');
         },
         goHome() {
-            this.$router.push('home'); // Redirige a la página principal ("/"). Cambia el path si es necesario.
-        },
-        goBack() {
-            console.log("Regresar a la página anterior");
+            this.$router.push('home');
         },
 
         navigateTo(page) {
-            console.log(`Navegando a ${page}`);
-            this.$router.push({ name: page }); // Asegúrate de que las rutas estén definidas con `name`.
+            this.$router.push({ name: page });
         },
+
         showMenu(menu) {
             this.menus[menu] = true;
         },
+
         hideMenu(menu) {
             this.menus[menu] = false;
         },
-        verSolicitudes() {
-            this.$router.push('/versolicitudes'); // Reemplaza con la ruta correcta
-        },
 
-    },
+        verSolicitudes() {
+            this.$router.push('/versolicitudes');
+        }
+    }
 };
 </script>
 
-
 <style scoped>
+.form-header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 20px;
+    width: 95%;
+
+}
+
+.form-field {
+    flex: 1;
+    margin-right:2%;
+}
+
+.form-field label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: #691B31;
+}
+
+.form-field select,
+.form-field input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #BC955B;
+    border-radius: 8px;
+    background-color: white;
+    color: #691B31;
+}
+
+.form-field input[readonly] {
+    background-color: #f5f5f5;
+    cursor: not-allowed;
+}
+
 .modal {
     position: fixed;
     top: 0;
@@ -381,7 +341,6 @@ export default {
 .modal-content label {
     color: white;
     margin-top: 10px;
-
 }
 
 .modal-content input {
@@ -390,111 +349,83 @@ export default {
     margin-bottom: 10px;
 }
 
-.close {
-    float: right;
-    cursor: pointer;
-}
-
-.cancelar {
-    background: #98989a;
-    color: white;
-}
-
-button.cancelar:hover {
-    background: #6f7271;
-    color: white;
-}
-
-
 .solicitud-table {
     width: 95%;
-    height: 200px;
     border-collapse: collapse;
     background-color: white;
     color: #691B31;
     border-radius: 15px;
     overflow: hidden;
+    margin-bottom: 20px;
 }
 
 .solicitud-table th,
 .solicitud-table td {
     padding: 10px;
     text-align: center;
-
+    border-bottom: 1px solid #ddd;
 }
 
 .solicitud-table th {
     background-color: #BC955B;
     color: white;
-    /* Fija los encabezados al desplazarse */
+    position: sticky;
     top: 0;
-    /* Fija los encabezados a la parte superior */
     z-index: 1;
-    /* Asegura que los encabezados estén encima de las filas */
 }
 
 .solicitud-table tr:hover {
-    background-color: #70727265;
-    color: #A02142;
-    transition: background-color 0.3s ease;
+    background-color: #f5f5f5;
+}
+
+.solicitud-table input,
+.solicitud-table select {
+    width: 90%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
 }
 
 .contenedor-tabla {
     width: 100%;
-    height: auto;
+    max-height: 400px;
+    overflow-y: auto;
+    margin-top: 20px;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    flex-direction: column;
-    max-height: 200px;
-    /* Ajusta la altura máxima antes de activar el scroll */
-    margin-top: 10px;
-    /* Espacio superior para separación */
+
 }
 
-.solicitud-table thead {
-    display: table;
-    /* Asegura que el encabezado se comporte como parte de la tabla */
-    width: 100%;
+.btn-add,
+.btn-delete {
+    padding: 5px 10px;
+    margin: 0 2px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
 }
 
-.solicitud-table tbody {
-    display: block;
-    max-height: 150px;
-    /* Ajusta esta altura según lo que necesites */
-    overflow-y: auto;
-    /* Activa el scroll solo para las filas */
-    width: 100%;
+.btn-add {
+    background-color: #4CAF50;
+    color: white;
 }
 
-.solicitud-table tbody tr {
-    display: table;
-    /* Asegura que cada fila se comporta correctamente */
-    width: 100%;
-    /* Hace que la fila ocupe el ancho total */
+.btn-delete {
+    background-color: #f44336;
+    color: white;
 }
 
-.solicitud-table td {
-    word-wrap: break-word;
-
-    /* Permite que el texto largo se ajuste dentro de la celda */
+.btn-add:hover {
+    background-color: #45a049;
 }
 
-/* Borde en la parte inferior de las filas de inserciones */
-.solicitud-table tbody tr {
-    border-bottom: 1px solid #ddd;
-    /* Puedes ajustar el color y grosor del borde */
+.btn-delete:hover {
+    background-color: #d32f2f;
 }
 
-/* Borde en la parte inferior de las filas de inserciones */
-.solicitud-table tbody tr {
-    border-bottom: 1px solid #bc955b;
-    /* Puedes ajustar el color y grosor del borde */
-}
-
-
-
-/* Aplicar Montserrat a todo el contenido */
+/* Resto de tus estilos existentes... */
 * {
     font-family: 'Montserrat', sans-serif;
 }
@@ -511,7 +442,6 @@ button.cancelar:hover {
     color: white;
 }
 
-/* Menú de navegación */
 .navbar {
     position: 0;
     display: flex;
@@ -526,13 +456,6 @@ button.cancelar:hover {
     flex: 1;
     display: flex;
     align-items: center;
-}
-
-.icon-back {
-    font-size: 24px;
-    cursor: pointer;
-    margin-right: 10px;
-    color: white;
 }
 
 .navbar-center {
@@ -578,12 +501,10 @@ button.cancelar:hover {
     color: #ddd;
 }
 
-/* Barra de navegación amarilla */
 .sub-navbar {
     display: flex;
     justify-content: center;
     background: linear-gradient(to right, #FFFFFF, #DDC9A3);
-    /* Degradado de izquierda a derecha */
     padding: 10px 0;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
@@ -610,7 +531,6 @@ button.cancelar:hover {
     border-radius: 5px;
     width: 150px;
     z-index: 1;
-
 }
 
 .dropdown-menu button {
@@ -621,7 +541,6 @@ button.cancelar:hover {
     color: white;
     text-align: left;
     font-size: 14px;
-
 }
 
 .dropdown-menu button:hover {
@@ -632,7 +551,6 @@ button.cancelar:hover {
     display: block;
 }
 
-/* Formulario */
 .form-container {
     flex: 1;
     display: flex;
@@ -640,38 +558,27 @@ button.cancelar:hover {
     align-items: center;
     width: 100%;
     height: 100%;
-
-
+    z-index: 0;
 }
 
 form {
     background: white;
     padding: 30px;
-    padding-bottom: 80px;
     border-radius: 10px;
     width: 1150px;
-    height: 375px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
-.form-row {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 20px;
-    padding-bottom: 15px;
-}
-
-input {
+.button-container {
     width: 100%;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    font-size: 14px;
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 20px;
 }
 
-button {
-    width: 60%;
+.boton {
+    width: 300px;
     padding: 15px;
     background: #870f33;
     color: white;
@@ -681,120 +588,18 @@ button {
     font-size: 16px;
 }
 
-button:hover {
+.boton:hover {
     background: #590d22;
 }
-
-.button-container {
-
-    width: 100%;
-    height: 50px;
-    display: flex;
-    justify-content: center;
-    margin-top: 5px;
-}
-
 
 label {
     display: block;
     margin-bottom: 5px;
     font-size: 14px;
     color: #691B31;
-
 }
 
 a {
     text-decoration: none;
-
-}
-
-/* Estilo para la fila de campos */
-.form-row {
-    display: flex;
-    gap: 20px;
-    /* Espacio entre los campos en la misma fila */
-    flex-wrap: wrap;
-    /* Permite que los campos se ajusten a nuevas filas si no caben */
-}
-
-/* Estilo para cada campo en la fila */
-.form-field {
-    flex: 1;
-    /* Cada campo ocupa un 100% del ancho disponible dentro de la fila */
-    min-width: 200px;
-    /* Establece un ancho mínimo para que no se colapse */
-
-}
-
-/* Estilo de los inputs dentro de la fila */
-.form-field input,
-.form-field select,
-.form-field textarea {
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    font-size: 14px;
-    width: 100%;
-    box-sizing: border-box;
-}
-
-
-
-
-
-
-.boton {
-    width: 300px;
-}
-
-.boton2 {
-    width: 300px;
-    background-color: #bc955b;
-}
-
-.boton2:hover {
-    background: #DDC9A3;
-}
-
-
-
-
-.btn-edit {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-    border: none;
-    cursor: pointer;
-    width: 100%;
-    height: 30px;
-}
-
-.btn-edit {
-    background-color: #4CAF50;
-    color: white;
-    margin-bottom: 4px;
-}
-
-
-
-.btn-edit:hover {
-    background-color: #45a049;
-}
-
-
-.editar {
-    width: 200px;
-}
-
-.descripcion {
-    min-width: 150px;
-    /* Define un ancho mínimo */
-    max-width: 400px;
-    /* Define un ancho máximo */
-    word-wrap: break-word;
-    /* Permite dividir palabras largas */
-    white-space: normal;
-    /* Permite que el texto se divida en varias líneas */
 }
 </style>
