@@ -164,23 +164,18 @@
                                     <label for="contrato_compra">Contrato de compra</label>
                                     <div class="dropzone" @drop.prevent="handleDropContrato" @dragover.prevent
                                         @click="triggerFileInputContrato">
-                                        <!-- Campo de subida de archivo específico para contrato -->
                                         <input type="file" id="contrato_compra" ref="contratoInput"
-                                            @change="handleContratoChange" accept=".pdf" style="display: none;"
-                                            multiple />
-
-                                        <!-- Ícono y mensaje -->
+                                            @change="handleContratoChange" accept=".pdf" style="display: none;" />
                                         <i class="fas fa-cloud-upload-alt"></i>
-                                        <span v-if="!currentFactura.contrato_compra">
+                                        <span v-if="!selectedContratoName && !currentFactura.contrato_compra">
                                             Arrastra aquí o haz clic para subir un contrato
                                         </span>
                                         <span v-else>
-                                            Contrato: {{ getFileName(currentFactura.contrato_compra) }}
+                                            {{ selectedContratoName || getFileName(currentFactura.contrato_compra) }}
                                         </span>
                                     </div>
-                                    <span v-if="errorMessageContrato" class="error-message">{{ errorMessageContrato
-                                        }}</span>
                                 </div>
+
                                 <div>
                                     <label>Factura No.:</label>
                                     <input v-model="currentFactura.numero_de_factura" type="text" />
@@ -235,20 +230,16 @@
                                     <label for="archivo_pdf">Documento (PDF)</label>
                                     <div class="dropzone" @drop.prevent="handleDropPdf" @dragover.prevent
                                         @click="triggerFileInputPdf">
-                                        <!-- Campo de subida de archivo específico para PDF -->
                                         <input type="file" id="archivo_pdf" ref="pdfInput" @change="handlePdfChange"
-                                            accept=".pdf" style="display: none;" multiple />
-
-                                        <!-- Ícono y mensaje -->
+                                            accept=".pdf" style="display: none;" />
                                         <i class="fas fa-cloud-upload-alt"></i>
-                                        <span v-if="!currentFactura.archivo_pdf">
+                                        <span v-if="!selectedPdfName && !currentFactura.archivo_pdf">
                                             Arrastra aquí o haz clic para subir un archivo PDF
                                         </span>
                                         <span v-else>
-                                            Archivo: {{ getFileName(currentFactura.archivo_pdf) }}
+                                            {{ selectedPdfName || getFileName(currentFactura.archivo_pdf) }}
                                         </span>
                                     </div>
-                                    <span v-if="errorMessagePdf" class="error-message">{{ errorMessagePdf }}</span>
                                 </div>
                             </div>
 
@@ -325,8 +316,9 @@ export default {
 
             selectedPdfFile: null,
             selectedContratoFile: null,
-            errorMessagePdf: '',
-            errorMessageContrato: ''
+            selectedPdfName: null,    // Nuevo: para mostrar nombre del PDF seleccionado
+            selectedContratoName: null // Nuevo: para mostrar nombre del contrato seleccionado
+
         };
     },
     computed: {
@@ -606,118 +598,129 @@ export default {
         triggerFileInputContrato() {
             this.$refs.contratoInput.click();
         },
-
-        handleContratoChange(event) {
-            const files = event.target.files;
-            if (files.length === 0) return;
-            this.selectedContratoFile = files[0];
-        },
-
-        handleDropContrato(event) {
-            const files = event.dataTransfer.files;
-            if (files.length > 1) {
-                this.errorMessageContrato = "Solo se permite subir un archivo.";
-                return;
-            }
-            this.errorMessageContrato = '';
-            this.selectedContratoFile = files[0];
-        },
-
         // Métodos específicos para PDF
         triggerFileInputPdf() {
             this.$refs.pdfInput.click();
         },
+        // Métodos para contrato
+        handleContratoChange(event) {
+            const file = event.target.files[0];
+            if (!file) return;
 
+            this.selectedContratoFile = file;
+            this.selectedContratoName = file.name; // Actualizar nombre para mostrar
+            this.errorMessageContrato = '';
+        },
+
+        handleDropContrato(event) {
+            const file = event.dataTransfer.files[0];
+            if (!file) return;
+
+            // Validar tipo de archivo
+            if (!file.name.endsWith('.pdf')) {
+                this.errorMessageContrato = "Solo se permiten archivos PDF";
+                return;
+            }
+
+            this.selectedContratoFile = file;
+            this.selectedContratoName = file.name; // Actualizar nombre para mostrar
+            this.errorMessageContrato = '';
+        },
+
+        // Métodos para PDF
         handlePdfChange(event) {
-            const files = event.target.files;
-            if (files.length === 0) return;
-            this.selectedPdfFile = files[0];
+            const file = event.target.files[0];
+            if (!file) return;
+
+            this.selectedPdfFile = file;
+            this.selectedPdfName = file.name; // Actualizar nombre para mostrar
+            this.errorMessagePdf = '';
         },
 
         handleDropPdf(event) {
-            const files = event.dataTransfer.files;
-            if (files.length > 1) {
-                this.errorMessagePdf = "Solo se permite subir un archivo.";
+            const file = event.dataTransfer.files[0];
+            if (!file) return;
+
+            // Validar tipo de archivo
+            if (!file.name.endsWith('.pdf')) {
+                this.errorMessagePdf = "Solo se permiten archivos PDF";
                 return;
             }
+
+            this.selectedPdfFile = file;
+            this.selectedPdfName = file.name; // Actualizar nombre para mostrar
             this.errorMessagePdf = '';
-            this.selectedPdfFile = files[0];
         },
 
-
-        // Método para editar una factura
+        // Modificar el método editfactura
         editfactura(factura) {
-            this.currentFactura = { ...factura }; // Copiar datos de la factura
-            this.currentFactura.id_proveedor = factura.id_proveedor; // Asegurar que el id_proveedor se copie
-            this.isEditing = true; // Abrir el modal de edición
-            this.selectedFile = null; // Resetear archivo seleccionado
+            this.currentFactura = { ...factura };
+            this.isEditing = true;
+            this.selectedPdfFile = null;
+            this.selectedContratoFile = null;
+            this.selectedPdfName = null;       // Resetear nombre temporal
+            this.selectedContratoName = null;  // Resetear nombre temporal
         },
-
         // Método para guardar cambios (incluyendo la subida del archivo si existe)
         async saveChanges() {
-            try {
-                // 1. Actualizar los datos de la factura
-                const response = await fetch(`http://localhost:3000/api/facturas/${this.currentFactura.id}`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        ...this.currentFactura,
-                        id_proveedor: this.currentFactura.id_proveedor
-                    }),
-                });
-
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.message || 'Error al actualizar la factura');
-                }
-
-                // 2. Subir el archivo PDF si se seleccionó uno
-                if (this.selectedPdfFile) {
-                    const pdfFormData = new FormData();
-                    pdfFormData.append('archivo_pdf', this.selectedPdfFile);
-
-                    const pdfResponse = await fetch(`http://localhost:3000/api/facturas/${this.currentFactura.id}/reemplazar-pdf`, {
-                        method: 'PUT',
-                        body: pdfFormData,
-                    });
-
-                    if (!pdfResponse.ok) {
-                        throw new Error('Error al subir el archivo PDF');
-                    }
-                }
-
-                // 3. Subir el archivo de contrato si se seleccionó uno
-                if (this.selectedContratoFile) {
-                    const contratoFormData = new FormData();
-                    contratoFormData.append('contrato_compra', this.selectedContratoFile);
-
-                    const contratoResponse = await fetch(`http://localhost:3000/api/facturas/${this.currentFactura.id}/reemplazar-contrato`, {
-                        method: 'PUT',
-                        body: contratoFormData,
-                    });
-
-                    if (!contratoResponse.ok) {
-                        throw new Error('Error al subir el contrato');
-                    }
-                }
-
-                // Mensaje de éxito
-                this.showAlert('Factura actualizada correctamente', "success");
-
-                // Recargar la lista de facturas y cerrar el modal
-                await this.fetchFacturas();
-                await this.fetchProveedores();
-                this.isEditing = false;
-                this.currentFactura = {};
-                this.selectedPdfFile = null;
-                this.selectedContratoFile = null;
-            } catch (error) {
-                console.error('Error:', error);
-                this.showAlert(error.message || 'Hubo un error al actualizar la factura. Por favor, inténtalo de nuevo', "error");
-            }
+    try {
+      // 1. Actualizar datos básicos de la factura
+      const response = await fetch(`http://localhost:3000/api/facturas/${this.currentFactura.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
         },
+        body: JSON.stringify({
+          ...this.currentFactura,
+          id_proveedor: this.currentFactura.id_proveedor
+        }),
+      });
+
+      if (!response.ok) throw new Error('Error al actualizar la factura');
+
+      // 2. Subir nuevo PDF si existe
+      if (this.selectedPdfFile) {
+        const pdfFormData = new FormData();
+        pdfFormData.append('archivo_pdf', this.selectedPdfFile);
+
+        const pdfResponse = await fetch(`http://localhost:3000/api/facturas/${this.currentFactura.id}/reemplazar-pdf`, {
+          method: 'PUT',
+          body: pdfFormData,
+        });
+
+        if (!pdfResponse.ok) throw new Error('Error al subir el PDF');
+      }
+
+      // 3. Subir nuevo contrato si existe
+      if (this.selectedContratoFile) {
+        const contratoFormData = new FormData();
+        contratoFormData.append('contrato_compra', this.selectedContratoFile);
+
+        const contratoResponse = await fetch(`http://localhost:3000/api/facturas/${this.currentFactura.id}/reemplazar-contrato`, {
+          method: 'PUT',
+          body: contratoFormData,
+        });
+
+        if (!contratoResponse.ok) throw new Error('Error al subir el contrato');
+      }
+
+      // Éxito
+      this.showAlert('Factura actualizada correctamente', "success");
+      await this.fetchFacturas();
+      this.isEditing = false;
+      
+      // Resetear todo
+      this.currentFactura = {};
+      this.selectedPdfFile = null;
+      this.selectedContratoFile = null;
+      this.selectedPdfName = null;
+      this.selectedContratoName = null;
+
+    } catch (error) {
+      console.error('Error:', error);
+      this.showAlert(error.message || 'Error al actualizar la factura', "error");
+    }
+  },
 
         cancelEdit() {
             this.isEditing = false;
