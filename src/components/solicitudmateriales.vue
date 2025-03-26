@@ -64,8 +64,11 @@
 
         <div class="form-container">
             <form @submit.prevent="submitForm">
-                <!-- Botón independiente del formulario -->
                 <div class="table-actions">
+                    <div class="solicitud-number">
+                        <label>Núm. Solicitud:</label>
+                        <input type="text" v-model="numeroSolicitud" readonly class="numero-solicitud-input" />
+                    </div>
                     <button type="button" @click="goToSolicitudes" class="btn-ver-solicitudes">
                         <i class="fas fa-list"></i> Ver Solicitudes
                     </button>
@@ -170,6 +173,9 @@ export default {
     name: "solicitudMaterialPage",
     data() {
         return {
+            numeroSolicitud: '', // Nuevo campo para el número de solicitud
+            nextSolicitudNumber: 0, // Para llevar el control del siguiente número
+
             alertMessage: "",  // Mensaje de la alerta
             alertClass: "",    // Clase de la alerta (ej. 'success' o 'error')
             alertIcon: "",     // Icono para la alerta
@@ -228,9 +234,29 @@ export default {
     async mounted() {
         await this.loadUserData();
         await this.cargarArticulos();
+        await this.obtenerNumeroSolicitud(); // Obtener número al cargar
+
     },
     methods: {
-        // Método para resetear el formulario completamente
+        // Obtener el próximo número de solicitud del backend
+        async obtenerNumeroSolicitud() {
+            try {
+                const response = await axios.get('http://localhost:3000/api/solicitudes/next-number');
+                this.numeroSolicitud = response.data.currentNumber;
+                this.nextSolicitudNumber = response.data.nextNumber;
+            } catch (error) {
+                console.error('Error al obtener número de solicitud:', error);
+                // Asignar un valor por defecto si falla
+                this.numeroSolicitud = '0001';
+                this.nextSolicitudNumber = 2;
+            }
+        },
+        // Formatear número con ceros a la izquierda (0001, 0002, etc.)
+        formatSolicitudNumber(num) {
+            return String(num).padStart(4, '0');
+        },
+
+        // Resetear formulario
         resetForm() {
             this.direccionSolicitante = '';
             this.items = [{
@@ -306,30 +332,30 @@ export default {
             }
 
             try {
-                // Primero actualizar inventario
-                const updatePromises = this.items.map(item =>
-                    axios.put(`http://localhost:3000/api/articulos/${item.id_articulo}`, {
-                        cantidad: item.cantidadDisponible - item.cantidadEntregada
-                    })
-                );
-
-                // Luego crear las solicitudes
+                // Enviar todos los artículos con el mismo número de solicitud
                 const solicitudes = this.items.map(item => ({
+                    numero_solicitud: this.numeroSolicitud,
                     direccion_solicitante: this.direccionSolicitante,
                     id_articulo: item.id_articulo,
                     cantidad_entregada: item.cantidadEntregada
                 }));
 
+                // Enviar solicitudes
                 const solicitudPromises = solicitudes.map(solicitud =>
                     axios.post('http://localhost:3000/api/solicitudes', solicitud)
                 );
 
-                await Promise.all([...updatePromises, ...solicitudPromises]);
+                await Promise.all(solicitudPromises);
+
+                // Actualizar el número para la próxima solicitud
+                this.numeroSolicitud = this.formatSolicitudNumber(this.nextSolicitudNumber);
+                this.nextSolicitudNumber++;
+
                 this.showConfirmationModal = true;
 
             } catch (error) {
                 console.error('Error al registrar salida:', error);
-                this.showAlert("Ocurrió un error al registrar la salida. Por favor intente nuevamente.", "error");
+                this.showAlert("Error al registrar la solicitud", "error");
             }
         },
         formatDireccion(direccion) {
@@ -498,9 +524,57 @@ export default {
 }
 
 .table-actions {
-    width: 100%;
     display: flex;
-    justify-content: end;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 15px;
+    width: 100%;
+}
+
+.solicitud-number {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.solicitud-number label {
+    margin: 0;
+    font-weight: bold;
+    color: #691B31;
+    white-space: nowrap;
+}
+
+.numero-solicitud-input {
+    padding: 8px 12px;
+    border: 1px solid #BC955B;
+    border-radius: 8px;
+    background-color: #f5f5f5;
+    color: #691B31;
+    font-weight: bold;
+    width: 50px;
+    text-align: center;
+}
+
+.btn-ver-solicitudes {
+    background: #870f33;
+    color: white;
+    border: none;
+    border-radius: 25px;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: background-color 0.3s;
+}
+
+.btn-ver-solicitudes:hover {
+    background: #590d22;
+}
+
+.btn-ver-solicitudes i {
+    font-size: 14px;
 }
 
 .btn-ver-solicitudes {

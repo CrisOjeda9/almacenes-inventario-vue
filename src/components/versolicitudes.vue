@@ -71,6 +71,7 @@
             <table class="solicitudes-table">
                 <thead>
                     <tr>
+                        <th>Numero de solicitud</th>
                         <th>Dirección Solicitante</th>
                         <th>Fecha de Salida</th>
                         <th>N° Partida</th>
@@ -82,6 +83,8 @@
                 </thead>
                 <tbody>
                     <tr v-for="solicitud in paginatedSolicitudes" :key="solicitud.id">
+                        <td>{{ solicitud.numero_solicitud || 'N/A' }}</td>
+                        <!-- Nueva columna para número de solicitud -->
                         <td>{{ solicitud.direccion_solicitante }}</td>
                         <td>{{ formatDate(solicitud.fechaSalida) }}</td>
                         <td>{{ solicitud.numeroPartida }}</td>
@@ -211,6 +214,7 @@ export default {
 
                     return {
                         id: solicitud.id,
+                        numero_solicitud: solicitud.numero_solicitud, // Asegurarse de incluir este campo
                         direccion_solicitante: solicitud.direccion_solicitante,
                         fechaSalida: solicitud.createdAt,
                         numeroPartida: articulo ? articulo.id_objetogasto : 'N/A',
