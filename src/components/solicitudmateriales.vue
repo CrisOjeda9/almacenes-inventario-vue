@@ -71,11 +71,9 @@
                             <label for="direccionSolicitante">Dirección Solicitante</label>
                             <select v-model="direccionSolicitante" required>
                                 <option value="" disabled>Seleccione una dirección</option>
-                                <option value="Dirección General">Dirección General</option>
-                                <option value="Dirección Administrativa">Dirección Administrativa</option>
-                                <option value="Dirección de Producción">Dirección de Producción</option>
-                                <option value="Dirección de Noticias">Dirección de Noticias</option>
-                                <option value="Dirección de Ingeniería">Dirección de Ingeniería</option>
+                                <option v-for="direccion in direcciones" :key="direccion" :value="direccion">
+                                    {{ formatDireccion(direccion) }}
+                                </option>
                             </select>
                         </div>
                         <div class="form-field">
@@ -96,36 +94,26 @@
                         <tbody>
                             <tr v-for="(item, index) in items" :key="index">
                                 <td>
-                                    <input type="text" v-model="item.numeroPartida" required />
+                                    <input type="text" v-model="item.numeroPartida" readonly />
                                 </td>
                                 <td>
-                                    <select v-model="item.unidadMedida" required>
-                                        <option value="" disabled>Seleccione</option>
-                                        <option value="Pieza">Pieza</option>
-                                        <option value="Paquete">Paquete</option>
-                                        <option value="Caja">Caja</option>
-                                        <option value="Rollo">Rollo</option>
-                                        <option value="Litro">Litro</option>
-                                        <option value="Metro">Metro</option>
-                                        <option value="Kilogramo">Kilogramo</option>
-                                        <option value="Juego">Juego</option>
-                                    </select>
+                                    <input type="text" v-model="item.unidadMedida" readonly />
                                 </td>
                                 <td>
-                                    <select v-model="item.descripcionMaterial" required>
+                                    <select v-model="item.descripcionMaterial" @change="onMaterialSelected(index)"
+                                        required>
                                         <option value="" disabled>Seleccione material</option>
-                                        <option value="Pilas: Duracel AA">Pilas: Duracel AA</option>
-                                        <option value="Rollo: Papel de Baño">Rollo: Papel de Baño</option>
-                                        <option value="Cartucho: Tinta HP 62">Cartucho: Tinta HP 62</option>
-                                        <option value="Resma: Papel Bond A4">Resma: Papel Bond A4</option>
-                                        <option value="Caja: Clips metálicos">Caja: Clips metálicos</option>
-                                        <option value="Paquete: Plumas BIC">Paquete: Plumas BIC</option>
-                                        <option value="Juego: Destornilladores">Juego: Destornilladores</option>
-                                        <!-- Agrega más opciones según sea necesario -->
+                                        <option v-for="articulo in materialesDisponibles" :key="articulo.id"
+                                            :value="articulo.value">
+                                            {{ articulo.value }}
+                                        </option>
                                     </select>
                                 </td>
                                 <td>
-                                    <input type="number" min="1" v-model="item.cantidadEntregada" required />
+                                    <input type="number" min="1" :max="item.cantidadDisponible"
+                                        v-model="item.cantidadEntregada" @change="validarCantidad(index)" required
+                                        :class="{ 'error-input': item.cantidadEntregada > item.cantidadDisponible }" />
+                                    <span class="stock-info">Disponible: {{ item.cantidadDisponible || 0 }}</span>
                                 </td>
                                 <td class="acciones">
                                     <button v-if="index === items.length - 1 && isCurrentRowComplete(index)"
@@ -162,35 +150,41 @@
 </template>
 
 <script>
+import axios from 'axios';
+
 export default {
     name: "solicitudMaterialPage",
     data() {
         return {
+            articulos: [], // Lista completa de artículos con cantidades
             direccionSolicitante: '',
+            direcciones: [
+                "Direccion General",
+                "Direccion de Coordinacion Financiera Y Planeacion",
+                "Direccion de Television",
+                "Direccion de Noticias",
+                "Direccion de Radio",
+                "Direccion de Ingenieria",
+                "Direccion de Proyectos Estrategicos",
+                "Organo Interno de Control",
+                "Direccion de Promocion e Intercambio",
+                "Direccion Juridica",
+                "Direccion de Vinculacion",
+                "Imagen",
+                "Estaciones de Radio",
+                "Estaciones de Television"
+            ],
             fechaSolicitud: new Date(),
             userRole: localStorage.getItem('userRole') || '',
             userName: "Cargando...",
             profileImage: "",
-            items: [
-                {
-                    bien: '',
-                    descripcion: '',
-                    cantidad: '',
-                    medida: ''
-                }
-            ],
-            bienDescripcion: {
-                micrófono: "Equipo para capturar audio de alta calidad.",
-                cámara: "Dispositivo utilizado para grabación de video.",
-                tripode: "Soporte para estabilizar cámaras durante grabaciones.",
-                transmisor: "Equipo usado para transmitir señales de audio o video.",
-                pantalla: "Pantalla para visualizar contenidos audiovisuales.",
-                audio: "Sistema de sonido para transmisión en vivo o grabación.",
-                mezcladora: "Equipo que permite controlar los niveles de audio.",
-                monitor: "Pantalla para visualización de contenido en tiempo real.",
-                luces: "Iluminación profesional para grabaciones y eventos.",
-                controlador: "Equipo para manejar y ajustar el flujo de señales."
-            },
+            items: [{
+                numeroPartida: '',
+                unidadMedida: '',
+                descripcionMaterial: '',
+                cantidadEntregada: '',
+                id_articulo: null // Nuevo campo para almacenar el ID del artículo
+            }],
             menus: {
                 homeMenu: false,
                 solicitudMaterialMenu: false,
@@ -203,9 +197,114 @@ export default {
         fechaFormateada() {
             const opciones = { day: 'numeric', month: 'long', year: 'numeric' };
             return this.fechaSolicitud.toLocaleDateString('es-ES', opciones);
+        },
+        // Filtra artículos para el select de descripción
+        materialesDisponibles() {
+            return this.articulos.map(articulo => ({
+                value: articulo.descripcion,
+                id: articulo.id,
+                unidadMedida: articulo.unidad_medida,
+                numeroPartida: articulo.id_objetogasto
+            }));
         }
     },
+    async mounted() {
+        await this.loadUserData();
+        await this.cargarArticulos();
+    },
     methods: {
+        
+        async cargarArticulos() {
+            try {
+                const response = await axios.get('http://localhost:3000/api/articulos');
+                this.articulos = response.data;
+            } catch (error) {
+                console.error('Error al cargar artículos:', error);
+            }
+        },
+
+        onMaterialSelected(index) {
+            const selectedMaterial = this.articulos.find(a =>
+                a.descripcion === this.items[index].descripcionMaterial
+            );
+
+            if (selectedMaterial) {
+                this.items[index].unidadMedida = selectedMaterial.unidad_medida;
+                this.items[index].numeroPartida = selectedMaterial.id_objetogasto;
+                this.items[index].id_articulo = selectedMaterial.id;
+                this.items[index].cantidadDisponible = selectedMaterial.cantidad;
+                // Resetear cantidad solicitada al cambiar artículo
+                this.items[index].cantidadEntregada = '';
+            }
+        },
+
+        validarCantidad(index) {
+            const item = this.items[index];
+            if (item.cantidadEntregada > item.cantidadDisponible) {
+                alert(`No hay suficiente stock. Disponible: ${item.cantidadDisponible}`);
+                item.cantidadEntregada = item.cantidadDisponible;
+            }
+        },
+
+        async submitForm() {
+            // Validar cantidades primero
+            for (const item of this.items) {
+                if (item.cantidadEntregada > item.cantidadDisponible) {
+                    alert(`No hay suficiente stock para ${item.descripcionMaterial}. Disponible: ${item.cantidadDisponible}`);
+                    return;
+                }
+            }
+
+            try {
+                // Primero actualizar inventario
+                const updatePromises = this.items.map(item =>
+                    axios.put(`http://localhost:3000/api/articulos/${item.id_articulo}`, {
+                        cantidad: item.cantidadDisponible - item.cantidadEntregada
+                    })
+                );
+
+                // Luego crear las solicitudes
+                const solicitudes = this.items.map(item => ({
+                    direccion_solicitante: this.direccionSolicitante,
+                    id_articulo: item.id_articulo,
+                    cantidad_entregada: item.cantidadEntregada
+                }));
+
+                const solicitudPromises = solicitudes.map(solicitud =>
+                    axios.post('http://localhost:3000/api/solicitudes', solicitud)
+                );
+
+                await Promise.all([...updatePromises, ...solicitudPromises]);
+                this.showConfirmationModal = true;
+
+            } catch (error) {
+                console.error('Error al registrar salida:', error);
+                alert("Ocurrió un error al registrar la salida. Por favor intente nuevamente.");
+            }
+        },
+        formatDireccion(direccion) {
+            const formatMap = {
+                "Direccion General": "Dirección General",
+                "Direccion de Coordinacion Financiera Y Planeacion": "Coordinación Financiera y Planeación",
+                "Direccion de Television": "Dirección de Televisión",
+                "Direccion de Noticias": "Dirección de Noticias",
+                "Direccion de Radio": "Dirección de Radio",
+                "Direccion de Ingenieria": "Dirección de Ingeniería",
+                "Direccion de Proyectos Estrategicos": "Proyectos Estratégicos",
+                "Organo Interno de Control": "Órgano Interno de Control",
+                "Direccion de Promocion e Intercambio": "Promoción e Intercambio",
+                "Direccion Juridica": "Dirección Jurídica",
+                "Direccion de Vinculacion": "Vinculación",
+                "Imagen": "Imagen",
+                "Estaciones de Radio": "Estaciones de Radio",
+                "Estaciones de Television": "Estaciones de Televisión"
+            };
+            return formatMap[direccion] || direccion;
+        },
+
+
+
+
         isCurrentRowComplete(index) {
             const item = this.items[index];
             return item.numeroPartida && item.unidadMedida &&
@@ -218,16 +317,11 @@ export default {
                     numeroPartida: '',
                     unidadMedida: '',
                     descripcionMaterial: '',
-                    cantidadEntregada: ''
+                    cantidadEntregada: '',
+                    id_articulo: null
                 });
             }
         },
-
-        updateDescripcion(index) {
-            this.items[index].descripcion = this.bienDescripcion[this.items[index].bien] || '';
-        },
-
-
 
         removeItem(index) {
             if (this.items.length > 1) {
@@ -235,43 +329,83 @@ export default {
             }
         },
 
-        submitForm() {
-            if (this.items.every(item => this.isCurrentRowComplete(this.items.indexOf(item)))) {
-                console.log("Salida registrada:", this.items);
-                this.showConfirmationModal = true;
-            } else {
-                alert("Por favor complete todos los campos antes de registrar la salida.");
-            }
-        },
 
         closeModal() {
             this.showConfirmationModal = false;
-            this.$router.push('/recepcionsolicitudes');
+            this.$router.push('/versolicitudes');
         },
+
+        async loadUserData() {
+            const storedUserName = localStorage.getItem("userName");
+            const storedUserEmail = localStorage.getItem("userEmail");
+
+            if (storedUserName && storedUserEmail) {
+                this.userName = storedUserName;
+
+                try {
+                    const response = await axios.get('http://localhost:3000/api/personas');
+                    const users = response.data;
+                    const user = users.find(u => u.email === storedUserEmail);
+
+                    if (user) {
+                        const fullName = `${user.nombre || storedUserName} ${user.apellidos || ""}`.trim();
+                        this.userName = fullName;
+
+                        const imagePath = user.imagen;
+                        let imageFileName = imagePath.split('\\').pop();
+
+                        if (imageFileName) {
+                            imageFileName = imageFileName.split('.').slice(0, -1).join('.');
+                            this.profileImage = `http://localhost:3000/api/users-files/${imageFileName}`;
+                        } else {
+                            this.profileImage = "../assets/UserHombre.png";
+                        }
+                    } else {
+                        this.profileImage = "../assets/UserHombre.png";
+                    }
+                } catch (error) {
+                    console.error('Error al cargar datos de usuario:', error);
+                    this.profileImage = "../assets/UserHombre.png";
+                }
+            } else {
+                this.userName = "Usuario desconocido";
+                this.profileImage = "../assets/UserHombre.png";
+            }
+        },
+
         goHome() {
             this.$router.push('home');
         },
-
         navigateTo(page) {
             this.$router.push({ name: page });
         },
-
         showMenu(menu) {
             this.menus[menu] = true;
         },
-
         hideMenu(menu) {
             this.menus[menu] = false;
         },
 
-        verSolicitudes() {
-            this.$router.push('/versolicitudes');
-        }
     }
 };
 </script>
 
 <style scoped>
+.error-input {
+    border: 2px solid red;
+}
+
+.stock-info {
+    font-size: 0.8em;
+    color: #666;
+    display: block;
+}
+
+.stock-warning {
+    color: red;
+    font-weight: bold;
+}
+
 .form-header {
     display: flex;
     justify-content: center;
@@ -291,9 +425,10 @@ button {
     cursor: pointer;
     font-size: 16px;
 }
+
 .form-field {
     flex: 1;
-    margin-right:2%;
+    margin-right: 2%;
 }
 
 .form-field label {

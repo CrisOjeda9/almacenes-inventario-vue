@@ -82,7 +82,7 @@
                 </thead>
                 <tbody>
                     <tr v-for="solicitud in paginatedSolicitudes" :key="solicitud.id">
-                        <td>{{ solicitud.direccionSolicitante }}</td>
+                        <td>{{ solicitud.direccion_solicitante }}</td>
                         <td>{{ formatDate(solicitud.fechaSalida) }}</td>
                         <td>{{ solicitud.numeroPartida }}</td>
                         <td>{{ solicitud.unidadMedida }}</td>
@@ -94,7 +94,7 @@
                     </tr>
                 </tbody>
             </table>
-            
+
             <!-- Paginador -->
             <div class="pagination">
                 <button :disabled="currentPage === 1" @click="changePage(currentPage - 1)">Anterior</button>
@@ -106,6 +106,8 @@
 </template>
 
 <script>
+import axios from 'axios';
+
 export default {
     name: "versolicitudesPage",
     data() {
@@ -119,31 +121,21 @@ export default {
                 settingsMenu: false,
             },
             searchQuery: '',
-            solicitudes: [
-                // Ejemplo de datos con la nueva estructura
-                {
-                    id: 1,
-                    direccionSolicitante: "Dirección Ejemplo",
-                    fechaSalida: "2024-01-15",
-                    numeroPartida: "12345",
-                    unidadMedida: "Pieza",
-                    descripcionMaterial: "Material de oficina",
-                    cantidadEntregada: 5
-                },
-                // Agrega más solicitudes aquí...
-            ],
+            solicitudes: [],
+            articulos: [],
+            combinedData: [],
             itemsPerPage: 10,
             currentPage: 1,
         };
     },
     computed: {
         filteredSolicitudes() {
-            return this.solicitudes.filter(solicitud => {
+            return this.combinedData.filter(item => {
                 const query = this.searchQuery.toLowerCase();
                 return (
-                    solicitud.direccionSolicitante.toLowerCase().includes(query) ||
-                    solicitud.numeroPartida.toLowerCase().includes(query) ||
-                    solicitud.descripcionMaterial.toLowerCase().includes(query)
+                    item.direccion_solicitante.toLowerCase().includes(query) ||
+                    (item.numeroPartida && item.numeroPartida.toString().toLowerCase().includes(query)) ||
+                    (item.descripcionMaterial && item.descripcionMaterial.toLowerCase().includes(query))
                 );
             });
         },
@@ -156,10 +148,9 @@ export default {
             return this.filteredSolicitudes.slice(start, end);
         },
     },
-    mounted() {
+    async mounted() {
         this.loadUserData();
-        // Aquí deberías cargar las solicitudes desde tu API
-        // this.cargarSolicitudes();
+        await this.cargarDatos();
     },
     methods: {
         formatDate(dateString) {
@@ -175,8 +166,8 @@ export default {
                 this.userName = storedUserName;
 
                 try {
-                    const response = await fetch('http://localhost:3000/api/personas');
-                    const users = await response.json();
+                    const response = await axios.get('http://localhost:3000/api/personas');
+                    const users = response.data;
                     const user = users.find(u => u.email === storedUserEmail);
 
                     if (user) {
@@ -204,6 +195,35 @@ export default {
                 this.profileImage = "../assets/UserHombre.png";
             }
         },
+        async cargarDatos() {
+            try {
+                // Cargar solicitudes
+                const solicitudesResponse = await axios.get('http://localhost:3000/api/solicitudes');
+                this.solicitudes = solicitudesResponse.data;
+
+                // Cargar artículos
+                const articulosResponse = await axios.get('http://localhost:3000/api/articulos');
+                this.articulos = articulosResponse.data;
+
+                // Combinar los datos
+                this.combinedData = this.solicitudes.map(solicitud => {
+                    const articulo = this.articulos.find(a => a.id === solicitud.id_articulo);
+
+                    return {
+                        id: solicitud.id,
+                        direccion_solicitante: solicitud.direccion_solicitante,
+                        fechaSalida: solicitud.createdAt,
+                        numeroPartida: articulo ? articulo.id_objetogasto : 'N/A',
+                        unidadMedida: articulo ? articulo.unidad_medida : 'N/A',
+                        descripcionMaterial: articulo ? articulo.descripcion : 'N/A',
+                        cantidadEntregada: solicitud.cantidad_entregada
+                    };
+                });
+
+            } catch (error) {
+                console.error('Error al cargar los datos:', error);
+            }
+        },
         goHome() {
             this.$router.push('home');
         },
@@ -222,18 +242,23 @@ export default {
             }
         },
         descargarSolicitud(solicitud) {
-            // Implementa la lógica para descargar la solicitud
             console.log('Descargando solicitud:', solicitud);
-            // Aquí podrías generar un PDF o hacer una llamada a la API para descargar
-        },
-        async cargarSolicitudes() {
-            try {
-                // Ejemplo de llamada a la API para obtener las solicitudes
-                const response = await fetch('http://localhost:3000/api/solicitudes');
-                this.solicitudes = await response.json();
-            } catch (error) {
-                console.error('Error al cargar las solicitudes:', error);
-            }
+            // Implementación con Axios para descargar
+            axios({
+                url: `http://localhost:3000/api/descargar-solicitud/${solicitud.id}`,
+                method: 'GET',
+                responseType: 'blob',
+            }).then(response => {
+                const url = window.URL.createObjectURL(new Blob([response.data]));
+                const link = document.createElement('a');
+                link.href = url;
+                link.setAttribute('download', `solicitud_${solicitud.id}.pdf`);
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }).catch(error => {
+                console.error('Error al descargar:', error);
+            });
         }
     },
 };
