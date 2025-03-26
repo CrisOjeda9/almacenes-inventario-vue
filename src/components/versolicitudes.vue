@@ -204,11 +204,11 @@ export default {
 
         async generarPDF() {
             try {
-                // Primero obtenemos todas las partidas disponibles
+                // Obtener datos de partidas
                 const partidasResponse = await axios.get('http://localhost:3000/api/objetoGastos');
                 const todasLasPartidas = partidasResponse.data;
 
-                // Agrupar solicitudes por número de partida
+                // Agrupar solicitudes por partida
                 const solicitudesPorPartida = {};
                 this.filteredSolicitudes.forEach(solicitud => {
                     const partida = solicitud.numeroPartida || 'N/A';
@@ -218,97 +218,87 @@ export default {
                     solicitudesPorPartida[partida].push(solicitud);
                 });
 
-                // Crear PDF en orientación vertical
+                // Crear PDF
                 const doc = new jsPDF({
                     orientation: 'portrait',
                     unit: 'mm'
                 });
 
-                // Configuración de la tabla
+                // Configuración de tabla
                 const headers = [
-                    'N° Solicitud',
-                    'Dirección',
-                    'Fecha',
-                    'Partida',
-                    'Unidad',
-                    'Descripción',
-                    'Cantidad'
+                    'N° Solicitud', 'Dirección', 'Fecha',
+                    'Partida', 'Unidad', 'Descripción', 'Cantidad'
                 ];
 
-                const tableWidth = 15 + 30 + 20 + 15 + 15 + 60 + 15; // 170mm
-                const pageWidth = 210; // Ancho de página A4 en mm
+                const tableWidth = 15 + 30 + 20 + 15 + 15 + 60 + 15;
+                const pageWidth = 210;
                 const marginLeft = (pageWidth - tableWidth) / 2;
 
                 const partidas = Object.keys(solicitudesPorPartida);
 
+                // Función para agregar número de página
+                const addPageNumber = (doc, totalPages) => {
+                    const pageCount = doc.internal.getNumberOfPages();
+                    for (let i = 1; i <= pageCount; i++) {
+                        doc.setPage(i);
+                        doc.setFontSize(8);
+                        doc.text(`Página ${i} de ${totalPages}`, pageWidth / 2, 285, { align: 'center' });
+                    }
+                };
+
+                // Primero generar todo el contenido
                 doc.setFont('helvetica', 'bold');
 
-                for (let i = 0; i < partidas.length; i++) {
-                    const numeroPartida = partidas[i];
-                    const solicitudes = solicitudesPorPartida[numeroPartida];
+                partidas.forEach((numeroPartida, index) => {
+                    if (index > 0) {
+                        doc.addPage();
+                    }
 
-                    // Buscar la partida correspondiente en el listado
                     const partidaInfo = todasLasPartidas.find(p => p.numero_partida === numeroPartida) || {
                         numero_partida: numeroPartida,
                         nombre: `Partida ${numeroPartida}`,
                         descripcion: ''
                     };
 
-                    if (i > 0) {
-                        doc.addPage();
-                    }
-
-                    // Título de la partida
+                    // Títulos
                     doc.setFontSize(14);
                     doc.text(`${partidaInfo.nombre}`, pageWidth / 2, 20, { align: 'center' });
                     doc.setFontSize(10);
                     doc.text(`Número de partida: ${partidaInfo.numero_partida}`, pageWidth / 2, 27, { align: 'center' });
 
-                    // Preparar datos para la tabla
-                    const body = solicitudes.map(solicitud => [
-                        solicitud.numero_solicitud || 'N/A',
-                        solicitud.direccion_solicitante,
-                        this.formatDate(solicitud.fechaSalida),
-                        solicitud.numeroPartida,
-                        solicitud.unidadMedida,
-                        solicitud.descripcionMaterial,
-                        solicitud.cantidadEntregada
-                    ]);
-
-                    // Generar tabla centrada
+                    // Tabla
                     doc.autoTable({
                         head: [headers],
-                        body: body,
+                        body: solicitudesPorPartida[numeroPartida].map(solicitud => [
+                            solicitud.numero_solicitud || 'N/A',
+                            solicitud.direccion_solicitante,
+                            this.formatDate(solicitud.fechaSalida),
+                            solicitud.numeroPartida,
+                            solicitud.unidadMedida,
+                            solicitud.descripcionMaterial,
+                            solicitud.cantidadEntregada
+                        ]),
                         startY: 35,
                         margin: { left: marginLeft, right: marginLeft },
-                        styles: {
-                            fontSize: 8,
-                            cellPadding: 2,
-                            overflow: 'linebreak',
-                            font: 'helvetica',
-                            textColor: [0, 0, 0]
-                        },
+                        styles: { fontSize: 8, cellPadding: 2 },
                         headStyles: {
                             fillColor: [188, 149, 91],
                             textColor: [255, 255, 255],
                             fontStyle: 'bold'
                         },
                         columnStyles: {
-                            0: { cellWidth: 15 },
-                            1: { cellWidth: 30 },
-                            2: { cellWidth: 20 },
-                            3: { cellWidth: 15 },
-                            4: { cellWidth: 15 },
-                            5: { cellWidth: 60 },
+                            0: { cellWidth: 15 }, 1: { cellWidth: 30 },
+                            2: { cellWidth: 20 }, 3: { cellWidth: 15 },
+                            4: { cellWidth: 15 }, 5: { cellWidth: 60 },
                             6: { cellWidth: 15 }
                         },
-                        didDrawPage: function (data) {
-                            const pageCount = doc.internal.getNumberOfPages();
-                            doc.setFontSize(8);
-                            doc.text(`Página ${data.pageNumber} de ${pageCount}`, pageWidth / 2, 285, { align: 'center' });
-                        }
+                        pageBreak: 'auto'
                     });
-                }
+                });
+
+                // Agregar números de página al final cuando sabemos el total
+                const totalPages = doc.internal.getNumberOfPages();
+                addPageNumber(doc, totalPages);
 
                 doc.save('reporte_solicitudes.pdf');
 
