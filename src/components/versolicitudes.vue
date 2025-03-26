@@ -65,6 +65,12 @@
                 <input type="text" v-model="searchQuery" placeholder="Buscar..." />
                 <i class="fas fa-search"></i>
             </div>
+            <div class="download-buttons">
+                <button @click="generarPDF">
+                    <i class="fas fa-file-pdf"></i> Descargar PDF
+                </button>
+            </div>
+
         </div>
 
         <div class="contenedor-tabla">
@@ -109,6 +115,8 @@
 </template>
 
 <script>
+import { jsPDF } from 'jspdf';
+import 'jspdf-autotable';
 import axios from 'axios';
 
 export default {
@@ -156,6 +164,159 @@ export default {
         await this.cargarDatos();
     },
     methods: {
+        async obtenerNombrePartida(numeroPartida) {
+            try {
+                const response = await axios.get(`http://localhost:3000/api/objetoGastos?numero_partida=${numeroPartida}`);
+                const partida = response.data[0];
+
+                // Si no existe la partida
+                if (!partida) {
+                    return {
+                        numero: numeroPartida,
+                        nombre: `${numeroPartida}`,
+                        mostrar: `Partida ${numeroPartida}`
+                    };
+                }
+
+                // Determinar el nombre a mostrar
+                let nombreMostrar;
+                if (partida.nombre && partida.nombre !== 'string' && partida.nombre.trim() !== '') {
+                    nombreMostrar = partida.nombre;
+                } else {
+                    nombreMostrar = `Partida ${partida.numero_partida}`;
+                }
+
+                return {
+                    numero: partida.numero_partida,
+                    nombre: partida.nombre,
+                    mostrar: `${partida.numero_partida} - ${nombreMostrar}`
+                };
+            } catch (error) {
+                console.error('Error al obtener datos de partida:', error);
+                return {
+                    numero: numeroPartida,
+                    nombre: `Partida ${numeroPartida}`,
+                    mostrar: `Partida ${numeroPartida}`
+                };
+            }
+        },
+
+
+        async generarPDF() {
+            try {
+                // Primero obtenemos todas las partidas disponibles
+                const partidasResponse = await axios.get('http://localhost:3000/api/objetoGastos');
+                const todasLasPartidas = partidasResponse.data;
+
+                // Agrupar solicitudes por número de partida
+                const solicitudesPorPartida = {};
+                this.filteredSolicitudes.forEach(solicitud => {
+                    const partida = solicitud.numeroPartida || 'N/A';
+                    if (!solicitudesPorPartida[partida]) {
+                        solicitudesPorPartida[partida] = [];
+                    }
+                    solicitudesPorPartida[partida].push(solicitud);
+                });
+
+                // Crear PDF en orientación vertical
+                const doc = new jsPDF({
+                    orientation: 'portrait',
+                    unit: 'mm'
+                });
+
+                // Configuración de la tabla
+                const headers = [
+                    'N° Solicitud',
+                    'Dirección',
+                    'Fecha',
+                    'Partida',
+                    'Unidad',
+                    'Descripción',
+                    'Cantidad'
+                ];
+
+                const tableWidth = 15 + 30 + 20 + 15 + 15 + 60 + 15; // 170mm
+                const pageWidth = 210; // Ancho de página A4 en mm
+                const marginLeft = (pageWidth - tableWidth) / 2;
+
+                const partidas = Object.keys(solicitudesPorPartida);
+
+                doc.setFont('helvetica', 'bold');
+
+                for (let i = 0; i < partidas.length; i++) {
+                    const numeroPartida = partidas[i];
+                    const solicitudes = solicitudesPorPartida[numeroPartida];
+
+                    // Buscar la partida correspondiente en el listado
+                    const partidaInfo = todasLasPartidas.find(p => p.numero_partida === numeroPartida) || {
+                        numero_partida: numeroPartida,
+                        nombre: `Partida ${numeroPartida}`,
+                        descripcion: ''
+                    };
+
+                    if (i > 0) {
+                        doc.addPage();
+                    }
+
+                    // Título de la partida
+                    doc.setFontSize(14);
+                    doc.text(`${partidaInfo.nombre}`, pageWidth / 2, 20, { align: 'center' });
+                    doc.setFontSize(10);
+                    doc.text(`Número de partida: ${partidaInfo.numero_partida}`, pageWidth / 2, 27, { align: 'center' });
+
+                    // Preparar datos para la tabla
+                    const body = solicitudes.map(solicitud => [
+                        solicitud.numero_solicitud || 'N/A',
+                        solicitud.direccion_solicitante,
+                        this.formatDate(solicitud.fechaSalida),
+                        solicitud.numeroPartida,
+                        solicitud.unidadMedida,
+                        solicitud.descripcionMaterial,
+                        solicitud.cantidadEntregada
+                    ]);
+
+                    // Generar tabla centrada
+                    doc.autoTable({
+                        head: [headers],
+                        body: body,
+                        startY: 35,
+                        margin: { left: marginLeft, right: marginLeft },
+                        styles: {
+                            fontSize: 8,
+                            cellPadding: 2,
+                            overflow: 'linebreak',
+                            font: 'helvetica',
+                            textColor: [0, 0, 0]
+                        },
+                        headStyles: {
+                            fillColor: [188, 149, 91],
+                            textColor: [255, 255, 255],
+                            fontStyle: 'bold'
+                        },
+                        columnStyles: {
+                            0: { cellWidth: 15 },
+                            1: { cellWidth: 30 },
+                            2: { cellWidth: 20 },
+                            3: { cellWidth: 15 },
+                            4: { cellWidth: 15 },
+                            5: { cellWidth: 60 },
+                            6: { cellWidth: 15 }
+                        },
+                        didDrawPage: function (data) {
+                            const pageCount = doc.internal.getNumberOfPages();
+                            doc.setFontSize(8);
+                            doc.text(`Página ${data.pageNumber} de ${pageCount}`, pageWidth / 2, 285, { align: 'center' });
+                        }
+                    });
+                }
+
+                doc.save('reporte_solicitudes.pdf');
+
+            } catch (error) {
+                console.error('Error al generar PDF:', error);
+                alert('Error al generar el PDF');
+            }
+        },
         formatDate(dateString) {
             if (!dateString) return '';
             const date = new Date(dateString);
@@ -274,7 +435,27 @@ export default {
     font-family: 'Montserrat', sans-serif;
 }
 
+.download-buttons {
+    margin: 20px 0;
+    text-align: center;
+}
 
+.download-buttons button {
+    width: 150px;
+    margin: 0 10px;
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: red;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-family: 'Montserrat', sans-serif;
+}
+
+.download-buttons button:hover {
+    background-color: #e0a800;
+}
 
 .pagination {
     display: flex;
