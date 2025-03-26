@@ -64,7 +64,14 @@
 
         <div class="form-container">
             <form @submit.prevent="submitForm">
+                <!-- Botón independiente del formulario -->
+                <div class="table-actions">
+                    <button type="button" @click="goToSolicitudes" class="btn-ver-solicitudes">
+                        <i class="fas fa-list"></i> Ver Solicitudes
+                    </button>
+                </div>
                 <div class="contenedor-tabla">
+
                     <!-- Nuevos campos agregados aquí -->
                     <div class="form-header">
                         <div class="form-field">
@@ -213,7 +220,10 @@ export default {
         await this.cargarArticulos();
     },
     methods: {
-        
+        // Método para ir a solicitudes
+        goToSolicitudes() {
+            this.$router.push('/versolicitudes');
+        },
         async cargarArticulos() {
             try {
                 const response = await axios.get('http://localhost:3000/api/articulos');
@@ -332,7 +342,6 @@ export default {
 
         closeModal() {
             this.showConfirmationModal = false;
-            this.$router.push('/versolicitudes');
         },
 
         async loadUserData() {
@@ -391,6 +400,22 @@ export default {
 </script>
 
 <style scoped>
+.table-actions {
+    width: 100%;
+    display: flex;
+    justify-content: end;
+}
+
+.btn-ver-solicitudes {
+    width: 200px;
+    background: #870f33;
+    color: white;
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
 .error-input {
     border: 2px solid red;
 }
@@ -534,14 +559,13 @@ button {
 
 .contenedor-tabla {
     width: 100%;
-    max-height: 400px;
+    height: 350px;
     overflow-y: auto;
     margin-top: 20px;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    justify-content: center;
-
+    align-items: center; /* Centra horizontalmente */
+    justify-content: flex-start; /* Alinea el contenido arriba */
 }
 
 .btn-add,
@@ -712,6 +736,7 @@ form {
     padding: 30px;
     border-radius: 10px;
     width: 1150px;
+    max-height: 500px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
