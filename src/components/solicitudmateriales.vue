@@ -332,7 +332,14 @@ export default {
             }
 
             try {
-                // Enviar todos los artículos con el mismo número de solicitud
+                // Primero actualizar inventario
+                const updatePromises = this.items.map(item =>
+                    axios.put(`http://localhost:3000/api/articulos/${item.id_articulo}`, {
+                        cantidad: item.cantidadDisponible - item.cantidadEntregada
+                    })
+                );
+
+                // Luego crear las solicitudes
                 const solicitudes = this.items.map(item => ({
                     numero_solicitud: this.numeroSolicitud,
                     direccion_solicitante: this.direccionSolicitante,
@@ -340,22 +347,28 @@ export default {
                     cantidad_entregada: item.cantidadEntregada
                 }));
 
-                // Enviar solicitudes
                 const solicitudPromises = solicitudes.map(solicitud =>
                     axios.post('http://localhost:3000/api/solicitudes', solicitud)
                 );
 
-                await Promise.all(solicitudPromises);
+                await Promise.all([...updatePromises, ...solicitudPromises]);
 
-                // Actualizar el número para la próxima solicitud
-                this.numeroSolicitud = this.formatSolicitudNumber(this.nextSolicitudNumber);
-                this.nextSolicitudNumber++;
+                // Actualizar los datos locales sin recargar la página
+                await this.cargarArticulos();
+
+                // Actualizar las cantidades disponibles en los items actuales
+                this.items.forEach(item => {
+                    const articulo = this.articulos.find(a => a.id === item.id_articulo);
+                    if (articulo) {
+                        item.cantidadDisponible = articulo.cantidad;
+                    }
+                });
 
                 this.showConfirmationModal = true;
 
             } catch (error) {
                 console.error('Error al registrar salida:', error);
-                this.showAlert("Error al registrar la solicitud", "error");
+                this.showAlert("Ocurrió un error al registrar la salida. Por favor intente nuevamente.", "error");
             }
         },
         formatDireccion(direccion) {
