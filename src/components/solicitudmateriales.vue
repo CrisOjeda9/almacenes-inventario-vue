@@ -101,10 +101,12 @@
                         <tbody>
                             <tr v-for="(item, index) in items" :key="index">
                                 <td>
-                                    <input type="text" v-model="item.numeroPartida" readonly />
+                                    <input type="text" v-model="item.numeroPartida" readonly
+                                        style="background-color: #dcddcd;" />
                                 </td>
                                 <td>
-                                    <input type="text" v-model="item.unidadMedida" readonly />
+                                    <input type="text" v-model="item.unidadMedida" readonly
+                                        style="background-color: #dcddcd;" />
                                 </td>
                                 <td>
                                     <select v-model="item.descripcionMaterial" @change="onMaterialSelected(index)"
@@ -144,14 +146,19 @@
                     </button>
                 </div>
 
+                <!-- Modal de confirmación modificado -->
                 <div v-if="showConfirmationModal" class="modal">
                     <div class="modal-content" style="background-color: white; color: #691b31;">
                         <h2>Salida Registrada</h2>
                         <p>La salida de materiales ha sido registrada con éxito.</p>
-                        <button @click="closeModal">Aceptar</button>
+                        <button @click="resetAndClose">Aceptar</button>
                     </div>
                 </div>
             </form>
+        </div>
+        <!-- Contenedor de notificaciones -->
+        <div v-if="alertMessage" :class="alertClass" class="notification">
+            <i :class="alertIcon"></i> {{ alertMessage }}
         </div>
     </div>
 </template>
@@ -163,6 +170,9 @@ export default {
     name: "solicitudMaterialPage",
     data() {
         return {
+            alertMessage: "",  // Mensaje de la alerta
+            alertClass: "",    // Clase de la alerta (ej. 'success' o 'error')
+            alertIcon: "",     // Icono para la alerta
             articulos: [], // Lista completa de artículos con cantidades
             direccionSolicitante: '',
             direcciones: [
@@ -220,6 +230,36 @@ export default {
         await this.cargarArticulos();
     },
     methods: {
+        // Método para resetear el formulario completamente
+        resetForm() {
+            this.direccionSolicitante = '';
+            this.items = [{
+                numeroPartida: '',
+                unidadMedida: '',
+                descripcionMaterial: '',
+                cantidadEntregada: '',
+                id_articulo: null,
+                cantidadDisponible: 0
+            }];
+        },
+        showAlert(message, type) {
+            this.alertMessage = message;
+            if (type === "success") {
+                this.alertClass = "alert-success";
+                this.alertIcon = "fa fa-check-circle";
+            } else if (type === "error") {
+                this.alertClass = "alert-error";
+                this.alertIcon = "fa fa-times-circle";
+            } else {
+                this.alertClass = "alert-warning";
+                this.alertIcon = "fa fa-exclamation-circle";
+            }
+
+            // Ocultar la alerta después de 3 segundos
+            setTimeout(() => {
+                this.alertMessage = "";
+            }, 3000);
+        },
         // Método para ir a solicitudes
         goToSolicitudes() {
             this.$router.push('/versolicitudes');
@@ -251,7 +291,7 @@ export default {
         validarCantidad(index) {
             const item = this.items[index];
             if (item.cantidadEntregada > item.cantidadDisponible) {
-                alert(`No hay suficiente stock. Disponible: ${item.cantidadDisponible}`);
+                this.showAlert(`No hay suficiente stock. Disponible: ${item.cantidadDisponible}`, "error");
                 item.cantidadEntregada = item.cantidadDisponible;
             }
         },
@@ -260,7 +300,7 @@ export default {
             // Validar cantidades primero
             for (const item of this.items) {
                 if (item.cantidadEntregada > item.cantidadDisponible) {
-                    alert(`No hay suficiente stock para ${item.descripcionMaterial}. Disponible: ${item.cantidadDisponible}`);
+                    this.showAlert(`No hay suficiente stock para ${item.descripcionMaterial}. Disponible: ${item.cantidadDisponible}`, "error");
                     return;
                 }
             }
@@ -289,7 +329,7 @@ export default {
 
             } catch (error) {
                 console.error('Error al registrar salida:', error);
-                alert("Ocurrió un error al registrar la salida. Por favor intente nuevamente.");
+                this.showAlert("Ocurrió un error al registrar la salida. Por favor intente nuevamente.", "error");
             }
         },
         formatDireccion(direccion) {
@@ -340,7 +380,9 @@ export default {
         },
 
 
-        closeModal() {
+        // Método para cerrar modal y limpiar formulario
+        resetAndClose() {
+            this.resetForm();
             this.showConfirmationModal = false;
         },
 
@@ -400,6 +442,61 @@ export default {
 </script>
 
 <style scoped>
+/* Estilo general para la notificación */
+.notification {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-size: 16px;
+    color: white;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    z-index: 999;
+    max-width: 80%;
+    opacity: 0;
+    animation: fadeIn 0.5s forwards;
+}
+
+/* Animación de aparición de la notificación */
+@keyframes fadeIn {
+    0% {
+        opacity: 0;
+        top: 0;
+    }
+
+    100% {
+        opacity: 1;
+        top: 20px;
+    }
+}
+
+/* Notificación de éxito */
+.alert-success {
+    background-color: #4CAF50;
+    /* Verde */
+}
+
+/* Notificación de error */
+.alert-error {
+    background-color: #f44336;
+    /* Rojo */
+}
+
+/* Notificación de advertencia */
+.alert-warning {
+    background-color: #ff9800;
+    /* Naranja */
+}
+
+/* Iconos de la alerta */
+.notification i {
+    margin-right: 10px;
+}
+
 .table-actions {
     width: 100%;
     display: flex;
@@ -564,8 +661,10 @@ button {
     margin-top: 20px;
     display: flex;
     flex-direction: column;
-    align-items: center; /* Centra horizontalmente */
-    justify-content: flex-start; /* Alinea el contenido arriba */
+    align-items: center;
+    /* Centra horizontalmente */
+    justify-content: flex-start;
+    /* Alinea el contenido arriba */
 }
 
 .btn-add,
