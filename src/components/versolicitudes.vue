@@ -1,5 +1,4 @@
 <template>
-
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
 
@@ -11,16 +10,14 @@
                     height="auto" style="cursor: pointer;" />
             </div>
             <div class="navbar-center">
-                <h1>Solicitudes
-
-                </h1>
+                <h1>Solicitudes</h1>
                 <p>Sistema inventario y Almacén de Radio y Televisión de Hidalgo</p>
             </div>
             <div class="navbar-right">
                 <div class="user-profile">
                     <img :src="profileImage" alt="User Profile" class="profile-pic" />
                     <div class="user-info">
-                        <p>{{ userName }}</p> <!-- Nombre dinámico del usuario -->
+                        <p>{{ userName }}</p>
                         <span><a href="profile" style="color: white;">Ver Perfil</a></span>
                     </div>
                 </div>
@@ -31,7 +28,8 @@
         <div class="sub-navbar">
             <a href="/home" class="nav-item">Inicio</a>
             <a v-if="userRole === 'Administrador'" href="users" class="nav-item">Usuarios</a>
-            <div v-if="userRole === 'Inventario' || userRole === 'Administrador'" class="nav-item" @mouseenter="showMenu('homeMenu')" @mouseleave="hideMenu('homeMenu')">
+            <div v-if="userRole === 'Inventario' || userRole === 'Administrador'" class="nav-item"
+                @mouseenter="showMenu('homeMenu')" @mouseleave="hideMenu('homeMenu')">
                 Inventario
                 <span class="menu-icon">▼</span>
                 <div class="dropdown-menu" v-show="menus.homeMenu">
@@ -43,14 +41,11 @@
                     <button @click="navigateTo('bienesnuevos')">Asignar resguardo</button>
                     <button @click="navigateTo('liberarbien')">Liberar Bien</button>
                     <button @click="navigateTo('reportes')">Generación de reportes</button>
-
-
-
-
                 </div>
             </div>
 
-            <div v-if="userRole === 'Almacenes' || userRole === 'Administrador'" class="nav-item" @mouseenter="showMenu('solicitudMenu')" @mouseleave="hideMenu('solicitudMenu')">
+            <div v-if="userRole === 'Almacenes' || userRole === 'Administrador'" class="nav-item"
+                @mouseenter="showMenu('solicitudMenu')" @mouseleave="hideMenu('solicitudMenu')">
                 Almacen
                 <span class="menu-icon">▼</span>
                 <div class="dropdown-menu" v-show="menus.solicitudMenu">
@@ -63,42 +58,43 @@
                     <button @click="navigateTo('poliza')">Polizas</button>
                 </div>
             </div>
-
         </div>
 
         <div class="search-bar">
-
             <div class="input-wrapper">
                 <input type="text" v-model="searchQuery" placeholder="Buscar..." />
-                <i class="fas fa-search"></i> <!-- Icono de la lupa -->
+                <i class="fas fa-search"></i>
             </div>
-
-
-
         </div>
 
         <div class="contenedor-tabla">
             <table class="solicitudes-table">
                 <thead>
                     <tr>
-                        <th>Usuario Solicitante</th>
-                        <th>Fecha en que se envio</th>
-                        <th>Fecha en que contesto</th>
+                        <th>Dirección Solicitante</th>
+                        <th>Fecha de Salida</th>
+                        <th>N° Partida</th>
+                        <th>Unidad Medida</th>
+                        <th>Descripción del Material</th>
+                        <th>Cantidad Entregada</th>
                         <th>Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr v-for="solicitudes in paginatedSolicitudes" :key="solicitudes.id">
-                        <td>{{ solicitudes.name }}</td>
-                        <td>{{ solicitudes.registrationDate }}</td>
-                        <td>{{ solicitudes.registrationDatelost }}</td>
+                    <tr v-for="solicitud in paginatedSolicitudes" :key="solicitud.id">
+                        <td>{{ solicitud.direccionSolicitante }}</td>
+                        <td>{{ formatDate(solicitud.fechaSalida) }}</td>
+                        <td>{{ solicitud.numeroPartida }}</td>
+                        <td>{{ solicitud.unidadMedida }}</td>
+                        <td>{{ solicitud.descripcionMaterial }}</td>
+                        <td>{{ solicitud.cantidadEntregada }}</td>
                         <td>
-                            <button @click="editsolicitudes(solicitudes)" class="btn-existencias">Descargar</button>
+                            <button @click="descargarSolicitud(solicitud)" class="btn-existencias">Descargar</button>
                         </td>
                     </tr>
                 </tbody>
-
             </table>
+            
             <!-- Paginador -->
             <div class="pagination">
                 <button :disabled="currentPage === 1" @click="changePage(currentPage - 1)">Anterior</button>
@@ -106,7 +102,6 @@
                 <button :disabled="currentPage === totalPages" @click="changePage(currentPage + 1)">Siguiente</button>
             </div>
         </div>
-
     </div>
 </template>
 
@@ -115,34 +110,43 @@ export default {
     name: "versolicitudesPage",
     data() {
         return {
-            userRole: localStorage.getItem('userRole') || '', // Obtener el rol desde el localStorage
-            userName: "Cargando...", // Mensaje temporal
-            profileImage: "",  // URL de la imagen del usuario
+            userRole: localStorage.getItem('userRole') || '',
+            userName: "Cargando...",
+            profileImage: "",
             menus: {
                 homeMenu: false,
                 solicitudMenu: false,
                 settingsMenu: false,
             },
             searchQuery: '',
-            bajas: [
-                { name: "Cristian", registrationDate: "2024-01-15", registrationDatelost: "2024-01-15"},
-
-                // Agrega más usuarios aquí...
+            solicitudes: [
+                // Ejemplo de datos con la nueva estructura
+                {
+                    id: 1,
+                    direccionSolicitante: "Dirección Ejemplo",
+                    fechaSalida: "2024-01-15",
+                    numeroPartida: "12345",
+                    unidadMedida: "Pieza",
+                    descripcionMaterial: "Material de oficina",
+                    cantidadEntregada: 5
+                },
+                // Agrega más solicitudes aquí...
             ],
-            itemsPerPage: 10, // Cantidad de elementos por página
-            currentPage: 1, // Página actual
-
+            itemsPerPage: 10,
+            currentPage: 1,
         };
     },
     computed: {
         filteredSolicitudes() {
-            return this.bajas.filter(solicitudes => {
+            return this.solicitudes.filter(solicitud => {
                 const query = this.searchQuery.toLowerCase();
-                return (solicitudes.name.toLowerCase().includes(query));
-
+                return (
+                    solicitud.direccionSolicitante.toLowerCase().includes(query) ||
+                    solicitud.numeroPartida.toLowerCase().includes(query) ||
+                    solicitud.descripcionMaterial.toLowerCase().includes(query)
+                );
             });
         },
-        // Número total de páginas
         totalPages() {
             return Math.ceil(this.filteredSolicitudes.length / this.itemsPerPage);
         },
@@ -154,8 +158,15 @@ export default {
     },
     mounted() {
         this.loadUserData();
+        // Aquí deberías cargar las solicitudes desde tu API
+        // this.cargarSolicitudes();
     },
     methods: {
+        formatDate(dateString) {
+            if (!dateString) return '';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('es-MX');
+        },
         async loadUserData() {
             const storedUserName = localStorage.getItem("userName");
             const storedUserEmail = localStorage.getItem("userEmail");
@@ -164,57 +175,40 @@ export default {
                 this.userName = storedUserName;
 
                 try {
-                    // Obtener todos los usuarios de la API
                     const response = await fetch('http://localhost:3000/api/personas');
                     const users = await response.json();
-
-                    // Buscar el usuario logueado por email
                     const user = users.find(u => u.email === storedUserEmail);
 
                     if (user) {
-                        // Concatenar nombre y apellidos
                         const fullName = `${user.nombre || storedUserName} ${user.apellidos || ""}`.trim();
                         this.userName = fullName;
 
-                        // Obtener la ruta completa de la imagen del usuario
-                        const imagePath = user.imagen; // Suponiendo que la API devuelve la ruta completa
-
-                        // Extraer el nombre del archivo de la ruta completa
-                        let imageFileName = imagePath.split('\\').pop(); // Extrae "radio2.jpg"
-
-                        // Eliminar la extensión del nombre del archivo
-                        if (imageFileName) {
-                            imageFileName = imageFileName.split('.').slice(0, -1).join('.'); // Elimina la extensión
-                        }
+                        const imagePath = user.imagen;
+                        let imageFileName = imagePath.split('\\').pop();
 
                         if (imageFileName) {
-                            // Construir la URL completa para la imagen
+                            imageFileName = imageFileName.split('.').slice(0, -1).join('.');
                             this.profileImage = `http://localhost:3000/api/users-files/${imageFileName}`;
                         } else {
-                            // Usar una imagen por defecto si no hay imagen en la API
                             this.profileImage = "../assets/UserHombre.png";
                         }
                     } else {
-                        this.profileImage = "../assets/UserHombre.png"; // Imagen por defecto
+                        this.profileImage = "../assets/UserHombre.png";
                     }
                 } catch (error) {
                     console.error('Error al cargar los datos del usuario:', error);
-                    this.profileImage = "../assets/UserHombre.png"; // Imagen por defecto en caso de error
+                    this.profileImage = "../assets/UserHombre.png";
                 }
             } else {
                 this.userName = "Usuario desconocido";
-                this.profileImage = "../assets/UserHombre.png"; // Imagen por defecto
+                this.profileImage = "../assets/UserHombre.png";
             }
         },
         goHome() {
-            this.$router.push('home'); // Redirige a la página principal ("/"). Cambia el path si es necesario.
-        },
-        goBack() {
-            console.log("Regresar a la página anterior");
+            this.$router.push('home');
         },
         navigateTo(page) {
-            console.log(`Navegando a ${page}`);
-            this.$router.push({ name: page }); // Asegúrate de que las rutas estén definidas con `name`.
+            this.$router.push({ name: page });
         },
         showMenu(menu) {
             this.menus[menu] = true;
@@ -222,15 +216,25 @@ export default {
         hideMenu(menu) {
             this.menus[menu] = false;
         },
-        redirectToAddsolicitudes() {
-            // Aquí defines la ruta a la que quieres redirigir al hacer clic en el botón
-            this.$router.push('/register');
-        },
         changePage(page) {
             if (page >= 1 && page <= this.totalPages) {
                 this.currentPage = page;
             }
         },
+        descargarSolicitud(solicitud) {
+            // Implementa la lógica para descargar la solicitud
+            console.log('Descargando solicitud:', solicitud);
+            // Aquí podrías generar un PDF o hacer una llamada a la API para descargar
+        },
+        async cargarSolicitudes() {
+            try {
+                // Ejemplo de llamada a la API para obtener las solicitudes
+                const response = await fetch('http://localhost:3000/api/solicitudes');
+                this.solicitudes = await response.json();
+            } catch (error) {
+                console.error('Error al cargar las solicitudes:', error);
+            }
+        }
     },
 };
 </script>
