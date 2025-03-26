@@ -238,24 +238,93 @@ export default {
 
     },
     methods: {
-        // Obtener el próximo número de solicitud del backend
         async obtenerNumeroSolicitud() {
             try {
-                const response = await axios.get('http://localhost:3000/api/solicitudes/next-number');
-                this.numeroSolicitud = response.data.currentNumber;
-                this.nextSolicitudNumber = response.data.nextNumber;
+                // 1. Obtener todas las solicitudes existentes
+                const response = await axios.get('http://localhost:3000/api/solicitudes');
+                const solicitudes = response.data;
+
+                // 2. Extraer todos los números de solicitud
+                const numerosSolicitud = solicitudes.map(s => s.numero_solicitud);
+
+                // 3. Encontrar el número máximo
+                const maxNumber = numerosSolicitud.length > 0 ?
+                    Math.max(...numerosSolicitud.map(num => parseInt(num))) :
+                    0;
+
+                // 4. Calcular el siguiente número (máximo + 1)
+                const nextNumber = maxNumber + 1;
+
+                // 5. Formatear a 4 dígitos con ceros a la izquierda
+                this.numeroSolicitud = String(nextNumber).padStart(4, '0');
+
             } catch (error) {
                 console.error('Error al obtener número de solicitud:', error);
-                // Asignar un valor por defecto si falla
+                // Valor por defecto si hay error
                 this.numeroSolicitud = '0001';
-                this.nextSolicitudNumber = 2;
+                this.showAlert("Error al obtener el número de solicitud. Usando valor temporal.", "error");
             }
         },
-        // Formatear número con ceros a la izquierda (0001, 0002, etc.)
+
         formatSolicitudNumber(num) {
             return String(num).padStart(4, '0');
         },
 
+        async submitForm() {
+            // Validar cantidades primero
+            for (const item of this.items) {
+                if (item.cantidadEntregada > item.cantidadDisponible) {
+                    this.showAlert(`No hay suficiente stock para ${item.descripcionMaterial}. Disponible: ${item.cantidadDisponible}`, "error");
+                    return;
+                }
+            }
+
+            try {
+                // Primero verificar que el número no se haya usado mientras tanto
+                const checkResponse = await axios.get('http://localhost:3000/api/solicitudes');
+                const existeNumero = checkResponse.data.some(s => s.numero_solicitud === this.numeroSolicitud);
+
+                if (existeNumero) {
+                    // Si ya existe, obtener nuevo número
+                    await this.obtenerNumeroSolicitud();
+                    this.showAlert("El número de solicitud ya estaba en uso. Se ha generado uno nuevo.", "warning");
+                    return;
+                }
+
+                // Crear las solicitudes
+                const solicitudes = this.items.map(item => ({
+                    numero_solicitud: this.numeroSolicitud,
+                    direccion_solicitante: this.direccionSolicitante,
+                    id_articulo: item.id_articulo,
+                    cantidad_entregada: item.cantidadEntregada
+                }));
+
+                // Actualizar inventario y crear solicitudes
+                const updatePromises = this.items.map(item =>
+                    axios.put(`http://localhost:3000/api/articulos/${item.id_articulo}`, {
+                        cantidad: item.cantidadDisponible - item.cantidadEntregada
+                    })
+                );
+
+                const solicitudPromises = solicitudes.map(solicitud =>
+                    axios.post('http://localhost:3000/api/solicitudes', solicitud)
+                );
+
+                await Promise.all([...updatePromises, ...solicitudPromises]);
+
+                // Actualizar datos locales
+                await this.cargarArticulos();
+
+                // Obtener nuevo número para la próxima solicitud
+                await this.obtenerNumeroSolicitud();
+
+                this.showConfirmationModal = true;
+
+            } catch (error) {
+                console.error('Error al registrar salida:', error);
+                this.showAlert("Ocurrió un error al registrar la salida. Por favor intente nuevamente.", "error");
+            }
+        },
         // Resetear formulario
         resetForm() {
             this.direccionSolicitante = '';
@@ -322,55 +391,6 @@ export default {
             }
         },
 
-        async submitForm() {
-            // Validar cantidades primero
-            for (const item of this.items) {
-                if (item.cantidadEntregada > item.cantidadDisponible) {
-                    this.showAlert(`No hay suficiente stock para ${item.descripcionMaterial}. Disponible: ${item.cantidadDisponible}`, "error");
-                    return;
-                }
-            }
-
-            try {
-                // Primero actualizar inventario
-                const updatePromises = this.items.map(item =>
-                    axios.put(`http://localhost:3000/api/articulos/${item.id_articulo}`, {
-                        cantidad: item.cantidadDisponible - item.cantidadEntregada
-                    })
-                );
-
-                // Luego crear las solicitudes
-                const solicitudes = this.items.map(item => ({
-                    numero_solicitud: this.numeroSolicitud,
-                    direccion_solicitante: this.direccionSolicitante,
-                    id_articulo: item.id_articulo,
-                    cantidad_entregada: item.cantidadEntregada
-                }));
-
-                const solicitudPromises = solicitudes.map(solicitud =>
-                    axios.post('http://localhost:3000/api/solicitudes', solicitud)
-                );
-
-                await Promise.all([...updatePromises, ...solicitudPromises]);
-
-                // Actualizar los datos locales sin recargar la página
-                await this.cargarArticulos();
-
-                // Actualizar las cantidades disponibles en los items actuales
-                this.items.forEach(item => {
-                    const articulo = this.articulos.find(a => a.id === item.id_articulo);
-                    if (articulo) {
-                        item.cantidadDisponible = articulo.cantidad;
-                    }
-                });
-
-                this.showConfirmationModal = true;
-
-            } catch (error) {
-                console.error('Error al registrar salida:', error);
-                this.showAlert("Ocurrió un error al registrar la salida. Por favor intente nuevamente.", "error");
-            }
-        },
         formatDireccion(direccion) {
             const formatMap = {
                 "Direccion General": "Dirección General",
