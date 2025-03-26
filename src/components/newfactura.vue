@@ -239,6 +239,7 @@ export default {
         this.fetchProveedores();
     },
     methods: {
+        
         navigateTo(page) {
             console.log(`Navegando a ${page}`);
             this.$router.push({ name: page }); // Asegúrate de que las rutas estén definidas con `name`.
@@ -306,7 +307,7 @@ export default {
             try {
                 const response = await fetch("http://localhost:3000/api/proveedor");
                 if (!response.ok) {
-                    throw new Error("Error al obtener proveedores");
+                    throw new Error("Error ");
                 }
                 const data = await response.json();
                 this.proveedores = data;
