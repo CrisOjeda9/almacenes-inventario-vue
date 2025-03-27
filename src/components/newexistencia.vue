@@ -78,10 +78,10 @@
                                 <input type="number" min="0" id="id_factura" v-model="form.id_factura" required />
                             </div>
                             <div class="form-field">
-                                <label for="precio_unitario">Importe sin IVA</label>
-                                <input type="number" step="0.01" min="0" id="precio_unitario"
-                                    v-model="form.precio_unitario" required />
+                                <label for="cantidad">Cantidad</label>
+                                <input type="number" min="0" id="cantidad" v-model="form.cantidad" required />
                             </div>
+
                         </div>
 
                         <!-- Descripción (fila completa) -->
@@ -92,20 +92,20 @@
                             </div>
                         </div>
 
-                        <!-- Segunda fila (3 campos) -->
                         <div class="form-row triple">
                             <div class="form-field">
-                                <label for="iva">IVA</label>
-                                <input type="number" step="0.01" min="0" id="iva" v-model="form.iva" required />
+                                <label for="precio_unitario">Precio Unitario (Sin IVA)</label>
+                                <input type="number" step="0.01" min="0" id="precio_unitario"
+                                    v-model="form.precio_unitario" @input="calcularTotales" required />
                             </div>
                             <div class="form-field">
-                                <label for="importe_con_iva">Importe con IVA</label>
+                                <label for="iva">IVA (16%)</label>
+                                <input type="number" step="0.01" min="0" id="iva" v-model="form.iva" readonly style="background-color: #dcddcd;" />
+                            </div>
+                            <div class="form-field">
+                                <label for="importe_con_iva">Importe (Con IVA)</label>
                                 <input type="number" step="0.01" min="0" id="importe_con_iva"
-                                    v-model="form.importe_con_iva" required />
-                            </div>
-                            <div class="form-field">
-                                <label for="cantidad">Cantidad</label>
-                                <input type="number" min="0" id="cantidad" v-model="form.cantidad" required />
+                                    v-model="form.importe_con_iva" readonly required  style="background-color: #dcddcd;"/>
                             </div>
                         </div>
 
@@ -126,8 +126,8 @@
                             </div>
                             <div class="form-field">
                                 <label for="total_ingreso">Total de ingreso</label>
-                                <input type="number" step="0.01" min="0" id="total_ingreso" v-model="form.total_ingreso"
-                                    required />
+                                <input type="number" step="0.01" min="0" id="total_ingreso" v-model="form.total_ingreso" style="background-color: #dcddcd;"
+                                    readonly required />
                             </div>
                             <div class="form-field"></div>
                         </div>
@@ -174,7 +174,7 @@
                                     <th>Cantidad</th>
                                     <th>Unidad</th>
                                     <th>Total</th>
-                                    <th>Acciones</th>
+                                    <th>Eliminar</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -183,7 +183,8 @@
                                     <td>{{ articulo.descripcion }}</td>
                                     <td>{{ articulo.cantidad }}</td>
                                     <td>{{ articulo.unidad_medida }}</td>
-                                    <td>${{ articulo.total_ingreso.toFixed(2) }}</td>
+                                    <td>${{ formatCurrency(articulo.total_ingreso) }}</td>
+
                                     <td>
                                         <button @click="showDeleteModal(index)" class="delete-btn">
                                             <i class="fas fa-trash"></i>
@@ -191,9 +192,17 @@
                                     </td>
                                 </tr>
                             </tbody>
-                        </table>
-                    </div>
 
+                            <tfoot>
+                                <tr class="total-row">
+                                    <td colspan="4" class="text-right"><strong>Total General:</strong></td>
+                                    <td><strong>${{ formatCurrency(totalGeneral) }}</strong></td>
+                                </tr>
+                            </tfoot>
+
+                        </table>
+
+                    </div>
                     <div class="table-actions">
                         <button @click="registerAllArticles" class="register-btn"
                             :disabled="articulosTabla.length === 0">
@@ -300,7 +309,40 @@ export default {
         this.loadObjetosGasto();
         this.loadArticulosRecientes();
     },
+    computed: {
+        totalGeneral() {
+            return this.articulosTabla.reduce((sum, articulo) => {
+                return sum + (parseFloat(articulo.total_ingreso) || 0);
+            }, 0);
+        }
+    },
     methods: {
+        calcularTotales() {
+            // Cálculo de IVA y Importe con IVA (como antes)
+            if (this.form.precio_unitario) {
+                const precio = parseFloat(this.form.precio_unitario);
+                this.form.iva = (precio * 0.16).toFixed(2);
+                this.form.importe_con_iva = (precio * 1.16).toFixed(2);
+                this.calcularTotalIngreso(); // Actualizar total ingreso si cambia el precio
+            } else {
+                this.form.iva = '';
+                this.form.importe_con_iva = '';
+                this.form.total_ingreso = '';
+            }
+        },
+
+        calcularTotalIngreso() {
+            if (this.form.cantidad && this.form.importe_con_iva) {
+                const cantidad = parseFloat(this.form.cantidad);
+                const importe = parseFloat(this.form.importe_con_iva);
+                this.form.total_ingreso = (cantidad * importe).toFixed(2);
+            } else {
+                this.form.total_ingreso = '';
+            }
+        },
+        formatCurrency(value) {
+            return parseFloat(value).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        },
         showAlert(message, type) {
             this.alertMessage = message;
             if (type === "success") {
@@ -702,6 +744,32 @@ export default {
     font-family: 'Montserrat', sans-serif;
 }
 
+tfoot {
+    position: sticky;
+    bottom: 0;
+    background-color: #f8f9fa;
+}
+
+.total-row {
+    border-top: 2px solid #691B31;
+}
+
+.total-row td {
+    padding: 12px 15px;
+    font-size: 15px;
+}
+
+.text-right {
+    text-align: right;
+}
+
+/* Estilo para mantener visible el footer al hacer scroll */
+.table-wrapper {
+    max-height: 400px;
+    overflow-y: auto;
+    position: relative;
+}
+
 
 /* Estilos del modal */
 .modal-overlay {
@@ -936,6 +1004,7 @@ export default {
     display: flex;
     flex-direction: column;
     height: 100%;
+    max-height: 530px;
     box-sizing: border-box;
 }
 
@@ -1241,6 +1310,7 @@ tr:hover {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     border-radius: 5px;
     width: 150px;
+    z-index: 1;
 }
 
 .dropdown-menu button {
