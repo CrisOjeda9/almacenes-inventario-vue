@@ -357,6 +357,15 @@ export default {
         },
 
         async submitForm() {
+            // Verificar duplicados
+            const uniqueIds = new Set();
+            for (const item of this.items) {
+                if (uniqueIds.has(item.id_articulo)) {
+                    this.showAlert(`El artículo ${item.descripcionMaterial} está duplicado en la solicitud`, "error");
+                    return;
+                }
+                uniqueIds.add(item.id_articulo);
+            }
             // Validar cantidades primero
             for (const item of this.items) {
                 if (item.cantidadEntregada > item.cantidadDisponible) {
@@ -460,6 +469,23 @@ export default {
             );
 
             if (selectedMaterial) {
+                // Verificar si el artículo ya está en otra fila
+                const isDuplicate = this.items.some((item, i) =>
+                    i !== index && item.id_articulo === selectedMaterial.id
+                );
+
+                if (isDuplicate) {
+                    this.showAlert("Este artículo ya ha sido agregado a la solicitud", "error");
+                    // Resetear la selección
+                    this.items[index].descripcionMaterial = '';
+                    this.items[index].unidadMedida = '';
+                    this.items[index].numeroPartida = '';
+                    this.items[index].id_articulo = null;
+                    this.items[index].cantidadDisponible = 0;
+                    this.items[index].cantidadEntregada = '';
+                    return;
+                }
+
                 this.items[index].unidadMedida = selectedMaterial.unidad_medida;
                 this.items[index].numeroPartida = selectedMaterial.id_objetogasto;
                 this.items[index].id_articulo = selectedMaterial.id;
@@ -507,6 +533,20 @@ export default {
         },
 
         addItem() {
+            const lastItem = this.items[this.items.length - 1];
+
+            // Verificar si el último artículo ya está en otra fila
+            if (lastItem.id_articulo) {
+                const isDuplicate = this.items.some((item, i) =>
+                    i !== this.items.length - 1 && item.id_articulo === lastItem.id_articulo
+                );
+
+                if (isDuplicate) {
+                    this.showAlert("Este artículo ya ha sido agregado a la solicitud", "error");
+                    return;
+                }
+            }
+
             if (this.isCurrentRowComplete(this.items.length - 1)) {
                 this.items.push({
                     numeroPartida: '',
