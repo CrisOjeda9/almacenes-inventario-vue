@@ -96,7 +96,7 @@
                 <tbody>
                     <tr v-for="existencia in paginatedExistencias" :key="existencia.id">
 
-                        <td>{{ existencia.id_factura }}</td>
+                        <td>{{ getNumeroFactura(existencia.id_factura) }}</td>
                         <td>{{ getNumeroPartida(existencia.id_objetogasto) }}</td>
                         <td>{{ existencia.descripcion }}</td>
                         <td>{{ existencia.precio_unitario }}</td>
@@ -304,7 +304,8 @@ export default {
             errorMessage: "",
             showImageModal: false,
             existencias: [], // Lista de artículos obtenidos de la API
-            objetosGasto: [], // Lista de objetos de gasto obtenidos de la API
+            objetosGasto: [],
+            facturas: [],
             deleteId: null, // ID del artículo a eliminar
             isLoading: true, // Indicador de carga
             imagesToDelete: [], // Lista temporal de imágenes a eliminar
@@ -341,7 +342,8 @@ export default {
     mounted() {
         this.loadUserData();
         this.loadExistencias(); // Cargar los artículos al montar el componente
-        this.loadObjetosGasto(); // Cargar los objetos de gasto al montar el componente
+        this.loadObjetosGasto();
+        this.loadFacturas();
     },
     methods: {
         showAlert(message, type) {
@@ -405,6 +407,14 @@ export default {
                 console.error('Error al cargar los objetos de gasto:', error);
             }
         },
+        async loadFacturas() {
+            try {
+                const response = await axios.get('http://localhost:3000/api/facturas');
+                this.facturas = response.data; // Guardar las facturas en la lista
+            } catch (error) {
+                console.error('Error al cargar las facturas:', error);
+            }
+        },
         // Obtener el número de partida a partir del id_objetogasto
         getNumeroPartida(idObjetogasto) {
             const objetoGasto = this.objetosGasto.find(
@@ -412,6 +422,13 @@ export default {
             );
             return objetoGasto ? objetoGasto.numero_partida : "N/A";
         },
+        getNumeroFactura(idFactura) {  // Cambiado de getNumeroDeFactura a getNumeroFactura
+            const factura = this.facturas.find(
+                (fact) => fact.id === idFactura
+            );
+            return factura ? factura.numero_de_factura : "N/A";
+        },
+
         // Cargar los datos del usuario
         async loadUserData() {
             const storedUserName = localStorage.getItem("userName");

@@ -75,7 +75,8 @@
                             </div>
                             <div class="form-field">
                                 <label for="id_factura">Número de factura</label>
-                                <input type="number" min="0" id="id_factura" v-model="form.id_factura" required />
+                                <input type="text" id="id_factura" v-model="form.numero_de_factura"
+                                    @input="validarNumeroFactura" required />
                             </div>
                             <div class="form-field">
                                 <label for="cantidad">Cantidad</label>
@@ -100,12 +101,14 @@
                             </div>
                             <div class="form-field">
                                 <label for="iva">IVA (16%)</label>
-                                <input type="number" step="0.01" min="0" id="iva" v-model="form.iva" readonly style="background-color: #dcddcd;" />
+                                <input type="number" step="0.01" min="0" id="iva" v-model="form.iva" readonly
+                                    style="background-color: #dcddcd;" />
                             </div>
                             <div class="form-field">
                                 <label for="importe_con_iva">Importe (Con IVA)</label>
                                 <input type="number" step="0.01" min="0" id="importe_con_iva"
-                                    v-model="form.importe_con_iva" readonly required  style="background-color: #dcddcd;"/>
+                                    v-model="form.importe_con_iva" readonly required
+                                    style="background-color: #dcddcd;" />
                             </div>
                         </div>
 
@@ -126,8 +129,8 @@
                             </div>
                             <div class="form-field">
                                 <label for="total_ingreso">Total de ingreso</label>
-                                <input type="number" step="0.01" min="0" id="total_ingreso" v-model="form.total_ingreso" style="background-color: #dcddcd;"
-                                    readonly required />
+                                <input type="number" step="0.01" min="0" id="total_ingreso" v-model="form.total_ingreso"
+                                    style="background-color: #dcddcd;" readonly required />
                             </div>
                             <div class="form-field"></div>
                         </div>
@@ -278,6 +281,7 @@ export default {
                 id_objetogasto: "",
                 numero_partida: "",
                 id_factura: "",
+                numero_de_factura: "",
                 descripcion: "",
                 precio_unitario: "",
                 iva: "",
@@ -288,6 +292,7 @@ export default {
                 foto_articulo: []
             },
             objetosGasto: [],
+            facturas: [],
             menus: {
                 homeMenu: false,
                 existenciaMenu: false,
@@ -299,6 +304,8 @@ export default {
             errorMessage: "",
             numeroPartidaValido: false,
             errorNumeroPartida: "",
+            errorNumeroFactura: "", // Nuevo mensaje de error
+            numeroFacturaValido: false, // Nuevo estado de validación
             articulosRecientes: [],
             articulosTabla: []
 
@@ -307,6 +314,7 @@ export default {
     mounted() {
         this.loadUserData();
         this.loadObjetosGasto();
+        this.loadFacturas();
         this.loadArticulosRecientes();
     },
     computed: {
@@ -317,6 +325,7 @@ export default {
         }
     },
     methods: {
+
         calcularTotales() {
             // Cálculo de IVA y Importe con IVA (como antes)
             if (this.form.precio_unitario) {
@@ -369,6 +378,11 @@ export default {
                 return;
             }
 
+            if (!this.validarNumeroFactura()) {
+                this.showAlert(this.errorNumeroFactura || "El número de factura no es válido.", "error");
+                return;
+            }
+
             if (this.form.foto_articulo.length === 0) {
                 this.showAlert("Por favor, agrega una foto del artículo.", "error");
                 return;
@@ -376,8 +390,9 @@ export default {
 
             const nuevoArticulo = {
                 id_objetogasto: this.form.id_objetogasto,
+                id_factura: this.form.id_factura, // Usamos el ID de la factura validada
                 numero_partida: this.form.numero_partida,
-                id_factura: this.form.id_factura,
+                numero_de_factura: this.form.numero_de_factura, // Usamos el número de factura
                 descripcion: this.form.descripcion,
                 precio_unitario: parseFloat(this.form.precio_unitario),
                 iva: parseFloat(this.form.iva),
@@ -451,7 +466,7 @@ export default {
         validarCampos() {
             const camposObligatorios = [
                 { campo: 'numero_partida', mensaje: 'Número de partida' },
-                { campo: 'id_factura', mensaje: 'Número de factura' },
+                { campo: 'numero_de_factura', mensaje: 'Número de factura' }, // Cambiado aquí
                 { campo: 'descripcion', mensaje: 'Descripción del artículo' },
                 { campo: 'precio_unitario', mensaje: 'Importe sin IVA' },
                 { campo: 'iva', mensaje: 'IVA' },
@@ -475,6 +490,7 @@ export default {
                 id_objetogasto: "",
                 numero_partida: "",
                 id_factura: "",
+                numero_de_factura: "", // Cambiado aquí
                 descripcion: "",
                 precio_unitario: "",
                 iva: "",
@@ -557,6 +573,20 @@ export default {
                 console.error('Error al cargar los objetos de gasto:', error);
             }
         },
+        async loadFacturas() {
+            try {
+                const response = await axios.get('http://localhost:3000/api/facturas');
+                this.facturas = response.data.map(factura => {
+                    if (!factura.numero_de_factura) {
+                        console.warn('Factura sin número de factura:', factura);
+                    }
+                    return factura;
+                });
+                console.log('Facturas cargadas:', this.facturas); // Verificar datos
+            } catch (error) {
+                console.error('Error al cargar las facturas:', error);
+            }
+        },
         openImageModal() {
             this.showImageModal = true;
         },
@@ -635,12 +665,38 @@ export default {
                 return false;
             }
         },
+        validarNumeroFactura() {
+            const numeroFactura = this.form.numero_de_factura.toString();
+
+            if (!numeroFactura) {
+                this.numeroFacturaValido = false;
+                this.errorNumeroFactura = "El número de factura es obligatorio.";
+                return false;
+            }
+
+            // Buscar el número de factura en la lista de facturas
+            const facturaExistente = this.facturas.find(
+                factura => factura.numero_de_factura === numeroFactura
+            );
+
+            if (facturaExistente) {
+                this.form.id_factura = facturaExistente.id; // Asignar el ID de la factura
+                this.numeroFacturaValido = true;
+                this.errorNumeroFactura = "";
+                return true;
+            } else {
+                this.form.id_factura = "";
+                this.numeroFacturaValido = false;
+                this.errorNumeroFactura = "El número de factura no existe. Verifica el número.";
+                return false;
+            }
+        },
         async registerExistencia(tipo) {
             // Validar campos obligatorios
             const camposObligatorios = [
                 { campo: 'numero_partida', mensaje: 'Número de partida' },
-                { campo: 'id_factura', mensaje: 'Número de factura' },
-                { campo: 'descripcion', mensaje: 'Descripcion del articulo' },
+                { campo: 'numero_de_factura', mensaje: 'Número de factura' },
+                { campo: 'descripcion', mensaje: 'Descripción del artículo' },
                 { campo: 'precio_unitario', mensaje: 'Importe sin IVA' },
                 { campo: 'iva', mensaje: 'IVA' },
                 { campo: 'importe_con_iva', mensaje: 'Importe con IVA' },
@@ -662,6 +718,12 @@ export default {
                 return;
             }
 
+            // Validar que el número de factura sea válido
+            if (!await this.validarNumeroFactura()) {
+                this.showAlert(this.errorNumeroFactura || "El número de factura no es válido.", "error");
+                return;
+            }
+
             if (this.form.foto_articulo.length === 0) {
                 this.showAlert("Por favor, agrega una foto del artículo.", "error");
                 return;
@@ -671,6 +733,8 @@ export default {
             const formData = new FormData();
             formData.append('id_objetogasto', this.form.id_objetogasto);
             formData.append('id_factura', this.form.id_factura);
+            formData.append('numero_de_factura', this.form.numero_de_factura);
+            formData.append('numero_partida', this.form.numero_partida);
             formData.append('descripcion', this.form.descripcion);
             formData.append('precio_unitario', this.form.precio_unitario);
             formData.append('iva', this.form.iva);
