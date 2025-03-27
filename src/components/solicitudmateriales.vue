@@ -238,6 +238,92 @@ export default {
 
     },
     methods: {
+        async generarPDFSolicitud() {
+            try {
+                const { jsPDF } = await import('jspdf');
+                await import('jspdf-autotable');
+
+                const doc = new jsPDF({
+                    orientation: 'portrait',
+                    unit: 'mm'
+                });
+
+                // Configuración de la tabla
+                const headers = [
+                    'N° Partida',
+                    'Unidad Medida',
+                    'Descripción del Material',
+                    'Cantidad Entregada'
+                ];
+
+                // Preparar datos para la tabla
+                const body = this.items.map(item => [
+                    item.numeroPartida,
+                    item.unidadMedida,
+                    item.descripcionMaterial,
+                    item.cantidadEntregada
+                ]);
+
+                // Configuración para centrado
+                const pageWidth = doc.internal.pageSize.getWidth();
+                const centerX = pageWidth / 2;
+
+                // Número de solicitud centrado
+                doc.setFontSize(12);
+                doc.text(`SOLICITUD DE MATERIAL N° ${this.numeroSolicitud}`, centerX, 20, { align: 'center' });
+
+                // Información de la solicitud centrada
+                doc.setFontSize(10);
+                doc.text(`Dirección Solicitante: ${this.formatDireccion(this.direccionSolicitante)}`, centerX, 30, { align: 'center' });
+                doc.text(`Fecha de Salida: ${this.fechaFormateada}`, centerX, 35, { align: 'center' });
+
+                // Calcular ancho de tabla para centrado
+                const columnWidths = [20, 25, 100, 25];
+                const tableWidth = columnWidths.reduce((a, b) => a + b, 0);
+                const marginLeft = (pageWidth - tableWidth) / 2;
+
+                // Generar tabla centrada
+                doc.autoTable({
+                    head: [headers],
+                    body: body,
+                    startY: 45,
+                    margin: { left: marginLeft, right: marginLeft },
+                    styles: {
+                        fontSize: 9,
+                        cellPadding: 3,
+                        overflow: 'linebreak',
+                        font: 'helvetica',
+                        textColor: [0, 0, 0],
+                        textAlign: 'center'
+                    },
+                    headStyles: {
+                        fillColor: [188, 149, 91], // Color dorado
+                        textColor: [255, 255, 255],
+                        fontStyle: 'bold',
+                        textAlign: 'center'
+                    },
+                    columnStyles: {
+                        0: { cellWidth: columnWidths[0], textAlign: 'center' },
+                        1: { cellWidth: columnWidths[1], textAlign: 'center' },
+                        2: { cellWidth: columnWidths[2], textAlign: 'left' },
+                        3: { cellWidth: columnWidths[3], textAlign: 'center' }
+                    },
+                    didDrawPage: function (data) {
+                        // Pie de página centrado
+                        const pageCount = doc.internal.getNumberOfPages();
+                        doc.setFontSize(8);
+                        doc.text(`Página ${data.pageNumber} de ${pageCount}`, centerX, 285, { align: 'center' });
+                    }
+                });
+
+                // Guardar PDF
+                doc.save(`Solicitud_${this.numeroSolicitud}.pdf`);
+
+            } catch (error) {
+                console.error('Error al generar PDF:', error);
+                this.showAlert("Error al generar el PDF de la solicitud", "error");
+            }
+        },
         async obtenerNumeroSolicitud() {
             try {
                 // 1. Obtener todas las solicitudes existentes
@@ -280,12 +366,11 @@ export default {
             }
 
             try {
-                // Primero verificar que el número no se haya usado mientras tanto
+                // Verificar que el número no se haya usado mientras tanto
                 const checkResponse = await axios.get('http://localhost:3000/api/solicitudes');
                 const existeNumero = checkResponse.data.some(s => s.numero_solicitud === this.numeroSolicitud);
 
                 if (existeNumero) {
-                    // Si ya existe, obtener nuevo número
                     await this.obtenerNumeroSolicitud();
                     this.showAlert("El número de solicitud ya estaba en uso. Se ha generado uno nuevo.", "warning");
                     return;
@@ -312,10 +397,11 @@ export default {
 
                 await Promise.all([...updatePromises, ...solicitudPromises]);
 
+                // Generar PDF después de registrar
+                await this.generarPDFSolicitud();
+
                 // Actualizar datos locales
                 await this.cargarArticulos();
-
-                // Obtener nuevo número para la próxima solicitud
                 await this.obtenerNumeroSolicitud();
 
                 this.showConfirmationModal = true;

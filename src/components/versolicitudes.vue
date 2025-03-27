@@ -84,7 +84,6 @@
                         <th>Unidad Medida</th>
                         <th>Descripción del Material</th>
                         <th>Cantidad Entregada</th>
-                        <th>Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -97,9 +96,7 @@
                         <td>{{ solicitud.unidadMedida }}</td>
                         <td>{{ solicitud.descripcionMaterial }}</td>
                         <td>{{ solicitud.cantidadEntregada }}</td>
-                        <td>
-                            <button @click="descargarSolicitud(solicitud)" class="btn-existencias">Descargar</button>
-                        </td>
+                        
                     </tr>
                 </tbody>
             </table>
@@ -396,25 +393,7 @@ export default {
                 this.currentPage = page;
             }
         },
-        descargarSolicitud(solicitud) {
-            console.log('Descargando solicitud:', solicitud);
-            // Implementación con Axios para descargar
-            axios({
-                url: `http://localhost:3000/api/descargar-solicitud/${solicitud.id}`,
-                method: 'GET',
-                responseType: 'blob',
-            }).then(response => {
-                const url = window.URL.createObjectURL(new Blob([response.data]));
-                const link = document.createElement('a');
-                link.href = url;
-                link.setAttribute('download', `solicitud_${solicitud.id}.pdf`);
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-            }).catch(error => {
-                console.error('Error al descargar:', error);
-            });
-        }
+       
     },
 };
 </script>
