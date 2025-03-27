@@ -17,7 +17,7 @@
                 <div class="user-profile">
                     <img :src="profileImage" alt="User Profile" class="profile-pic" />
                     <div class="user-info">
-                        <p>{{ userName }}</p> <!-- Nombre dinámico del usuario -->
+                        <p>{{ userName }}</p>
                         <span><a href="profile" style="color: white;">Ver Perfil</a></span>
                     </div>
                 </div>
@@ -41,8 +41,6 @@
                     <button @click="navigateTo('bienesnuevos')">Asignar resguardo</button>
                     <button @click="navigateTo('liberarbien')">Liberar Bien</button>
                     <button @click="navigateTo('reportes')">Generación de reportes</button>
-
-
                 </div>
             </div>
 
@@ -64,130 +62,153 @@
             </div>
         </div>
 
-        <!-- Formulario -->
-        <div class="form-container">
-            <form @submit.prevent="registerExistencia">
-                <div class="form-row">
-                    <!-- Numero de partida -->
-                    <div class="form-field">
-                        <label for="id_objetogasto">Número de partida</label>
-                        <input type="number" min="0" id="id_objetogasto" placeholder="" v-model="form.numero_partida"
-                            @input="validarNumeroPartida" required />
-                    </div>
-
-                    <!-- Número de factura -->
-                    <div class="form-field">
-                        <label for="id_factura">Número de factura</label>
-                        <input type="number" min="0" id="id_factura" placeholder="" v-model="form.id_factura"
-                            required />
-                    </div>
-
-                    <!-- descripcion -->
-                    <div class="form-field">
-                        <label for="descripcion">descripcion</label>
-                        <input type="text" id="descripcion" placeholder="" v-model="form.descripcion" required />
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <!-- Importe sin IVA -->
-                    <div class="form-field">
-                        <label for="precio_unitario">Importe sin IVA</label>
-                        <input type="number" step="0.01" min="0" id="precio_unitario" placeholder=""
-                            v-model="form.precio_unitario" required />
-                    </div>
-
-                    <!-- IVA -->
-                    <div class="form-field">
-                        <label for="iva">IVA</label>
-                        <input type="number" step="0.01" min="0" id="iva" placeholder="" v-model="form.iva" required />
-                    </div>
-
-                    <!-- Importe con IVA -->
-                    <div class="form-field">
-                        <label for="importe_con_iva">Importe con IVA</label>
-                        <input type="number" step="0.01" id="importe_con_iva" min="0" placeholder=""
-                            v-model="form.importe_con_iva" required />
-                    </div>
-
-                </div>
-
-                <div class="form-row">
-                    <!-- Cantidad -->
-                    <div class="form-field">
-                        <label for="cantidad">Cantidad</label>
-                        <input type="number" min="0" id="cantidad" placeholder="" v-model="form.cantidad" required />
-                    </div>
-
-                    <!-- Unidad de medida -->
-                    <div class="form-field">
-                        <label for="unidad_medida">Unidad de medida</label>
-                        <select id="unidad_medida" v-model="form.unidad_medida" required>
-                            <option value="" disabled>Selecciona una opción</option>
-                            <option value="Piezas">Piezas</option>
-                            <option value="Paquetes">Paquetes</option>
-                            <option value="Cajas">Cajas</option>
-                            <option value="Kilogramos">Kilogramos</option>
-                            <option value="Litros">Litros</option>
-                            <option value="Metros">Metros</option>
-                            <option value="Rollos">Rollos</option>
-                            <option value="Bultos">Bultos</option>
-                        </select>
-                    </div>
-
-
-
-
-                    <!-- Total de ingreso -->
-                    <div class="form-field">
-                        <label for="total_ingreso">Total de ingreso</label>
-                        <input type="number" step="0.01" min="0" id="total_ingreso" placeholder=""
-                            v-model="form.total_ingreso" required />
-                    </div>
-
-
-                </div>
-                <div class="form-row">
-                    <!-- Foto artículo -->
-
-                    <div class="form-field">
-                        <label for="foto_articulo">Foto artículo</label>
-                        <div class="dropzone" @drop.prevent="handleDrop" @dragover.prevent @click="triggerFileInput">
-                            <input type="file" id="foto_articulo" ref="fileInputExistencia" multiple
-                                @change="handleFileUpload" accept="image/*" />
-                            <i class="fas fa-cloud-upload-alt"></i>
-                            <span v-if="form.foto_articulo.length === 0">Arrastra o selecciona imágenes (JPG,
-                                PNG)</span>
-                            <span v-else>{{ form.foto_articulo.length }} imágenes seleccionadas</span>
+        <div class="content-wrapper">
+            <div class="form-table-container">
+                <div class="form-section">
+                    <form @submit.prevent="addToTable">
+                        <!-- Primera fila (3 campos) -->
+                        <div class="form-row triple">
+                            <div class="form-field">
+                                <label for="id_objetogasto">Número de partida</label>
+                                <input type="number" min="0" id="id_objetogasto" v-model="form.numero_partida"
+                                    @input="validarNumeroPartida" required />
+                            </div>
+                            <div class="form-field">
+                                <label for="id_factura">Número de factura</label>
+                                <input type="number" min="0" id="id_factura" v-model="form.id_factura" required />
+                            </div>
+                            <div class="form-field">
+                                <label for="precio_unitario">Importe sin IVA</label>
+                                <input type="number" step="0.01" min="0" id="precio_unitario"
+                                    v-model="form.precio_unitario" required />
+                            </div>
                         </div>
-                        <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
 
-                        <!-- Botón para abrir el modal con los nombres de las imágenes -->
-                        <button v-if="form.foto_articulo.length > 0" @click.prevent="openImageModal"
-                            class="view-images-btn">
-                            Ver Imágenes
+                        <!-- Descripción (fila completa) -->
+                        <div class="form-row single">
+                            <div class="form-field full-width">
+                                <label for="descripcion">Descripción</label>
+                                <input type="text" id="descripcion" v-model="form.descripcion" required />
+                            </div>
+                        </div>
+
+                        <!-- Segunda fila (3 campos) -->
+                        <div class="form-row triple">
+                            <div class="form-field">
+                                <label for="iva">IVA</label>
+                                <input type="number" step="0.01" min="0" id="iva" v-model="form.iva" required />
+                            </div>
+                            <div class="form-field">
+                                <label for="importe_con_iva">Importe con IVA</label>
+                                <input type="number" step="0.01" min="0" id="importe_con_iva"
+                                    v-model="form.importe_con_iva" required />
+                            </div>
+                            <div class="form-field">
+                                <label for="cantidad">Cantidad</label>
+                                <input type="number" min="0" id="cantidad" v-model="form.cantidad" required />
+                            </div>
+                        </div>
+
+                        <div class="form-row ">
+                            <div class="form-field">
+                                <label for="unidad_medida">Unidad de medida</label>
+                                <select id="unidad_medida" v-model="form.unidad_medida" required>
+                                    <option value="" disabled>Selecciona una opción</option>
+                                    <option value="Piezas">Piezas</option>
+                                    <option value="Paquetes">Paquetes</option>
+                                    <option value="Cajas">Cajas</option>
+                                    <option value="Kilogramos">Kilogramos</option>
+                                    <option value="Litros">Litros</option>
+                                    <option value="Metros">Metros</option>
+                                    <option value="Rollos">Rollos</option>
+                                    <option value="Bultos">Bultos</option>
+                                </select>
+                            </div>
+                            <div class="form-field">
+                                <label for="total_ingreso">Total de ingreso</label>
+                                <input type="number" step="0.01" min="0" id="total_ingreso" v-model="form.total_ingreso"
+                                    required />
+                            </div>
+                            <div class="form-field"></div>
+                        </div>
+
+                        <!-- Foto artículo (fila completa) -->
+                        <div class="form-row single">
+                            <div class="form-field full-width">
+                                <label for="foto_articulo">Foto artículo</label>
+                                <div class="dropzone" @drop.prevent="handleDrop" @dragover.prevent
+                                    @click="triggerFileInput">
+                                    <input type="file" id="foto_articulo" ref="fileInputExistencia" multiple
+                                        @change="handleFileUpload" accept="image/*" />
+                                    <i class="fas fa-cloud-upload-alt"></i>
+                                    <span v-if="form.foto_articulo.length === 0">Arrastra o selecciona imágenes (JPG,
+                                        PNG)</span>
+                                    <span v-else>{{ form.foto_articulo.length }} imágenes seleccionadas</span>
+                                </div>
+                                <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
+
+                                <button v-if="form.foto_articulo.length > 0" @click.prevent="openImageModal"
+                                    class="view-images-btn">
+                                    Ver Imágenes
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="button-container">
+                            <button class="boton" type="submit">
+                                <i class="fas fa-plus-square"></i> Agregar a Tabla
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Tabla (derecha) -->
+                <div class="table-section">
+                    <h2>Artículos a Registrar</h2>
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>No. Partida</th>
+                                    <th>Descripción</th>
+                                    <th>Cantidad</th>
+                                    <th>Unidad</th>
+                                    <th>Total</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="(articulo, index) in articulosTabla" :key="index">
+                                    <td>{{ articulo.numero_partida }}</td>
+                                    <td>{{ articulo.descripcion }}</td>
+                                    <td>{{ articulo.cantidad }}</td>
+                                    <td>{{ articulo.unidad_medida }}</td>
+                                    <td>${{ articulo.total_ingreso.toFixed(2) }}</td>
+                                    <td>
+                                        <button @click="showDeleteModal(index)" class="delete-btn">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="table-actions">
+                        <button @click="registerAllArticles" class="register-btn"
+                            :disabled="articulosTabla.length === 0">
+                            <i class="fas fa-save"></i> Registrar Artículos
                         </button>
                     </div>
                 </div>
-
-
-                <div class="button-container" style="gap: 30px;">
-                    <button class="boton" type="submit" @click.prevent="registerExistencia('articulo')">
-                        <i class="fas fa-plus-square"></i> Agregar Articulo
-                    </button>
-                    <button class="boton" type="submit" @click.prevent="registerExistencia('bien')">
-                        <i class="fas fa-plus-square"></i> Agregar Bien
-                    </button>
-                </div>
-            </form>
+            </div>
         </div>
 
-        <!-- Modal para mostrar las imágenes y sus nombres -->
+        <!-- Modal para mostrar las imágenes -->
         <div v-if="showImageModal" class="modal-overlay2">
             <div class="modal2">
                 <h2>Imágenes seleccionadas</h2>
                 <div class="image-preview-container">
-                    <!-- Vista previa de las imágenes con su nombre -->
                     <div v-for="(img, index) in form.foto_articulo" :key="index" class="image-preview">
                         <div class="image-container">
                             <img :src="getImageUrl(img)" :alt="img.name" class="image-preview-img" />
@@ -201,64 +222,235 @@
                 <button @click="closeImageModal">Cerrar</button>
             </div>
         </div>
+
         <!-- Modal de Éxito -->
         <div v-if="modalVisible" class="modal">
             <div class="modal-content">
                 <span class="close" @click="cerrarModal">&times;</span>
                 <h2>¡Registro Exitoso!</h2>
-                <p>La existencia ha sido agregada correctamente.</p>
+                <p>Los artículos han sido registrados correctamente.</p>
                 <button @click="redirigirPagina">Aceptar</button>
             </div>
         </div>
-        
-
-
+        <!-- Contenedor de notificaciones -->
+        <div v-if="alertMessage" :class="alertClass" class="notification">
+            <i :class="alertIcon"></i> {{ alertMessage }}
+        </div>
+        <!-- Modal de Confirmación de Eliminación -->
+        <div v-if="isDeleteModalVisible" class="modal-overlay">
+            <div class="modal-content-delete">
+                <h3>¿Estás seguro de eliminar este artículo?</h3>
+                <div class="modal-buttons">
+                    <button @click="confirmDelete" class="btn-confirm">Confirmar</button>
+                    <button @click="cancelDelete" class="btn-cancel">Cancelar</button>
+                </div>
+            </div>
+        </div>
     </div>
 </template>
 
 <script>
-import axios from 'axios'; // Importar axios para hacer solicitudes HTTP
+import axios from 'axios';
 
 export default {
     name: "newExistenciaPage",
     data() {
         return {
-            userRole: localStorage.getItem('userRole') || '', // Obtener el rol desde el localStorage
+
+            alertMessage: "",  // Mensaje de la alerta
+            alertClass: "",    // Clase de la alerta (ej. 'success' o 'error')
+            alertIcon: "",     // Icono para la alerta
+            userRole: localStorage.getItem('userRole') || '',
             userName: "Cargando...",
-            profileImage: "",  // URL de la imagen del usuario
+            profileImage: "",
+            isDeleteModalVisible: false,
+            deleteIndex: null,
             form: {
-                id_objetogasto: "", // ID del objeto de gasto (se asignará automáticamente)
-                numero_partida: "", // Número de partida (ingresado por el usuario)
-                id_factura: "", // Número de factura
-                descripcion: "", // descripcion del artículo
-                precio_unitario: "", // Importe sin IVA
-                iva: "", // IVA
-                importe_con_iva: "", // Importe con IVA
-                cantidad: "", // Cantidad
-                unidad_medida: "", // Unidad de medida
-                total_ingreso: "", // Total de ingreso
-                foto_articulo: [] // Foto del artículo (archivo)
+                id_objetogasto: "",
+                numero_partida: "",
+                id_factura: "",
+                descripcion: "",
+                precio_unitario: "",
+                iva: "",
+                importe_con_iva: "",
+                cantidad: "",
+                unidad_medida: "",
+                total_ingreso: "",
+                foto_articulo: []
             },
-            objetosGasto: [], // Lista de objetos de gasto
+            objetosGasto: [],
             menus: {
                 homeMenu: false,
                 existenciaMenu: false,
                 settingsMenu: false,
             },
+            modalVisible: false,
+            buttonType: "",
+            showImageModal: false,
+            errorMessage: "",
+            numeroPartidaValido: false,
+            errorNumeroPartida: "",
+            articulosRecientes: [],
+            articulosTabla: []
 
-            modalVisible: false, // Estado del modal
-            buttonType: "",  // Tipo de registro (articulo o bien)
-            showImageModal: false, // Estado del modal de imágenes
-            errorMessage: "", // Mensaje de error
-            numeroPartidaValido: false, // Indica si el número de partida es válido
-            errorNumeroPartida: "", // Mensaje de error para el número de partida
         };
     },
     mounted() {
         this.loadUserData();
-        this.loadObjetosGasto(); // Cargar los objetos de gasto al montar el componente
+        this.loadObjetosGasto();
+        this.loadArticulosRecientes();
     },
     methods: {
+        showAlert(message, type) {
+            this.alertMessage = message;
+            if (type === "success") {
+                this.alertClass = "alert-success";
+                this.alertIcon = "fa fa-check-circle";
+            } else if (type === "error") {
+                this.alertClass = "alert-error";
+                this.alertIcon = "fa fa-times-circle";
+            } else {
+                this.alertClass = "alert-warning";
+                this.alertIcon = "fa fa-exclamation-circle";
+            }
+
+            // Ocultar la alerta después de 3 segundos
+            setTimeout(() => {
+                this.alertMessage = "";
+            }, 3000);
+        },
+        async addToTable() {
+            if (!this.validarCampos()) return;
+
+            if (!this.validarNumeroPartida()) {
+                this.showAlert(this.errorNumeroPartida || "El número de partida no es válido.", "error");
+                return;
+            }
+
+            if (this.form.foto_articulo.length === 0) {
+                this.showAlert("Por favor, agrega una foto del artículo.", "error");
+                return;
+            }
+
+            const nuevoArticulo = {
+                id_objetogasto: this.form.id_objetogasto,
+                numero_partida: this.form.numero_partida,
+                id_factura: this.form.id_factura,
+                descripcion: this.form.descripcion,
+                precio_unitario: parseFloat(this.form.precio_unitario),
+                iva: parseFloat(this.form.iva),
+                importe_con_iva: parseFloat(this.form.importe_con_iva),
+                cantidad: parseInt(this.form.cantidad),
+                unidad_medida: this.form.unidad_medida,
+                total_ingreso: parseFloat(this.form.total_ingreso),
+                foto_articulo: [...this.form.foto_articulo]
+            };
+
+            this.articulosTabla.push(nuevoArticulo);
+            this.resetForm();
+            this.showAlert('Artículo añadido a la tabla', "success");
+        },
+
+        async registerAllArticles() {
+            try {
+                if (this.articulosTabla.length === 0) {
+                    this.showAlert("No hay artículos para registrar", "error");
+                    return;
+                }
+
+                const promises = this.articulosTabla.map(articulo => {
+                    const formData = new FormData();
+
+                    Object.keys(articulo).forEach(key => {
+                        if (key === 'foto_articulo') {
+                            articulo.foto_articulo.forEach(file => {
+                                formData.append('foto_articulo', file);
+                            });
+                        } else {
+                            formData.append(key, articulo[key]);
+                        }
+                    });
+
+                    return axios.post('http://localhost:3000/api/articulos', formData, {
+                        headers: {
+                            'Content-Type': 'multipart/form-data'
+                        }
+                    });
+                });
+
+                await Promise.all(promises);
+                this.mostrarModal();
+                this.articulosTabla = [];
+
+            } catch (error) {
+                console.error('Error al registrar artículos:', error);
+                this.showAlert('Ocurrió un error al registrar los artículos', "error");
+            }
+        },
+
+        showDeleteModal(index) {
+            this.deleteIndex = index;
+            this.isDeleteModalVisible = true;
+        },
+
+        confirmDelete() {
+            if (this.deleteIndex !== null) {
+                this.articulosTabla.splice(this.deleteIndex, 1);
+                this.showAlert('Artículo retirado correctamente', 'success');
+            }
+            this.cancelDelete();
+        },
+
+        cancelDelete() {
+            this.isDeleteModalVisible = false;
+            this.deleteIndex = null;
+        },
+
+        validarCampos() {
+            const camposObligatorios = [
+                { campo: 'numero_partida', mensaje: 'Número de partida' },
+                { campo: 'id_factura', mensaje: 'Número de factura' },
+                { campo: 'descripcion', mensaje: 'Descripción del artículo' },
+                { campo: 'precio_unitario', mensaje: 'Importe sin IVA' },
+                { campo: 'iva', mensaje: 'IVA' },
+                { campo: 'importe_con_iva', mensaje: 'Importe con IVA' },
+                { campo: 'cantidad', mensaje: 'Cantidad' },
+                { campo: 'unidad_medida', mensaje: 'Unidad de medida' },
+                { campo: 'total_ingreso', mensaje: 'Total de ingreso' }
+            ];
+
+            for (const { campo, mensaje } of camposObligatorios) {
+                if (!this.form[campo]) {
+                    this.showAlert(`Por favor, completa el campo: ${mensaje}`, "error");
+                    return false;
+                }
+            }
+            return true;
+        },
+
+        resetForm() {
+            this.form = {
+                id_objetogasto: "",
+                numero_partida: "",
+                id_factura: "",
+                descripcion: "",
+                precio_unitario: "",
+                iva: "",
+                importe_con_iva: "",
+                cantidad: "",
+                unidad_medida: "",
+                total_ingreso: "",
+                foto_articulo: []
+            };
+        },
+        async loadArticulosRecientes() {
+            try {
+                const response = await axios.get('http://localhost:3000/api/articulos/recientes');
+                this.articulosRecientes = response.data;
+            } catch (error) {
+                console.error('Error al cargar artículos recientes:', error);
+            }
+        },
         async loadUserData() {
             const storedUserName = localStorage.getItem("userName");
             const storedUserEmail = localStorage.getItem("userEmail");
@@ -417,19 +609,19 @@ export default {
 
             for (const { campo, mensaje } of camposObligatorios) {
                 if (!this.form[campo]) {
-                    alert(`Por favor, completa el campo: ${mensaje}`);
+                    this.showAlert(`Por favor, completa el campo: ${mensaje}`, "error");
                     return;
                 }
             }
 
             // Validar que el número de partida sea válido
             if (!this.validarNumeroPartida()) {
-                alert(this.errorNumeroPartida || "El número de partida no es válido.");
+                this.showAlert(this.errorNumeroPartida || "El número de partida no es válido.", "error");
                 return;
             }
 
             if (this.form.foto_articulo.length === 0) {
-                alert("Por favor, agrega una foto del artículo.");
+                this.showAlert("Por favor, agrega una foto del artículo.", "error");
                 return;
             }
 
@@ -465,11 +657,11 @@ export default {
             } catch (error) {
                 console.error('Error al enviar el formulario:', error);
                 if (error.response) {
-                    alert(`Error: ${error.response.data.message || 'Hubo un error al enviar el formulario.'}`);
+                    this.showAlert(`Error: ${error.response.data.message || 'Hubo un error al enviar el formulario.'}`, "error");
                 } else if (error.request) {
-                    alert('No se recibió respuesta del servidor. Por favor, verifica tu conexión a internet.');
+                    this.showAlert('No se recibió respuesta del servidor. Por favor, verifica tu conexión a internet.', 'error');
                 } else {
-                    alert('Hubo un error al configurar la solicitud. Por favor, intenta nuevamente.');
+                    this.showAlert('Hubo un error al configurar la solicitud. Por favor, intenta nuevamente.', "error");
                 }
             }
         },
@@ -508,6 +700,292 @@ export default {
 /* Aplicar Montserrat a todo el contenido */
 * {
     font-family: 'Montserrat', sans-serif;
+}
+
+
+/* Estilos del modal */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 999;
+}
+
+.modal-content-delete {
+    font-size: 25px;
+    background: #691B31;
+    padding: 20px;
+    border-radius: 10px;
+    width: 300px;
+    text-align: center;
+    padding-bottom: 40px;
+}
+
+.modal-buttons {
+    margin-top: 20px;
+}
+
+.btn-confirm,
+.btn-cancel {
+    padding: 10px;
+    margin: 5px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.btn-confirm {
+    background-color: green;
+    color: white;
+}
+
+.btn-cancel {
+    background-color: red;
+    color: white;
+}
+
+
+/* Estilo general para la notificación */
+.notification {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-size: 16px;
+    color: white;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    z-index: 999;
+    max-width: 80%;
+    opacity: 0;
+    animation: fadeIn 0.5s forwards;
+}
+
+/* Animación de aparición de la notificación */
+@keyframes fadeIn {
+    0% {
+        opacity: 0;
+        top: 0;
+    }
+
+    100% {
+        opacity: 1;
+        top: 20px;
+    }
+}
+
+/* Notificación de éxito */
+.alert-success {
+    background-color: #4CAF50;
+    /* Verde */
+}
+
+/* Notificación de error */
+.alert-error {
+    background-color: #f44336;
+    /* Rojo */
+}
+
+/* Notificación de advertencia */
+.alert-warning {
+    background-color: #ff9800;
+    /* Naranja */
+}
+
+/* Iconos de la alerta */
+.notification i {
+    margin-right: 10px;
+}
+
+/* Estilos para la tabla */
+.action-btn {
+    padding: 5px 10px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    margin: 0 2px;
+}
+
+.action-btn.delete {
+    background-color: #ff4444;
+    color: white;
+}
+
+.action-btn.delete:hover {
+    background-color: #cc0000;
+}
+
+.table-actions {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+    text-align: right;
+}
+
+.register-btn {
+    padding: 10px 20px;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s;
+}
+
+.register-btn:hover {
+    background-color: #218838;
+}
+
+.register-btn:disabled {
+    background-color: #6c757d;
+    cursor: not-allowed;
+}
+
+/* Estilos para notificaciones */
+.vue-notification {
+    margin: 5px;
+    padding: 10px;
+    font-size: 14px;
+    color: #ffffff;
+    border-radius: 5px;
+}
+
+.vue-notification.success {
+    background-color: #28a745;
+}
+
+.vue-notification.error {
+    background-color: #dc3545;
+}
+
+/* Filas con 3 campos */
+.form-row.triple {
+    justify-content: space-between;
+}
+
+.form-row.triple .form-field {
+    flex: 1;
+    min-width: 0;
+    /* Permite que los campos se reduzcan */
+    margin-right: 10px;
+}
+
+.form-row.triple .form-field:last-child {
+    margin-right: 0;
+}
+
+/* Contenedor principal centrado */
+.content-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 20px;
+    height: calc(100% - 160px);
+    /* Ajusta según la altura de tus barras de navegación */
+    overflow-y: auto;
+}
+
+/* Contenedor para formulario y tabla */
+.form-table-container {
+    display: flex;
+    gap: 20px;
+    max-width: 1400px;
+    /* Ancho máximo del contenedor */
+    width: 100%;
+    margin: 0 auto;
+}
+
+/* Secciones (formulario y tabla) */
+.form-section,
+.table-section {
+    flex: 1;
+    min-width: 0;
+    /* Permite que se reduzcan equitativamente */
+}
+
+/* Estilo del formulario */
+.form-section form {
+    background: white;
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    height: 530px;
+    box-sizing: border-box;
+}
+
+/* Estilo de la tabla */
+.table-section {
+    background: white;
+    color: #691B31;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    box-sizing: border-box;
+}
+
+.table-section h2 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-size: 18px;
+    text-align: center;
+    color: #691B31;
+}
+
+.table-wrapper {
+    flex-grow: 1;
+    overflow-y: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th,
+td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+th {
+    background-color: #691B31;
+    color: white;
+    position: sticky;
+    top: 0;
+}
+
+tr:hover {
+    background-color: #f5f5f5;
+}
+
+/* Ajustes responsive */
+@media (max-width: 1200px) {
+    .form-table-container {
+        flex-direction: column;
+        max-width: 800px;
+    }
+
+    .form-section,
+    .table-section {
+        width: 100%;
+    }
 }
 
 .image-preview-container {
@@ -795,20 +1273,12 @@ export default {
 
 }
 
-form {
-    background: white;
-    padding: 30px;
-    padding-bottom: 80px;
-    border-radius: 10px;
-    width: 1150px;
-    height: 375px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-}
+
 
 .form-row {
     display: flex;
     justify-content: center;
-    margin-bottom: 10px;
+    margin-bottom: 1px;
     padding-bottom: 15px;
 }
 

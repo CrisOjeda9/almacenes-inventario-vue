@@ -270,7 +270,7 @@ export default {
 
                 // Número de solicitud centrado
                 doc.setFontSize(12);
-                doc.text(`SOLICITUD DE MATERIAL N° ${this.numeroSolicitud}`, centerX, 20, { align: 'center' });
+                doc.text(`VALE DE SALIDA N° ${this.numeroSolicitud}`, centerX, 20, { align: 'center' });
 
                 // Información de la solicitud centrada
                 doc.setFontSize(10);
