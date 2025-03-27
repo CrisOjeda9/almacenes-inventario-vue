@@ -415,6 +415,28 @@ export default {
                     return;
                 }
 
+                // Obtener el número de factura del primer artículo (todos deben tener el mismo)
+                const numeroFactura = this.articulosTabla[0].numero_de_factura;
+
+                // Buscar la factura correspondiente
+                const factura = this.facturas.find(f => f.numero_de_factura === numeroFactura);
+
+                if (!factura) {
+                    this.showAlert("No se encontró la factura correspondiente", "error");
+                    return;
+                }
+
+                // Comparar el total general con el total de la factura
+                const totalFactura = parseFloat(factura.total);
+                const diferencia = Math.abs(this.totalGeneral - totalFactura);
+
+                // Permitir pequeñas diferencias por redondeo (ej. 0.01)
+                if (diferencia > 0.01) {
+                    this.showAlert(`Error: El total general (${this.formatCurrency(this.totalGeneral)}) no coincide con el total registrado en la factura (${this.formatCurrency(totalFactura)}). Verifica los importes.`, "error");
+                    return;
+                }
+
+                // Si los totales coinciden, proceder con el registro
                 const promises = this.articulosTabla.map(articulo => {
                     const formData = new FormData();
 
