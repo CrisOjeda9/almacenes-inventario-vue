@@ -55,7 +55,7 @@
                 Almacén
                 <span class="menu-icon">▼</span>
                 <div class="dropdown-menu" v-show="menus.almacenMenu">
-                    <button @click="navigateTo('solicitudmaterial')">Solicitud de material</button>
+                    <button @click="navigateTo('solicitudmaterial')">Salida de material</button>
                     <button @click="navigateTo('bieninventario')">Agregar un bien para inventario</button>
                     <button @click="navigateTo('existencia')">Entrada de artículos</button>
                     <button @click="navigateTo('recepcionsolicitudes')">Recepción de solicitudes</button>
@@ -69,8 +69,8 @@
         <div class="menu">
             <!-- Fila 1 -->
             <div class="button-card" @click="navigateTo2('solicitudmaterial')">
-                <i class="fas fa-cart-plus"></i> <!-- Ícono de solicitud de materiales -->
-                <span>Solicitud de materiales</span>
+                <i class="fas fa-cart-plus"></i> <!-- Ícono de Salida de materiales -->
+                <span>Salida de materiales</span>
             </div>
             <div class="button-card" @click="navigateTo2('existencia')">
                 <i class="fas fa-arrow-circle-down"></i> <!-- Ícono de entrada de existencias -->

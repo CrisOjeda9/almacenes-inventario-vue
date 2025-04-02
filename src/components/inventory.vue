@@ -51,7 +51,7 @@
                 Almacen
                 <span class="menu-icon">▼</span>
                 <div class="dropdown-menu" v-show="menus.inventoryMenu">
-                    <button @click="navigateTo('solicitudmaterial')">Solicitud de material</button>
+                    <button @click="navigateTo('solicitudmaterial')">Salida de material</button>
                     <button @click="navigateTo('bieninventario')">Agregar un bien para inventario</button>
                     <button @click="navigateTo('existencia')">Entrada de artículos</button>
                     <button @click="navigateTo('recepcionsolicitudes')">Recepcion de solicitudes</button>
