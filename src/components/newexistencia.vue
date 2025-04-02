@@ -76,7 +76,9 @@
                             <div class="form-field">
                                 <label for="id_factura">Número de factura</label>
                                 <input type="text" id="id_factura" v-model="form.numero_de_factura"
-                                    @input="validarNumeroFactura" required />
+                                    @blur="validarNumeroFactura" :disabled="facturaBloqueada !== null" required />
+                                <span v-if="facturaBloqueada !== null" class="factura-bloqueada-nota">
+                                </span>
                             </div>
                             <div class="form-field">
                                 <label for="cantidad">Cantidad</label>
@@ -307,7 +309,9 @@ export default {
             errorNumeroFactura: "", // Nuevo mensaje de error
             numeroFacturaValido: false, // Nuevo estado de validación
             articulosRecientes: [],
-            articulosTabla: []
+            articulosTabla: [],
+            facturaBloqueada: null, // Almacena el número de factura bloqueada
+
 
         };
     },
@@ -315,7 +319,6 @@ export default {
         this.loadUserData();
         this.loadObjetosGasto();
         this.loadFacturas();
-        this.loadArticulosRecientes();
     },
     computed: {
         totalGeneral() {
@@ -371,41 +374,90 @@ export default {
             }, 3000);
         },
         async addToTable() {
+            // Validar campos obligatorios primero
             if (!this.validarCampos()) return;
 
+            // Validar número de partida
             if (!this.validarNumeroPartida()) {
                 this.showAlert(this.errorNumeroPartida || "El número de partida no es válido.", "error");
                 return;
             }
 
+            // Validar número de factura
             if (!this.validarNumeroFactura()) {
                 this.showAlert(this.errorNumeroFactura || "El número de factura no es válido.", "error");
                 return;
             }
 
-            if (this.form.foto_articulo.length === 0) {
-                this.showAlert("Por favor, agrega una foto del artículo.", "error");
+            // Bloquear factura al primer artículo
+            if (this.articulosTabla.length === 0) {
+                this.facturaBloqueada = this.form.numero_de_factura;
+            }
+
+            // Validar que coincida con factura bloqueada
+            if (this.facturaBloqueada && this.form.numero_de_factura !== this.facturaBloqueada) {
+                this.showAlert(`Todos los artículos deben ser de la factura ${this.facturaBloqueada}`, "error");
                 return;
             }
 
+            // Resto de la lógica de agregar artículo...
+            const factura = this.facturas.find(f => f.numero_de_factura === this.form.numero_de_factura);
+
+            if (!factura) {
+                this.showAlert("No se encontró la factura correspondiente", "error");
+                return;
+            }
+
+            // Validar unidades contra factura
+            const unidadesEnTabla = this.articulosTabla.reduce((sum, art) => sum + parseFloat(art.cantidad), 0);
+            const unidadesNuevas = parseFloat(this.form.cantidad);
+            const unidadesTotales = unidadesEnTabla + unidadesNuevas;
+            const unidadesFactura = parseFloat(factura.cantidad);
+
+            if (unidadesTotales > unidadesFactura) {
+                this.showAlert(
+                    `Límite de unidades excedido: Factura tiene ${unidadesFactura} unidades.\n` +
+                    `En tabla: ${unidadesEnTabla}`,
+                    "error"
+                );
+                return;
+            }
+
+            // Validar que hay imágenes
+            if (this.form.foto_articulo.length === 0) {
+                this.showAlert("Debes agregar al menos una imagen del artículo", "error");
+                return;
+            }
+
+            // Crear nuevo artículo
             const nuevoArticulo = {
                 id_objetogasto: this.form.id_objetogasto,
-                id_factura: this.form.id_factura, // Usamos el ID de la factura validada
+                id_factura: factura.id,
                 numero_partida: this.form.numero_partida,
-                numero_de_factura: this.form.numero_de_factura, // Usamos el número de factura
+                numero_de_factura: this.form.numero_de_factura,
                 descripcion: this.form.descripcion,
                 precio_unitario: parseFloat(this.form.precio_unitario),
                 iva: parseFloat(this.form.iva),
                 importe_con_iva: parseFloat(this.form.importe_con_iva),
-                cantidad: parseInt(this.form.cantidad),
+                cantidad: unidadesNuevas,
                 unidad_medida: this.form.unidad_medida,
                 total_ingreso: parseFloat(this.form.total_ingreso),
                 foto_articulo: [...this.form.foto_articulo]
             };
 
+            // Agregar a tabla
             this.articulosTabla.push(nuevoArticulo);
-            this.resetForm();
-            this.showAlert('Artículo añadido a la tabla', "success");
+
+            // Mostrar notificación
+            const disponibles = unidadesFactura - unidadesTotales;
+            this.showAlert(
+                `Artículo agregado (${unidadesTotales}/${unidadesFactura} unidades)` +
+                `${disponibles > 0 ? ` | Disponibles: ${disponibles}` : ''}`,
+                "success"
+            );
+
+            // Resetear formulario (manteniendo factura)
+            this.resetForm(true);
         },
 
         async registerAllArticles() {
@@ -415,10 +467,7 @@ export default {
                     return;
                 }
 
-                // Obtener el número de factura del primer artículo (todos deben tener el mismo)
                 const numeroFactura = this.articulosTabla[0].numero_de_factura;
-
-                // Buscar la factura correspondiente
                 const factura = this.facturas.find(f => f.numero_de_factura === numeroFactura);
 
                 if (!factura) {
@@ -426,45 +475,84 @@ export default {
                     return;
                 }
 
-                // Comparar el total general con el total de la factura
-                const totalFactura = parseFloat(factura.total);
-                const diferencia = Math.abs(this.totalGeneral - totalFactura);
+                // Validar unidades totales
+                const unidadesTotales = this.articulosTabla.reduce((sum, art) => sum + parseFloat(art.cantidad), 0);
+                const unidadesFactura = parseFloat(factura.cantidad);
 
-                // Permitir pequeñas diferencias por redondeo (ej. 0.01)
-                if (diferencia > 0.01) {
-                    this.showAlert(`Error: El total general (${this.formatCurrency(this.totalGeneral)}) no coincide con el total registrado en la factura (${this.formatCurrency(totalFactura)}). Verifica los importes.`, "error");
+                if (Math.abs(unidadesTotales - unidadesFactura) > 0.01) {
+                    this.showAlert(
+                        `Error en unidades: Factura tiene ${unidadesFactura} | Tabla tiene ${unidadesTotales}`,
+                        "error"
+                    );
                     return;
                 }
 
-                // Si los totales coinciden, proceder con el registro
-                const promises = this.articulosTabla.map(articulo => {
+                // Validar total monetario
+                const totalFactura = parseFloat(factura.total);
+                const diferenciaTotal = Math.abs(this.totalGeneral - totalFactura);
+
+                if (diferenciaTotal > 0.01) {
+                    this.showAlert(
+                        `Error en total: Factura $${totalFactura} | Tabla $${this.totalGeneral}`,
+                        "error"
+                    );
+                    return;
+                }
+
+               
+
+                // Enviar artículos
+                const requests = this.articulosTabla.map(articulo => {
                     const formData = new FormData();
 
-                    Object.keys(articulo).forEach(key => {
+                    Object.entries(articulo).forEach(([key, value]) => {
                         if (key === 'foto_articulo') {
                             articulo.foto_articulo.forEach(file => {
                                 formData.append('foto_articulo', file);
                             });
                         } else {
-                            formData.append(key, articulo[key]);
+                            formData.append(key, value);
                         }
                     });
 
                     return axios.post('http://localhost:3000/api/articulos', formData, {
                         headers: {
-                            'Content-Type': 'multipart/form-data'
+                            'Content-Type': 'multipart/form-data',
+                            'Authorization': `Bearer ${localStorage.getItem('token')}`
                         }
                     });
                 });
 
-                await Promise.all(promises);
-                this.mostrarModal();
-                this.articulosTabla = [];
+                const responses = await Promise.all(requests);
 
+                if (responses.every(r => r.status === 201)) {
+                    this.mostrarModal();
+                    this.articulosTabla = [];
+                    this.facturaBloqueada = null;
+                    this.resetForm();
+                    this.showAlert("Artículos registrados exitosamente", "success");
+                }
             } catch (error) {
-                console.error('Error al registrar artículos:', error);
-                this.showAlert('Ocurrió un error al registrar los artículos', "error");
+                console.error('Error:', error);
+                this.showAlert('Error al registrar artículos', "error");
             }
+        },
+
+        resetForm(keepFactura = false) {
+            this.form = {
+                id_objetogasto: "",
+                numero_partida: "",
+                id_factura: keepFactura ? this.form.id_factura : "",
+                numero_de_factura: keepFactura ? this.facturaBloqueada : "",
+                descripcion: "",
+                precio_unitario: "",
+                iva: "",
+                importe_con_iva: "",
+                cantidad: "",
+                unidad_medida: "",
+                total_ingreso: "",
+                foto_articulo: []
+            };
         },
 
         showDeleteModal(index) {
@@ -507,30 +595,8 @@ export default {
             return true;
         },
 
-        resetForm() {
-            this.form = {
-                id_objetogasto: "",
-                numero_partida: "",
-                id_factura: "",
-                numero_de_factura: "", // Cambiado aquí
-                descripcion: "",
-                precio_unitario: "",
-                iva: "",
-                importe_con_iva: "",
-                cantidad: "",
-                unidad_medida: "",
-                total_ingreso: "",
-                foto_articulo: []
-            };
-        },
-        async loadArticulosRecientes() {
-            try {
-                const response = await axios.get('http://localhost:3000/api/articulos/recientes');
-                this.articulosRecientes = response.data;
-            } catch (error) {
-                console.error('Error al cargar artículos recientes:', error);
-            }
-        },
+
+     
         async loadUserData() {
             const storedUserName = localStorage.getItem("userName");
             const storedUserEmail = localStorage.getItem("userEmail");
@@ -688,30 +754,56 @@ export default {
             }
         },
         validarNumeroFactura() {
-            const numeroFactura = this.form.numero_de_factura.toString();
+            // 1. Obtener y limpiar el valor
+            const numeroFactura = this.form.numero_de_factura.toString().trim();
 
+            // 2. Si está vacío
             if (!numeroFactura) {
+                this.errorNumeroFactura = "El número de factura es obligatorio";
                 this.numeroFacturaValido = false;
-                this.errorNumeroFactura = "El número de factura es obligatorio.";
+                this.facturaBloqueada = null; // Asegurar que no quede bloqueada
                 return false;
             }
 
-            // Buscar el número de factura en la lista de facturas
-            const facturaExistente = this.facturas.find(
-                factura => factura.numero_de_factura === numeroFactura
+            // 3. Buscar coincidencia exacta en facturas
+            const facturaExistente = this.facturas.find(f =>
+                f.numero_de_factura.toString() === numeroFactura
             );
 
-            if (facturaExistente) {
-                this.form.id_factura = facturaExistente.id; // Asignar el ID de la factura
-                this.numeroFacturaValido = true;
-                this.errorNumeroFactura = "";
-                return true;
-            } else {
-                this.form.id_factura = "";
+            // 4. Si no existe la factura
+            if (!facturaExistente) {
+                this.errorNumeroFactura = "No existe factura con este número";
                 this.numeroFacturaValido = false;
-                this.errorNumeroFactura = "El número de factura no existe. Verifica el número.";
+                this.facturaBloqueada = null;
+                this.form.id_factura = "";
                 return false;
             }
+
+            // 5. Si la factura ya está registrada completamente
+            if (facturaExistente.registrada_completa) {
+                this.errorNumeroFactura = "Esta factura ya fue registrada completamente";
+                this.numeroFacturaValido = false;
+                this.facturaBloqueada = null;
+                return false;
+            }
+
+            // 6. Si es válida y es el primer artículo
+            if (this.articulosTabla.length === 0) {
+                this.facturaBloqueada = numeroFactura;
+            }
+
+            // 7. Asignar valores correctos
+            this.form.id_factura = facturaExistente.id;
+            this.errorNumeroFactura = "";
+            this.numeroFacturaValido = true;
+
+            return true;
+        },
+        buscarFacturasParciales(valor) {
+            return this.facturas.filter(f =>
+                f.numero_de_factura.toString().includes(valor) &&
+                !f.registrada_completa
+            );
         },
         async registerExistencia(tipo) {
             // Validar campos obligatorios
