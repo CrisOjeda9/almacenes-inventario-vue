@@ -432,7 +432,7 @@ export default {
 
                 // Permitir pequeñas diferencias por redondeo (ej. 0.01)
                 if (diferencia > 0.01) {
-                    this.showAlert(`Error: El total general (${this.formatCurrency(this.totalGeneral)}) no coincide con el total registrado en la factura (${this.formatCurrency(totalFactura)}). Verifica los importes.`, "error");
+                    this.showAlert(`El total general (${this.formatCurrency(this.totalGeneral)}) no coincide con el total registrado en la factura (${this.formatCurrency(totalFactura)}). Verifica los importes.`, "error");
                     return;
                 }
 
