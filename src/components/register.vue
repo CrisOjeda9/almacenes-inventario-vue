@@ -17,7 +17,7 @@
                 <div class="user-profile">
                     <img :src="profileImage" alt="User Profile" class="profile-pic" />
                     <div class="user-info">
-                        <p>{{ userName }}</p> <!-- Nombre dinámico del usuario -->
+                        <p>{{ userName }}</p>
                         <span><a href="profile" style="color: white;">Ver Perfil</a></span>
                     </div>
                 </div>
@@ -140,12 +140,11 @@
 
                 <!-- Cuarta fila de campos -->
                 <div class="form-row">
-
                     <!-- Campo Doc -->
                     <div class="form-field">
                         <label for="identificacion">Identificación</label>
                         <div class="dropzone" style="background-color: #dcddcd;">
-                            <span>{{ form.identificacion ? form.identificacion.split('/').pop() : 'No se ha seleccionadoninguna foto' }}</span>
+                            <span>{{ form.identificacion ? form.identificacion.split('/').pop() : 'No se ha seleccionado ninguna foto' }}</span>
                         </div>
                     </div>
                     <!-- Campo Foto -->
@@ -159,19 +158,33 @@
                     <div class="form-field">
                         <label for="password">Contraseña</label>
                         <div class="input-wrapper">
-                            <input :type="showPassword ? 'text' : 'password'" v-model="form.password" required />
+                            <input 
+                                :type="showPassword ? 'text' : 'password'" 
+                                v-model="form.password" 
+                                @input="validatePassword"
+                                @blur="validatePassword"
+                                required
+                                ref="passwordField"
+                            />
                             <i :class="showPassword ? 'fa fa-eye-slash' : 'fa fa-eye'"
                                 @click="showPassword = !showPassword"></i>
                         </div>
+                        <span class="error-message" v-if="errors.password">{{ errors.password }}</span>
                     </div>
                     <div class="form-field" style="margin-bottom: 15px;">
                         <label for="confirm_password">Confirmar Contraseña</label>
                         <div class="input-wrapper">
-                            <input :type="showConfirmPassword ? 'text' : 'password'" v-model="form.confirm_password"
-                                required />
+                            <input 
+                                :type="showConfirmPassword ? 'text' : 'password'" 
+                                v-model="form.confirm_password" 
+                                @input="validateConfirmPassword"
+                                @blur="validateConfirmPassword"
+                                required
+                            />
                             <i :class="showConfirmPassword ? 'fa fa-eye-slash' : 'fa fa-eye'"
                                 @click="showConfirmPassword = !showConfirmPassword"></i>
                         </div>
+                        <span class="error-message" v-if="errors.confirm_password">{{ errors.confirm_password }}</span>
                     </div>
                 </div>
 
@@ -201,73 +214,130 @@
                 <button @click="closeModal">Aceptar</button>
             </div>
         </div>
-        <!-- Contenedor de notificaciones -->
+        
         <div v-if="alertMessage" :class="alertClass" class="notification">
             <i :class="alertIcon"></i> {{ alertMessage }}
         </div>
     </div>
 </template>
 
-<script>import axios from 'axios';
+<script>
+import axios from 'axios';
 
 export default {
     name: "RegisterPage",
     data() {
         return {
-            userName: "Cargando...", // Mensaje temporal
-            profileImage: "",  // URL de la imagen del usuario
-            alertMessage: "",  // Mensaje de la alerta
-            alertClass: "",    // Clase de la alerta (ej. 'success' o 'error')
-            alertIcon: "",     // Icono para la alerta
-            searchName: "", // Campo para buscar nombres
+            userName: "Cargando...",
+            profileImage: "",
+            alertMessage: "",
+            alertClass: "",
+            alertIcon: "",
+            searchName: "",
             form: {
-                rol: "", // Rol del usuario
-                password: "", // Contraseña
-                confirm_password: "", // Confirmación de contraseña
-                id: "", // ID de la persona seleccionada
-                nombre: "", // Nombre de la persona
-                apellidos: "", // Apellidos de la persona
-                RFC: "", // RFC de la persona
-                numero_trabajador: "", // Número de trabajador
-                CURP: "", // CURP de la persona
-                nivel: "", // Nivel
-                cargo: "", // Cargo
-                direccion_pertenencia: "", // Dirección de pertenencia
-                departamento: "", // Departamento
-                organo_superior: "", // Organo superior
-                area_presupuestal: "", // ��rea presupuestal
-                email: "", // Correo electrónico
+                rol: "",
+                password: "",
+                confirm_password: "",
+                id: "",
+                nombre: "",
+                apellidos: "",
+                RFC: "",
+                numero_trabajador: "",
+                CURP: "",
+                nivel: "",
+                cargo: "",
+                direccion_pertenencia: "",
+                departamento: "",
+                organo_superior: "",
+                area_presupuestal: "",
+                email: "",
+                identificacion: "",
+                imagen: ""
+            },
+            errors: {
+                password: "",
+                confirm_password: ""
             },
             menus: {
                 homeMenu: false,
                 proveedorMenu: false,
                 settingsMenu: false,
             },
-            showPassword: false, // Mostrar/ocultar contraseña
-            showConfirmPassword: false, // Mostrar/ocultar confirmación de contraseña
-            showModal: false, // Modal de éxito
-            showAlertModal: false, // Modal de error
-            alertMessageList: [], // Mensajes de error
-            personas: [], // Lista de personas obtenidas de la API
-            filteredUsers: [], // Lista filtrada de personas
+            showPassword: false,
+            showConfirmPassword: false,
+            showModal: false,
+            showAlertModal: false,
+            alertMessageList: [],
+            personas: [],
+            filteredUsers: []
         };
     },
     mounted() {
-        this.loadPersonas(); // Cargar la lista de personas al montar el componente
+        this.loadPersonas();
         this.loadUserData();
     },
     methods: {
-        // Cargar la lista de personas desde la API
+        validatePassword() {
+            if (!this.form.password) {
+                this.errors.password = "Complete este campo";
+                return false;
+            }
+            
+            if (!/[A-Z]/.test(this.form.password)) {
+                this.errors.password = "Falta una letra mayúscula";
+                return false;
+            }
+            
+            if (!/[a-z]/.test(this.form.password)) {
+                this.errors.password = "Falta una letra minúscula";
+                return false;
+            }
+            
+            if (!/\d/.test(this.form.password)) {
+                this.errors.password = "Falta un número";
+                return false;
+            }
+            
+            if (!/[@$!%*?&]/.test(this.form.password)) {
+                this.errors.password = "Falta un carácter especial (@$!%*?&)";
+                return false;
+            }
+            
+            if (this.form.password.length < 8 || this.form.password.length > 16) {
+                this.errors.password = "Debe tener entre 8-16 caracteres";
+                return false;
+            }
+            
+            this.errors.password = "";
+            return true;
+        },
+        
+        validateConfirmPassword() {
+            if (!this.form.confirm_password) {
+                this.errors.confirm_password = "Complete este campo";
+                return false;
+            }
+            
+            if (this.form.password !== this.form.confirm_password) {
+                this.errors.confirm_password = "Las contraseñas no coinciden";
+                return false;
+            }
+            
+            this.errors.confirm_password = "";
+            return true;
+        },
+
         async loadPersonas() {
             try {
                 const response = await axios.get('http://localhost:3000/api/personas');
-                this.personas = response.data; // Asignar la lista de personas
+                this.personas = response.data;
             } catch (error) {
                 console.error('Error al cargar personas', error);
                 this.alertMessageList = ['Error al cargar la lista de personas.'];
                 this.showAlertModal = true;
             }
         },
+        
         async loadUserData() {
             const storedUserName = localStorage.getItem("userName");
             const storedUserEmail = localStorage.getItem("userEmail");
@@ -276,50 +346,35 @@ export default {
                 this.userName = storedUserName;
 
                 try {
-                    // Obtener todos los usuarios de la API
                     const response = await fetch('http://localhost:3000/api/personas');
                     const users = await response.json();
-
-                    // Buscar el usuario logueado por email
                     const user = users.find(u => u.email === storedUserEmail);
 
                     if (user) {
-                        // Concatenar nombre y apellidos
                         const fullName = `${user.nombre || storedUserName} ${user.apellidos || ""}`.trim();
                         this.userName = fullName;
-
-                        // Obtener la ruta completa de la imagen del usuario
-                        const imagePath = user.imagen; // Suponiendo que la API devuelve la ruta completa
-
-                        // Extraer el nombre del archivo de la ruta completa
-                        let imageFileName = imagePath.split('\\').pop(); // Extrae "radio2.jpg"
-
-                        // Eliminar la extensión del nombre del archivo
+                        const imagePath = user.imagen;
+                        let imageFileName = imagePath.split('\\').pop();
+                        
                         if (imageFileName) {
-                            imageFileName = imageFileName.split('.').slice(0, -1).join('.'); // Elimina la extensión
-                        }
-
-                        if (imageFileName) {
-                            // Construir la URL completa para la imagen
+                            imageFileName = imageFileName.split('.').slice(0, -1).join('.');
                             this.profileImage = `http://localhost:3000/api/users-files/${imageFileName}`;
                         } else {
-                            // Usar una imagen por defecto si no hay imagen en la API
                             this.profileImage = "../assets/UserHombre.png";
                         }
                     } else {
-                        this.profileImage = "../assets/UserHombre.png"; // Imagen por defecto
+                        this.profileImage = "../assets/UserHombre.png";
                     }
                 } catch (error) {
                     console.error('Error al cargar los datos del usuario:', error);
-                    this.profileImage = "../assets/UserHombre.png"; // Imagen por defecto en caso de error
+                    this.profileImage = "../assets/UserHombre.png";
                 }
             } else {
                 this.userName = "Usuario desconocido";
-                this.profileImage = "../assets/UserHombre.png"; // Imagen por defecto
+                this.profileImage = "../assets/UserHombre.png";
             }
         },
 
-        // Filtrar personas por nombre
         filterUsers() {
             if (this.searchName.trim() !== "") {
                 const searchTerm = this.searchName.toLowerCase();
@@ -342,19 +397,16 @@ export default {
             this.form.cargo = persona.cargo;
             this.form.direccion_pertenencia = persona.direccion_pertenencia;
             this.form.departamento = persona.departamento;
-            this.form.organo_superior = persona.organo_superior; // CORREGIDO: `this.from.organo_superior` estaba mal escrito
+            this.form.organo_superior = persona.organo_superior;
             this.form.area_presupuestal = persona.area_presupuestal;
             this.form.email = persona.email;
-
-            // **Nuevas asignaciones para identificación y foto**
             this.form.identificacion = persona.identificacion || "No disponible";
             this.form.imagen = persona.imagen || "No disponible";
 
-
-
-            this.searchName = `${persona.nombre}`; // Mostrar el nombre en el campo de búsqueda
-            this.filteredUsers = []; // Ocultar la lista de sugerencias
+            this.searchName = `${persona.nombre}`;
+            this.filteredUsers = [];
         },
+        
         showAlert(message, type) {
             this.alertMessage = message;
             if (type === "success") {
@@ -368,19 +420,22 @@ export default {
                 this.alertIcon = "fa fa-exclamation-circle";
             }
 
-            // Ocultar la alerta después de 3 segundos
             setTimeout(() => {
                 this.alertMessage = "";
             }, 3000);
         },
 
-
-
-
-        // Registrar usuario
         async registerUser() {
-            // Validar que todos los campos estén llenos
-            const requiredFields = ["rol", "password", "confirm_password", "id"];
+            // Validar campos de contraseña
+            const isPasswordValid = this.validatePassword();
+            const isConfirmValid = this.validateConfirmPassword();
+            
+            if (!isPasswordValid || !isConfirmValid) {
+                return;
+            }
+
+            // Validar otros campos requeridos
+            const requiredFields = ["rol", "id"];
             const emptyFields = requiredFields.filter(field => !this.form[field]);
 
             if (emptyFields.length > 0) {
@@ -389,28 +444,21 @@ export default {
                 return;
             }
 
-            // Validar que las contraseñas coincidan
-            if (this.form.password !== this.form.confirm_password) {
-                this.showAlert("Las contraseña no coinciden.");
-                return;
-            }
-
-            // Crear el objeto de datos para enviar a la API de usuarios
+            // Crear el objeto de datos
             const userData = {
                 rol: this.form.rol,
-                password: this.form.password, // En un entorno real, esto debería estar hasheado
-                id_persona: this.form.id, // ID de la persona seleccionada
+                password: this.form.password,
+                id_persona: this.form.id,
             };
 
-            // Enviar los datos a la API de usuarios
             try {
                 const response = await axios.post('http://localhost:3000/api/usuarios', userData);
                 console.log('Usuario registrado con éxito', response.data);
-                this.showModal = true; // Mostrar modal de éxito
+                this.showModal = true;
             } catch (error) {
                 console.error('Error al registrar usuario', error.response?.data || error);
                 this.alertMessageList = ['Error al registrar usuario. Intenta de nuevo.'];
-                this.showAlertModal = true; // Mostrar modal de error
+                this.showAlertModal = true;
             }
         },
 
@@ -423,29 +471,45 @@ export default {
         hideMenu(menuName) {
             this.menus[menuName] = false;
         },
-
-        // Cerrar modal de éxito
         closeModal() {
             this.showModal = false;
-            this.$router.push("/users"); // Redirigir a la lista de usuarios
+            this.$router.push("/users");
         },
-
-        // Cerrar modal de error
         closeAlertModal() {
             this.showAlertModal = false;
         },
     },
 };
-
 </script>
-
 
 <style scoped>
 /* Aplicar Montserrat a todo el contenido */
 * {
     font-family: 'Montserrat', sans-serif;
 }
+.error-message {
+    color: #ff0000;
+    font-size: 12px;
+    margin-top: 5px;
+    display: block;
+}
 
+.input-wrapper {
+    position: relative;
+}
+
+.input-wrapper i {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: #666;
+}
+
+input:invalid {
+    border-color: #ff0000;
+}
 /* Estilo general para la notificación */
 .notification {
     position: fixed;
