@@ -319,7 +319,6 @@ export default {
         this.loadUserData();
         this.loadObjetosGasto();
         this.loadFacturas();
-        this.loadArticulosRecientes();
     },
     computed: {
         totalGeneral() {
@@ -597,14 +596,7 @@ export default {
         },
 
 
-        async loadArticulosRecientes() {
-            try {
-                const response = await axios.get('http://localhost:3000/api/articulos/recientes');
-                this.articulosRecientes = response.data;
-            } catch (error) {
-                console.error('Error al cargar artículos recientes:', error);
-            }
-        },
+     
         async loadUserData() {
             const storedUserName = localStorage.getItem("userName");
             const storedUserEmail = localStorage.getItem("userEmail");
