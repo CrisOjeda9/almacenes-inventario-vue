@@ -87,6 +87,15 @@
                             </select>
                         </div>
                         <div class="form-field">
+                            <label for="area">Área</label>
+                            <select v-model="area" required>
+                                <option value="" disabled>Seleccione un área</option>
+                                <option v-for="area in areas" :key="area" :value="area">
+                                    {{ formatArea(area) }}
+                                </option>
+                            </select>
+                        </div>
+                        <div class="form-field">
                             <label for="fechaSolicitud">Fecha de Salida</label>
                             <input type="text" v-model="fechaFormateada" readonly />
                         </div>
@@ -163,6 +172,41 @@
         <div v-if="alertMessage" :class="alertClass" class="notification">
             <i :class="alertIcon"></i> {{ alertMessage }}
         </div>
+        <!-- Modal para capturar nombres y cargos -->
+        <div v-if="showSignatureModal" class="modal2">
+            <div class="modal-content2" style="background-color: white; color: #691b31; width: 50%; max-width: 500px;">
+                <h2>Información de Firmantes</h2>
+
+                <div class="form-field2">
+                    <label for="solicitanteNombre">Nombre del Solicitante:</label>
+                    <input type="text" v-model="solicitanteNombre" required />
+                </div>
+
+                <div class="form-field2">
+                    <label for="solicitanteCargo">Cargo del Solicitante:</label>
+                    <input type="text" v-model="solicitanteCargo" required />
+                </div>
+
+                <div class="form-field2">
+                    <label for="receptorNombre">Nombre del Receptor:</label>
+                    <input type="text" v-model="receptorNombre" required />
+                </div>
+
+                <div class="form-field2">
+                    <label for="receptorCargo">Cargo del Receptor:</label>
+                    <input type="text" v-model="receptorCargo" required />
+                </div>
+
+                <div class="button-group" style="margin-top: 20px;">
+                    <button @click="confirmAndGeneratePDF" class="boton">
+                        <i class="fas fa-file-pdf"></i> Generar PDF
+                    </button>
+                    <button @click="showSignatureModal = false" class="boton-cancelar">
+                        Cancelar
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
 </template>
 
@@ -175,7 +219,7 @@ export default {
         return {
             numeroSolicitud: '', // Nuevo campo para el número de solicitud
             nextSolicitudNumber: 0, // Para llevar el control del siguiente número
-
+            area: "",
             alertMessage: "",  // Mensaje de la alerta
             alertClass: "",    // Clase de la alerta (ej. 'success' o 'error')
             alertIcon: "",     // Icono para la alerta
@@ -213,7 +257,28 @@ export default {
                 solicitudMaterialMenu: false,
                 settingsMenu: false,
             },
+            areas: [
+                "Direccion General",
+                "Direccion de Coordinacion Financiera Y Planeacion",
+                "Direccion de Television",
+                "Direccion de Noticias",
+                "Direccion de Radio",
+                "Direccion de Ingenieria",
+                "Direccion de Proyectos Estrategicos",
+                "Organo Interno de Control",
+                "Direccion de Promocion e Intercambio",
+                "Direccion Juridica",
+                "Direccion de Vinculacion",
+                "Imagen",
+                "Estaciones de Radio",
+                "Estaciones de Television"
+            ],
             showConfirmationModal: false,
+            showSignatureModal: false,
+            solicitanteNombre: '',
+            solicitanteCargo: '',
+            receptorNombre: '',
+            receptorCargo: '',
         };
     },
     computed: {
@@ -240,90 +305,200 @@ export default {
     methods: {
         async generarPDFSolicitud() {
             try {
+                // 1. Cargar dinámicamente las dependencias
                 const { jsPDF } = await import('jspdf');
                 await import('jspdf-autotable');
 
+                // 2. Crear documento con configuración segura
                 const doc = new jsPDF({
                     orientation: 'portrait',
-                    unit: 'mm'
+                    unit: 'mm',
+                    format: 'a4'
                 });
 
-                // Configuración de la tabla
-                const headers = [
-                    'N° Partida',
-                    'Unidad Medida',
-                    'Descripción del Material',
-                    'Cantidad Entregada'
-                ];
-
-                // Preparar datos para la tabla
-                const body = this.items.map(item => [
-                    item.numeroPartida,
-                    item.unidadMedida,
-                    item.descripcionMaterial,
-                    item.cantidadEntregada
-                ]);
-
-                // Configuración para centrado
+                // 3. Configuración de márgenes y dimensiones
                 const pageWidth = doc.internal.pageSize.getWidth();
                 const centerX = pageWidth / 2;
+                const margin = 15;
+                const tableStartY = 40;
 
-                // Número de solicitud centrado
-                doc.setFontSize(12);
+                // 4. Encabezado del documento
+                doc.setFont('helvetica', 'bold');
+                doc.setFontSize(14);
                 doc.text(`VALE DE SALIDA N° ${this.numeroSolicitud}`, centerX, 20, { align: 'center' });
 
-                // Información de la solicitud centrada
+                doc.setFont('helvetica', 'normal');
                 doc.setFontSize(10);
+
+                // Dirección y Área
                 doc.text(`Dirección Solicitante: ${this.formatDireccion(this.direccionSolicitante)}`, centerX, 30, { align: 'center' });
-                doc.text(`Fecha de Salida: ${this.fechaFormateada}`, centerX, 35, { align: 'center' });
+                doc.text(`Área: ${this.formatArea(this.area).toUpperCase()}`, centerX, 35, { align: 'center' });  // Área en mayúsculas
 
-                // Calcular ancho de tabla para centrado
-                const columnWidths = [20, 25, 100, 25];
-                const tableWidth = columnWidths.reduce((a, b) => a + b, 0);
-                const marginLeft = (pageWidth - tableWidth) / 2;
+                // Fecha en mayúsculas
+                const fechaFormateada = this.fechaFormateada.toUpperCase();
+                doc.text(`FECHA: ${fechaFormateada}`, centerX, 40, { align: 'center' });  // Posición ajustada a 40
+                // Espacio de separación antes de la tabla (15mm)
+                // 5. Configuración de la tabla
+                const headers = [
+                    { title: 'N° Partida', dataKey: 'partida' },
+                    { title: 'Unidad', dataKey: 'unidad' },
+                    { title: 'Descripción', dataKey: 'descripcion' },
+                    { title: 'Cantidad', dataKey: 'cantidad' }
+                ];
 
-                // Generar tabla centrada
+                const body = this.items.map(item => ({
+                    partida: item.numeroPartida || '',
+                    unidad: item.unidadMedida || '',
+                    descripcion: item.descripcionMaterial || '',
+                    cantidad: item.cantidadEntregada || ''
+                }));
+
+                // 6. Generar tabla con autotable
                 doc.autoTable({
-                    head: [headers],
-                    body: body,
-                    startY: 45,
-                    margin: { left: marginLeft, right: marginLeft },
+                    head: [headers.map(h => h.title)],
+                    body: body.map(item => headers.map(h => item[h.dataKey])),
+                    startY: tableStartY + 10,  // Posición ajustada
+                    margin: { left: margin, right: margin },
+                    headStyles: {
+                        fillColor: [188, 149, 91],
+                        textColor: [255, 255, 255],
+                        fontStyle: 'bold'
+                    },
+                    columnStyles: {
+                        0: { cellWidth: 20, halign: 'center' },
+                        1: { cellWidth: 20, halign: 'center' },
+                        2: { cellWidth: 'auto', halign: 'left' },
+                        3: { cellWidth: 20, halign: 'center' }
+                    },
                     styles: {
                         fontSize: 9,
                         cellPadding: 3,
-                        overflow: 'linebreak',
-                        font: 'helvetica',
-                        textColor: [0, 0, 0],
-                        textAlign: 'center'
+                        overflow: 'linebreak'
                     },
-                    headStyles: {
-                        fillColor: [188, 149, 91], // Color dorado
-                        textColor: [255, 255, 255],
-                        fontStyle: 'bold',
-                        textAlign: 'center'
-                    },
-                    columnStyles: {
-                        0: { cellWidth: columnWidths[0], textAlign: 'center' },
-                        1: { cellWidth: columnWidths[1], textAlign: 'center' },
-                        2: { cellWidth: columnWidths[2], textAlign: 'left' },
-                        3: { cellWidth: columnWidths[3], textAlign: 'center' }
-                    },
-                    didDrawPage: function (data) {
-                        // Pie de página centrado
+                    didDrawPage: (data) => {
+                        // Numeración de páginas
                         const pageCount = doc.internal.getNumberOfPages();
                         doc.setFontSize(8);
-                        doc.text(`Página ${data.pageNumber} de ${pageCount}`, centerX, 285, { align: 'center' });
+                        doc.text(`Página ${data.pageNumber} de ${pageCount}`, centerX, doc.internal.pageSize.getHeight() - 10, { align: 'center' });
                     }
                 });
 
-                // Guardar PDF
-                doc.save(`Solicitud_${this.numeroSolicitud}.pdf`);
+                // 7. Sección de firmas (en la misma página si hay espacio)
+                const finalY = doc.lastAutoTable.finalY || tableStartY;
+                const spaceNeeded = 60;
+                const pageHeight = doc.internal.pageSize.getHeight();
+
+                if (finalY + spaceNeeded > pageHeight) {
+                    doc.addPage();
+                    doc.setFontSize(12);
+                    this.dibujarFirmas(doc, 40);
+                } else {
+                    doc.setFontSize(12);
+                    this.dibujarFirmas(doc, finalY + 25);
+                }
+
+                // 8. Guardar el documento
+                doc.save(`Vale_Salida_${this.numeroSolicitud}.pdf`);
 
             } catch (error) {
                 console.error('Error al generar PDF:', error);
-                this.showAlert("Error al generar el PDF de la solicitud", "error");
+                this.showAlert("Error al generar el PDF: " + error.message, "error");
             }
         },
+
+        // Método auxiliar para dibujar firmas con formato mejorado
+        dibujarFirmas(doc, startY) {
+            const centerX = doc.internal.pageSize.getWidth() / 2;
+            const signatureWidth = 80;
+            const verticalSpacing = 50;
+            const columnSpacing = 15;
+
+            // Primera fila de firmas
+            const firstLineY = startY + 25;
+
+            // Firma 1 (Izquierda) - Entrega
+            this.dibujarFirmaCompleta(
+                doc,
+                centerX - signatureWidth - columnSpacing,
+                firstLineY,
+                signatureWidth,
+                'SOLICITA',
+                this.solicitanteNombre.toUpperCase(),
+                this.solicitanteCargo.toUpperCase(),
+                30
+            );
+
+            // Firma 2 (Derecha) - Validación
+            this.dibujarFirmaCompleta(
+                doc,
+                centerX + columnSpacing,
+                firstLineY,
+                signatureWidth,
+                'AUTORIZA',
+                'L.C. EDGAR DE JESUS VERGARA CONTRERAS',
+                'DIRECTOR DE COORDINACIÓN FINANCIERA Y PLANEACIÓN',
+                30
+            );
+
+            // Segunda fila de firmas
+            const secondLineY = firstLineY + verticalSpacing;
+
+            // Firma 3 (Izquierda) - Revisión
+            this.dibujarFirmaCompleta(
+                doc,
+                centerX - signatureWidth - columnSpacing,
+                secondLineY,
+                signatureWidth,
+                'RECIBE',
+                this.receptorNombre.toUpperCase(),
+                this.receptorCargo.toUpperCase(),
+                30
+            );
+
+            // Firma 4 (Derecha) - Recibe
+            this.dibujarFirmaCompleta(
+                doc,
+                centerX + columnSpacing,
+                secondLineY,
+                signatureWidth,
+                'ENTREGA',
+                'IVÁN MARTÍNEZ ALDANA',
+                'RESPONSABLE DEL ALMACÉN',
+                30
+            );
+        },
+
+        // Método para dibujar firma completa con formato específico
+        dibujarFirmaCompleta(doc, x, y, width, titulo, nombre, cargo, espacioTituloLinea = 12) {
+            // Configuración de posiciones
+            const titleOffset = 5;
+            const lineYOffset = y + espacioTituloLinea;
+            const nameOffset = 5;
+            const cargoOffset = 10;
+
+            // 1. Título en negrita
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(10);
+            const titleWidth = doc.getStringUnitWidth(titulo) * doc.internal.getFontSize() / doc.internal.scaleFactor;
+            doc.text(titulo, x + (width / 2) - (titleWidth / 2), y + titleOffset);
+
+            // 2. Línea de firma DELGADA
+            doc.setDrawColor(0);  // Color negro
+            doc.setLineWidth(0.2);  // Línea más delgada (valor original: 0.5)
+            doc.line(x, lineYOffset, x + width, lineYOffset);
+
+            // 3. Nombre en negrita
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(9);
+            const nombreWidth = doc.getStringUnitWidth(nombre) * doc.internal.getFontSize() / doc.internal.scaleFactor;
+            doc.text(nombre, x + (width / 2) - (nombreWidth / 2), lineYOffset + nameOffset);
+
+            // 4. Cargo en normal (sin negrita)
+            doc.setFont('helvetica', 'normal');
+            const cargoWidth = doc.getStringUnitWidth(cargo) * doc.internal.getFontSize() / doc.internal.scaleFactor;
+            doc.text(cargo, x + (width / 2) - (cargoWidth / 2), lineYOffset + cargoOffset);
+        },
+
         async obtenerNumeroSolicitud() {
             try {
                 // 1. Obtener todas las solicitudes existentes
@@ -366,7 +541,8 @@ export default {
                 }
                 uniqueIds.add(item.id_articulo);
             }
-            // Validar cantidades primero
+
+            // Validar cantidades
             for (const item of this.items) {
                 if (item.cantidadEntregada > item.cantidadDisponible) {
                     this.showAlert(`No hay suficiente stock para ${item.descripcionMaterial}. Disponible: ${item.cantidadDisponible}`, "error");
@@ -374,8 +550,17 @@ export default {
                 }
             }
 
+            // Solo mostrar el modal de firmas
+            this.showSignatureModal = true;
+        },
+        async confirmAndGeneratePDF() {
+            if (!this.solicitanteNombre || !this.solicitanteCargo || !this.receptorNombre || !this.receptorCargo) {
+                this.showAlert("Por favor complete todos los campos de nombre y cargo", "error");
+                return;
+            }
+
             try {
-                // Verificar que el número no se haya usado mientras tanto
+                // Verificar que el número de solicitud no se haya usado
                 const checkResponse = await axios.get('http://localhost:3000/api/solicitudes');
                 const existeNumero = checkResponse.data.some(s => s.numero_solicitud === this.numeroSolicitud);
 
@@ -389,6 +574,7 @@ export default {
                 const solicitudes = this.items.map(item => ({
                     numero_solicitud: this.numeroSolicitud,
                     direccion_solicitante: this.direccionSolicitante,
+                    area: this.area,
                     id_articulo: item.id_articulo,
                     cantidad_entregada: item.cantidadEntregada
                 }));
@@ -404,16 +590,19 @@ export default {
                     axios.post('http://localhost:3000/api/solicitudes', solicitud)
                 );
 
+                // Ejecutar todas las promesas
                 await Promise.all([...updatePromises, ...solicitudPromises]);
 
-                // Generar PDF después de registrar
+                // Generar PDF
                 await this.generarPDFSolicitud();
 
                 // Actualizar datos locales
                 await this.cargarArticulos();
                 await this.obtenerNumeroSolicitud();
 
+                // Mostrar confirmación y cerrar modales
                 this.showConfirmationModal = true;
+                this.showSignatureModal = false;
 
             } catch (error) {
                 console.error('Error al registrar salida:', error);
@@ -522,7 +711,25 @@ export default {
             };
             return formatMap[direccion] || direccion;
         },
-
+        formatArea(area) {
+            const formatMap = {
+                "Direccion General": "Dirección General",
+                "Direccion de Coordinacion Financiera Y Planeacion": "Coordinación Financiera y Planeación",
+                "Direccion de Television": "Dirección de Televisión",
+                "Direccion de Noticias": "Dirección de Noticias",
+                "Direccion de Radio": "Dirección de Radio",
+                "Direccion de Ingenieria": "Dirección de Ingeniería",
+                "Direccion de Proyectos Estrategicos": "Proyectos Estratégicos",
+                "Organo Interno de Control": "Órgano Interno de Control",
+                "Direccion de Promocion e Intercambio": "Promoción e Intercambio",
+                "Direccion Juridica": "Dirección Jurídica",
+                "Direccion de Vinculacion": "Vinculación",
+                "Imagen": "Imagen",
+                "Estaciones de Radio": "Estaciones de Radio",
+                "Estaciones de Television": "Estaciones de Televisión"
+            };
+            return formatMap[area] || area;
+        },
 
 
 
@@ -628,6 +835,61 @@ export default {
 
 <style scoped>
 /* Estilo general para la notificación */
+
+.modal2 {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content2 {
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.form-field2 {
+    margin-bottom: 15px;
+    width: 90%;
+    margin-right: 5%;
+    margin-left: 5%;
+}
+
+.form-field2 label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.form-field2 input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.button-group {
+    display: flex;
+    justify-content: space-between;
+}
+
+
+
+.boton-cancelar:hover {
+    background-color: #d32f2f;
+}
+
 .notification {
     position: fixed;
     top: 20px;

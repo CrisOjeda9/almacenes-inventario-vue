@@ -79,6 +79,7 @@
                     <tr>
                         <th>Numero de solicitud</th>
                         <th>Dirección Solicitante</th>
+                        <th>Area</th>
                         <th>Fecha de Salida</th>
                         <th>N° Partida</th>
                         <th>Unidad Medida</th>
@@ -91,12 +92,13 @@
                         <td>{{ solicitud.numero_solicitud || 'N/A' }}</td>
                         <!-- Nueva columna para número de solicitud -->
                         <td>{{ solicitud.direccion_solicitante }}</td>
+                        <td>{{ solicitud.area }}</td>
                         <td>{{ formatDate(solicitud.fechaSalida) }}</td>
                         <td>{{ solicitud.numeroPartida }}</td>
                         <td>{{ solicitud.unidadMedida }}</td>
                         <td>{{ solicitud.descripcionMaterial }}</td>
                         <td>{{ solicitud.cantidadEntregada }}</td>
-                        
+
                     </tr>
                 </tbody>
             </table>
@@ -142,6 +144,7 @@ export default {
                 const query = this.searchQuery.toLowerCase();
                 return (
                     item.direccion_solicitante.toLowerCase().includes(query) ||
+                    item.area.toLowerCase().includes(query) ||
                     (item.numeroPartida && item.numeroPartida.toString().toLowerCase().includes(query)) ||
                     (item.descripcionMaterial && item.descripcionMaterial.toLowerCase().includes(query))
                 );
@@ -269,6 +272,7 @@ export default {
                         body: solicitudesPorPartida[numeroPartida].map(solicitud => [
                             solicitud.numero_solicitud || 'N/A',
                             solicitud.direccion_solicitante,
+                            solicitud.area,
                             this.formatDate(solicitud.fechaSalida),
                             solicitud.numeroPartida,
                             solicitud.unidadMedida,
@@ -356,21 +360,26 @@ export default {
                 const articulosResponse = await axios.get('http://localhost:3000/api/articulos');
                 this.articulos = articulosResponse.data;
 
-                // Combinar los datos
-                this.combinedData = this.solicitudes.map(solicitud => {
-                    const articulo = this.articulos.find(a => a.id === solicitud.id_articulo);
+                // Combinar los datos y ordenar por fecha (más reciente primero)
+                this.combinedData = this.solicitudes
+                    .map(solicitud => {
+                        const articulo = this.articulos.find(a => a.id === solicitud.id_articulo);
 
-                    return {
-                        id: solicitud.id,
-                        numero_solicitud: solicitud.numero_solicitud, // Asegurarse de incluir este campo
-                        direccion_solicitante: solicitud.direccion_solicitante,
-                        fechaSalida: solicitud.createdAt,
-                        numeroPartida: articulo ? articulo.id_objetogasto : 'N/A',
-                        unidadMedida: articulo ? articulo.unidad_medida : 'N/A',
-                        descripcionMaterial: articulo ? articulo.descripcion : 'N/A',
-                        cantidadEntregada: solicitud.cantidad_entregada
-                    };
-                });
+                        return {
+                            id: solicitud.id,
+                            numero_solicitud: solicitud.numero_solicitud,
+                            direccion_solicitante: solicitud.direccion_solicitante,
+                            area: solicitud.area,
+                            fechaSalida: solicitud.createdAt, // Usamos createdAt que es la fecha de creación
+                            numeroPartida: articulo ? articulo.id_objetogasto : 'N/A',
+                            unidadMedida: articulo ? articulo.unidad_medida : 'N/A',
+                            descripcionMaterial: articulo ? articulo.descripcion : 'N/A',
+                            cantidadEntregada: solicitud.cantidad_entregada,
+                            // Agregamos un campo timestamp para facilitar el ordenamiento
+                            timestamp: new Date(solicitud.createdAt).getTime()
+                        };
+                    })
+                    .sort((a, b) => b.timestamp - a.timestamp); // Orden descendente por fecha
 
             } catch (error) {
                 console.error('Error al cargar los datos:', error);
@@ -393,7 +402,7 @@ export default {
                 this.currentPage = page;
             }
         },
-       
+
     },
 };
 </script>
