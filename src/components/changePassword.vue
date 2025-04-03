@@ -17,7 +17,7 @@
                 <div class="user-profile">
                     <img :src="profileImage" alt="User Profile" class="profile-pic" />
                     <div class="user-info">
-                        <p>{{ userName }}</p> <!-- Nombre dinámico del usuario -->
+                        <p>{{ userName }}</p>
                         <span><a href="profile" style="color: white;">Ver Perfil</a></span>
                     </div>
                 </div>
@@ -46,7 +46,7 @@
                 Almacen
                 <span class="menu-icon">▼</span>
                 <div class="dropdown-menu" v-show="menus.passwordMenu">
-                    <button @click="navigateTo('solicitudmaterial')">Salida de material</button>
+                    <button @click="navigateTo('solicitudmaterial')">Solicitud de material</button>
                     <button @click="navigateTo('bieninventario')">Agregar un bien para inventario</button>
                     <button @click="navigateTo('existencia')">Entrada de artículos</button>
                     <button @click="navigateTo('recepcionsolicitudes')">Recepcion de solicitudes</button>
@@ -71,17 +71,27 @@
                 <div class="form-field">
                     <label for="newpassword">Contraseña Nueva</label>
                     <div class="input-wrapper">
-                        <input :type="shownewPassword ? 'text' : 'password'" v-model="form.newpassword" required />
+                        <input 
+                            :type="shownewPassword ? 'text' : 'password'" 
+                            v-model="form.newpassword" 
+                            @input="validateNewPassword"
+                            @blur="validateNewPassword"
+                            required
+                        />
                         <i :class="shownewPassword ? 'fa fa-eye-slash' : 'fa fa-eye'"
                             @click="shownewPassword = !shownewPassword"></i>
                     </div>
+                    <span class="error-message" v-if="errors.newpassword">{{ errors.newpassword }}</span>
                 </div>
 
                 <div class="form-field">
                     <label for="confirmPassword">Confirmar Nueva Contraseña</label>
                     <div class="input-wrapper">
-                        <input :type="showConfirmPassword ? 'text' : 'password'" v-model="form.confirmPassword"
-                            required />
+                        <input 
+                            :type="showConfirmPassword ? 'text' : 'password'" 
+                            v-model="form.confirmPassword"
+                            required 
+                        />
                         <i :class="showConfirmPassword ? 'fa fa-eye-slash' : 'fa fa-eye'"
                             @click="showConfirmPassword = !showConfirmPassword"></i>
                     </div>
@@ -101,15 +111,18 @@ export default {
     name: "changePassword",
     data() {
         return {
-            alertMessage: "",  // Mensaje de la alerta
-            alertClass: "",    // Clase de la alerta (ej. 'success' o 'error')
-            alertIcon: "",     // Icono para la alerta
-            userName: "Cargando...", // Mensaje temporal
-            profileImage: "",  // URL de la imagen del usuario
+            alertMessage: "",
+            alertClass: "",
+            alertIcon: "",
+            userName: "Cargando...",
+            profileImage: "",
             form: {
-                password: "", // Contraseña actual
-                newpassword: "", // Nueva contraseña
-                confirmPassword: "", // Confirmación de nueva contraseña
+                password: "",
+                newpassword: "",
+                confirmPassword: "",
+            },
+            errors: {
+                newpassword: ""
             },
             showPassword: false,
             showConfirmPassword: false,
@@ -125,6 +138,41 @@ export default {
         this.loadUserData();
     },
     methods: {
+        validateNewPassword() {
+            if (!this.form.newpassword) {
+                this.errors.newpassword = "Complete este campo";
+                return false;
+            }
+            
+            if (!/[A-Z]/.test(this.form.newpassword)) {
+                this.errors.newpassword = "Falta una letra mayúscula";
+                return false;
+            }
+            
+            if (!/[a-z]/.test(this.form.newpassword)) {
+                this.errors.newpassword = "Falta una letra minúscula";
+                return false;
+            }
+            
+            if (!/\d/.test(this.form.newpassword)) {
+                this.errors.newpassword = "Falta un número";
+                return false;
+            }
+            
+            if (!/[@$!%*?&]/.test(this.form.newpassword)) {
+                this.errors.newpassword = "Falta un carácter especial (@$!%*?&)";
+                return false;
+            }
+            
+            if (this.form.newpassword.length < 8 || this.form.newpassword.length > 16) {
+                this.errors.newpassword = "Debe tener entre 8-16 caracteres";
+                return false;
+            }
+            
+            this.errors.newpassword = "";
+            return true;
+        },
+
         async loadUserData() {
             const storedUserName = localStorage.getItem("userName");
             const storedUserEmail = localStorage.getItem("userEmail");
@@ -133,46 +181,32 @@ export default {
                 this.userName = storedUserName;
 
                 try {
-                    // Obtener todos los usuarios de la API
                     const response = await fetch('http://localhost:3000/api/personas');
                     const users = await response.json();
-
-                    // Buscar el usuario logueado por email
                     const user = users.find(u => u.email === storedUserEmail);
 
                     if (user) {
-                        // Concatenar nombre y apellidos
                         const fullName = `${user.nombre || storedUserName} ${user.apellidos || ""}`.trim();
                         this.userName = fullName;
-
-                        // Obtener la ruta completa de la imagen del usuario
-                        const imagePath = user.imagen; // Suponiendo que la API devuelve la ruta completa
-
-                        // Extraer el nombre del archivo de la ruta completa
-                        let imageFileName = imagePath.split('\\').pop(); // Extrae "radio2.jpg"
-
-                        // Eliminar la extensión del nombre del archivo
+                        const imagePath = user.imagen;
+                        let imageFileName = imagePath.split('\\').pop();
+                        
                         if (imageFileName) {
-                            imageFileName = imageFileName.split('.').slice(0, -1).join('.'); // Elimina la extensión
-                        }
-
-                        if (imageFileName) {
-                            // Construir la URL completa para la imagen
+                            imageFileName = imageFileName.split('.').slice(0, -1).join('.');
                             this.profileImage = `http://localhost:3000/api/users-files/${imageFileName}`;
                         } else {
-                            // Usar una imagen por defecto si no hay imagen en la API
                             this.profileImage = "../assets/UserHombre.png";
                         }
                     } else {
-                        this.profileImage = "../assets/UserHombre.png"; // Imagen por defecto
+                        this.profileImage = "../assets/UserHombre.png";
                     }
                 } catch (error) {
                     console.error('Error al cargar los datos del usuario:', error);
-                    this.profileImage = "../assets/UserHombre.png"; // Imagen por defecto en caso de error
+                    this.profileImage = "../assets/UserHombre.png";
                 }
             } else {
                 this.userName = "Usuario desconocido";
-                this.profileImage = "../assets/UserHombre.png"; // Imagen por defecto
+                this.profileImage = "../assets/UserHombre.png";
             }
         },
         goHome() {
@@ -191,12 +225,17 @@ export default {
                 this.alertIcon = "fa fa-exclamation-circle";
             }
 
-            // Ocultar la alerta después de 3 segundos
             setTimeout(() => {
                 this.alertMessage = "";
             }, 3000);
         },
         async registerPassword() {
+            // Validar nueva contraseña primero
+            if (!this.validateNewPassword()) {
+                return;
+            }
+
+            // Validación original de coincidencia de contraseñas
             if (this.form.newpassword !== this.form.confirmPassword) {
                 this.showAlert("Las contraseñas no coinciden", "error");
                 return;
@@ -204,7 +243,6 @@ export default {
 
             const email = localStorage.getItem("userEmail");
             try {
-                // Primero, buscar en tb_personas para obtener el id_persona
                 const personasResponse = await fetch('http://localhost:3000/api/personas');
                 const personas = await personasResponse.json();
                 const persona = personas.find(p => p.email === email);
@@ -214,7 +252,6 @@ export default {
                     return;
                 }
 
-                // Luego, buscar en tb_usuarios usando el id_persona
                 const usersResponse = await fetch('http://localhost:3000/api/usuarios');
                 const users = await usersResponse.json();
                 const user = users.find(u => u.id_persona === persona.id);
@@ -224,13 +261,11 @@ export default {
                     return;
                 }
 
-                // Verificar la contraseña actual
                 if (this.form.password !== user.password) {
                     this.showAlert("La contraseña actual es incorrecta", "error");
                     return;
                 }
 
-                // Realizar la solicitud PUT para actualizar la contraseña
                 const updateResponse = await fetch(`http://localhost:3000/api/usuarios/${user.id}`, {
                     method: 'PUT',
                     headers: {
@@ -241,13 +276,11 @@ export default {
                     }),
                 });
 
-                // Verificar si la respuesta fue exitosa
                 if (updateResponse.ok) {
                     this.showAlert('Contraseña actualizada exitosamente', 'success');
-                    // Retrasar la redirección para mostrar la alerta
                     setTimeout(() => {
                         this.$router.push('/home');
-                    }, 2000);  // 2 segundos de retraso
+                    }, 2000);
                 } else {
                     const error = await updateResponse.json();
                     this.showAlert('Error al actualizar la contraseña: ' + (error.message || 'Error desconocido'), 'error');
@@ -278,6 +311,25 @@ export default {
 /* Aplicar Montserrat a todo el contenido */
 * {
     font-family: 'Montserrat', sans-serif;
+}
+.error-message {
+    color: red;
+    font-size: 12px;
+    margin-top: 5px;
+    display: block;
+}
+
+.input-wrapper {
+    position: relative;
+}
+
+.input-wrapper i {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: #666;
 }
 
 /* Estilo general para la notificación */
