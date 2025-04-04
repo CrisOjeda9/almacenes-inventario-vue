@@ -211,7 +211,6 @@ export default {
 </script>
 
 <style scoped>
-/* Aplicar Montserrat a todo el contenido */
 * {
     font-family: 'Montserrat', sans-serif;
 }

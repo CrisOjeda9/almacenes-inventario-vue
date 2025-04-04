@@ -70,6 +70,7 @@
                             <option value="Administrador">Administrador</option>
                             <option value="Inventario">Inventario</option>
                             <option value="Almacenes">Almacenes</option>
+                            <option value="Usuario">Usuario</option>
                         </select>
                     </div>
                     <div class="form-field">

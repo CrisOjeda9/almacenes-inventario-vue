@@ -71,72 +71,77 @@
         </div>
 
         <div class="contenedor-tabla">
-            <table class="user-table">
-                <thead>
-                    <tr>
-                        <th>Rol</th>
-                        <th>Nombre(s)</th>
-                        <th>Apellidos</th>
-                        <th>RFC</th>
-                        <th>CURP</th>
-                        <th>Nivel</th>
-                        <th>Num. trabajador</th>
-                        <th>Direc. pertenencia</th>
-                        <th>Departamento</th>
-                        <th>Cargo</th>
-                        <th>Correo</th>
-                        <th>Foto</th>
-                        <th>Identificación</th>
-                        <th>Fecha de registro</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr v-for="user in paginateduser" :key="user.id">
-                        <td>{{ user.rol }}</td>
-                        <td>{{ user.nombre }}</td>
-                        <td>{{ user.apellidos }}</td>
-                        <td>{{ user.RFC }}</td>
-                        <td>{{ user.CURP }}</td>
-                        <td>{{ user.nivel }}</td>
-                        <td>{{ user.numero_trabajador }}</td>
-                        <td> {{ getDireccionText(user.direccion_pertenencia) }}</td>
-                        <td>{{ user.departamento }}</td>
-                        <td>{{ user.cargo }}</td>
-                        <td>{{ user.email }}</td>
-                        <td>
+            <div class="table-horizontal-scroll"> <!-- Nuevo wrapper para scroll -->
+                <table class="user-table">
+                    <thead>
+                        <tr>
+                            <th>Rol</th>
+                            <th>Nombre(s)</th>
+                            <th>Apellidos</th>
+                            <th>RFC</th>
+                            <th>CURP</th>
+                            <th>Nivel</th>
+                            <th>Num. trabajador</th>
+                            <th>Direc. pertenencia</th>
+                            <th>Departamento</th>
+                            <th>Cargo</th>
+                            <th>Correo</th>
+                            <th>Foto</th>
+                            <th>Identificación</th>
+                            <th>Fecha de registro</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="user in paginateduser" :key="user.id">
+                            <td>{{ user.rol }}</td>
+                            <td>{{ user.nombre }}</td>
+                            <td>{{ user.apellidos }}</td>
+                            <td>{{ user.RFC }}</td>
+                            <td>{{ user.CURP }}</td>
+                            <td>{{ user.nivel }}</td>
+                            <td>{{ user.numero_trabajador }}</td>
+                            <td> {{ getDireccionText(user.direccion_pertenencia) }}</td>
+                            <td>{{ user.departamento }}</td>
+                            <td>{{ user.cargo }}</td>
+                            <td>{{ user.email }}</td>
+                            <td>
 
-                            <!-- Enlace para abrir la foto en una nueva pestaña -->
-                            <a v-if="user.imagen" :href="getImageUrl(user.imagen)" target="_blank" class="btn-open">
-                                <img v-if="user.imagen" :src="getImageUrl(user.imagen)"
-                                    style="width: 40px; height: 40px;" alt="Foto de perfil" class="user-photo" /> </a>
-                        </td>
-                        <td>
-                            <template v-if="user.identificacion">
-                                <ul>
-                                    <li v-for="(file, index) in getPdfFiles(user.identificacion)" :key="index">
-                                        <!-- Aplicar truncateFileName al nombre del archivo -->
-                                        <a :href="file.url" target="_blank" :title="file.name">
-                                            {{ truncateFileName(file.name, 20) }}
-                                        </a>
-                                    </li>
-                                </ul>
-                            </template>
-                            <button @click="downloadZip(user)" class="btn-download">
-                                <p class="textoDescarga">Descargar</p>
-                            </button>
-                        </td>
+                                <!-- Enlace para abrir la foto en una nueva pestaña -->
+                                <a v-if="user.imagen" :href="getImageUrl(user.imagen)" target="_blank" class="btn-open">
+                                    <img v-if="user.imagen" :src="getImageUrl(user.imagen)"
+                                        style="width: 40px; height: 40px;" alt="Foto de perfil" class="user-photo" />
+                                </a>
+                            </td>
+                            <td>
+                                <template v-if="user.identificacion">
+                                    <ul>
+                                        <li v-for="(file, index) in getPdfFiles(user.identificacion)" :key="index">
+                                            <!-- Aplicar truncateFileName al nombre del archivo -->
+                                            <a :href="file.url" target="_blank" :title="file.name">
+                                                {{ truncateFileName(file.name, 20) }}
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </template>
+                                <button @click="downloadZip(user)" class="btn-download">
+                                    <p class="textoDescarga">Descargar</p>
+                                </button>
+                            </td>
 
 
 
-                        <td>{{ formatDate(user.createdAt) }}</td>
+                            <td>{{ formatDate(user.createdAt) }}</td>
 
-                        <td>
-                            <button @click="showDeleteModal(user.id)" class="btn-delete">Eliminar</button>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+                            <td>
+                                <button @click="showDeleteModal(user.id)" class="btn-delete">Eliminar</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+
 
 
 
@@ -517,6 +522,7 @@ td ul li a:hover {
     flex-direction: column;
     color: white;
     overflow-x: hidden;
+    overflow-y: auto;
 }
 
 
@@ -700,33 +706,71 @@ a {
     text-decoration: none;
 }
 
+.contenedor-tabla {
+    width: 95%;
+    margin-left: 2.5%;
+    margin-right: 2.5%;
+    display: flex;
+    flex-direction: column;
+    background-color: white;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 15px;
+}
+
+.table-horizontal-scroll {
+    overflow-x: auto;
+    /* Solo scroll horizontal */
+    overflow-y: visible;
+    /* Sin scroll vertical */
+    border-radius: 15px;
+}
+
 .user-table {
-    width: 1400px;
-    max-width: 1400px;
+    width: auto;
+    /* Se expande según contenido */
+    min-width: 100%;
+    /* Mínimo el ancho del contenedor */
     border-collapse: separate;
     border-spacing: 0;
     background-color: white;
     color: #691B31;
-    border-radius: 15px 15px 0 0; /* Solo redondear las esquinas superiores */
-    overflow: hidden; /* Para que los bordes no sobresalgan */
     font-size: 14px;
 }
 
+/* Bordes redondeados solo en la tabla */
+.user-table thead tr:first-child th:first-child {
+    border-top-left-radius: 15px;
+}
+
+.user-table thead tr:first-child th:last-child {
+    border-top-right-radius: 15px;
+}
+
+.user-table tbody tr:last-child td:first-child {
+    border-bottom-left-radius: 15px;
+}
+
+.user-table tbody tr:last-child td:last-child {
+    border-bottom-right-radius: 15px;
+}
+
+/* Estilos de celdas */
 .user-table th,
 .user-table td {
     padding: 10px;
     text-align: center;
+    white-space: nowrap;
 }
 
 .user-table th {
     background-color: #BC955B;
     color: white;
+    position: sticky;
+    top: 0;
 }
 
 .user-table tr:hover {
-    background-color: #70727265;
-    color: #A02142;
-    transition: background-color 0.3s ease;
+    background-color: #f5f5f5;
 }
 
 .btn-edit,
@@ -762,18 +806,7 @@ a {
     background-color: #e41f1f;
 }
 
-.contenedor-tabla {
-    width: 95%;
-    margin-left: 2.5%;
-    margin-right: 2.5%;
-    display: flex;
-    align-items: start;
-    justify-content: center;
-    display: flex;
-    flex-direction: column;
-    overflow: auto;
-    border-radius: 15px 15px 0 0;
-}
+
 
 .pagination {
     width: 100%;
