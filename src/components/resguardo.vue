@@ -29,27 +29,34 @@
         <div class="sub-navbar">
             <a href="/home" class="nav-item">Inicio</a>
             <a v-if="userRole === 'Administrador'" href="users" class="nav-item">Usuarios</a>
-            <div v-if="userRole === 'Inventario' || userRole === 'Administrador'" class="nav-item" @mouseenter="showMenu('homeMenu')" @mouseleave="hideMenu('homeMenu')">
+            <!-- Menú de Inventario para Administrador e Inventario (todas las opciones) -->
+            <div v-if="userRole === 'Inventario' || userRole === 'Administrador'" class="nav-item"
+                @mouseenter="showMenu('homeMenu')" @mouseleave="hideMenu('homeMenu')">
                 Inventario
                 <span class="menu-icon">▼</span>
                 <div class="dropdown-menu" v-show="menus.homeMenu">
                     <button @click="navigateTo('bajas')">Historial de bajas</button>
                     <button @click="navigateTo('historialbienes')">Historial de bienes</button>
                     <button @click="navigateTo('bajabien')">Baja de bienes</button>
-                    <button @click="navigateTo('resguardo')"
-                        style="background-color: #ddc9a3; color: #691b31; border-radius: 4px;">Bienes sin
-                        resguardo</button>
-                    <button @click="navigateTo('listaalmacen')">Asignar No.Inventario</button>
+                    <button @click="navigateTo('resguardo')">Bienes sin resguardo</button>
+                    <button @click="navigateTo('listaalmacen')">Asignar No. Inventario</button>
                     <button @click="navigateTo('bienesnuevos')">Asignar resguardo</button>
                     <button @click="navigateTo('liberarbien')">Liberar Bien</button>
                     <button @click="navigateTo('reportes')">Generación de reportes</button>
-
-
-
                 </div>
             </div>
 
-            <div v-if="userRole === 'Almacen' || userRole === 'Administrador'" class="nav-item" @mouseenter="showMenu('resguardoMenu')" @mouseleave="hideMenu('resguardoMenu')">
+            <!-- Menú SOLO para Usuario (solo "Bienes sin resguardo") -->
+            <div v-if="userRole === 'Usuario'" class="nav-item" @mouseenter="showMenu('userMenu')"
+                @mouseleave="hideMenu('userMenu')">
+                Inventario
+                <span class="menu-icon">▼</span>
+                <div class="dropdown-menu" v-show="menus.userMenu">
+                    <button style="background-color: #ddc9a3; color: #691b31; border-radius: 4px;" @click="navigateTo('resguardo') ">Bienes sin resguardo</button>
+                </div>
+            </div>
+            <div v-if="userRole === 'Almacen' || userRole === 'Administrador'" class="nav-item"
+                @mouseenter="showMenu('resguardoMenu')" @mouseleave="hideMenu('resguardoMenu')">
                 Almacen
                 <span class="menu-icon">▼</span>
                 <div class="dropdown-menu" v-show="menus.resguardoMenu">
@@ -164,9 +171,9 @@ export default {
                 { label: "Fecha de Registro", value: "registrationDate" }
             ],
             resguardo: [
-                { noinventario: "15051", descripcion: "es grande", color: "Rojo", material: "Marmol", modelo: "pro", marca: "apple", foto: ["radio-y-television-de-hidalgo.jpg", "radio.jpeg","radio2.jpg"], serie: "pro", registrationDate: "2024-01-15" },
-                { noinventario: "15052", descripcion: "compacto", color: "Azul", material: "Aluminio", modelo: "mini", marca: "samsung", foto:["radio-y-television-de-hidalgo.jpg", "radio.jpeg","radio2.jpg"], serie: "mini", registrationDate: "2024-01-16" },
-                { noinventario: "15053", descripcion: "elegante", color: "Negro", material: "Vidrio", modelo: "elegant", marca: "sony", foto: ["radio-y-television-de-hidalgo.jpg",  "radio.jpeg","radio2.jpg"], serie: "elegant", registrationDate: "2024-01-17" }
+                { noinventario: "15051", descripcion: "es grande", color: "Rojo", material: "Marmol", modelo: "pro", marca: "apple", foto: ["radio-y-television-de-hidalgo.jpg", "radio.jpeg", "radio2.jpg"], serie: "pro", registrationDate: "2024-01-15" },
+                { noinventario: "15052", descripcion: "compacto", color: "Azul", material: "Aluminio", modelo: "mini", marca: "samsung", foto: ["radio-y-television-de-hidalgo.jpg", "radio.jpeg", "radio2.jpg"], serie: "mini", registrationDate: "2024-01-16" },
+                { noinventario: "15053", descripcion: "elegante", color: "Negro", material: "Vidrio", modelo: "elegant", marca: "sony", foto: ["radio-y-television-de-hidalgo.jpg", "radio.jpeg", "radio2.jpg"], serie: "elegant", registrationDate: "2024-01-17" }
             ],
             itemsPerPage: 10, // Cantidad de elementos por página
             currentPage: 1, // Página actual

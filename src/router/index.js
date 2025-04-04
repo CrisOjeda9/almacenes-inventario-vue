@@ -62,8 +62,8 @@ const router = createRouter({
       path: '/inventory',
       name: 'inventory',
       component: inventoryPage,
-      meta: { role: 'Inventario' } // Cambia el nombre aquí
     },
+
     {
       path: '/almacen',
       name: 'almacen',

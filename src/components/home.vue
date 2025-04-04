@@ -17,7 +17,7 @@
                 <div class="user-profile">
                     <img :src="profileImage" alt="User Profile" class="profile-pic" />
                     <div class="user-info">
-                        <p>{{ userName }} {{apellidos}}</p> <!-- Nombre dinámico del usuario -->
+                        <p>{{ userName }} {{ apellidos }}</p> <!-- Nombre dinámico del usuario -->
                         <span><a href="profile" style="color: white;">Ver Perfil</a></span>
                     </div>
                 </div>
@@ -31,19 +31,27 @@
             <a v-if="userRole === 'Administrador'" href="users" class="nav-item">Usuarios</a>
 
             <!-- Se muestra solo si es Administrador o Inventario -->
-            <div v-if="userRole === 'Inventario' || userRole === 'Administrador'" class="nav-item"
-                @mouseenter="showMenu('homeMenu')" @mouseleave="hideMenu('homeMenu')">
+            <div v-if="userRole === 'Inventario' || userRole === 'Administrador' || userRole === 'Usuario'"
+                class="nav-item" @mouseenter="showMenu('homeMenu')" @mouseleave="hideMenu('homeMenu')">
                 Inventario
                 <span class="menu-icon">▼</span>
                 <div class="dropdown-menu" v-show="menus.homeMenu">
-                    <button @click="navigateTo('bajas')">Historial de bajas</button>
-                    <button @click="navigateTo('historialbienes')">Historial de bienes</button>
-                    <button @click="navigateTo('bajabien')">Baja de bienes</button>
-                    <button @click="navigateTo('resguardo')">Bienes sin resguardo</button>
-                    <button @click="navigateTo('listaalmacen')">Asignar No. Inventario</button>
-                    <button @click="navigateTo('bienesnuevos')">Asignar resguardo</button>
-                    <button @click="navigateTo('liberarbien')">Liberar Bien</button>
-                    <button @click="navigateTo('reportes')">Generación de reportes</button>
+                    <!-- Mostrar todas las opciones para Administrador e Inventario -->
+                    <template v-if="userRole === 'Inventario' || userRole === 'Administrador'">
+                        <button @click="navigateTo('bajas')">Historial de bajas</button>
+                        <button @click="navigateTo('historialbienes')">Historial de bienes</button>
+                        <button @click="navigateTo('bajabien')">Baja de bienes</button>
+                        <button @click="navigateTo('resguardo')">Bienes sin resguardo</button>
+                        <button @click="navigateTo('listaalmacen')">Asignar No. Inventario</button>
+                        <button @click="navigateTo('bienesnuevos')">Asignar resguardo</button>
+                        <button @click="navigateTo('liberarbien')">Liberar Bien</button>
+                        <button @click="navigateTo('reportes')">Generación de reportes</button>
+                    </template>
+
+                    <!-- Mostrar solo "Bienes sin resguardo" para Usuario -->
+                    <template v-if="userRole === 'Usuario'">
+                        <button @click="navigateTo('resguardo')">Bienes sin resguardo</button>
+                    </template>
                 </div>
             </div>
 
@@ -66,7 +74,7 @@
 
         <div class="menu">
             <!-- Control Inventario (solo Inventario y Administrador) -->
-            <div v-if="userRole === 'Inventario' || userRole === 'Administrador'" class="button-card"
+            <div v-if="userRole === 'Inventario' || userRole === 'Administrador' || userRole === 'Usuario'" class="button-card"
                 @click="navigateTo2('inventory')">
                 <i class="fas fa-box"></i>
                 <span>Control inventario</span>
@@ -153,7 +161,7 @@ export default {
                     this.profileImage = "../assets/UserHombre.png"; // Imagen por defecto en caso de error
                 }
             } else {
-                this.userName = "Usuario desconocido"   ;
+                this.userName = "Usuario desconocido";
                 this.profileImage = "../assets/UserHombre.png"; // Imagen por defecto
             }
         },

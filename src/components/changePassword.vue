@@ -27,8 +27,10 @@
         <!-- Barra de navegación amarilla -->
         <div class="sub-navbar">
             <a href="/home" class="nav-item">Inicio</a>
-            <a href="users" class="nav-item">Usuarios</a>
-            <div class="nav-item" @mouseenter="showMenu('homeMenu')" @mouseleave="hideMenu('homeMenu')">
+            <a v-if="userRole === 'Administrador'" href="users" class="nav-item">Usuarios</a>
+            <!-- Menú de Inventario para Administrador e Inventario (todas las opciones) -->
+            <div v-if="userRole === 'Inventario' || userRole === 'Administrador'" class="nav-item"
+                @mouseenter="showMenu('homeMenu')" @mouseleave="hideMenu('homeMenu')">
                 Inventario
                 <span class="menu-icon">▼</span>
                 <div class="dropdown-menu" v-show="menus.homeMenu">
@@ -36,17 +38,29 @@
                     <button @click="navigateTo('historialbienes')">Historial de bienes</button>
                     <button @click="navigateTo('bajabien')">Baja de bienes</button>
                     <button @click="navigateTo('resguardo')">Bienes sin resguardo</button>
-                    <button @click="navigateTo('listaalmacen')">Asignar No.Inventario</button>
+                    <button @click="navigateTo('listaalmacen')">Asignar No. Inventario</button>
                     <button @click="navigateTo('bienesnuevos')">Asignar resguardo</button>
                     <button @click="navigateTo('liberarbien')">Liberar Bien</button>
                     <button @click="navigateTo('reportes')">Generación de reportes</button>
                 </div>
             </div>
-            <div class="nav-item" @mouseenter="showMenu('passwordMenu')" @mouseleave="hideMenu('passwordMenu')">
+
+            <!-- Menú SOLO para Usuario (solo "Bienes sin resguardo") -->
+            <div v-if="userRole === 'Usuario'" class="nav-item" @mouseenter="showMenu('userMenu')"
+                @mouseleave="hideMenu('userMenu')">
+                Inventario
+                <span class="menu-icon">▼</span>
+                <div class="dropdown-menu" v-show="menus.userMenu">
+                    <button @click="navigateTo('resguardo')">Bienes sin resguardo</button>
+                </div>
+            </div>
+
+            <div v-if="userRole === 'Almacenes' || userRole === 'Administrador'" class="nav-item"
+                @mouseenter="showMenu('proveedorMenu')" @mouseleave="hideMenu('proveedorMenu')">
                 Almacen
                 <span class="menu-icon">▼</span>
-                <div class="dropdown-menu" v-show="menus.passwordMenu">
-                    <button @click="navigateTo('solicitudmaterial')">Solicitud de material</button>
+                <div class="dropdown-menu" v-show="menus.proveedorMenu">
+                    <button @click="navigateTo('solicitudmaterial')">Salida de material</button>
                     <button @click="navigateTo('bieninventario')">Agregar un bien para inventario</button>
                     <button @click="navigateTo('existencia')">Entrada de artículos</button>
                     <button @click="navigateTo('recepcionsolicitudes')">Recepcion de solicitudes</button>
@@ -71,13 +85,8 @@
                 <div class="form-field">
                     <label for="newpassword">Contraseña Nueva</label>
                     <div class="input-wrapper">
-                        <input 
-                            :type="shownewPassword ? 'text' : 'password'" 
-                            v-model="form.newpassword" 
-                            @input="validateNewPassword"
-                            @blur="validateNewPassword"
-                            required
-                        />
+                        <input :type="shownewPassword ? 'text' : 'password'" v-model="form.newpassword"
+                            @input="validateNewPassword" @blur="validateNewPassword" required />
                         <i :class="shownewPassword ? 'fa fa-eye-slash' : 'fa fa-eye'"
                             @click="shownewPassword = !shownewPassword"></i>
                     </div>
@@ -87,11 +96,8 @@
                 <div class="form-field">
                     <label for="confirmPassword">Confirmar Nueva Contraseña</label>
                     <div class="input-wrapper">
-                        <input 
-                            :type="showConfirmPassword ? 'text' : 'password'" 
-                            v-model="form.confirmPassword"
-                            required 
-                        />
+                        <input :type="showConfirmPassword ? 'text' : 'password'" v-model="form.confirmPassword"
+                            required />
                         <i :class="showConfirmPassword ? 'fa fa-eye-slash' : 'fa fa-eye'"
                             @click="showConfirmPassword = !showConfirmPassword"></i>
                     </div>
@@ -132,6 +138,8 @@ export default {
                 passwordMenu: false,
                 settingsMenu: false,
             },
+            userRole: localStorage.getItem('userRole') || '', // Obtener el rol desde el localStorage
+
         };
     },
     mounted() {
@@ -143,32 +151,32 @@ export default {
                 this.errors.newpassword = "Complete este campo";
                 return false;
             }
-            
+
             if (!/[A-Z]/.test(this.form.newpassword)) {
                 this.errors.newpassword = "Falta una letra mayúscula";
                 return false;
             }
-            
+
             if (!/[a-z]/.test(this.form.newpassword)) {
                 this.errors.newpassword = "Falta una letra minúscula";
                 return false;
             }
-            
+
             if (!/\d/.test(this.form.newpassword)) {
                 this.errors.newpassword = "Falta un número";
                 return false;
             }
-            
+
             if (!/[@$!%*?&]/.test(this.form.newpassword)) {
                 this.errors.newpassword = "Falta un carácter especial (@$!%*?&)";
                 return false;
             }
-            
+
             if (this.form.newpassword.length < 8 || this.form.newpassword.length > 16) {
                 this.errors.newpassword = "Debe tener entre 8-16 caracteres";
                 return false;
             }
-            
+
             this.errors.newpassword = "";
             return true;
         },
@@ -190,7 +198,7 @@ export default {
                         this.userName = fullName;
                         const imagePath = user.imagen;
                         let imageFileName = imagePath.split('\\').pop();
-                        
+
                         if (imageFileName) {
                             imageFileName = imageFileName.split('.').slice(0, -1).join('.');
                             this.profileImage = `http://localhost:3000/api/users-files/${imageFileName}`;
@@ -312,6 +320,7 @@ export default {
 * {
     font-family: 'Montserrat', sans-serif;
 }
+
 .error-message {
     color: red;
     font-size: 12px;

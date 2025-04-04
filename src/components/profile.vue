@@ -28,6 +28,7 @@
         <div class="sub-navbar">
             <a href="/home" class="nav-item">Inicio</a>
             <a v-if="userRole === 'Administrador'" href="users" class="nav-item">Usuarios</a>
+            <!-- Menú de Inventario para Administrador e Inventario (todas las opciones) -->
             <div v-if="userRole === 'Inventario' || userRole === 'Administrador'" class="nav-item"
                 @mouseenter="showMenu('homeMenu')" @mouseleave="hideMenu('homeMenu')">
                 Inventario
@@ -37,10 +38,20 @@
                     <button @click="navigateTo('historialbienes')">Historial de bienes</button>
                     <button @click="navigateTo('bajabien')">Baja de bienes</button>
                     <button @click="navigateTo('resguardo')">Bienes sin resguardo</button>
-                    <button @click="navigateTo('listaalmacen')">Asignar No.Inventario</button>
+                    <button @click="navigateTo('listaalmacen')">Asignar No. Inventario</button>
                     <button @click="navigateTo('bienesnuevos')">Asignar resguardo</button>
                     <button @click="navigateTo('liberarbien')">Liberar Bien</button>
                     <button @click="navigateTo('reportes')">Generación de reportes</button>
+                </div>
+            </div>
+
+            <!-- Menú SOLO para Usuario (solo "Bienes sin resguardo") -->
+            <div v-if="userRole === 'Usuario'" class="nav-item" @mouseenter="showMenu('userMenu')"
+                @mouseleave="hideMenu('userMenu')">
+                Inventario
+                <span class="menu-icon">▼</span>
+                <div class="dropdown-menu" v-show="menus.userMenu">
+                    <button @click="navigateTo('resguardo')">Bienes sin resguardo</button>
                 </div>
             </div>
 

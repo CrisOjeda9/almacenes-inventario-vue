@@ -30,7 +30,9 @@
         <div class="sub-navbar">
             <a href="/home" class="nav-item">Inicio</a>
             <a a v-if="userRole === 'Administrador'" href="users" class="nav-item">Usuarios</a>
-            <div v-if="userRole === 'Inventario' || userRole === 'Administrador'" class="nav-item" @mouseenter="showMenu('homeMenu')" @mouseleave="hideMenu('homeMenu')">
+            <!-- Menú de Inventario para Administrador e Inventario (todas las opciones) -->
+            <div v-if="userRole === 'Inventario' || userRole === 'Administrador'" class="nav-item"
+                @mouseenter="showMenu('homeMenu')" @mouseleave="hideMenu('homeMenu')">
                 Inventario
                 <span class="menu-icon">▼</span>
                 <div class="dropdown-menu" v-show="menus.homeMenu">
@@ -38,16 +40,25 @@
                     <button @click="navigateTo('historialbienes')">Historial de bienes</button>
                     <button @click="navigateTo('bajabien')">Baja de bienes</button>
                     <button @click="navigateTo('resguardo')">Bienes sin resguardo</button>
-                    <button @click="navigateTo('listaalmacen')">Asignar No.Inventario</button>
+                    <button @click="navigateTo('listaalmacen')">Asignar No. Inventario</button>
                     <button @click="navigateTo('bienesnuevos')">Asignar resguardo</button>
                     <button @click="navigateTo('liberarbien')">Liberar Bien</button>
                     <button @click="navigateTo('reportes')">Generación de reportes</button>
-
-
                 </div>
             </div>
 
-            <div v-if="userRole === 'Almacen' || userRole === 'Administrador'" class="nav-item" @mouseenter="showMenu('inventoryMenu')" @mouseleave="hideMenu('inventoryMenu')">
+            <!-- Menú SOLO para Usuario (solo "Bienes sin resguardo") -->
+            <div v-if="userRole === 'Usuario'" class="nav-item" @mouseenter="showMenu('userMenu')"
+                @mouseleave="hideMenu('userMenu')">
+                Inventario
+                <span class="menu-icon">▼</span>
+                <div class="dropdown-menu" v-show="menus.userMenu">
+                    <button @click="navigateTo('resguardo')">Bienes sin resguardo</button>
+                </div>
+            </div>
+
+            <div v-if="userRole === 'Almacen' || userRole === 'Administrador'" class="nav-item"
+                @mouseenter="showMenu('inventoryMenu')" @mouseleave="hideMenu('inventoryMenu')">
                 Almacen
                 <span class="menu-icon">▼</span>
                 <div class="dropdown-menu" v-show="menus.inventoryMenu">
@@ -62,55 +73,65 @@
             </div>
 
         </div>
-        <div class="menu">
-            <!-- Fila 1 -->
-            <div class="button-card" @click="navigateTo2('bajas')">
-                <i class="fa fa-history"></i>
-                <span>Historial de bajas</span>
+        <!-- Mostrar todos los botones para Administrador e Inventario -->
+        <template v-if="userRole === 'Administrador' || userRole === 'Inventario'">
+            <div class="menu">
+                <!-- Fila 1 -->
+                <div class="button-card" @click="navigateTo2('bajas')">
+                    <i class="fa fa-history"></i>
+                    <span>Historial de bajas</span>
+                </div>
+
+                <div class="button-card" @click="navigateTo2('bajabien')">
+                    <i class="fa fa-arrow-circle-down"></i>
+                    <span>Baja de bienes</span>
+                </div>
+                <div class="button-card" @click="navigateTo2('liberarbien')">
+                    <i class="fa fa-user-times"></i>
+                    <span>Liberar Bien de Usuario</span>
+                </div>
             </div>
 
-            <div class="button-card" @click="navigateTo2('bajabien')">
-                <i class="fa fa-arrow-circle-down"></i>
-                <span>Baja de bienes</span>
-            </div>
-            <div class="button-card" @click="navigateTo2('liberarbien')">
-                <i class="fa fa-user-times"></i>
-                <span>Liberar Bien de Usuario</span>
-            </div>
-        </div>
+            <!-- Fila 2 -->
+            <div class="menu">
+                <div class="button-card" @click="navigateTo2('resguardo')">
+                    <i class="fas fa-clipboard"></i>
+                    <span>Bienes sin resguardo</span>
+                </div>
 
-        <!-- Nueva fila de botones -->
-        <div class="menu">
-            <div class="button-card" @click="navigateTo2('resguardo')">
-                <i class="fas fa-clipboard"></i>
-                <span>Bienes sin resguardo</span>
-            </div>
-
-            <div class="button-card" @click="navigateTo2('bienesnuevos')">
-                <i class="fas fa-user"></i>
-                <span>Asignar resguardo</span>
-            </div>
-            <div class="button-card"  @click="navigateTo2('historialbienes')">
-                <i class="fas fa-history"></i> <!-- Historial -->
-                <span>Historial de bienes</span>
+                <div class="button-card" @click="navigateTo2('bienesnuevos')">
+                    <i class="fas fa-user"></i>
+                    <span>Asignar resguardo</span>
+                </div>
+                <div class="button-card" @click="navigateTo2('historialbienes')">
+                    <i class="fas fa-history"></i>
+                    <span>Historial de bienes</span>
+                </div>
             </div>
 
+            <!-- Fila 3 -->
+            <div class="menu">
+                <div class="button-card" @click="navigateTo2('listaalmacen')">
+                    <i class="fas fa-warehouse"></i>
+                    <span>Asignar No. Inventario</span>
+                </div>
 
-        </div>
-
-        <div class="menu">
-            <div class="button-card" @click="navigateTo2('listaalmacen')">
-                <i class="fas fa-warehouse"></i> <!-- Almacén -->
-                <span>Asignar No. Inventario</span>
+                <div class="button-card" @click="navigateTo2('reportes')">
+                    <i class="fas fa-file-alt"></i>
+                    <span>Generacion de reportes</span>
+                </div>
             </div>
+        </template>
 
-           
-
-            <div class="button-card"  @click="navigateTo2('reportes')">
-                <i class="fas fa-file-alt"></i> <!-- Reportes -->
-                <span>Generacion de reportes</span>
+        <!-- Mostrar solo "Bienes sin resguardo" para Usuario -->
+        <template v-if="userRole === 'Usuario'">
+            <div class="menu">
+                <div class="button-card" @click="navigateTo2('resguardo')">
+                    <i class="fas fa-clipboard"></i>
+                    <span>Bienes sin resguardo</span>
+                </div>
             </div>
-        </div>
+        </template>
 
 
 
@@ -187,7 +208,7 @@ export default {
                 this.userName = "Usuario desconocido";
                 this.profileImage = "../assets/UserHombre.png"; // Imagen por defecto
             }
-        },  
+        },
         goHome() {
             this.$router.push('home'); // Redirige a la página principal ("/"). Cambia el path si es necesario.
         },
