@@ -14,7 +14,7 @@
                 <h1>Bienes nuevos para asignar resguardo
 
                 </h1>
-                <p>Sistema inventario y Almacén de Radio y Televisión de Hidalgo</p>
+                <p>Sistema de Almacén e Inventarios de Radio y Televisión de Hidalgo</p>
             </div>
             <div class="navbar-right">
                 <div class="user-profile">

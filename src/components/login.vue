@@ -1,9 +1,9 @@
 <template>
   <div class="login-container">
     <div class="login-card">
-      <img src="../assets/logoSistema.png" alt="Logo">
+      <img src="../assets/SAI.png" alt="Logo">
       <h2>Inicia Sesión</h2>
-      <p>Sistema Inventario y Almacén de Radio y Televisión de Hidalgo</p>
+      <p>Sistema de Almacén e Inventarios de Radio y Televisión de Hidalgo</p>
       <form @submit.prevent="login">
         <div class="input-group">
           <label for="usuario">Email</label>
@@ -193,7 +193,7 @@ body {
 }
 
 img {
-  width: 30%;
+  width: 60%;
   margin-bottom: 1rem;
 }
 

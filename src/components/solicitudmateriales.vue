@@ -11,7 +11,7 @@
             </div>
             <div class="navbar-center">
                 <h1>Salida de materiales</h1>
-                <p>Sistema inventario y Almacén de Radio y Televisión de Hidalgo</p>
+                <p>Sistema de Almacén e Inventarios de Radio y Televisión de Hidalgo</p>
             </div>
             <div class="navbar-right">
                 <div class="user-profile">
@@ -50,7 +50,7 @@
                 <span class="menu-icon">▼</span>
                 <div class="dropdown-menu" v-show="menus.solicitudMaterialMenu">
                     <button @click="navigateTo('solicitudmaterial')"
-                        style="background-color: #ddc9a3; color: #691b31; border-radius: 4px;">Solicitud de
+                        style="background-color: #ddc9a3; color: #691b31; border-radius: 4px;">Salida de
                         material</button>
                     <button @click="navigateTo('bieninventario')">Agregar un bien para inventario</button>
                     <button @click="navigateTo('existencia')">Entrada de artículos</button>
