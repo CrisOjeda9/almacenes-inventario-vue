@@ -305,40 +305,55 @@ export default {
     methods: {
         async generarPDFSolicitud() {
             try {
-                // 1. Cargar dinámicamente las dependencias
+                // 1. Cargar dependencias dinámicamente
                 const { jsPDF } = await import('jspdf');
                 await import('jspdf-autotable');
 
-                // 2. Crear documento con configuración segura
+                // 2. Cargar y optimizar el logo
+                let logoData = null;
+                try {
+                    const logoOriginal = (await import('@/assets/RTH Y ESCUDO.png')).default;
+                    logoData = await this.optimizarLogo(logoOriginal);
+                } catch (e) {
+                    console.warn('No se pudo cargar el logo:', e);
+                }
+
+                // 3. Crear documento PDF
                 const doc = new jsPDF({
                     orientation: 'portrait',
                     unit: 'mm',
-                    format: 'a4'
+                    format: 'a4',
+                    compress: true // Habilitar compresión
                 });
 
-                // 3. Configuración de márgenes y dimensiones
+                // 4. Configuración de márgenes
                 const pageWidth = doc.internal.pageSize.getWidth();
                 const centerX = pageWidth / 2;
                 const margin = 15;
                 const tableStartY = 40;
 
-                // 4. Encabezado del documento
+                // 5. Agregar logo optimizado (si está disponible)
+                if (logoData) {
+                    const logoWidth = 40;
+                    const logoHeight = 15;
+                    const logoX = pageWidth - margin - logoWidth; // Calcula la posición X para alinear a la derecha
+                    doc.addImage(logoData, 'JPEG', logoX, 10, logoWidth, logoHeight, undefined, 'FAST');
+                }
+
+                // 6. Encabezado del documento
                 doc.setFont('helvetica', 'bold');
                 doc.setFontSize(14);
                 doc.text(`VALE DE SALIDA N° ${this.numeroSolicitud}`, centerX, 20, { align: 'center' });
 
                 doc.setFont('helvetica', 'normal');
                 doc.setFontSize(10);
-
-                // Dirección y Área
                 doc.text(`Dirección Solicitante: ${this.formatDireccion(this.direccionSolicitante)}`, centerX, 30, { align: 'center' });
-                doc.text(`Área: ${this.formatArea(this.area).toUpperCase()}`, centerX, 35, { align: 'center' });  // Área en mayúsculas
+                doc.text(`Área: ${this.formatArea(this.area).toUpperCase()}`, centerX, 35, { align: 'center' });
 
-                // Fecha en mayúsculas
                 const fechaFormateada = this.fechaFormateada.toUpperCase();
-                doc.text(`FECHA: ${fechaFormateada}`, centerX, 40, { align: 'center' });  // Posición ajustada a 40
-                // Espacio de separación antes de la tabla (15mm)
-                // 5. Configuración de la tabla
+                doc.text(`FECHA: ${fechaFormateada}`, centerX, 40, { align: 'center' });
+
+                // 7. Configuración de la tabla
                 const headers = [
                     { title: 'N° Partida', dataKey: 'partida' },
                     { title: 'Unidad', dataKey: 'unidad' },
@@ -353,11 +368,11 @@ export default {
                     cantidad: item.cantidadEntregada || ''
                 }));
 
-                // 6. Generar tabla con autotable
+                // 8. Generar tabla optimizada
                 doc.autoTable({
                     head: [headers.map(h => h.title)],
                     body: body.map(item => headers.map(h => item[h.dataKey])),
-                    startY: tableStartY + 10,  // Posición ajustada
+                    startY: tableStartY + 10,
                     margin: { left: margin, right: margin },
                     headStyles: {
                         fillColor: [188, 149, 91],
@@ -376,6 +391,14 @@ export default {
                         overflow: 'linebreak'
                     },
                     didDrawPage: (data) => {
+                        // Agregar logo en todas las páginas (si existe)
+                        if (logoData) {
+                            const logoWidth = 40;
+                            const logoHeight = 15;
+                            const logoX = pageWidth - margin - logoWidth;
+                            doc.addImage(logoData, 'JPEG', logoX, 10, logoWidth, logoHeight, undefined, 'FAST');
+                        }
+
                         // Numeración de páginas
                         const pageCount = doc.internal.getNumberOfPages();
                         doc.setFontSize(8);
@@ -383,7 +406,7 @@ export default {
                     }
                 });
 
-                // 7. Sección de firmas (en la misma página si hay espacio)
+                // 9. Sección de firmas
                 const finalY = doc.lastAutoTable.finalY || tableStartY;
                 const spaceNeeded = 60;
                 const pageHeight = doc.internal.pageSize.getHeight();
@@ -394,10 +417,16 @@ export default {
                     this.dibujarFirmas(doc, 40);
                 } else {
                     doc.setFontSize(12);
-                    this.dibujarFirmas(doc, finalY + 25);
+                    this.dibujarFirmas(doc, finalY + 5);
                 }
 
-                // 8. Guardar el documento
+                // 10. Guardar el documento con verificación de tamaño
+                const pdfBlob = doc.output('blob');
+                if (pdfBlob.size > 2000 * 1024) { // Si es mayor a 2MB
+                    console.warn('PDF demasiado grande:', pdfBlob.size / 1024, 'KB');
+                    this.showAlert("El PDF generado es muy grande. Se recomienda usar un logo más pequeño.", "warning");
+                }
+
                 doc.save(`Vale_Salida_${this.numeroSolicitud}.pdf`);
 
             } catch (error) {
@@ -406,17 +435,40 @@ export default {
             }
         },
 
-        // Método auxiliar para dibujar firmas con formato mejorado
+        // Método para optimizar el logo
+        async optimizarLogo(imageSrc) {
+            return new Promise((resolve) => {
+                const img = new Image();
+                img.src = imageSrc;
+
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const maxWidth = 300; // Ancho máximo recomendado
+                    const scale = maxWidth / img.width;
+                    canvas.width = maxWidth;
+                    canvas.height = img.height * scale;
+
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+                    // Convertir a JPEG con calidad del 80%
+                    const optimizedData = canvas.toDataURL('image/png');
+                    resolve(optimizedData);
+                };
+
+                img.onerror = () => resolve(null);
+            });
+        },
+
+        // Métodos auxiliares para firmas (se mantienen igual)
         dibujarFirmas(doc, startY) {
             const centerX = doc.internal.pageSize.getWidth() / 2;
             const signatureWidth = 80;
             const verticalSpacing = 50;
             const columnSpacing = 15;
 
-            // Primera fila de firmas
             const firstLineY = startY + 25;
 
-            // Firma 1 (Izquierda) - Entrega
             this.dibujarFirmaCompleta(
                 doc,
                 centerX - signatureWidth - columnSpacing,
@@ -428,7 +480,6 @@ export default {
                 30
             );
 
-            // Firma 2 (Derecha) - Validación
             this.dibujarFirmaCompleta(
                 doc,
                 centerX + columnSpacing,
@@ -440,10 +491,8 @@ export default {
                 30
             );
 
-            // Segunda fila de firmas
             const secondLineY = firstLineY + verticalSpacing;
 
-            // Firma 3 (Izquierda) - Revisión
             this.dibujarFirmaCompleta(
                 doc,
                 centerX - signatureWidth - columnSpacing,
@@ -455,7 +504,6 @@ export default {
                 30
             );
 
-            // Firma 4 (Derecha) - Recibe
             this.dibujarFirmaCompleta(
                 doc,
                 centerX + columnSpacing,
@@ -468,36 +516,31 @@ export default {
             );
         },
 
-        // Método para dibujar firma completa con formato específico
         dibujarFirmaCompleta(doc, x, y, width, titulo, nombre, cargo, espacioTituloLinea = 12) {
-            // Configuración de posiciones
             const titleOffset = 5;
             const lineYOffset = y + espacioTituloLinea;
             const nameOffset = 5;
             const cargoOffset = 10;
 
-            // 1. Título en negrita
             doc.setFont('helvetica', 'bold');
             doc.setFontSize(10);
             const titleWidth = doc.getStringUnitWidth(titulo) * doc.internal.getFontSize() / doc.internal.scaleFactor;
             doc.text(titulo, x + (width / 2) - (titleWidth / 2), y + titleOffset);
 
-            // 2. Línea de firma DELGADA
-            doc.setDrawColor(0);  // Color negro
-            doc.setLineWidth(0.2);  // Línea más delgada (valor original: 0.5)
+            doc.setDrawColor(0);
+            doc.setLineWidth(0.2);
             doc.line(x, lineYOffset, x + width, lineYOffset);
 
-            // 3. Nombre en negrita
             doc.setFont('helvetica', 'bold');
             doc.setFontSize(9);
             const nombreWidth = doc.getStringUnitWidth(nombre) * doc.internal.getFontSize() / doc.internal.scaleFactor;
             doc.text(nombre, x + (width / 2) - (nombreWidth / 2), lineYOffset + nameOffset);
 
-            // 4. Cargo en normal (sin negrita)
             doc.setFont('helvetica', 'normal');
             const cargoWidth = doc.getStringUnitWidth(cargo) * doc.internal.getFontSize() / doc.internal.scaleFactor;
             doc.text(cargo, x + (width / 2) - (cargoWidth / 2), lineYOffset + cargoOffset);
         },
+
 
         async obtenerNumeroSolicitud() {
             try {
