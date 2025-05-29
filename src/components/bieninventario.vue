@@ -59,7 +59,6 @@
 
             
         </div>
-
         <!-- Formulario -->
         <div class="form-container">
             <form @submit.prevent="registerBien">
@@ -85,11 +84,18 @@
                             @input="handleInput" required />
                     </div>
                     <!-- Descripción -->
-                    <div class="form-field">
-                        <label for="descripcion">Descripción</label>
-                        <input type="text" id="descripcion" placeholder=""
-                            v-model="form.descripcion" required />
+                    <div class="form-field"> 
+                        <label for="descripcion">Descripción</label> 
+                        <input 
+                            type="text" 
+                            id="descripcion"  
+                            placeholder="" 
+                            :value="selectedArticuloDescription"
+                            readonly
+                            required 
+                        /> 
                     </div>
+
                     <!-- Color -->
                     <div class="form-field">
                         <label for="color">Color</label>
@@ -163,15 +169,20 @@
 </template>
 
 <script>
+import axios from 'axios'; // Asegúrate de tener axios importado
+
 export default {
     name: "BienPage",
     data() {
         return {
             userName: "Cargando...", // Mensaje temporal
             profileImage: "",  // URL de la imagen del usuario
+            articulos: [], // Array para almacenar los artículos
+            isLoading: false, // Indicador de carga
             form: {
                 tipoInventario: "",
                 inventario: "",
+                id_articulo: "",
                 descripcion: "",
                 color: "",
                 material: "",
@@ -190,6 +201,56 @@ export default {
             },
         };
     },
+    computed: {
+        selectedArticuloDescription() {
+            // Si viene descripción por parámetro, usar esa
+            if (this.$route.params.descripcion) {
+                return this.form.descripcion;
+            }
+            
+            // Si no, buscar por ID seleccionado
+            if (!this.form.id_articulo) return '';
+            const articulo = this.articulos.find(art => art.id == this.form.id_articulo);
+            return articulo ? articulo.descripcion : '';
+        }
+    },
+    mounted() {
+        this.loadUserData();
+        this.loadArticulos().then(() => {
+            // Prioridad 1: Verificar si hay un ID de artículo desde localStorage (más reciente)
+            const articuloIdFromStorage = localStorage.getItem('articuloId');
+            
+            // Prioridad 2: Verificar si se pasó un ID como parámetro en la URL
+            const articuloIdFromParams = this.$route.params.articuloId;
+            
+            // Prioridad 3: Verificar si se pasó una descripción como parámetro (método anterior)
+            const descripcionFromParams = this.$route.params.descripcion;
+
+            if (articuloIdFromStorage) {
+                // Usar el ID desde localStorage (más reciente)
+                console.log('Usando ID desde localStorage:', articuloIdFromStorage);
+                this.setArticuloById(articuloIdFromStorage);
+                // Limpiar localStorage después de usar
+                localStorage.removeItem('articuloId');
+            } else if (articuloIdFromParams) {
+                // Usar el ID desde parámetros de URL
+                console.log('Usando ID desde parámetros:', articuloIdFromParams);
+                this.setArticuloById(articuloIdFromParams);
+            } else if (descripcionFromParams) {
+                // Método anterior: usar descripción para buscar artículo
+                console.log('Usando descripción desde parámetros:', descripcionFromParams);
+                this.form.descripcion = descripcionFromParams;
+                
+                // Buscar y seleccionar automáticamente el artículo correspondiente
+                const articulo = this.articulos.find(art => 
+                    art.descripcion.toLowerCase() === descripcionFromParams.toLowerCase()
+                );
+                if (articulo) {
+                    this.form.id_articulo = articulo.id;
+                }
+            }
+        });
+    },
     watch: {
         'form.tipoInventario': function (newVal) {
             if (newVal === 'gob') {
@@ -199,10 +260,31 @@ export default {
             }
         },
     },
-    mounted() {
-        this.loadUserData();
-    },
     methods: {
+        // Nuevo método para establecer el artículo por ID
+        setArticuloById(articuloId) {
+            console.log('Buscando artículo con ID:', articuloId);
+            console.log('Artículos disponibles:', this.articulos);
+            
+            // Buscar el artículo por ID
+            const articulo = this.articulos.find(art => art.id == articuloId);
+            
+            if (articulo) {
+                console.log('Artículo encontrado:', articulo);
+                // Establecer el ID y descripción del artículo
+                this.form.id_articulo = articulo.id;
+                this.form.descripcion = articulo.descripcion;
+                
+                console.log('Formulario actualizado:', {
+                    id_articulo: this.form.id_articulo,
+                    descripcion: this.form.descripcion
+                });
+            } else {
+                console.warn('No se encontró ningún artículo con el ID:', articuloId);
+                console.log('IDs disponibles:', this.articulos.map(art => art.id));
+            }
+        },
+
         async loadUserData() {
             const storedUserName = localStorage.getItem("userName");
             const storedUserEmail = localStorage.getItem("userEmail");
@@ -253,11 +335,54 @@ export default {
                 this.profileImage = "../assets/UserHombre.png"; // Imagen por defecto
             }
         },
+        
+        async loadArticulos() {
+            this.isLoading = true;
+            try {
+                const response = await axios.get('http://localhost:3000/api/articulos');
+                console.log('Artículos cargados:', response.data); // Verificar los datos cargados
+                
+                this.articulos = response.data
+                    .map(articulo => ({
+                        ...articulo,
+                        // Si tienes fotos, puedes procesarlas aquí también
+                        foto_articulo: articulo.foto_articulo ? this.extractFileNames(articulo.foto_articulo) : []
+                    }))
+                    .sort((a, b) => {
+                        // Ordenar por descripción alfabéticamente
+                        return a.descripcion.localeCompare(b.descripcion);
+                    });
+                    
+                console.log('Artículos procesados:', this.articulos); // Verificar los datos procesados
+            } catch (error) {
+                console.error('Error al cargar los artículos:', error);
+                // Opcional: mostrar mensaje de error al usuario
+                alert('Error al cargar los artículos. Por favor, recarga la página.');
+            } finally {
+                this.isLoading = false; // Desactivar el indicador de carga
+            }
+        },
+
+        extractFileNames(filePath) {
+            // Método para extraer nombres de archivos si es necesario
+            if (!filePath) return [];
+            
+            // Si es un string con múltiples rutas separadas por coma
+            if (typeof filePath === 'string') {
+                return filePath.split(',').map(path => {
+                    return path.trim().split('\\').pop().split('/').pop();
+                });
+            }
+            
+            return [];
+        },
+
         generateInventoryNumber() {
             // Generar un número de inventario único de 5 dígitos (incremental)
             this.form.inventario = this.inventarioCounter.toString().padStart(5, '0');
             this.inventarioCounter++; // Incrementar para el siguiente número
         },
+        
         handleInput() {
             // Si el tipo de inventario es "gob", dejar al usuario escribir el número.
             // Si no es "gob", evitar que el usuario lo cambie.
@@ -290,7 +415,6 @@ export default {
     },
 };
 </script>
-
 
 <style scoped>
 /* Aplicar Montserrat a todo el contenido */
@@ -527,5 +651,56 @@ a {
     font-size: 14px;
     width: 100%;
     box-sizing: border-box;
+}
+.search-bar {
+    margin: 20px 0;
+    text-align: center;
+    width: auto;
+
+}
+.input-wrapper {
+    position: relative;
+}
+
+.input-wrapper input {
+    width: 100%;
+
+    /* Espacio para el ícono */
+}
+
+.input-wrapper i {
+    position: absolute;
+    right: -10px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+}
+.input-wrapper {
+    position: relative;
+    width: 60%;
+    display: inline-block;
+}
+
+.input-wrapper input {
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+    border-radius: 25px;
+    border: 1px solid #BC955B;
+    background-color: #fff;
+}
+
+.input-wrapper i {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 18px;
+    color: #691B31;
+    pointer-events: none;
+}
+
+.input-wrapper input::placeholder {
+    color: #691B31;
 }
 </style>

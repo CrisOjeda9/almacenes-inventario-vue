@@ -9,7 +9,6 @@
                 <img src="../assets/LOGOS DORADOS-02.png" alt="Icono" class="navbar-icon" @click="goHome" width="50%"
                     height="auto" style="cursor: pointer;" />
             </div>
-
             <div class="navbar-center">
                 <h1>Artículos</h1>
                 <p>Sistema de Almacén e Inventarios de Radio y Televisión de Hidalgo</p>
@@ -89,6 +88,7 @@
                         <th>Foto artículo</th>
                         <th>Fecha de registro</th>
                         <th>Acciones</th>
+                        <th>Agregar Inventario</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -112,6 +112,11 @@
                         <td>
                             <button @click="editExistencia(existencia)" class="btn-edit">Editar</button>
                             <button @click="showDeleteModal(existencia.id)" class="btn-delete">Eliminar</button>
+                        </td>
+                        <td> 
+                            <button @click="addToInventario(existencia)" class="btn-inventario">
+                                <i class="fas fa-plus"></i>
+                            </button>
                         </td>
                     </tr>
                 </tbody>
@@ -239,6 +244,7 @@
                 </div>
             </div>
 
+
             <!-- Paginación -->
             <div class="pagination">
                 <button @click="prevPage" :disabled="currentPage === 1">Anterior</button>
@@ -284,6 +290,7 @@ export default {
             userName: "Cargando...", // Mensaje temporal
             profileImage: "",  // URL de la imagen del usuario
             isDeleteModalVisible: false,
+            selectedArticuloId: null,
             menus: {
                 homeMenu: false,
                 existenciaMenu: false,
@@ -609,6 +616,23 @@ export default {
             // Recargar la lista de artículos (opcional)
             this.loadExistencias();
         },
+        addToInventario(existencia) {
+            // Guardar el ID del artículo en localStorage para acceso posterior
+            localStorage.setItem('articuloId', existencia.id);
+            
+            // También puedes guardarlo en una variable del componente si lo necesitas
+            this.selectedArticuloId = existencia.id;
+            
+            console.log('ID del artículo seleccionado:', existencia.id); // Para debugging
+            
+            // Navegar a la página de inventario con los parámetros
+            this.$router.push({
+                name: 'bieninventario',
+                params: { 
+                    articuloId: existencia.id // Pasar el ID como parámetro también
+                }
+            });
+        },
         async saveChanges() {
             try {
                 // 1. Eliminar las imágenes marcadas para eliminación
@@ -673,10 +697,88 @@ export default {
             this.deleteId = id;
             this.isDeleteModalVisible = true;
         },
+
+        // Método para actualizar tanto la cantidad como el total de la factura
+        async updateFacturaData(facturaId, nuevaCantidad, nuevoTotal) {
+            try {
+                const response = await axios.put(`http://localhost:3000/api/facturas/${facturaId}`, {
+                    cantidad: nuevaCantidad,
+                    total: nuevoTotal
+                }, {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
+                
+                if (response.status === 200) {
+                    console.log('Datos de factura actualizados correctamente');
+                    return true;
+                }
+            } catch (error) {
+                console.error('Error al actualizar los datos de factura:', error);
+                return false;
+            }
+        },
+
+        // Método confirmDelete actualizado para incluir la resta del total
         async confirmDelete() {
             try {
+                // Encontrar el artículo que se va a eliminar
+                const articuloAEliminar = this.existencias.find(
+                    existencia => existencia.id === this.deleteId
+                );
+
+                if (!articuloAEliminar) {
+                    this.showAlert("No se encontró el artículo a eliminar", "error");
+                    return;
+                }
+
+                // Encontrar la factura correspondiente
+                const facturaId = articuloAEliminar.id_factura;
+                const factura = this.facturas.find(f => f.id === facturaId);
+
+                if (!factura) {
+                    this.showAlert("No se encontró la factura correspondiente", "error");
+                    return;
+                }
+
                 // Realizar la solicitud DELETE a la API
-                await axios.delete(`http://localhost:3000/api/articulos/${this.deleteId}`);
+                await axios.delete(`http://localhost:3000/api/articulos/${this.deleteId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
+
+                // Calcular los nuevos valores para la factura
+                const cantidadArticuloEliminado = parseFloat(articuloAEliminar.cantidad) || 0;
+                const totalIngresoArticuloEliminado = parseFloat(articuloAEliminar.total_ingreso) || 0;
+                
+                const cantidadActualFactura = parseFloat(factura.cantidad) || 0;
+                const totalActualFactura = parseFloat(factura.total) || 0;
+                
+                const nuevaCantidadFactura = cantidadActualFactura + cantidadArticuloEliminado;
+                const nuevoTotalFactura = totalActualFactura + totalIngresoArticuloEliminado;
+
+                // Actualizar tanto la cantidad como el total en la factura
+                const facturaActualizada = await this.updateFacturaData(
+                    facturaId, 
+                    nuevaCantidadFactura, 
+                    nuevoTotalFactura
+                );
+
+                if (facturaActualizada) {
+                    // Actualizar la factura en el array local
+                    const facturaIndex = this.facturas.findIndex(f => f.id === facturaId);
+                    if (facturaIndex !== -1) {
+                        this.facturas[facturaIndex].cantidad = nuevaCantidadFactura;
+                        this.facturas[facturaIndex].total = nuevoTotalFactura;
+                        
+                        // Si tenía registrada_completa = true, cambiarla a false
+                        if (this.facturas[facturaIndex].registrada_completa) {
+                            this.facturas[facturaIndex].registrada_completa = false;
+                        }
+                    }
+                }
 
                 // Eliminar el artículo de la lista local
                 const index = this.existencias.findIndex(
@@ -690,7 +792,19 @@ export default {
                 this.isDeleteModalVisible = false;
                 this.deleteId = null;
 
-                // Mostrar un mensaje de éxito (opcional)
+                // Mostrar mensaje de éxito
+                if (facturaActualizada) {
+                    this.showAlert(
+                        `Artículo eliminado correctamente. Cantidad disponible: ${nuevaCantidadFactura}, Nuevo total: ${nuevoTotalFactura.toFixed(2)}`, 
+                        "success"
+                    );
+                } else {
+                    this.showAlert(
+                        "Artículo eliminado, pero hubo un error al actualizar la factura", 
+                        "warning"
+                    );
+                }
+
             } catch (error) {
                 console.error('Error al eliminar el artículo:', error);
                 this.showAlert("Hubo un error al eliminar el artículo. Inténtalo de nuevo.", "error");
@@ -703,6 +817,7 @@ export default {
         redirectToAddExistencia() {
             this.$router.push('/newexistencia');
         },
+       
     }
 };
 </script>

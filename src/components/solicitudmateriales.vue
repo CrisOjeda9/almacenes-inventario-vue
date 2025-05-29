@@ -95,16 +95,6 @@
                             />
                         </div>
                         <div class="form-field">
-                            <label for="nombre">Nombre</label>
-                            <input 
-                                type="text" 
-                                v-model="nombre" 
-                                placeholder="Ingrese el nombre"
-                                required
-                                maxlength="100"
-                            />
-                        </div>
-                        <div class="form-field">
                             <label for="fechaSolicitud">Fecha de Salida</label>
                             <input type="text" v-model="fechaFormateada" required />
                         </div>
@@ -229,7 +219,6 @@ export default {
             numeroSolicitud: '', // Nuevo campo para el número de solicitud
             nextSolicitudNumber: 0, // Para llevar el control del siguiente número
             area: "",
-            nombre:"",
             alertMessage: "",  // Mensaje de la alerta
             alertClass: "",    // Clase de la alerta (ej. 'success' o 'error')
             alertIcon: "",     // Icono para la alerta
