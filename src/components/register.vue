@@ -28,32 +28,34 @@
         <div class="sub-navbar">
             <a href="/home" class="nav-item">Inicio</a>
             <a href="users" class="nav-item" style="color: #6F7271; ">Usuarios</a>
-            <div class="nav-item" @mouseenter="showMenu('homeMenu')" @mouseleave="hideMenu('homeMenu')">
-                Inventario
-                <span class="menu-icon">▼</span>
-                <div class="dropdown-menu" v-show="menus.homeMenu">
-                    <button @click="navigateTo('bajas')">Historial de bajas</button>
-                    <button @click="navigateTo('historialbienes')">Historial de bienes</button>
-                    <button @click="navigateTo('bajabien')">Baja de bienes</button>
-                    <button @click="navigateTo('resguardo')">Bienes sin resguardo</button>
-                    <button @click="navigateTo('listaalmacen')">Asignar No.Inventario</button>
-                    <button @click="navigateTo('bienesnuevos')">Asignar resguardo</button>
-                    <button @click="navigateTo('liberarbien')">Liberar Bien</button>
-                    <button @click="navigateTo('reportes')">Generación de reportes</button>
-                </div>
-            </div>
+            
 
             <div class="nav-item" @mouseenter="showMenu('usersMenu')" @mouseleave="hideMenu('usersMenu')">
                 Almacen
                 <span class="menu-icon">▼</span>
                 <div class="dropdown-menu" v-show="menus.usersMenu">
-                    <button @click="navigateTo('solicitudmaterial')">Salida de material</button>
-                    <button @click="navigateTo('bieninventario')">Agregar un bien para inventario</button>
-                    <button @click="navigateTo('existencia')">Entrada de artículos</button>
-                    <button @click="navigateTo('recepcionsolicitudes')">Recepcion de solicitudes</button>
                     <button @click="navigateTo('proveedor')">Ver proveedores</button>
                     <button @click="navigateTo('factura')">Facturas</button>
-                    <button @click="navigateTo('poliza')">Polizas</button>
+                    <button @click="navigateTo('existencia')">Entrada de artículos</button>
+                    <button @click="navigateTo('solicitudmaterial')">Salida de material</button>
+                    <button @click="navigateTo('recepcionsolicitudes')">Recepción de solicitudes</button>
+                    <button @click="navigateTo('bieninventario')">Agregar un bien para inventario</button>
+                    <button @click="navigateTo('poliza')">Pólizas</button>
+                </div>
+            </div>
+
+            <div class="nav-item" @mouseenter="showMenu('homeMenu')" @mouseleave="hideMenu('homeMenu')">
+                Inventario
+                <span class="menu-icon">▼</span>
+                <div class="dropdown-menu" v-show="menus.homeMenu">
+                     <button @click="navigateTo('historialbienes')">Historial de bienes</button>
+                    <button @click="navigateTo('resguardo')">Bienes sin resguardo</button>
+                    <button @click="navigateTo('listaalmacen')">Bienes nuevos</button>
+                    <button @click="navigateTo('bienesnuevos')">Asignar resguardo</button>
+                    <button @click="navigateTo('liberarbien')">Liberar Bien</button>
+                    <button @click="navigateTo('bajabien')">Baja de bienes</button>
+                    <button @click="navigateTo('bajas')">Historial de bajas</button>
+                    <button @click="navigateTo('reportes')">Generación de reportes</button>
                 </div>
             </div>
         </div>
@@ -664,9 +666,11 @@ input:invalid {
     width: 100%;
     height: 100%;
     display: flex;
-    background: linear-gradient(to bottom, #000000, #691B31);
+    background: white;
     flex-direction: column;
     color: white;
+    overflow-x: hidden;
+    overflow-y: auto;
 }
 
 /* Menú de navegación */
@@ -675,7 +679,7 @@ input:invalid {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 10px 20px;
+    padding: 30px 20px;
     background: #691B31;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
@@ -705,7 +709,7 @@ input:invalid {
 
 .navbar-center p {
     margin: 0;
-    font-size: 14px;
+    font-size: 18px;
 }
 
 .navbar-right {
@@ -804,16 +808,18 @@ form {
     padding: 30px;
     padding-bottom: 80px;
     border-radius: 10px;
-    width: 1150px;
-    height: 375px;
+    width: auto;
+    height: auto;
+    border-collapse: separate;
+    border-spacing: 0;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
 .form-row {
     display: flex;
     justify-content: center;
-    margin-bottom: 10px;
-    padding-bottom: 15px;
+    margin-bottom: auto;
+    padding-bottom: autp;
 }
 
 input {

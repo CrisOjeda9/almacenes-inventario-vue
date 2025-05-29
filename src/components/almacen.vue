@@ -33,71 +33,74 @@
             <!-- Mostrar solo si el usuario NO es de Almacén -->
             <a v-if="userRole === 'Administrador'" href="users" class="nav-item">Usuarios</a>
 
-            <div v-if="userRole === 'Inventario' || userRole === 'Administrador'" class="nav-item" @mouseenter="showMenu('homeMenu')"
-                @mouseleave="hideMenu('homeMenu')">
-                Inventario
-                <span class="menu-icon">▼</span>
-                <div class="dropdown-menu" v-show="menus.homeMenu">
-                    <button @click="navigateTo('bajas')">Historial de bajas</button>
-                    <button @click="navigateTo('historialbienes')">Historial de bienes</button>
-                    <button @click="navigateTo('bajabien')">Baja de bienes</button>
-                    <button @click="navigateTo('resguardo')">Bienes sin resguardo</button>
-                    <button @click="navigateTo('listaalmacen')">Asignar No.Inventario</button>
-                    <button @click="navigateTo('bienesnuevos')">Asignar resguardo</button>
-                    <button @click="navigateTo('liberarbien')">Liberar Bien</button>
-                    <button @click="navigateTo('reportes')">Generación de reportes</button>
-                </div>
-            </div>
-
             <!-- Solo mostrar "Almacén" si el usuario tiene el rol de Almacén -->
             <div v-if="userRole === 'Almacenes' || userRole === 'Administrador'" class="nav-item" @mouseenter="showMenu('almacenMenu')"
                 @mouseleave="hideMenu('almacenMenu')">
                 Almacén
                 <span class="menu-icon">▼</span>
                 <div class="dropdown-menu" v-show="menus.almacenMenu">
-                    <button @click="navigateTo('solicitudmaterial')">Salida de material</button>
-                    <button @click="navigateTo('bieninventario')">Agregar un bien para inventario</button>
-                    <button @click="navigateTo('existencia')">Entrada de artículos</button>
-                    <button @click="navigateTo('recepcionsolicitudes')">Recepción de solicitudes</button>
                     <button @click="navigateTo('proveedor')">Ver proveedores</button>
                     <button @click="navigateTo('factura')">Facturas</button>
+                    <button @click="navigateTo('existencia')">Entrada de artículos</button>
+                    <button @click="navigateTo('solicitudmaterial')">Salida de material</button>
+                    <button @click="navigateTo('recepcionsolicitudes')">Recepción de solicitudes</button>
+                    <button @click="navigateTo('bieninventario')">Agregar un bien para inventario</button>
                     <button @click="navigateTo('poliza')">Pólizas</button>
                 </div>
             </div>
+
+            <div v-if="userRole === 'Inventario' || userRole === 'Administrador'" class="nav-item" @mouseenter="showMenu('homeMenu')"
+                @mouseleave="hideMenu('homeMenu')">
+                Inventario
+                <span class="menu-icon">▼</span>
+                <div class="dropdown-menu" v-show="menus.homeMenu">
+                    <button @click="navigateTo('historialbienes')">Historial de bienes</button>
+                    <button @click="navigateTo('resguardo')">Bienes sin resguardo</button>
+                    <button @click="navigateTo('listaalmacen')">Bienes nuevos</button>
+                    <button @click="navigateTo('bienesnuevos')">Asignar resguardo</button>
+                    <button @click="navigateTo('liberarbien')">Liberar Bien</button>
+                    <button @click="navigateTo('bajabien')">Baja de bienes</button>
+                    <button @click="navigateTo('bajas')">Historial de bajas</button>
+                    <button @click="navigateTo('reportes')">Generación de reportes</button>
+                </div>
+            </div>
+
+            
         </div>
 
         <div class="menu">
             <!-- Fila 1 -->
-            <div class="button-card" @click="navigateTo2('solicitudmaterial')">
-                <i class="fas fa-cart-plus"></i> <!-- Ícono de Salida de materiales -->
-                <span>Salida de materiales</span>
-            </div>
-            <div class="button-card" @click="navigateTo2('existencia')">
-                <i class="fas fa-arrow-circle-down"></i> <!-- Ícono de entrada de existencias -->
-                <span>Entrada de Artículos</span>
-            </div>
-            <div class="button-card" @click="navigateTo2('bieninventario')">
-                <i class="fas fa-plus-circle"></i> <!-- Ícono de agregar un bien para inventario -->
-                <span>Agregar un bien para inventario</span>
-            </div>
-        </div>
-
-        <!-- Nueva fila de botones -->
-        <div class="menu">
-
-
-            <div class="button-card" @click="navigateTo2('recepcionsolicitudes')">
-                <i class="fas fa-box"></i> <!-- Ícono de recepción de solicitudes -->
-                <span>Recepción de solicitudes</span>
-            </div>
-
-            <div class="button-card" @click="navigateTo2('proveedor')">
+             <div class="button-card" @click="navigateTo2('proveedor')">
                 <i class="fas fa-handshake"></i> <!-- Ícono de ver proveedores -->
                 <span>Ver proveedores</span>
             </div>
             <div class="button-card" @click="navigateTo2('factura')">
                 <i class="fas fa-file-invoice"></i>
                 <span>Facturas</span>
+            </div>
+             <div class="button-card" @click="navigateTo2('existencia')">
+                <i class="fas fa-arrow-circle-down"></i> <!-- Ícono de entrada de existencias -->
+                <span>Entrada de Artículos</span>
+            </div>
+            
+        </div>
+
+        <!-- Nueva fila de botones -->
+        <div class="menu">
+                
+            <div class="button-card" @click="navigateTo2('solicitudmaterial')">
+                <i class="fas fa-cart-plus"></i> <!-- Ícono de Salida de materiales -->
+                <span>Salida de materiales</span>
+            </div>
+            <div class="button-card" @click="navigateTo2('recepcionsolicitudes')">
+                <i class="fas fa-box"></i> <!-- Ícono de recepción de solicitudes -->
+                <span>Recepción de solicitudes</span>
+            </div>
+
+            
+           <div class="button-card" @click="navigateTo2('bieninventario')">
+                <i class="fas fa-plus-circle"></i> <!-- Ícono de agregar un bien para inventario -->
+                <span>Agregar un bien para inventario</span>
             </div>
 
             <div class="button-card" @click="navigateTo2('poliza')">
@@ -228,7 +231,7 @@ export default {
     width: 100%;
     height: 100%;
     display: flex;
-    background: linear-gradient(to bottom, #000000, #691B31);
+    background: white;
     flex-direction: column;
     color: white;
 }
@@ -239,7 +242,7 @@ export default {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 10px 20px;
+    padding: 30px 20px;
     background: #691B31;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
@@ -269,7 +272,7 @@ export default {
 
 .navbar-center p {
     margin: 0;
-    font-size: 14px;
+    font-size: 18px;
 }
 
 
@@ -428,9 +431,9 @@ a {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    background: #FFFFFF;
+    background:linear-gradient(to right, #691B31, #A02142);
     /* Gradiente suave */
-    color: #691B31;
+    color: #FFFFFF;
     border-radius: 15px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
     /* Sombra sutil */

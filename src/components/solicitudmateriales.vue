@@ -28,36 +28,34 @@
         <div class="sub-navbar">
             <a href="/home" class="nav-item">Inicio</a>
             <a v-if="userRole === 'Administrador'" href="users" class="nav-item">Usuarios</a>
-            <div v-if="userRole === 'Inventario' || userRole === 'Administrador'" class="nav-item"
-                @mouseenter="showMenu('homeMenu')" @mouseleave="hideMenu('homeMenu')">
-                Inventario
+            <div v-if="userRole === 'Almacenes' || userRole === 'Administrador'" class="nav-item" @mouseenter="showMenu('almacenMenu')"
+                @mouseleave="hideMenu('almacenMenu')">
+                Almacén
                 <span class="menu-icon">▼</span>
-                <div class="dropdown-menu" v-show="menus.homeMenu">
-                    <button @click="navigateTo('bajas')">Historial de bajas</button>
-                    <button @click="navigateTo('historialbienes')">Historial de bienes</button>
-                    <button @click="navigateTo('bajabien')">Baja de bienes</button>
-                    <button @click="navigateTo('resguardo')">Bienes sin resguardo</button>
-                    <button @click="navigateTo('listaalmacen')">Asignar No.Inventario</button>
-                    <button @click="navigateTo('bienesnuevos')">Asignar resguardo</button>
-                    <button @click="navigateTo('liberarbien')">Liberar Bien</button>
-                    <button @click="navigateTo('reportes')">Generación de reportes</button>
+                <div class="dropdown-menu" v-show="menus.almacenMenu">
+                    <button @click="navigateTo('proveedor')">Ver proveedores</button>
+                    <button @click="navigateTo('factura')">Facturas</button>
+                    <button @click="navigateTo('existencia')">Entrada de artículos</button>
+                    <button @click="navigateTo('solicitudmaterial')">Salida de material</button>
+                    <button @click="navigateTo('recepcionsolicitudes')">Recepción de solicitudes</button>
+                    <button @click="navigateTo('bieninventario')">Agregar un bien para inventario</button>
+                    <button @click="navigateTo('poliza')">Pólizas</button>
                 </div>
             </div>
 
-            <div v-if="userRole === 'Almacenes' || userRole === 'Administrador'" class="nav-item"
-                @mouseenter="showMenu('solicitudMaterialMenu')" @mouseleave="hideMenu('solicitudMaterialMenu')">
-                Almacen
+            <div v-if="userRole === 'Inventario' || userRole === 'Administrador'" class="nav-item" @mouseenter="showMenu('homeMenu')"
+                @mouseleave="hideMenu('homeMenu')">
+                Inventario
                 <span class="menu-icon">▼</span>
-                <div class="dropdown-menu" v-show="menus.solicitudMaterialMenu">
-                    <button @click="navigateTo('solicitudmaterial')"
-                        style="background-color: #ddc9a3; color: #691b31; border-radius: 4px;">Salida de
-                        material</button>
-                    <button @click="navigateTo('bieninventario')">Agregar un bien para inventario</button>
-                    <button @click="navigateTo('existencia')">Entrada de artículos</button>
-                    <button @click="navigateTo('recepcionsolicitudes')">Recepcion de solicitudes</button>
-                    <button @click="navigateTo('proveedor')">Ver proveedores</button>
-                    <button @click="navigateTo('factura')">Facturas</button>
-                    <button @click="navigateTo('Polizas')">Plizas</button>
+                <div class="dropdown-menu" v-show="menus.homeMenu">
+                    <button @click="navigateTo('historialbienes')">Historial de bienes</button>
+                    <button @click="navigateTo('resguardo')">Bienes sin resguardo</button>
+                    <button @click="navigateTo('listaalmacen')">Bienes nuevos</button>
+                    <button @click="navigateTo('bienesnuevos')">Asignar resguardo</button>
+                    <button @click="navigateTo('liberarbien')">Liberar Bien</button>
+                    <button @click="navigateTo('bajabien')">Baja de bienes</button>
+                    <button @click="navigateTo('bajas')">Historial de bajas</button>
+                    <button @click="navigateTo('reportes')">Generación de reportes</button>
                 </div>
             </div>
         </div>
@@ -88,16 +86,27 @@
                         </div>
                         <div class="form-field">
                             <label for="area">Área</label>
-                            <select v-model="area" required>
-                                <option value="" disabled>Seleccione un área</option>
-                                <option v-for="area in areas" :key="area" :value="area">
-                                    {{ formatArea(area) }}
-                                </option>
-                            </select>
+                            <input 
+                                type="text" 
+                                v-model="area" 
+                                placeholder="Ingrese el área"
+                                required
+                                maxlength="100"
+                            />
+                        </div>
+                        <div class="form-field">
+                            <label for="nombre">Nombre</label>
+                            <input 
+                                type="text" 
+                                v-model="nombre" 
+                                placeholder="Ingrese el nombre"
+                                required
+                                maxlength="100"
+                            />
                         </div>
                         <div class="form-field">
                             <label for="fechaSolicitud">Fecha de Salida</label>
-                            <input type="text" v-model="fechaFormateada" readonly />
+                            <input type="text" v-model="fechaFormateada" required />
                         </div>
                     </div>
                     <table class="solicitud-table">
@@ -220,6 +229,7 @@ export default {
             numeroSolicitud: '', // Nuevo campo para el número de solicitud
             nextSolicitudNumber: 0, // Para llevar el control del siguiente número
             area: "",
+            nombre:"",
             alertMessage: "",  // Mensaje de la alerta
             alertClass: "",    // Clase de la alerta (ej. 'success' o 'error')
             alertIcon: "",     // Icono para la alerta
@@ -257,22 +267,7 @@ export default {
                 solicitudMaterialMenu: false,
                 settingsMenu: false,
             },
-            areas: [
-                "Direccion General",
-                "Direccion de Coordinacion Financiera Y Planeacion",
-                "Direccion de Television",
-                "Direccion de Noticias",
-                "Direccion de Radio",
-                "Direccion de Ingenieria",
-                "Direccion de Proyectos Estrategicos",
-                "Organo Interno de Control",
-                "Direccion de Promocion e Intercambio",
-                "Direccion Juridica",
-                "Direccion de Vinculacion",
-                "Imagen",
-                "Estaciones de Radio",
-                "Estaciones de Television"
-            ],
+            
             showConfirmationModal: false,
             showSignatureModal: false,
             solicitanteNombre: '',
@@ -618,6 +613,7 @@ export default {
                     numero_solicitud: this.numeroSolicitud,
                     direccion_solicitante: this.direccionSolicitante,
                     area: this.area,
+                    nombre: this.nombre,
                     id_articulo: item.id_articulo,
                     cantidad_entregada: item.cantidadEntregada
                 }));
@@ -655,6 +651,8 @@ export default {
         // Resetear formulario
         resetForm() {
             this.direccionSolicitante = '';
+            this.area = '';
+            this.nombre = '';
             this.items = [{
                 numeroPartida: '',
                 unidadMedida: '',
@@ -754,25 +752,7 @@ export default {
             };
             return formatMap[direccion] || direccion;
         },
-        formatArea(area) {
-            const formatMap = {
-                "Direccion General": "Dirección General",
-                "Direccion de Coordinacion Financiera Y Planeacion": "Coordinación Financiera y Planeación",
-                "Direccion de Television": "Dirección de Televisión",
-                "Direccion de Noticias": "Dirección de Noticias",
-                "Direccion de Radio": "Dirección de Radio",
-                "Direccion de Ingenieria": "Dirección de Ingeniería",
-                "Direccion de Proyectos Estrategicos": "Proyectos Estratégicos",
-                "Organo Interno de Control": "Órgano Interno de Control",
-                "Direccion de Promocion e Intercambio": "Promoción e Intercambio",
-                "Direccion Juridica": "Dirección Jurídica",
-                "Direccion de Vinculacion": "Vinculación",
-                "Imagen": "Imagen",
-                "Estaciones de Radio": "Estaciones de Radio",
-                "Estaciones de Television": "Estaciones de Televisión"
-            };
-            return formatMap[area] || area;
-        },
+        
 
 
 
@@ -1244,7 +1224,7 @@ button {
     width: 100%;
     height: 100%;
     display: flex;
-    background: linear-gradient(to bottom, #000000, #691B31);
+    background: white;
     flex-direction: column;
     color: white;
 }
@@ -1254,7 +1234,7 @@ button {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 10px 20px;
+    padding: 30px 20px;
     background: #691B31;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
@@ -1277,7 +1257,7 @@ button {
 
 .navbar-center p {
     margin: 0;
-    font-size: 14px;
+    font-size: 18px;
 }
 
 .navbar-right {
