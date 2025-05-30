@@ -31,7 +31,7 @@
             <a href="/home" class="nav-item">Inicio</a>
 
             <!-- Mostrar solo si el usuario NO es de Almacén -->
-            <a v-if="userRole === 'Administrador'" href="users" class="nav-item">Usuarios</a>
+            <a v-if="userRole === 'Administrador'" href="users" class="nav-item">Aministrador</a>
 
             <!-- Solo mostrar "Almacén" si el usuario tiene el rol de Almacén -->
             <div v-if="userRole === 'Almacenes' || userRole === 'Administrador'" class="nav-item" @mouseenter="showMenu('almacenMenu')"
@@ -44,7 +44,6 @@
                     <button @click="navigateTo('existencia')">Entrada de artículos</button>
                     <button @click="navigateTo('solicitudmaterial')">Salida de material</button>
                     <button @click="navigateTo('recepcionsolicitudes')">Recepción de solicitudes</button>
-                    <button @click="navigateTo('bieninventario')">Agregar un bien para inventario</button>
                     <button @click="navigateTo('poliza')">Pólizas</button>
                 </div>
             </div>
@@ -62,6 +61,16 @@
                     <button @click="navigateTo('bajabien')">Baja de bienes</button>
                     <button @click="navigateTo('bajas')">Historial de bajas</button>
                     <button @click="navigateTo('reportes')">Generación de reportes</button>
+                </div>
+            </div>
+
+            <div v-if="userRole === 'Usuarios' || userRole === 'Administrador'" class="nav-item" @mouseenter="showMenu('userMenu')"
+                @mouseleave="hideMenu('userMenu')">
+                Usuario
+                <span class="menu-icon">▼</span>
+                <div class="dropdown-menu" v-show="menus.userMenu">
+                    <button @click="navigateTo('')">Solicitud de Material</button>
+                    <button @click="navigateTo('resguardoUsuario')">Resguardo</button>
                 </div>
             </div>
 
@@ -108,11 +117,6 @@
                 <span>Pólizas</span>
             </div>
         </div>
-
-
-
-
-
     </div>
 </template>
 
@@ -131,6 +135,8 @@ export default {
                 homeMenu: false,
                 almacenMenu: false,
                 settingsMenu: false,
+                userMenu: false,
+
             },
         };
     },

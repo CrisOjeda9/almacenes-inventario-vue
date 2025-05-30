@@ -11,7 +11,7 @@
                     height="auto" style="cursor: pointer;" />
             </div>
             <div class="navbar-center">
-                <h1>Historial de Bajas</h1>
+                <h1>Resguardo</h1>
                 <p>Sistema de Almacén e Inventarios de Radio y Televisión de Hidalgo</p>
             </div>
             <div class="navbar-right">
@@ -71,15 +71,6 @@
         </div>
 
         <div class="search-bar">
-            <!-- Caja de selección para el filtro -->
-            <select v-model="filterTerm">
-                <option value="">Tipo de Procedencia</option>
-                <option value="RTH">RTH</option>
-                <option value="GA">GA</option>
-                <option value="NT">NT</option>
-                <option value="DON">DON</option>
-                <option value="PG">PG</option>
-            </select>
             <div class="input-wrapper">
                 <input type="text" v-model="searchQuery" placeholder="Buscar..." />
                 <i class="fas fa-search"></i> <!-- Icono de la lupa -->
@@ -90,50 +81,24 @@
         </div>
 
         <div class="contenedor-tabla">
-            <table class="bajas-table">
+            <table class="bienes-table">
                 <thead>
                     <tr>
-                        <th>No. Bien</th>
                         <th>Descripción</th>
-                        <th>Modelo</th>
                         <th>Marca</th>
+                        <th>Modelo</th>
                         <th>Serie</th>
-                        <th>Fecha de Baja</th>
-                        <th>Tipo de Baja</th>
-                        <th>Unidad Presupuestal</th>
-                        <th>Órgano Superior</th>
-                        <th>Documento Baja</th>
-                        <th>Oficio Dictamen</th>
-                        <th>Foto Bien</th>
+                        <th>Foto del Bien</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr v-for="baja in paginatedBajas" :key="baja.id">
-                        <td>{{ baja.numerobien }}</td>
-                        <td>{{ baja.descripcion }}</td>
-                        <td>{{ baja.modelo }}</td>
-                        <td>{{ baja.marca }}</td>
-                        <td>{{ baja.serie }}</td>
-                        <td>{{ baja.fechaBaja }}</td>
-                        <td>{{ baja.tipoBaja }}</td>
-                        <td>{{ baja.unidadPresupuestal }}</td>
-                        <td>{{ baja.organoSuperior }}</td>
+                    <tr v-for="bienes in paginatedBienes" :key="bienes.id">
+                        <td>{{ bienes.descripcion }}</td>
+                        <td>{{ bienes.marca }}</td>
+                        <td>{{ bienes.modelo }}</td>
+                        <td>{{ bienes.serie }}</td>
                         <td>
-                            <a :href="'/ruta/del/archivo/' + bajas.documentoAmpara" download>
-                                <button class="btn-download">
-                                    <i class="fas fa-file-alt"></i> <!-- Icon for document -->
-                                </button>
-                            </a>
-                        </td>
-                        <td>
-                            <a :href="'/ruta/del/archivo/' + bajas.oficioSolicitud" download>
-                                <button class="btn-download">
-                                    <i class="fas fa-file-signature"></i> <!-- Icon for signature or official letter -->
-                                </button>
-                            </a>
-                        </td>
-                        <td>
-                            <button @click="openModal(baja.fotoBien)" class="btn-download">
+                            <button @click="openModal(bienes.fotoBien)" class="btn-download">
                                 <i class="fas fa-eye"></i>
                             </button>
                         </td>
@@ -165,90 +130,77 @@
                 <button @click="closeModal">Cerrar</button>
             </div>
         </div>
+
+
     </div>
 </template>
 
 <script>
 export default {
-    name: "bajasPage",
+    name: "resguardoUsuarioPage",
     data() {
         return {
             userRole: localStorage.getItem('userRole') || '', // Obtener el rol desde el localStorage
-
             userName: "Cargando...", // Mensaje temporal
             profileImage: "",  // URL de la imagen del usuario
-
             menus: {
                 homeMenu: false,
-                bajasMenu: false,
+                bienesMenu: false,
                 settingsMenu: false,
                 userMenu: false,
             },
-            bajas: [
+            searchQuery: '',
+            bienes: [
                 {
-                    numerobien: "12345",
-                    descripcion: "Laptop HP ProBook",
-                    modelo: "ProBook 450 G8",
+                    descripcion: "Computadora de escritorio",
                     marca: "HP",
-                    serie: "5CD12345XYZ",
-                    fechaBaja: "2024-01-15",
-                    tipoBaja: "Robo",
-                    unidadPresupuestal: "Radio y Televisión de Hidalgo",
-                    organoSuperior: "Organismo Descentralizado",
-                    documentoAmpara: "/path/to/documento.pdf",
-                    oficioSolicitud: "/path/to/oficio.pdf",
-                    fotoBien: ["radio-y-television-de-hidalgo.jpg", "radio.jpeg", "radio2.jpg", "radio-y-television-de-hidalgo.jpg", "radio-y-television-de-hidalgo.jpg", "document_download.png", "logo.png"]
+                    modelo: "Pavilion",
+                    serie: "123456789",
+                    fotoBien: ["laptop.jpeg"],
                 },
                 {
-                    numerobien: "67890",
-                    descripcion: "Impresora Canon",
-                    modelo: "PIXMA G6020",
-                    marca: "Canon",
-                    serie: "ABC67890DEF",
-                    fechaBaja: "2024-01-20",
-                    tipoBaja: "Donación",
-                    unidadPresupuestal: "Radio y Televisión de Hidalgo",
-                    organoSuperior: "Organismo Descentralizado",
-                    documentoAmpara: "/path/to/documento2.pdf",
-                    oficioSolicitud: "/path/to/oficio2.pdf",
-                    fotoBien: ["radio-y-television-de-hidalgo.jpg", "radio.jpeg", "radio2.jpg", "radio-y-television-de-hidalgo.jpg", "radio-y-television-de-hidalgo.jpg", "document_download.png", "logo.png"]
-                }
+                    descripcion: "Impresora láser",
+                    marca: "Epson",
+                    modelo: "L120",
+                    serie: "987654321",
+                    fotoBien: ["laptop.jpeg"]
+                },
+                // Agrega más bienes aquí...
             ],
-            itemsPerPage: 10,
-            currentPage: 1,
-            filterTerm: '',
-            searchQuery: '',
+            itemsPerPage: 10, // Cantidad de elementos por página
+            currentPage: 1, // Página actual
+            filterTerm: '', // Variable para filtrar por término específico
             showModal: false,
             modalImages: [],
+            itemToRemove: null,
+
         };
     },
     computed: {
-        filteredBajas() {
-            return this.bajas.filter(baja => {
+        filteredBienes() {
+            return this.bienes.filter(bien => {
                 const query = this.searchQuery.toLowerCase();
                 return (
-                    baja.numerobien.toLowerCase().includes(query) ||
-                    baja.descripcion.toLowerCase().includes(query) ||
-                    baja.modelo.toLowerCase().includes(query) ||
-                    baja.marca.toLowerCase().includes(query) ||
-                    baja.serie.toLowerCase().includes(query) ||
-                    baja.tipoBaja.toLowerCase().includes(query)
+                    bien.descripcion.toLowerCase().includes(query) ||
+                    bien.marca.toLowerCase().includes(query) ||
+                    bien.modelo.toLowerCase().includes(query) ||
+                    bien.serie.toLowerCase().includes(query)
                 );
             });
         },
+        // Número total de páginas
         totalPages() {
-            return Math.ceil(this.filteredBajas.length / this.itemsPerPage);
+            return Math.ceil(this.filteredBienes.length / this.itemsPerPage);
         },
-        paginatedBajas() {
+        paginatedBienes() {
             const start = (this.currentPage - 1) * this.itemsPerPage;
             const end = start + this.itemsPerPage;
-            return this.filteredBajas.slice(start, end);
-        }
+            return this.filteredBienes.slice(start, end);
+        },
     },
     mounted() {
         this.loadUserData();
     },
-
     methods: {
         async loadUserData() {
             const storedUserName = localStorage.getItem("userName");
@@ -324,7 +276,7 @@ export default {
         hideMenu(menu) {
             this.menus[menu] = false;
         },
-        redirectToAddbajas() {
+        redirectToAddbienes() {
             // Aquí defines la ruta a la que quieres redirigir al hacer clic en el botón
             this.$router.push('/register');
         },
@@ -333,10 +285,9 @@ export default {
                 this.currentPage = page;
             }
         },
-        
         getImageUrl(image) {
             return require(`@/assets/${image}`);
-        },
+        }
     },
 };
 </script>
@@ -346,7 +297,6 @@ export default {
 * {
     font-family: 'Montserrat', sans-serif;
 }
-
 
 .image-container {
     display: grid;
@@ -637,7 +587,7 @@ a {
     text-decoration: none;
 }
 
-.bajas-table {
+.bienes-table {
     width: 80%;
     border-collapse: separate;
     border-spacing: 0;
@@ -649,18 +599,18 @@ a {
     /* Para que los bordes no sobresalgan */
 }
 
-.bajas-table th,
-.bajas-table td {
+.bienes-table th,
+.bienes-table td {
     padding: 10px;
     text-align: center;
 }
 
-.bajas-table th {
+.bienes-table th {
     background-color: #BC955B;
     color: white;
 }
 
-.bajas-table tr:hover {
+.bienes-table tr:hover {
     background-color: #70727265;
     color: #A02142;
     transition: background-color 0.3s ease;

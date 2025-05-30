@@ -27,7 +27,7 @@
         <!-- Barra de navegación amarilla -->
         <div class="sub-navbar">
             <a href="/home" class="nav-item">Inicio</a>
-            <a v-if="userRole === 'Administrador'" href="users" class="nav-item">Usuarios</a>
+            <a v-if="userRole === 'Administrador'" href="users" class="nav-item">Aministrador</a>
             <div v-if="userRole === 'Almacenes' || userRole === 'Administrador'" class="nav-item" @mouseenter="showMenu('almacenMenu')"
                 @mouseleave="hideMenu('almacenMenu')">
                 Almacén
@@ -38,7 +38,6 @@
                     <button @click="navigateTo('existencia')">Entrada de artículos</button>
                     <button @click="navigateTo('solicitudmaterial')">Salida de material</button>
                     <button @click="navigateTo('recepcionsolicitudes')">Recepción de solicitudes</button>
-                    <button @click="navigateTo('bieninventario')">Agregar un bien para inventario</button>
                     <button @click="navigateTo('poliza')">Pólizas</button>
                 </div>
             </div>
@@ -58,6 +57,15 @@
                     <button @click="navigateTo('reportes')">Generación de reportes</button>
                 </div>
             </div>
+            <div v-if="userRole === 'Usuarios' || userRole === 'Administrador'" class="nav-item" @mouseenter="showMenu('userMenu')"
+                @mouseleave="hideMenu('userMenu')">
+                Usuario
+                <span class="menu-icon">▼</span>
+                <div class="dropdown-menu" v-show="menus.userMenu">
+                    <button @click="navigateTo('')">Solicitud de Material</button>
+                    <button @click="navigateTo('resguardoUsuario')">Resguardo</button>
+                </div>
+            </div>
         </div>
 
         <div class="search-bar">
@@ -73,74 +81,77 @@
         </div>
 
         <div class="contenedor-tabla">
-            <table class="factura-table">
-                <thead>
-                    <tr>
-                        <th>Tipo de compra</th>
-                        <th>Contrato de compra</th>
-                        <th>Fecha de adquisición</th>
-                        <th>No. Factura</th>
-                        <th>Tipo de Presupuesto</th>
-                        <th>Nombre Proveedor</th>
-                        <th>Cantidad</th>
-                        <th>Precio total sin IVA</th>
-                        <th>IVA</th>
-                        <th>Precio total con IVA</th>
-                        <th>Documento</th>
-                        <th>Fecha de registro</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr v-for="factura in paginatedfactura" :key="factura.id">
-                        <td>{{ factura.tipo_compra }}</td>
-                        <td>
-                            <!-- Mostrar archivos de contrato_compra -->
-                            <template v-if="factura.contrato_compra">
-                                <ul>
-                                    <li v-for="(file, index) in getPdfFiles(factura.contrato_compra)" :key="index">
-                                        <a :href="file.url" target="_blank" :title="file.name">
-                                            {{ truncateFileName(file.name, 20) }}
-                                        </a>
-                                    </li>
-                                </ul>
-                            </template>
-                            <button @click="downloadZip(factura, 'contrato_compra')" class="btn-download">
-                                <p class="textoDescarga">Descargar</p>
-                            </button>
-                        </td>
-                        <td>{{ formatDate(factura.fecha_adquisicion) }}</td>
-                        <td>{{ factura.numero_de_factura }}</td>
-                        <td>{{ factura.tipo_presupuesto }}</td>
-                        <td>{{ getNombreProveedor(factura.id_proveedor) }}</td>
-                        <!-- Aquí se muestra el nombre del proveedor -->
-                        <td>{{ factura.cantidad }}</td>
-                        <td>{{ factura.sub_total }}</td>
-                        <td>{{ factura.iva }}</td>
-                        <td>{{ factura.total }}</td>
-                        <td>
-                            <!-- Mostrar archivos de archivo_pdf -->
-                            <template v-if="factura.archivo_pdf">
-                                <ul>
-                                    <li v-for="(file, index) in getPdfFiles(factura.archivo_pdf)" :key="index">
-                                        <a :href="file.url" target="_blank" :title="file.name">
-                                            {{ truncateFileName(file.name, 20) }}
-                                        </a>
-                                    </li>
-                                </ul>
-                            </template>
-                            <button @click="downloadZip(factura, 'archivo_pdf')" class="btn-download">
-                                <p class="textoDescarga">Descargar</p>
-                            </button>
-                        </td>
-                        <td>{{ formatDate(factura.createdAt) }}</td>
-                        <td>
-                            <button @click="editfactura(factura)" class="btn-edit">Editar</button>
-                            <button @click="showDeleteModal(factura.id)" class="btn-delete">Eliminar</button>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+            <div class="table-horizontal-scroll">
+                <table class="factura-table">
+                    <thead>
+                        <tr>
+                            <th>Tipo de compra</th>
+                            <th>Contrato de compra</th>
+                            <th>Fecha de adquisición</th>
+                            <th>No. Factura</th>
+                            <th>Tipo de Presupuesto</th>
+                            <th>Nombre Proveedor</th>
+                            <th>Cantidad</th>
+                            <th>Precio total sin IVA</th>
+                            <th>IVA</th>
+                            <th>Precio total con IVA</th>
+                            <th>Documento</th>
+                            <th>Fecha de registro</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="factura in paginatedfactura" :key="factura.id">
+                            <td>{{ factura.tipo_compra }}</td>
+                            <td>
+                                <!-- Mostrar archivos de contrato_compra -->
+                                <template v-if="factura.contrato_compra">
+                                    <ul>
+                                        <li v-for="(file, index) in getPdfFiles(factura.contrato_compra)" :key="index">
+                                            <a :href="file.url" target="_blank" :title="file.name">
+                                                {{ truncateFileName(file.name, 20) }}
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </template>
+                                <button @click="downloadZip(factura, 'contrato_compra')" class="btn-download">
+                                    <p class="textoDescarga">Descargar</p>
+                                </button>
+                            </td>
+                            <td>{{ formatDate(factura.fecha_adquisicion) }}</td>
+                            <td>{{ factura.numero_de_factura }}</td>
+                            <td>{{ factura.tipo_presupuesto }}</td>
+                            <td>{{ getNombreProveedor(factura.id_proveedor) }}</td>
+                            <!-- Aquí se muestra el nombre del proveedor -->
+                            <td>{{ factura.cantidad }}</td>
+                            <td>{{ factura.sub_total }}</td>
+                            <td>{{ factura.iva }}</td>
+                            <td>{{ factura.total }}</td>
+                            <td>
+                                <!-- Mostrar archivos de archivo_pdf -->
+                                <template v-if="factura.archivo_pdf">
+                                    <ul>
+                                        <li v-for="(file, index) in getPdfFiles(factura.archivo_pdf)" :key="index">
+                                            <a :href="file.url" target="_blank" :title="file.name">
+                                                {{ truncateFileName(file.name, 20) }}
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </template>
+                                <button @click="downloadZip(factura, 'archivo_pdf')" class="btn-download">
+                                    <p class="textoDescarga">Descargar</p>
+                                </button>
+                            </td>
+                            <td>{{ formatDate(factura.createdAt) }}</td>
+                            <td>
+                                <button @click="editfactura(factura)" class="btn-edit">Editar</button>
+                                <button @click="showDeleteModal(factura.id)" class="btn-delete">Eliminar</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
 
             <!-- Modal de Edición -->
             <div v-if="isEditing" class="edit-modal">
@@ -294,6 +305,7 @@ export default {
                 homeMenu: false,
                 facturaMenu: false,
                 settingsMenu: false,
+                userMenu: false, 
             },
             searchQuery: '',
             currentPage: 1,
@@ -662,64 +674,64 @@ export default {
         },
         // Método para guardar cambios (incluyendo la subida del archivo si existe)
         async saveChanges() {
-    try {
-      // 1. Actualizar datos básicos de la factura
-      const response = await fetch(`http://localhost:3000/api/facturas/${this.currentFactura.id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
+            try {
+            // 1. Actualizar datos básicos de la factura
+            const response = await fetch(`http://localhost:3000/api/facturas/${this.currentFactura.id}`, {
+                method: 'PUT',
+                headers: {
+                'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                ...this.currentFactura,
+                id_proveedor: this.currentFactura.id_proveedor
+                }),
+            });
+
+            if (!response.ok) throw new Error('Error al actualizar la factura');
+
+            // 2. Subir nuevo PDF si existe
+            if (this.selectedPdfFile) {
+                const pdfFormData = new FormData();
+                pdfFormData.append('archivo_pdf', this.selectedPdfFile);
+
+                const pdfResponse = await fetch(`http://localhost:3000/api/facturas/${this.currentFactura.id}/reemplazar-pdf`, {
+                method: 'PUT',
+                body: pdfFormData,
+                });
+
+                if (!pdfResponse.ok) throw new Error('Error al subir el PDF');
+            }
+
+            // 3. Subir nuevo contrato si existe
+            if (this.selectedContratoFile) {
+                const contratoFormData = new FormData();
+                contratoFormData.append('contrato_compra', this.selectedContratoFile);
+
+                const contratoResponse = await fetch(`http://localhost:3000/api/facturas/${this.currentFactura.id}/reemplazar-contrato`, {
+                method: 'PUT',
+                body: contratoFormData,
+                });
+
+                if (!contratoResponse.ok) throw new Error('Error al subir el contrato');
+            }
+
+            // Éxito
+            this.showAlert('Factura actualizada correctamente', "success");
+            await this.fetchFacturas();
+            this.isEditing = false;
+            
+            // Resetear todo
+            this.currentFactura = {};
+            this.selectedPdfFile = null;
+            this.selectedContratoFile = null;
+            this.selectedPdfName = null;
+            this.selectedContratoName = null;
+
+            } catch (error) {
+            console.error('Error:', error);
+            this.showAlert(error.message || 'Error al actualizar la factura', "error");
+            }
         },
-        body: JSON.stringify({
-          ...this.currentFactura,
-          id_proveedor: this.currentFactura.id_proveedor
-        }),
-      });
-
-      if (!response.ok) throw new Error('Error al actualizar la factura');
-
-      // 2. Subir nuevo PDF si existe
-      if (this.selectedPdfFile) {
-        const pdfFormData = new FormData();
-        pdfFormData.append('archivo_pdf', this.selectedPdfFile);
-
-        const pdfResponse = await fetch(`http://localhost:3000/api/facturas/${this.currentFactura.id}/reemplazar-pdf`, {
-          method: 'PUT',
-          body: pdfFormData,
-        });
-
-        if (!pdfResponse.ok) throw new Error('Error al subir el PDF');
-      }
-
-      // 3. Subir nuevo contrato si existe
-      if (this.selectedContratoFile) {
-        const contratoFormData = new FormData();
-        contratoFormData.append('contrato_compra', this.selectedContratoFile);
-
-        const contratoResponse = await fetch(`http://localhost:3000/api/facturas/${this.currentFactura.id}/reemplazar-contrato`, {
-          method: 'PUT',
-          body: contratoFormData,
-        });
-
-        if (!contratoResponse.ok) throw new Error('Error al subir el contrato');
-      }
-
-      // Éxito
-      this.showAlert('Factura actualizada correctamente', "success");
-      await this.fetchFacturas();
-      this.isEditing = false;
-      
-      // Resetear todo
-      this.currentFactura = {};
-      this.selectedPdfFile = null;
-      this.selectedContratoFile = null;
-      this.selectedPdfName = null;
-      this.selectedContratoName = null;
-
-    } catch (error) {
-      console.error('Error:', error);
-      this.showAlert(error.message || 'Error al actualizar la factura', "error");
-    }
-  },
 
         cancelEdit() {
             this.isEditing = false;
@@ -1468,4 +1480,51 @@ button[type="button"]:hover {
 .contenedor-dropzone label {
     color: white;
 }
+.table-horizontal-scroll {
+    overflow-x: auto;
+    /* Solo scroll horizontal */
+    overflow-y: visible;
+    /* Sin scroll vertical */
+    border-radius: 15px;
+    white-space: break-word; /* Evitar que el contenido se ajuste */
+}
+@media (max-width: 768px) {
+   
+    
+    .table-horizontal-scroll {
+        max-width: calc(100vw - 20px); /* Considerar el padding */
+    }
+    
+    .factura-table {
+        min-width: 1000px;
+    }
+    
+    .factura-table th,
+    .factura-table td {
+        padding: 8px 6px;
+        font-size: 14px;
+        min-width: 80px; /* Reducir un poco el ancho mínimo */
+    }
+}
+
+@media (max-width: 480px) {
+    
+    
+    .table-horizontal-scroll {
+        max-width: calc(100vw - 10px);
+    }
+    
+    .factura-table {
+        min-width: 900px;
+    }
+    
+    .factura-table th,
+    .factura-table td {
+        padding: 6px 4px;
+        font-size: 12px;
+        min-width: 70px;
+    }
+}
+
+
 </style>

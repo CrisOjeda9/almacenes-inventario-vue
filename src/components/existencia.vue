@@ -27,7 +27,7 @@
         <!-- Barra de navegación amarilla -->
         <div class="sub-navbar">
             <a href="/home" class="nav-item">Inicio</a>
-            <a v-if="userRole === 'Administrador'" href="users" class="nav-item">Usuarios</a>
+            <a v-if="userRole === 'Administrador'" href="users" class="nav-item">Aministrador</a>
             <div v-if="userRole === 'Almacenes' || userRole === 'Administrador'" class="nav-item" @mouseenter="showMenu('almacenMenu')"
                 @mouseleave="hideMenu('almacenMenu')">
                 Almacén
@@ -38,7 +38,6 @@
                     <button @click="navigateTo('existencia')">Entrada de artículos</button>
                     <button @click="navigateTo('solicitudmaterial')">Salida de material</button>
                     <button @click="navigateTo('recepcionsolicitudes')">Recepción de solicitudes</button>
-                    <button @click="navigateTo('bieninventario')">Agregar un bien para inventario</button>
                     <button @click="navigateTo('poliza')">Pólizas</button>
                 </div>
             </div>
@@ -58,6 +57,15 @@
                     <button @click="navigateTo('reportes')">Generación de reportes</button>
                 </div>
             </div>
+            <div v-if="userRole === 'Usuarios' || userRole === 'Administrador'" class="nav-item" @mouseenter="showMenu('userMenu')"
+                @mouseleave="hideMenu('userMenu')">
+                Usuario
+                <span class="menu-icon">▼</span>
+                <div class="dropdown-menu" v-show="menus.userMenu">
+                    <button @click="navigateTo('')">Solicitud de Material</button>
+                    <button @click="navigateTo('resguardoUsuario')">Resguardo</button>
+                </div>
+            </div>
         </div>
 
         <div class="search-bar">
@@ -73,54 +81,56 @@
         </div>
 
         <div class="contenedor-tabla">
-            <table class="existencia-table">
-                <thead>
-                    <tr>
-                        <th>Núm. factura</th>
-                        <th>Núm. partida</th>
-                        <th>Descripcion</th>
-                        <th>Precio Unitario</th>
-                        <th>IVA</th>
-                        <th>Importe con IVA</th>
-                        <th>Cantidad</th>
-                        <th>Unidad de medida</th>
-                        <th>Total de ingreso</th>
-                        <th>Foto artículo</th>
-                        <th>Fecha de registro</th>
-                        <th>Acciones</th>
-                        <th>Agregar Inventario</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr v-for="existencia in paginatedExistencias" :key="existencia.id">
+            <div class="table-horizontal-scroll">
+                <table class="existencia-table">
+                    <thead>
+                        <tr>
+                            <th>Núm. factura</th>
+                            <th>Núm. partida</th>
+                            <th>Descripcion</th>
+                            <th>Precio Unitario</th>
+                            <th>IVA</th>
+                            <th>Importe con IVA</th>
+                            <th>Cantidad</th>
+                            <th>Unidad de medida</th>
+                            <th>Total de ingreso</th>
+                            <th>Foto artículo</th>
+                            <th>Fecha de registro</th>
+                            <th>Acciones</th>
+                            <th>Agregar Inventario</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="existencia in paginatedExistencias" :key="existencia.id">
 
-                        <td>{{ getNumeroFactura(existencia.id_factura) }}</td>
-                        <td>{{ getNumeroPartida(existencia.id_objetogasto) }}</td>
-                        <td>{{ existencia.descripcion }}</td>
-                        <td>{{ existencia.precio_unitario }}</td>
-                        <td>{{ existencia.iva }}</td>
-                        <td>{{ existencia.importe_con_iva }}</td>
-                        <td>{{ existencia.cantidad }}</td>
-                        <td>{{ existencia.unidad_medida }}</td>
-                        <td>{{ existencia.total_ingreso }}</td>
-                        <td>
-                            <button @click="openModal(existencia.foto_articulo)" class="btn-download">
-                                <i class="fas fa-eye"></i>
-                            </button>
-                        </td>
-                        <td>{{ formatDate(existencia.createdAt) }}</td>
-                        <td>
-                            <button @click="editExistencia(existencia)" class="btn-edit">Editar</button>
-                            <button @click="showDeleteModal(existencia.id)" class="btn-delete">Eliminar</button>
-                        </td>
-                        <td> 
-                            <button @click="addToInventario(existencia)" class="btn-inventario">
-                                <i class="fas fa-plus"></i>
-                            </button>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+                            <td>{{ getNumeroFactura(existencia.id_factura) }}</td>
+                            <td>{{ getNumeroPartida(existencia.id_objetogasto) }}</td>
+                            <td>{{ existencia.descripcion }}</td>
+                            <td>{{ existencia.precio_unitario }}</td>
+                            <td>{{ existencia.iva }}</td>
+                            <td>{{ existencia.importe_con_iva }}</td>
+                            <td>{{ existencia.cantidad }}</td>
+                            <td>{{ existencia.unidad_medida }}</td>
+                            <td>{{ existencia.total_ingreso }}</td>
+                            <td>
+                                <button @click="openModal(existencia.foto_articulo)" class="btn-download">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </td>
+                            <td>{{ formatDate(existencia.createdAt) }}</td>
+                            <td>
+                                <button @click="editExistencia(existencia)" class="btn-edit">Editar</button>
+                                <button @click="showDeleteModal(existencia.id)" class="btn-delete">Eliminar</button>
+                            </td>
+                            <td> 
+                                <button @click="addToInventario(existencia)" class="btn-inventario">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>    
 
             <!-- Modal de Edición -->
             <div v-if="isEditing" class="edit-modal">
@@ -291,10 +301,12 @@ export default {
             profileImage: "",  // URL de la imagen del usuario
             isDeleteModalVisible: false,
             selectedArticuloId: null,
+            inventario: [],
             menus: {
                 homeMenu: false,
                 existenciaMenu: false,
                 settingsMenu: false,
+                userMenu: false,
             },
             searchQuery: '',
             currentPage: 1,
@@ -346,7 +358,7 @@ export default {
     },
     mounted() {
         this.loadUserData();
-        this.loadExistencias(); // Cargar los artículos al montar el componente
+        this.initializeData();
         this.loadObjetosGasto();
         this.loadFacturas();
     },
@@ -376,23 +388,88 @@ export default {
             const date = new Date(dateString);
             return date.toLocaleDateString('es-MX', options); // Usando la configuración en español de México
         },
-        // Cargar los artículos desde la API
+        async initializeData() {
+            try {
+                await this.loadInventario(); // Esperar a que termine de cargar el inventario
+                await this.loadExistencias(); // Después cargar los artículos
+            } catch (error) {
+                console.error('Error al inicializar los datos:', error);
+                this.isLoading = false;
+            }
+        },
+
+        // Método loadInventario actualizado (asegúrate de que sea async)
+        async loadInventario() {
+            try {
+                const response = await axios.get('http://localhost:3000/api/inventario');
+                this.inventario = response.data;
+                console.log('Inventario cargado:', this.inventario);
+            } catch (error) {
+                console.error('Error al cargar el inventario:', error);
+                this.inventario = []; // Asegurar que inventario sea un array vacío en caso de error
+            }
+        },
+
+        // Método loadExistencias actualizado
         async loadExistencias() {
             try {
                 const response = await axios.get('http://localhost:3000/api/articulos');
-                console.log('Datos cargados:', response.data); // Verificar los datos cargados
-                this.existencias = response.data
+                console.log('Datos cargados:', response.data);
+                
+                // Verificar que inventario esté cargado
+                console.log('Inventario disponible:', this.inventario);
+                
+                // Obtener los IDs de artículos que ya están en inventario
+                const articulosEnInventario = this.inventario.map(item => item.id_articulo);
+                console.log('Artículos en inventario (IDs):', articulosEnInventario);
+                
+                // Filtrar los artículos que NO están en inventario
+                const articulosFiltrados = response.data.filter(articulo => {
+                    const estaEnInventario = articulosEnInventario.includes(articulo.id);
+                    console.log(`Artículo ${articulo.id} - ${articulo.descripcion}: ${estaEnInventario ? 'EN INVENTARIO (filtrado)' : 'DISPONIBLE'}`);
+                    return !estaEnInventario;
+                });
+                
+                this.existencias = articulosFiltrados
                     .map(articulo => ({
                         ...articulo,
-                        foto_articulo: articulo.foto_articulo ? this.extractFileNames(articulo.foto_articulo) : [] // Extraer nombres de archivos
+                        foto_articulo: articulo.foto_articulo ? this.extractFileNames(articulo.foto_articulo) : []
                     }))
-                    .sort((a, b) => a.id_objetogasto - b.id_objetogasto); // Ordenar por id_objetogasto ascendente
-                console.log('Datos procesados:', this.existencias); // Verificar los datos procesados
+                    .sort((a, b) => a.id_objetogasto - b.id_objetogasto);
+                    
+                console.log('Total artículos filtrados (sin inventario):', this.existencias.length);
+                console.log('Artículos mostrados:', this.existencias);
             } catch (error) {
                 console.error('Error al cargar los artículos:', error);
             } finally {
-                this.isLoading = false; // Desactivar el indicador de carga
+                this.isLoading = false;
             }
+        },
+
+        // También actualizar el método addToInventario para refrescar la lista
+        async addToInventario(existencia) {
+            // Guardar el ID del artículo en localStorage para acceso posterior
+            localStorage.setItem('articuloId', existencia.id);
+            
+            // También puedes guardarlo en una variable del componente si lo necesitas
+            this.selectedArticuloId = existencia.id;
+            
+            console.log('ID del artículo seleccionado:', existencia.id);
+            
+            // Navegar a la página de inventario con los parámetros
+            this.$router.push({
+                name: 'bieninventario',
+                params: { 
+                    articuloId: existencia.id
+                }
+            });
+        },
+
+        // Agregar un método para refrescar los datos cuando regreses de otra página
+        async refreshData() {
+            this.isLoading = true;
+            await this.loadInventario();
+            await this.loadExistencias();
         },
         // Extraer nombres de archivos de las rutas completas y eliminar la extensión
         extractFileNames(filePaths) {
@@ -616,23 +693,7 @@ export default {
             // Recargar la lista de artículos (opcional)
             this.loadExistencias();
         },
-        addToInventario(existencia) {
-            // Guardar el ID del artículo en localStorage para acceso posterior
-            localStorage.setItem('articuloId', existencia.id);
-            
-            // También puedes guardarlo en una variable del componente si lo necesitas
-            this.selectedArticuloId = existencia.id;
-            
-            console.log('ID del artículo seleccionado:', existencia.id); // Para debugging
-            
-            // Navegar a la página de inventario con los parámetros
-            this.$router.push({
-                name: 'bieninventario',
-                params: { 
-                    articuloId: existencia.id // Pasar el ID como parámetro también
-                }
-            });
-        },
+       
         async saveChanges() {
             try {
                 // 1. Eliminar las imágenes marcadas para eliminación
@@ -1299,15 +1360,19 @@ a {
 }
 
 .existencia-table {
-    width: 95%;
+     width: 100%;
+    /* Ocupa todo el ancho disponible */
+    max-width: 1200px;
+    /* Limita el ancho máximo */
     border-collapse: separate;
     border-spacing: 0;
     background-color: white;
     color: #691B31;
+    font-size: 14px;
     border-radius: 15px;
-    /* Redondear las esquinas de la tabla */
     overflow: hidden;
-    /* Para que los bordes no sobresalgan */
+    table-layout: auto;
+    /* Ajusta el ancho según el contenido */
 }
 
 .existencia-table th,
@@ -1652,4 +1717,50 @@ button[type="button"]:hover {
 .dropzone input[type="file"] {
     display: none;
 }
+.table-horizontal-scroll {
+    overflow-x: auto; /* Scroll horizontal */
+    overflow-y: visible; /* Sin scroll vertical */
+    border-radius: 15px;
+    /* Agregar estas propiedades para forzar el scroll */
+    display: block;
+    white-space: break-word; /* Evitar que el contenido se ajuste */
+}
+@media (max-width: 768px) {
+   
+    
+    .table-horizontal-scroll {
+        max-width: calc(100vw - 20px); /* Considerar el padding */
+    }
+    
+    .existencia-table {
+        min-width: 1000px;
+    }
+    
+    .existencia-table th,
+    .existencia-table td {
+        padding: 8px 6px;
+        font-size: 14px;
+        min-width: 80px; /* Reducir un poco el ancho mínimo */
+    }
+}
+
+@media (max-width: 480px) {
+   
+    
+    .table-horizontal-scroll {
+        max-width: calc(100vw - 10px);
+    }
+    
+    .existencia-table {
+        min-width: 900px;
+    }
+    
+    .existencia-table th,
+    .existencia-table td {
+        padding: 6px 4px;
+        font-size: 12px;
+        min-width: 70px;
+    }
+}
+
 </style>

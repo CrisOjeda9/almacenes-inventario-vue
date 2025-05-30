@@ -27,7 +27,7 @@
         <!-- Barra de navegación amarilla -->
         <div class="sub-navbar">
             <a href="/home" class="nav-item">Inicio</a>
-            <a href="users" class="nav-item">Usuarios</a>
+            <a href="users" class="nav-item">Aministrador</a>
             <div class="nav-item" @mouseenter="showMenu('bieninventarioMenu')"
                 @mouseleave="hideMenu('bieninventarioMenu')">
                 Almacen
@@ -38,7 +38,6 @@
                     <button @click="navigateTo('existencia')">Entrada de artículos</button>
                     <button @click="navigateTo('solicitudmaterial')">Salida de material</button>
                     <button @click="navigateTo('recepcionsolicitudes')">Recepción de solicitudes</button>
-                    <button @click="navigateTo('bieninventario')">Agregar un bien para inventario</button>
                     <button @click="navigateTo('poliza')">Pólizas</button>
                 </div>
             </div>
@@ -54,6 +53,15 @@
                     <button @click="navigateTo('bajabien')">Baja de bienes</button>
                     <button @click="navigateTo('bajas')">Historial de bajas</button>
                     <button @click="navigateTo('reportes')">Generación de reportes</button>
+                </div>
+            </div>
+            <div v-if="userRole === 'Usuarios' || userRole === 'Administrador'" class="nav-item" @mouseenter="showMenu('userMenu')"
+                @mouseleave="hideMenu('userMenu')">
+                Usuario
+                <span class="menu-icon">▼</span>
+                <div class="dropdown-menu" v-show="menus.userMenu">
+                    <button @click="navigateTo('')">Solicitud de Material</button>
+                    <button @click="navigateTo('resguardoUsuario')">Resguardo</button>
                 </div>
             </div>
 
@@ -198,6 +206,7 @@ export default {
                 homeMenu: false,
                 bieninventarioMenu: false,
                 settingsMenu: false,
+                userMenu: false,
             },
         };
     },
@@ -250,6 +259,9 @@ export default {
                 }
             }
         });
+
+        // Cargar el último número de inventario al inicializar
+        this.loadLastInventoryNumber();
     },
     watch: {
         'form.tipoInventario': function (newVal) {
@@ -261,6 +273,73 @@ export default {
         },
     },
     methods: {
+        // Nuevo método para cargar el último número de inventario usado
+        async loadLastInventoryNumber() {
+            try {
+                console.log('Consultando último número de inventario...');
+                const response = await axios.get('http://localhost:3000/api/inventario');
+                const inventarios = response.data;
+                
+                if (inventarios && inventarios.length > 0) {
+                    // Encontrar el número más alto de inventario
+                    const numerosInventario = inventarios
+                        .map(item => parseInt(item.numero_inventario))
+                        .filter(num => !isNaN(num)); // Filtrar números válidos
+                    
+                    if (numerosInventario.length > 0) {
+                        const maxNumber = Math.max(...numerosInventario);
+                        this.inventarioCounter = maxNumber + 1;
+                        console.log('Último número encontrado:', maxNumber);
+                        console.log('Siguiente número a usar:', this.inventarioCounter);
+                    } else {
+                        console.log('No se encontraron números válidos, usando valor por defecto:', this.inventarioCounter);
+                    }
+                } else {
+                    console.log('No hay inventarios previos, usando valor por defecto:', this.inventarioCounter);
+                }
+            } catch (error) {
+                console.error('Error al cargar último número de inventario:', error);
+                console.log('Usando valor por defecto:', this.inventarioCounter);
+            }
+        },
+
+        // Método mejorado para generar número único de inventario
+        async generateInventoryNumber() {
+            try {
+                // Obtener todos los números de inventario existentes
+                const response = await axios.get('http://localhost:3000/api/inventario');
+                const inventarios = response.data;
+                
+                // Extraer todos los números de inventario existentes
+                const numerosExistentes = inventarios
+                    .map(item => parseInt(item.numero_inventario))
+                    .filter(num => !isNaN(num));
+                
+                // Encontrar el siguiente número disponible
+                let nuevoNumero = this.inventarioCounter;
+                
+                // Verificar si el número ya existe y buscar el siguiente disponible
+                while (numerosExistentes.includes(nuevoNumero)) {
+                    nuevoNumero++;
+                }
+                
+                // Actualizar el contador y asignar el número
+                this.inventarioCounter = nuevoNumero;
+                this.form.inventario = nuevoNumero.toString().padStart(5, '0');
+                
+                console.log('Nuevo número de inventario generado:', this.form.inventario);
+                
+                // Incrementar el contador para la próxima vez
+                this.inventarioCounter++;
+                
+            } catch (error) {
+                console.error('Error al generar número de inventario:', error);
+                // En caso de error, usar el método anterior como respaldo
+                this.form.inventario = this.inventarioCounter.toString().padStart(5, '0');
+                this.inventarioCounter++;
+            }
+        },
+
         // Nuevo método para establecer el artículo por ID
         setArticuloById(articuloId) {
             console.log('Buscando artículo con ID:', articuloId);
@@ -376,18 +455,12 @@ export default {
             
             return [];
         },
-
-        generateInventoryNumber() {
-            // Generar un número de inventario único de 5 dígitos (incremental)
-            this.form.inventario = this.inventarioCounter.toString().padStart(5, '0');
-            this.inventarioCounter++; // Incrementar para el siguiente número
-        },
         
-        handleInput() {
+        async handleInput() {
             // Si el tipo de inventario es "gob", dejar al usuario escribir el número.
-            // Si no es "gob", evitar que el usuario lo cambie.
-            if (this.form.tipoInventario !== 'gob' && this.form.inventario !== this.inventarioCounter.toString().padStart(5, '0')) {
-                this.generateInventoryNumber();
+            // Si no es "gob", evitar que el usuario lo cambie y regenerar si es necesario.
+            if (this.form.tipoInventario !== 'gob') {
+                await this.generateInventoryNumber();
             }
         },
 
@@ -407,10 +480,178 @@ export default {
         hideMenu(menu) {
             this.menus[menu] = false;
         },
-        registerBien() {
-            // Aquí procesas el formulario y luego rediriges
-            console.log("Formulario enviado:", this.form);
-            this.$router.push('/bienesnuevos'); // Redirige a la vista de inicio o la vista que desees
+
+        mapTipoPosesion(tipoPosesion) {
+            const mapping = {
+                'inventario': 'inventario',
+                'comodato': 'Comodato'
+            };
+            return mapping[tipoPosesion] || tipoPosesion;
+        },
+
+        // Método para mapear estado del bien a valores ENUM correctos
+        mapEstadoBien(estadoBien) {
+            const mapping = {
+                'nuevo': 'Nuevo',
+                'bueno': 'Bueno', 
+                'regular': 'Regular',
+                'malo': 'Malo',
+                'inservible': 'Inservible'
+            };
+            return mapping[estadoBien] || estadoBien;
+        },
+
+        // Método corregido para registrar bien en inventario
+        async registerBien() {
+            try {
+                console.log("=== REGISTRAR BIEN ===");
+                console.log("Datos del formulario:", this.form);
+
+                // Validar que todos los campos requeridos estén completos
+                if (!this.validateForm()) {
+                    return;
+                }
+
+                // Verificar una vez más que el número de inventario sea único
+                if (this.form.tipoInventario !== 'gob') {
+                    await this.generateInventoryNumber();
+                }
+
+                // Obtener el ID del artículo
+                const articuloId = this.form.id_articulo || this.getArticuloIdByDescription();
+                
+                if (!articuloId) {
+                    alert('Error: No se pudo identificar el artículo seleccionado');
+                    return;
+                }
+
+                // Preparar los datos para enviar con valores ENUM correctos
+                const inventarioData = {
+                    tipo_inventario: this.form.tipoInventario.toUpperCase(),
+                    numero_inventario: parseInt(this.form.inventario),
+                    id_articulo: parseInt(articuloId),
+                    color: this.form.color.trim(),
+                    material: this.form.material.trim(),
+                    marca: this.form.marca.trim(),
+                    modelo: this.form.modelo.trim(),
+                    serie: this.form.serie.trim(),
+                    tipo_posesion: this.mapTipoPosesion(this.form.tipodeposesion), // Usar mapeo correcto
+                    estado_bien: this.mapEstadoBien(this.form.estadobien),  
+                };
+
+                console.log("Enviando datos del inventario:", inventarioData);
+                console.log("Valores mapeados:", {
+                    tipo_posesion: inventarioData.tipo_posesion,
+                    estado_bien: inventarioData.estado_bien
+                });
+
+                // Enviar la solicitud a la API
+                const response = await fetch("http://localhost:3000/api/inventario", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(inventarioData),
+                });
+
+                // Obtener la respuesta
+                const responseData = await response.json();
+                console.log("Respuesta del servidor:", responseData);
+
+                if (!response.ok) {
+                    console.error("Error del servidor:", responseData);
+                    throw new Error(responseData.message || `Error ${response.status}: ${response.statusText}`);
+                }
+
+                console.log("Bien registrado exitosamente:", responseData);
+
+                // Mostrar mensaje de éxito
+                alert("Bien registrado exitosamente en el inventario");
+
+                // Limpiar el formulario
+                this.resetForm();
+
+                // Redirigir a la vista de bienes nuevos
+                this.$router.push('/existencia');
+
+            } catch (error) {
+                console.error("Error completo al registrar el bien:", error);
+                alert(`Hubo un error al registrar el bien: ${error.message}`);
+            }
+        },
+
+        // Método para validar el formulario
+        validateForm() {
+            const requiredFields = [
+                'tipoInventario',
+                'inventario', 
+                'color',
+                'material',
+                'marca',
+                'modelo',
+                'serie',
+                'tipodeposesion',
+                'estadobien'
+            ];
+
+            for (let field of requiredFields) {
+                if (!this.form[field] || this.form[field].trim() === '') {
+                    alert(`Por favor, completa el campo: ${this.getFieldLabel(field)}`);
+                    return false;
+                }
+            }
+
+            // Validar que haya una descripción seleccionada
+            if (!this.selectedArticuloDescription) {
+                alert('Por favor, selecciona un artículo válido');
+                return false;
+            }
+
+            return true;
+        },
+
+        // Método para obtener el label del campo en español
+        getFieldLabel(fieldName) {
+            const labels = {
+                'tipoInventario': 'Tipo de Inventario',
+                'inventario': 'Número de Inventario',
+                'color': 'Color',
+                'material': 'Material',
+                'marca': 'Marca',
+                'modelo': 'Modelo',
+                'serie': 'Serie',
+                'tipodeposesion': 'Tipo de Posesión',
+                'estadobien': 'Estado del Bien'
+            };
+            return labels[fieldName] || fieldName;
+        },
+
+        // Método para obtener el ID del artículo por descripción (respaldo)
+        getArticuloIdByDescription() {
+            if (!this.selectedArticuloDescription) return null;
+            
+            const articulo = this.articulos.find(art => 
+                art.descripcion.toLowerCase() === this.selectedArticuloDescription.toLowerCase()
+            );
+            
+            return articulo ? articulo.id : null;
+        },
+
+        // Método para limpiar el formulario
+        resetForm() {
+            this.form = {
+                tipoInventario: "",
+                inventario: "",
+                id_articulo: "",
+                descripcion: "",
+                color: "",
+                material: "",
+                marca: "",
+                modelo: "",
+                serie: "",
+                tipodeposesion: "",
+                estadobien: ""
+            };
         }
     },
 };
