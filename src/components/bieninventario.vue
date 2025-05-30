@@ -27,40 +27,46 @@
         <!-- Barra de navegación amarilla -->
         <div class="sub-navbar">
             <a href="/home" class="nav-item">Inicio</a>
-            <a href="users" class="nav-item">Usuarios</a>
-            <div class="nav-item" @mouseenter="showMenu('homeMenu')" @mouseleave="hideMenu('homeMenu')">
-                Inventario
-                <span class="menu-icon">▼</span>
-                <div class="dropdown-menu" v-show="menus.homeMenu">
-                    <button @click="navigateTo('bajas')">Historial de bajas</button>
-                    <button @click="navigateTo('historialbienes')">Historial de bienes</button>
-                    <button @click="navigateTo('bajabien')">Baja de bienes</button>
-                    <button @click="navigateTo('resguardo')">Bienes sin resguardo</button>
-                    <button @click="navigateTo('listaalmacen')" >Asignar No.Inventario</button>
-                    <button @click="navigateTo('bienesnuevos')">Asignar resguardo</button>
-                    <button @click="navigateTo('liberarbien')">Liberar Bien</button>
-                    <button @click="navigateTo('reportes')">Generación de reportes</button>
-                </div>
-            </div>
-
+            <a href="users" class="nav-item">Aministrador</a>
             <div class="nav-item" @mouseenter="showMenu('bieninventarioMenu')"
                 @mouseleave="hideMenu('bieninventarioMenu')">
                 Almacen
                 <span class="menu-icon">▼</span>
                 <div class="dropdown-menu" v-show="menus.bieninventarioMenu">
-                    <button @click="navigateTo('solicitudmaterial')">Salida de material</button>
-                    <button @click="navigateTo('bieninventario')"
-                        style="background-color: #ddc9a3; color: #691b31; border-radius: 4px;">Agregar un bien para
-                        inventario</button>
-                    <button @click="navigateTo('existencia')">Entrada de artículos</button>
-                    <button @click="navigateTo('recepcionsolicitudes')">Recepcion de solicitudes</button>
                     <button @click="navigateTo('proveedor')">Ver proveedores</button>
                     <button @click="navigateTo('factura')">Facturas</button>
-                    <button @click="navigateTo('poliza')">Polizas</button>
+                    <button @click="navigateTo('existencia')">Entrada de artículos</button>
+                    <button @click="navigateTo('solicitudmaterial')">Salida de material</button>
+                    <button @click="navigateTo('recepcionsolicitudes')">Recepción de solicitudes</button>
+                    <button @click="navigateTo('poliza')">Pólizas</button>
                 </div>
             </div>
-        </div>
+            <div class="nav-item" @mouseenter="showMenu('homeMenu')" @mouseleave="hideMenu('homeMenu')">
+                Inventario
+                <span class="menu-icon">▼</span>
+                <div class="dropdown-menu" v-show="menus.homeMenu">
+                    <button @click="navigateTo('historialbienes')">Historial de bienes</button>
+                    <button @click="navigateTo('resguardo')">Bienes sin resguardo</button>
+                    <button @click="navigateTo('listaalmacen')">Bienes nuevos</button>
+                    <button @click="navigateTo('bienesnuevos')">Asignar resguardo</button>
+                    <button @click="navigateTo('liberarbien')">Liberar Bien</button>
+                    <button @click="navigateTo('bajabien')">Baja de bienes</button>
+                    <button @click="navigateTo('bajas')">Historial de bajas</button>
+                    <button @click="navigateTo('reportes')">Generación de reportes</button>
+                </div>
+            </div>
+            <div v-if="userRole === 'Usuarios' || userRole === 'Administrador'" class="nav-item" @mouseenter="showMenu('userMenu')"
+                @mouseleave="hideMenu('userMenu')">
+                Usuario
+                <span class="menu-icon">▼</span>
+                <div class="dropdown-menu" v-show="menus.userMenu">
+                    <button @click="navigateTo('')">Solicitud de Material</button>
+                    <button @click="navigateTo('resguardoUsuario')">Resguardo</button>
+                </div>
+            </div>
 
+            
+        </div>
         <!-- Formulario -->
         <div class="form-container">
             <form @submit.prevent="registerBien">
@@ -86,11 +92,18 @@
                             @input="handleInput" required />
                     </div>
                     <!-- Descripción -->
-                    <div class="form-field">
-                        <label for="descripcion">Descripción</label>
-                        <input type="text" id="descripcion" placeholder=""
-                            v-model="form.descripcion" required />
+                    <div class="form-field"> 
+                        <label for="descripcion">Descripción</label> 
+                        <input 
+                            type="text" 
+                            id="descripcion"  
+                            placeholder="" 
+                            :value="selectedArticuloDescription"
+                            readonly
+                            required 
+                        /> 
                     </div>
+
                     <!-- Color -->
                     <div class="form-field">
                         <label for="color">Color</label>
@@ -164,15 +177,20 @@
 </template>
 
 <script>
+import axios from 'axios'; // Asegúrate de tener axios importado
+
 export default {
     name: "BienPage",
     data() {
         return {
             userName: "Cargando...", // Mensaje temporal
             profileImage: "",  // URL de la imagen del usuario
+            articulos: [], // Array para almacenar los artículos
+            isLoading: false, // Indicador de carga
             form: {
                 tipoInventario: "",
                 inventario: "",
+                id_articulo: "",
                 descripcion: "",
                 color: "",
                 material: "",
@@ -188,8 +206,62 @@ export default {
                 homeMenu: false,
                 bieninventarioMenu: false,
                 settingsMenu: false,
+                userMenu: false,
             },
         };
+    },
+    computed: {
+        selectedArticuloDescription() {
+            // Si viene descripción por parámetro, usar esa
+            if (this.$route.params.descripcion) {
+                return this.form.descripcion;
+            }
+            
+            // Si no, buscar por ID seleccionado
+            if (!this.form.id_articulo) return '';
+            const articulo = this.articulos.find(art => art.id == this.form.id_articulo);
+            return articulo ? articulo.descripcion : '';
+        }
+    },
+    mounted() {
+        this.loadUserData();
+        this.loadArticulos().then(() => {
+            // Prioridad 1: Verificar si hay un ID de artículo desde localStorage (más reciente)
+            const articuloIdFromStorage = localStorage.getItem('articuloId');
+            
+            // Prioridad 2: Verificar si se pasó un ID como parámetro en la URL
+            const articuloIdFromParams = this.$route.params.articuloId;
+            
+            // Prioridad 3: Verificar si se pasó una descripción como parámetro (método anterior)
+            const descripcionFromParams = this.$route.params.descripcion;
+
+            if (articuloIdFromStorage) {
+                // Usar el ID desde localStorage (más reciente)
+                console.log('Usando ID desde localStorage:', articuloIdFromStorage);
+                this.setArticuloById(articuloIdFromStorage);
+                // Limpiar localStorage después de usar
+                localStorage.removeItem('articuloId');
+            } else if (articuloIdFromParams) {
+                // Usar el ID desde parámetros de URL
+                console.log('Usando ID desde parámetros:', articuloIdFromParams);
+                this.setArticuloById(articuloIdFromParams);
+            } else if (descripcionFromParams) {
+                // Método anterior: usar descripción para buscar artículo
+                console.log('Usando descripción desde parámetros:', descripcionFromParams);
+                this.form.descripcion = descripcionFromParams;
+                
+                // Buscar y seleccionar automáticamente el artículo correspondiente
+                const articulo = this.articulos.find(art => 
+                    art.descripcion.toLowerCase() === descripcionFromParams.toLowerCase()
+                );
+                if (articulo) {
+                    this.form.id_articulo = articulo.id;
+                }
+            }
+        });
+
+        // Cargar el último número de inventario al inicializar
+        this.loadLastInventoryNumber();
     },
     watch: {
         'form.tipoInventario': function (newVal) {
@@ -200,10 +272,98 @@ export default {
             }
         },
     },
-    mounted() {
-        this.loadUserData();
-    },
     methods: {
+        // Nuevo método para cargar el último número de inventario usado
+        async loadLastInventoryNumber() {
+            try {
+                console.log('Consultando último número de inventario...');
+                const response = await axios.get('http://localhost:3000/api/inventario');
+                const inventarios = response.data;
+                
+                if (inventarios && inventarios.length > 0) {
+                    // Encontrar el número más alto de inventario
+                    const numerosInventario = inventarios
+                        .map(item => parseInt(item.numero_inventario))
+                        .filter(num => !isNaN(num)); // Filtrar números válidos
+                    
+                    if (numerosInventario.length > 0) {
+                        const maxNumber = Math.max(...numerosInventario);
+                        this.inventarioCounter = maxNumber + 1;
+                        console.log('Último número encontrado:', maxNumber);
+                        console.log('Siguiente número a usar:', this.inventarioCounter);
+                    } else {
+                        console.log('No se encontraron números válidos, usando valor por defecto:', this.inventarioCounter);
+                    }
+                } else {
+                    console.log('No hay inventarios previos, usando valor por defecto:', this.inventarioCounter);
+                }
+            } catch (error) {
+                console.error('Error al cargar último número de inventario:', error);
+                console.log('Usando valor por defecto:', this.inventarioCounter);
+            }
+        },
+
+        // Método mejorado para generar número único de inventario
+        async generateInventoryNumber() {
+            try {
+                // Obtener todos los números de inventario existentes
+                const response = await axios.get('http://localhost:3000/api/inventario');
+                const inventarios = response.data;
+                
+                // Extraer todos los números de inventario existentes
+                const numerosExistentes = inventarios
+                    .map(item => parseInt(item.numero_inventario))
+                    .filter(num => !isNaN(num));
+                
+                // Encontrar el siguiente número disponible
+                let nuevoNumero = this.inventarioCounter;
+                
+                // Verificar si el número ya existe y buscar el siguiente disponible
+                while (numerosExistentes.includes(nuevoNumero)) {
+                    nuevoNumero++;
+                }
+                
+                // Actualizar el contador y asignar el número
+                this.inventarioCounter = nuevoNumero;
+                this.form.inventario = nuevoNumero.toString().padStart(5, '0');
+                
+                console.log('Nuevo número de inventario generado:', this.form.inventario);
+                
+                // Incrementar el contador para la próxima vez
+                this.inventarioCounter++;
+                
+            } catch (error) {
+                console.error('Error al generar número de inventario:', error);
+                // En caso de error, usar el método anterior como respaldo
+                this.form.inventario = this.inventarioCounter.toString().padStart(5, '0');
+                this.inventarioCounter++;
+            }
+        },
+
+        // Nuevo método para establecer el artículo por ID
+        setArticuloById(articuloId) {
+            console.log('Buscando artículo con ID:', articuloId);
+            console.log('Artículos disponibles:', this.articulos);
+            
+            // Buscar el artículo por ID
+            const articulo = this.articulos.find(art => art.id == articuloId);
+            
+            if (articulo) {
+                console.log('Artículo encontrado:', articulo);
+                // Establecer el ID y descripción del artículo
+                this.form.id_articulo = articulo.id;
+                this.form.descripcion = articulo.descripcion;
+                
+                console.log('Formulario actualizado:', {
+                    id_articulo: this.form.id_articulo,
+                    descripcion: this.form.descripcion
+                });
+            } else {
+                console.warn('No se encontró ningún artículo con el ID:', articuloId);
+                console.log('IDs disponibles:', this.articulos.map(art => art.id));
+            }
+        },
+
         async loadUserData() {
             const storedUserName = localStorage.getItem("userName");
             const storedUserEmail = localStorage.getItem("userEmail");
@@ -254,16 +414,53 @@ export default {
                 this.profileImage = "../assets/UserHombre.png"; // Imagen por defecto
             }
         },
-        generateInventoryNumber() {
-            // Generar un número de inventario único de 5 dígitos (incremental)
-            this.form.inventario = this.inventarioCounter.toString().padStart(5, '0');
-            this.inventarioCounter++; // Incrementar para el siguiente número
+        
+        async loadArticulos() {
+            this.isLoading = true;
+            try {
+                const response = await axios.get('http://localhost:3000/api/articulos');
+                console.log('Artículos cargados:', response.data); // Verificar los datos cargados
+                
+                this.articulos = response.data
+                    .map(articulo => ({
+                        ...articulo,
+                        // Si tienes fotos, puedes procesarlas aquí también
+                        foto_articulo: articulo.foto_articulo ? this.extractFileNames(articulo.foto_articulo) : []
+                    }))
+                    .sort((a, b) => {
+                        // Ordenar por descripción alfabéticamente
+                        return a.descripcion.localeCompare(b.descripcion);
+                    });
+                    
+                console.log('Artículos procesados:', this.articulos); // Verificar los datos procesados
+            } catch (error) {
+                console.error('Error al cargar los artículos:', error);
+                // Opcional: mostrar mensaje de error al usuario
+                alert('Error al cargar los artículos. Por favor, recarga la página.');
+            } finally {
+                this.isLoading = false; // Desactivar el indicador de carga
+            }
         },
-        handleInput() {
+
+        extractFileNames(filePath) {
+            // Método para extraer nombres de archivos si es necesario
+            if (!filePath) return [];
+            
+            // Si es un string con múltiples rutas separadas por coma
+            if (typeof filePath === 'string') {
+                return filePath.split(',').map(path => {
+                    return path.trim().split('\\').pop().split('/').pop();
+                });
+            }
+            
+            return [];
+        },
+        
+        async handleInput() {
             // Si el tipo de inventario es "gob", dejar al usuario escribir el número.
-            // Si no es "gob", evitar que el usuario lo cambie.
-            if (this.form.tipoInventario !== 'gob' && this.form.inventario !== this.inventarioCounter.toString().padStart(5, '0')) {
-                this.generateInventoryNumber();
+            // Si no es "gob", evitar que el usuario lo cambie y regenerar si es necesario.
+            if (this.form.tipoInventario !== 'gob') {
+                await this.generateInventoryNumber();
             }
         },
 
@@ -283,15 +480,182 @@ export default {
         hideMenu(menu) {
             this.menus[menu] = false;
         },
-        registerBien() {
-            // Aquí procesas el formulario y luego rediriges
-            console.log("Formulario enviado:", this.form);
-            this.$router.push('/bienesnuevos'); // Redirige a la vista de inicio o la vista que desees
+
+        mapTipoPosesion(tipoPosesion) {
+            const mapping = {
+                'inventario': 'inventario',
+                'comodato': 'Comodato'
+            };
+            return mapping[tipoPosesion] || tipoPosesion;
+        },
+
+        // Método para mapear estado del bien a valores ENUM correctos
+        mapEstadoBien(estadoBien) {
+            const mapping = {
+                'nuevo': 'Nuevo',
+                'bueno': 'Bueno', 
+                'regular': 'Regular',
+                'malo': 'Malo',
+                'inservible': 'Inservible'
+            };
+            return mapping[estadoBien] || estadoBien;
+        },
+
+        // Método corregido para registrar bien en inventario
+        async registerBien() {
+            try {
+                console.log("=== REGISTRAR BIEN ===");
+                console.log("Datos del formulario:", this.form);
+
+                // Validar que todos los campos requeridos estén completos
+                if (!this.validateForm()) {
+                    return;
+                }
+
+                // Verificar una vez más que el número de inventario sea único
+                if (this.form.tipoInventario !== 'gob') {
+                    await this.generateInventoryNumber();
+                }
+
+                // Obtener el ID del artículo
+                const articuloId = this.form.id_articulo || this.getArticuloIdByDescription();
+                
+                if (!articuloId) {
+                    alert('Error: No se pudo identificar el artículo seleccionado');
+                    return;
+                }
+
+                // Preparar los datos para enviar con valores ENUM correctos
+                const inventarioData = {
+                    tipo_inventario: this.form.tipoInventario.toUpperCase(),
+                    numero_inventario: parseInt(this.form.inventario),
+                    id_articulo: parseInt(articuloId),
+                    color: this.form.color.trim(),
+                    material: this.form.material.trim(),
+                    marca: this.form.marca.trim(),
+                    modelo: this.form.modelo.trim(),
+                    serie: this.form.serie.trim(),
+                    tipo_posesion: this.mapTipoPosesion(this.form.tipodeposesion), // Usar mapeo correcto
+                    estado_bien: this.mapEstadoBien(this.form.estadobien),  
+                };
+
+                console.log("Enviando datos del inventario:", inventarioData);
+                console.log("Valores mapeados:", {
+                    tipo_posesion: inventarioData.tipo_posesion,
+                    estado_bien: inventarioData.estado_bien
+                });
+
+                // Enviar la solicitud a la API
+                const response = await fetch("http://localhost:3000/api/inventario", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(inventarioData),
+                });
+
+                // Obtener la respuesta
+                const responseData = await response.json();
+                console.log("Respuesta del servidor:", responseData);
+
+                if (!response.ok) {
+                    console.error("Error del servidor:", responseData);
+                    throw new Error(responseData.message || `Error ${response.status}: ${response.statusText}`);
+                }
+
+                console.log("Bien registrado exitosamente:", responseData);
+
+                // Mostrar mensaje de éxito
+                alert("Bien registrado exitosamente en el inventario");
+
+                // Limpiar el formulario
+                this.resetForm();
+
+                // Redirigir a la vista de bienes nuevos
+                this.$router.push('/existencia');
+
+            } catch (error) {
+                console.error("Error completo al registrar el bien:", error);
+                alert(`Hubo un error al registrar el bien: ${error.message}`);
+            }
+        },
+
+        // Método para validar el formulario
+        validateForm() {
+            const requiredFields = [
+                'tipoInventario',
+                'inventario', 
+                'color',
+                'material',
+                'marca',
+                'modelo',
+                'serie',
+                'tipodeposesion',
+                'estadobien'
+            ];
+
+            for (let field of requiredFields) {
+                if (!this.form[field] || this.form[field].trim() === '') {
+                    alert(`Por favor, completa el campo: ${this.getFieldLabel(field)}`);
+                    return false;
+                }
+            }
+
+            // Validar que haya una descripción seleccionada
+            if (!this.selectedArticuloDescription) {
+                alert('Por favor, selecciona un artículo válido');
+                return false;
+            }
+
+            return true;
+        },
+
+        // Método para obtener el label del campo en español
+        getFieldLabel(fieldName) {
+            const labels = {
+                'tipoInventario': 'Tipo de Inventario',
+                'inventario': 'Número de Inventario',
+                'color': 'Color',
+                'material': 'Material',
+                'marca': 'Marca',
+                'modelo': 'Modelo',
+                'serie': 'Serie',
+                'tipodeposesion': 'Tipo de Posesión',
+                'estadobien': 'Estado del Bien'
+            };
+            return labels[fieldName] || fieldName;
+        },
+
+        // Método para obtener el ID del artículo por descripción (respaldo)
+        getArticuloIdByDescription() {
+            if (!this.selectedArticuloDescription) return null;
+            
+            const articulo = this.articulos.find(art => 
+                art.descripcion.toLowerCase() === this.selectedArticuloDescription.toLowerCase()
+            );
+            
+            return articulo ? articulo.id : null;
+        },
+
+        // Método para limpiar el formulario
+        resetForm() {
+            this.form = {
+                tipoInventario: "",
+                inventario: "",
+                id_articulo: "",
+                descripcion: "",
+                color: "",
+                material: "",
+                marca: "",
+                modelo: "",
+                serie: "",
+                tipodeposesion: "",
+                estadobien: ""
+            };
         }
     },
 };
 </script>
-
 
 <style scoped>
 /* Aplicar Montserrat a todo el contenido */
@@ -306,7 +670,7 @@ export default {
     width: 100%;
     height: 100%;
     display: flex;
-    background: linear-gradient(to bottom, #000000, #691B31);
+    background: white;
     flex-direction: column;
     color: white;
 }
@@ -317,7 +681,7 @@ export default {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 10px 20px;
+    padding: 30px 20px;
     background: #691B31;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
@@ -347,7 +711,7 @@ export default {
 
 .navbar-center p {
     margin: 0;
-    font-size: 14px;
+    font-size: 18px;
 }
 
 .navbar-right {
@@ -446,8 +810,8 @@ form {
     padding: 30px;
     padding-bottom: 80px;
     border-radius: 10px;
-    width: 1000px;
-    height: 250px;
+    width: auto;
+    height: auto;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
@@ -528,5 +892,56 @@ a {
     font-size: 14px;
     width: 100%;
     box-sizing: border-box;
+}
+.search-bar {
+    margin: 20px 0;
+    text-align: center;
+    width: auto;
+
+}
+.input-wrapper {
+    position: relative;
+}
+
+.input-wrapper input {
+    width: 100%;
+
+    /* Espacio para el ícono */
+}
+
+.input-wrapper i {
+    position: absolute;
+    right: -10px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+}
+.input-wrapper {
+    position: relative;
+    width: 60%;
+    display: inline-block;
+}
+
+.input-wrapper input {
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+    border-radius: 25px;
+    border: 1px solid #BC955B;
+    background-color: #fff;
+}
+
+.input-wrapper i {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 18px;
+    color: #691B31;
+    pointer-events: none;
+}
+
+.input-wrapper input::placeholder {
+    color: #691B31;
 }
 </style>

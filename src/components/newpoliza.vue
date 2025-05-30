@@ -27,38 +27,43 @@
         <!-- Barra de navegación amarilla -->
         <div class="sub-navbar">
             <a href="/home" class="nav-item">Inicio</a>
-            <a v-if="userRole === 'Administrador'" href="users" class="nav-item">Usuarios</a>
-            <div v-if="userRole === 'Inventario' || userRole === 'Administrador'" class="nav-item"
-                @mouseenter="showMenu('homeMenu')" @mouseleave="hideMenu('homeMenu')">
-                Inventario
+            <a v-if="userRole === 'Administrador'" href="users" class="nav-item">Aministrador</a>
+            <div v-if="userRole === 'Almacenes' || userRole === 'Administrador'" class="nav-item" @mouseenter="showMenu('almacenMenu')"
+                @mouseleave="hideMenu('almacenMenu')">
+                Almacén
                 <span class="menu-icon">▼</span>
-                <div class="dropdown-menu" v-show="menus.homeMenu">
-                    <button @click="navigateTo('bajas')">Historial de bajas</button>
-                    <button @click="navigateTo('historialbienes')">Historial de bienes</button>
-                    <button @click="navigateTo('bajabien')">Baja de bienes</button>
-                    <button @click="navigateTo('resguardo')">Bienes sin resguardo</button>
-                    <button @click="navigateTo('listaalmacen')">Asignar No.Inventario</button>
-                    <button @click="navigateTo('bienesnuevos')">Asignar resguardo</button>
-                    <button @click="navigateTo('liberarbien')">Liberar Bien</button>
-                    <button @click="navigateTo('reportes')">Generación de reportes</button>
-
-
+                <div class="dropdown-menu" v-show="menus.almacenMenu">
+                    <button @click="navigateTo('proveedor')">Ver proveedores</button>
+                    <button @click="navigateTo('factura')">Facturas</button>
+                    <button @click="navigateTo('existencia')">Entrada de artículos</button>
+                    <button @click="navigateTo('solicitudmaterial')">Salida de material</button>
+                    <button @click="navigateTo('recepcionsolicitudes')">Recepción de solicitudes</button>
+                    <button @click="navigateTo('poliza')">Pólizas</button>
                 </div>
             </div>
 
-            <div v-if="userRole === 'Almacenes' || userRole === 'Administrador'" class="nav-item"
-                @mouseenter="showMenu('polizaMenu')" @mouseleave="hideMenu('polizaMenu')">
-                Almacen
+            <div v-if="userRole === 'Inventario' || userRole === 'Administrador'" class="nav-item" @mouseenter="showMenu('homeMenu')"
+                @mouseleave="hideMenu('homeMenu')">
+                Inventario
                 <span class="menu-icon">▼</span>
-                <div class="dropdown-menu" v-show="menus.polizaMenu">
-                    <button @click="navigateTo('solicitudmaterial')">Salida de material</button>
-                    <button @click="navigateTo('bieninventario')">Agregar un bien para inventario</button>
-                    <button @click="navigateTo('existencia')">Entrada de artículos</button>
-                    <button @click="navigateTo('recepcionsolicitudes')">Recepcion de solicitudes</button>
-                    <button @click="navigateTo('proveedor')">Ver proveedores</button>
-                    <button @click="navigateTo('factura')">Facturas</button>
-                    <button @click="navigateTo('poliza')"
-                        style="background-color: #ddc9a3; color: #691b31; border-radius: 4px;">Polizas</button>
+                <div class="dropdown-menu" v-show="menus.homeMenu">
+                    <button @click="navigateTo('historialbienes')">Historial de bienes</button>
+                    <button @click="navigateTo('resguardo')">Bienes sin resguardo</button>
+                    <button @click="navigateTo('listaalmacen')">Bienes nuevos</button>
+                    <button @click="navigateTo('bienesnuevos')">Asignar resguardo</button>
+                    <button @click="navigateTo('liberarbien')">Liberar Bien</button>
+                    <button @click="navigateTo('bajabien')">Baja de bienes</button>
+                    <button @click="navigateTo('bajas')">Historial de bajas</button>
+                    <button @click="navigateTo('reportes')">Generación de reportes</button>
+                </div>
+            </div>
+            <div v-if="userRole === 'Usuarios' || userRole === 'Administrador'" class="nav-item" @mouseenter="showMenu('userMenu')"
+                @mouseleave="hideMenu('userMenu')">
+                Usuario
+                <span class="menu-icon">▼</span>
+                <div class="dropdown-menu" v-show="menus.userMenu">
+                    <button @click="navigateTo('')">Solicitud de Material</button>
+                    <button @click="navigateTo('resguardoUsuario')">Resguardo</button>
                 </div>
             </div>
         </div>
@@ -75,7 +80,7 @@
 
                     <!-- Cobertura -->
                     <div class="form-field">
-                        <label for="cobertura">Cobertura</label>
+                        <label for="cobertura">Número de poliza</label>
                         <input type="text" id="cobertura" v-model="form.cobertura" required />
                     </div>
 
@@ -94,53 +99,9 @@
                             <option value="Depositos">Depósitos</option>
                         </select>
                     </div>
-
-                    <!-- Calidad -->
-                    <div class="form-field">
-                        <label for="calidad">Calidad</label>
-                        <input type="text" id="calidad" v-model="form.calidad" required />
-                    </div>
                 </div>
-
                 <div class="form-row">
-                    <!-- Deducible -->
-                    <div class="form-field">
-                        <label for="deducible">Deducible</label>
-                        <input type="number" step="0.01" id="deducible" v-model="form.deducible" min="0" required />
-                    </div>
-
-                    <!-- Prima -->
-                    <div class="form-field">
-                        <label for="prima">Prima</label>
-                        <input type="number" step="0.01" id="prima" v-model="form.prima" min="0" required />
-                    </div>
-
-                    <!-- Cantidad -->
-                    <div class="form-field">
-                        <label for="cantidad">Cantidad</label>
-                        <input type="number" step="0.01" id="cantidad" v-model="form.cantidad" min="0" required />
-                    </div>
-
-                    <!-- Límite de indemnización -->
-                    <div class="form-field">
-                        <label for="limites_indemnizacion">Límite de indemnización</label>
-                        <input type="text" id="limites_indemnizacion" v-model="form.limites_indemnizacion" required />
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <!-- Periodo de Validación -->
-                    <div class="form-field">
-                        <label for="periodo_vigencia">Periodo de Validación</label>
-                        <input type="date" id="periodo_vigencia" v-model="form.periodo_vigencia" required />
-                    </div>
-
-                    <!-- Clausulas de exclusión -->
-                    <div class="form-field">
-                        <label for="clausulas_exclusion">Cláusulas de exclusión</label>
-                        <input type="text" id="clausulas_exclusion" v-model="form.clausulas_exclusion" required />
-                    </div>
-
+                
                     <!-- Fecha de Póliza -->
                     <div class="form-field">
                         <label for="fecha">Fecha de Póliza</label>
@@ -205,6 +166,7 @@ export default {
                 homeMenu: false,
                 polizaMenu: false,
                 settingsMenu: false,
+                userMenu: false,
             },
             showModal: false, // Controla la visibilidad del modal de éxito
             errorMessage: "", // Mensaje de error
@@ -294,9 +256,7 @@ export default {
         async registerPoliza() {
             try {
                 // Validar que todos los campos obligatorios estén completos
-                if (!this.form.descripcion || !this.form.cobertura || !this.form.tipo || !this.form.calidad ||
-                    !this.form.deducible || !this.form.prima || !this.form.cantidad || !this.form.limites_indemnizacion ||
-                    !this.form.periodo_vigencia || !this.form.clausulas_exclusion || !this.form.fecha || !this.form.archivo) {
+                if (!this.form.descripcion || !this.form.cobertura || !this.form.tipo || !this.form.fecha || !this.form.archivo) {
                     this.errorMessage = "Por favor, completa todos los campos obligatorios.";
                     return;
                 }
@@ -304,15 +264,8 @@ export default {
                 // Crear un objeto FormData para enviar los datos del formulario
                 const formData = new FormData();
                 formData.append("descripcion", this.form.descripcion);
-                formData.append("cobertura", this.form.cobertura);
+                formData.append("numero_poliza", this.form.cobertura);
                 formData.append("tipo", this.form.tipo);
-                formData.append("calidad", this.form.calidad);
-                formData.append("deducible", this.form.deducible);
-                formData.append("prima", this.form.prima);
-                formData.append("cantidad", this.form.cantidad);
-                formData.append("limites_indemnizacion", this.form.limites_indemnizacion);
-                formData.append("periodo_vigencia", this.form.periodo_vigencia);
-                formData.append("clausulas_exclusion", this.form.clausulas_exclusion);
                 formData.append("fecha", this.form.fecha);
 
                 // Agregar el archivo al FormData si existe
@@ -397,7 +350,7 @@ export default {
     width: 100%;
     height: 100%;
     display: flex;
-    background: linear-gradient(to bottom, #000000, #691B31);
+    background: white;
     flex-direction: column;
     color: white;
 }
@@ -408,7 +361,7 @@ export default {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 10px 20px;
+    padding: 30px 20px;
     background: #691B31;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
@@ -438,7 +391,7 @@ export default {
 
 .navbar-center p {
     margin: 0;
-    font-size: 14px;
+    font-size: 18px;
 }
 
 .navbar-right {
@@ -537,8 +490,8 @@ form {
     padding: 30px;
     padding-bottom: 80px;
     border-radius: 10px;
-    width: 1000px;
-    height: 300px;
+    width: auto;
+    height: auto;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 

@@ -27,37 +27,43 @@
         <!-- Barra de navegación amarilla -->
         <div class="sub-navbar">
             <a href="/home" class="nav-item">Inicio</a>
-            <a v-if="userRole === 'Administrador'" href="users" class="nav-item">Usuarios</a>
-            <div v-if="userRole === 'Inventario' || userRole === 'Administrador'" class="nav-item"
-                @mouseenter="showMenu('homeMenu')" @mouseleave="hideMenu('homeMenu')">
-                Inventario
+            <a v-if="userRole === 'Administrador'" href="users" class="nav-item">Aministrador</a>
+            <div v-if="userRole === 'Almacenes' || userRole === 'Administrador'" class="nav-item" @mouseenter="showMenu('almacenMenu')"
+                @mouseleave="hideMenu('almacenMenu')">
+                Almacén
                 <span class="menu-icon">▼</span>
-                <div class="dropdown-menu" v-show="menus.homeMenu">
-                    <button @click="navigateTo('bajas')">Historial de bajas</button>
-                    <button @click="navigateTo('historialbienes')">Historial de bienes</button>
-                    <button @click="navigateTo('bajabien')">Baja de bienes</button>
-                    <button @click="navigateTo('resguardo')">Bienes sin resguardo</button>
-                    <button @click="navigateTo('listaalmacen')">Asignar No.Inventario</button>
-                    <button @click="navigateTo('bienesnuevos')">Asignar resguardo</button>
-                    <button @click="navigateTo('liberarbien')">Liberar Bien</button>
-                    <button @click="navigateTo('reportes')">Generación de reportes</button>
+                <div class="dropdown-menu" v-show="menus.almacenMenu">
+                    <button @click="navigateTo('proveedor')">Ver proveedores</button>
+                    <button @click="navigateTo('factura')">Facturas</button>
+                    <button @click="navigateTo('existencia')">Entrada de artículos</button>
+                    <button @click="navigateTo('solicitudmaterial')">Salida de material</button>
+                    <button @click="navigateTo('recepcionsolicitudes')">Recepción de solicitudes</button>
+                    <button @click="navigateTo('poliza')">Pólizas</button>
                 </div>
             </div>
 
-            <div v-if="userRole === 'Almacenes' || userRole === 'Administrador'" class="nav-item"
-                @mouseenter="showMenu('existenciaMenu')" @mouseleave="hideMenu('existenciaMenu')">
-                Almacen
+            <div v-if="userRole === 'Inventario' || userRole === 'Administrador'" class="nav-item" @mouseenter="showMenu('homeMenu')"
+                @mouseleave="hideMenu('homeMenu')">
+                Inventario
                 <span class="menu-icon">▼</span>
-                <div class="dropdown-menu" v-show="menus.existenciaMenu">
-                    <button @click="navigateTo('solicitudmaterial')">Salida de material</button>
-                    <button @click="navigateTo('bieninventario')">Agregar un bien para inventario</button>
-                    <button @click="navigateTo('existencia')"
-                        style="background-color: #ddc9a3; color: #691b31; border-radius: 4px;">Entrada de
-                        artículos</button>
-                    <button @click="navigateTo('recepcionsolicitudes')">Recepcion de solicitudes</button>
-                    <button @click="navigateTo('proveedor')">Ver proveedores</button>
-                    <button @click="navigateTo('factura')">Facturas</button>
-                    <button @click="navigateTo('poliza')">Polizas</button>
+                <div class="dropdown-menu" v-show="menus.homeMenu">
+                    <button @click="navigateTo('historialbienes')">Historial de bienes</button>
+                    <button @click="navigateTo('resguardo')">Bienes sin resguardo</button>
+                    <button @click="navigateTo('listaalmacen')">Bienes nuevos</button>
+                    <button @click="navigateTo('bienesnuevos')">Asignar resguardo</button>
+                    <button @click="navigateTo('liberarbien')">Liberar Bien</button>
+                    <button @click="navigateTo('bajabien')">Baja de bienes</button>
+                    <button @click="navigateTo('bajas')">Historial de bajas</button>
+                    <button @click="navigateTo('reportes')">Generación de reportes</button>
+                </div>
+            </div>
+            <div v-if="userRole === 'Usuarios' || userRole === 'Administrador'" class="nav-item" @mouseenter="showMenu('userMenu')"
+                @mouseleave="hideMenu('userMenu')">
+                Usuario
+                <span class="menu-icon">▼</span>
+                <div class="dropdown-menu" v-show="menus.userMenu">
+                    <button @click="navigateTo('')">Solicitud de Material</button>
+                    <button @click="navigateTo('resguardoUsuario')">Resguardo</button>
                 </div>
             </div>
         </div>
@@ -299,6 +305,7 @@ export default {
                 homeMenu: false,
                 existenciaMenu: false,
                 settingsMenu: false,
+                userMenu: false,
             },
             modalVisible: false,
             buttonType: "",
@@ -460,6 +467,170 @@ export default {
             this.resetForm(true);
         },
 
+       // Método para actualizar la cantidad y total de la factura
+        async updateFacturaCantidad(facturaId, nuevaCantidad, nuevoTotal = null) {
+            try {
+                const updateData = {
+                    cantidad: nuevaCantidad
+                };
+                
+                // Si se proporciona un nuevo total, incluirlo en la actualización
+                if (nuevoTotal !== null) {
+                    updateData.total = nuevoTotal;
+                }
+
+                const response = await axios.put(`http://localhost:3000/api/facturas/${facturaId}`, updateData, {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
+                
+                if (response.status === 200) {
+                    console.log('Factura actualizada correctamente');
+                    return true;
+                }
+            } catch (error) {
+                console.error('Error al actualizar la factura:', error);
+                return false;
+            }
+        },
+
+        // Método registerExistencia actualizado
+        async registerExistencia(tipo) {
+            // Validar campos obligatorios
+            const camposObligatorios = [
+                { campo: 'numero_partida', mensaje: 'Número de partida' },
+                { campo: 'numero_de_factura', mensaje: 'Número de factura' },
+                { campo: 'descripcion', mensaje: 'Descripción del artículo' },
+                { campo: 'precio_unitario', mensaje: 'Importe sin IVA' },
+                { campo: 'iva', mensaje: 'IVA' },
+                { campo: 'importe_con_iva', mensaje: 'Importe con IVA' },
+                { campo: 'cantidad', mensaje: 'Cantidad' },
+                { campo: 'unidad_medida', mensaje: 'Unidad de medida' },
+                { campo: 'total_ingreso', mensaje: 'Total de ingreso' }
+            ];
+
+            for (const { campo, mensaje } of camposObligatorios) {
+                if (!this.form[campo]) {
+                    this.showAlert(`Por favor, completa el campo: ${mensaje}`, "error");
+                    return;
+                }
+            }
+
+            // Validar que el número de partida sea válido
+            if (!this.validarNumeroPartida()) {
+                this.showAlert(this.errorNumeroPartida || "El número de partida no es válido.", "error");
+                return;
+            }
+
+            // Validar que el número de factura sea válido
+            if (!await this.validarNumeroFactura()) {
+                this.showAlert(this.errorNumeroFactura || "El número de factura no es válido.", "error");
+                return;
+            }
+
+            if (this.form.foto_articulo.length === 0) {
+                this.showAlert("Por favor, agrega una foto del artículo.", "error");
+                return;
+            }
+
+            // Obtener la factura actual para calcular la nueva cantidad
+            const facturaActual = this.facturas.find(f => f.id == this.form.id_factura);
+            if (!facturaActual) {
+                this.showAlert("No se encontró la factura correspondiente", "error");
+                return;
+            }
+
+            // Crear FormData para enviar archivos y datos
+            const formData = new FormData();
+            formData.append('id_objetogasto', this.form.id_objetogasto);
+            formData.append('id_factura', this.form.id_factura);
+            formData.append('numero_de_factura', this.form.numero_de_factura);
+            formData.append('numero_partida', this.form.numero_partida);
+            formData.append('descripcion', this.form.descripcion);
+            formData.append('precio_unitario', this.form.precio_unitario);
+            formData.append('iva', this.form.iva);
+            formData.append('importe_con_iva', this.form.importe_con_iva);
+            formData.append('cantidad', this.form.cantidad);
+            formData.append('unidad_medida', this.form.unidad_medida);
+            formData.append('total_ingreso', this.form.total_ingreso);
+
+            // Agregar archivos al FormData
+            this.form.foto_articulo.forEach((file) => {
+                formData.append('foto_articulo', file);
+            });
+
+            try {
+                // Registrar el artículo
+                const response = await axios.post('http://localhost:3000/api/articulos', formData, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
+
+                if (response.status === 201) {
+                    // Calcular nueva cantidad y total de la factura
+                    const cantidadUsada = parseFloat(this.form.cantidad);
+                    const totalUsado = parseFloat(this.form.total_ingreso);
+                    const cantidadActual = parseFloat(facturaActual.cantidad);
+                    const totalActual = parseFloat(facturaActual.total);
+                    
+                    const nuevaCantidad = Math.max(0, cantidadActual - cantidadUsada);
+                    const nuevoTotal = Math.max(0, totalActual - totalUsado);
+
+                    // Actualizar la cantidad y total en la factura
+                    const facturaActualizada = await this.updateFacturaCantidad(
+                        this.form.id_factura, 
+                        nuevaCantidad, 
+                        nuevoTotal
+                    );
+                    this.showModal = true;
+                    this.mostrarModal();
+                    this.buttonType = tipo;
+
+                    if (facturaActualizada) {
+                        // Actualizar la factura en el array local
+                        const index = this.facturas.findIndex(f => f.id == this.form.id_factura);
+                        if (index !== -1) {
+                            this.facturas[index].cantidad = nuevaCantidad;
+                            this.facturas[index].total = nuevoTotal;
+                            
+                            // Si la cantidad llega a 0, marcar como completamente registrada
+                            if (nuevaCantidad === 0) {
+                                this.facturas[index].registrada_completa = true;
+                            }
+                        }
+                        
+                        this.showAlert(
+                            `Artículo registrado exitosamente. Cantidad restante: ${nuevaCantidad}, Total restante: $${nuevoTotal.toFixed(2)}`, 
+                            "success"
+                        );
+                    } else {
+                        this.showAlert("Artículo registrado, pero hubo un error al actualizar la factura", "warning");
+                    }
+
+                    // Mostrar modal y configurar redirección
+                    this.showModal = true;
+                    this.mostrarModal();
+                    this.buttonType = tipo;
+                    
+                    // Limpiar formulario
+                    this.resetForm();
+                }
+            } catch (error) {
+                console.error('Error al enviar el formulario:', error);
+                if (error.response) {
+                    this.showAlert(`Error: ${error.response.data.message || 'Hubo un error al enviar el formulario.'}`, "error");
+                } else if (error.request) {
+                    this.showAlert('No se recibió respuesta del servidor. Por favor, verifica tu conexión a internet.', 'error');
+                } else {
+                    this.showAlert('Hubo un error al configurar la solicitud. Por favor, intenta nuevamente.', "error");
+                }
+            }
+        },
+
+        // Método registerAllArticles actualizado
         async registerAllArticles() {
             try {
                 if (this.articulosTabla.length === 0) {
@@ -499,8 +670,6 @@ export default {
                     return;
                 }
 
-               
-
                 // Enviar artículos
                 const requests = this.articulosTabla.map(articulo => {
                     const formData = new FormData();
@@ -526,18 +695,30 @@ export default {
                 const responses = await Promise.all(requests);
 
                 if (responses.every(r => r.status === 201)) {
+                    // Actualizar la cantidad y total de la factura a 0 (ya que se registraron todos los artículos)
+                    const facturaActualizada = await this.updateFacturaCantidad(factura.id, 0, 0);
+                    
+                    if (facturaActualizada) {
+                        // Actualizar la factura en el array local
+                        const index = this.facturas.findIndex(f => f.id == factura.id);
+                        if (index !== -1) {
+                            this.facturas[index].cantidad = 0;
+                            this.facturas[index].total = 0;
+                            this.facturas[index].registrada_completa = true; // Marcar como completamente registrada
+                        }
+                    }
+
                     this.mostrarModal();
                     this.articulosTabla = [];
                     this.facturaBloqueada = null;
                     this.resetForm();
-                    this.showAlert("Artículos registrados exitosamente", "success");
+                    this.showAlert("Artículos registrados exitosamente. Factura completamente procesada.", "success");
                 }
             } catch (error) {
                 console.error('Error:', error);
                 this.showAlert('Error al registrar artículos', "error");
             }
         },
-
         resetForm(keepFactura = false) {
             this.form = {
                 id_objetogasto: "",
@@ -805,86 +986,7 @@ export default {
                 !f.registrada_completa
             );
         },
-        async registerExistencia(tipo) {
-            // Validar campos obligatorios
-            const camposObligatorios = [
-                { campo: 'numero_partida', mensaje: 'Número de partida' },
-                { campo: 'numero_de_factura', mensaje: 'Número de factura' },
-                { campo: 'descripcion', mensaje: 'Descripción del artículo' },
-                { campo: 'precio_unitario', mensaje: 'Importe sin IVA' },
-                { campo: 'iva', mensaje: 'IVA' },
-                { campo: 'importe_con_iva', mensaje: 'Importe con IVA' },
-                { campo: 'cantidad', mensaje: 'Cantidad' },
-                { campo: 'unidad_medida', mensaje: 'Unidad de medida' },
-                { campo: 'total_ingreso', mensaje: 'Total de ingreso' }
-            ];
-
-            for (const { campo, mensaje } of camposObligatorios) {
-                if (!this.form[campo]) {
-                    this.showAlert(`Por favor, completa el campo: ${mensaje}`, "error");
-                    return;
-                }
-            }
-
-            // Validar que el número de partida sea válido
-            if (!this.validarNumeroPartida()) {
-                this.showAlert(this.errorNumeroPartida || "El número de partida no es válido.", "error");
-                return;
-            }
-
-            // Validar que el número de factura sea válido
-            if (!await this.validarNumeroFactura()) {
-                this.showAlert(this.errorNumeroFactura || "El número de factura no es válido.", "error");
-                return;
-            }
-
-            if (this.form.foto_articulo.length === 0) {
-                this.showAlert("Por favor, agrega una foto del artículo.", "error");
-                return;
-            }
-
-            // Crear FormData para enviar archivos y datos
-            const formData = new FormData();
-            formData.append('id_objetogasto', this.form.id_objetogasto);
-            formData.append('id_factura', this.form.id_factura);
-            formData.append('numero_de_factura', this.form.numero_de_factura);
-            formData.append('numero_partida', this.form.numero_partida);
-            formData.append('descripcion', this.form.descripcion);
-            formData.append('precio_unitario', this.form.precio_unitario);
-            formData.append('iva', this.form.iva);
-            formData.append('importe_con_iva', this.form.importe_con_iva);
-            formData.append('cantidad', this.form.cantidad);
-            formData.append('unidad_medida', this.form.unidad_medida);
-            formData.append('total_ingreso', this.form.total_ingreso);
-
-            // Agregar archivos al FormData
-            this.form.foto_articulo.forEach((file) => {
-                formData.append('foto_articulo', file);
-            });
-
-            try {
-                const response = await axios.post('http://localhost:3000/api/articulos', formData, {
-                    headers: {
-                        'Content-Type': 'multipart/form-data'
-                    }
-                });
-
-                if (response.status === 201) {
-                    this.showModal = true;
-                    this.mostrarModal();
-                    this.buttonType = tipo;
-                }
-            } catch (error) {
-                console.error('Error al enviar el formulario:', error);
-                if (error.response) {
-                    this.showAlert(`Error: ${error.response.data.message || 'Hubo un error al enviar el formulario.'}`, "error");
-                } else if (error.request) {
-                    this.showAlert('No se recibió respuesta del servidor. Por favor, verifica tu conexión a internet.', 'error');
-                } else {
-                    this.showAlert('Hubo un error al configurar la solicitud. Por favor, intenta nuevamente.', "error");
-                }
-            }
-        },
+        
         navigateTo(page) {
             console.log(`Navegando a ${page}`);
             this.$router.push({ name: page }); // Asegúrate de que las rutas estén definidas con `name`.
@@ -904,12 +1006,17 @@ export default {
                 this.$router.push({ name: 'existencia' });
             } else if (this.buttonType === 'bien') {
                 this.$router.push({ name: 'listaalmacen' });
-            }
+            } 
+            this.cerrarModal();
         },
+            
+           
         closeModal() {
             this.showModal = false;
             this.$router.push('/existencia'); // Redirigir a la página de pólizas
         },
+        
+
     },
 };
 </script>
@@ -1385,7 +1492,7 @@ tr:hover {
     width: 100%;
     height: 100%;
     display: flex;
-    background: linear-gradient(to bottom, #000000, #691B31);
+    background: white;
     flex-direction: column;
     color: white;
 }
@@ -1396,7 +1503,7 @@ tr:hover {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 10px 20px;
+    padding: 30px 20px;
     background: #691B31;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
@@ -1426,7 +1533,7 @@ tr:hover {
 
 .navbar-center p {
     margin: 0;
-    font-size: 14px;
+    font-size: 18px;
 }
 
 .navbar-right {
@@ -1557,7 +1664,6 @@ button:hover {
     display: flex;
     justify-content: center;
 }
-
 
 label {
     display: block;
