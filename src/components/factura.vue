@@ -36,6 +36,7 @@
                     <button @click="navigateTo('proveedor')">Ver proveedores</button>
                     <button @click="navigateTo('factura')">Facturas</button>
                     <button @click="navigateTo('existencia')">Entrada de artículos</button>
+                    <button @click="navigateTo('articulos')">Existencias</button>
                     <button @click="navigateTo('solicitudmaterial')">Salida de material</button>
                     <button @click="navigateTo('recepcionsolicitudes')">Recepción de solicitudes</button>
                     <button @click="navigateTo('poliza')">Pólizas</button>
@@ -290,6 +291,7 @@
 </template>
 
 <script>
+import api from '../services/api';
 export default {
     name: "facturaPage",
     data() {
@@ -427,7 +429,7 @@ export default {
 
                 try {
                     // Obtener todos los usuarios de la API
-                    const response = await fetch('http://localhost:3000/api/personas');
+                    const response = await api.get('/personas');
                     const users = await response.json();
 
                     // Buscar el usuario logueado por email
@@ -451,7 +453,7 @@ export default {
 
                         if (imageFileName) {
                             // Construir la URL completa para la imagen
-                            this.profileImage = `http://localhost:3000/api/users-files/${imageFileName}`;
+                            this.profileImage = `http://192.168.10.31:3000/api/users-files/${imageFileName}`;
                         } else {
                             // Usar una imagen por defecto si no hay imagen en la API
                             this.profileImage = "../assets/UserHombre.png";
@@ -488,7 +490,7 @@ export default {
         },
         async fetchProveedores() {
             try {
-                const response = await fetch("http://localhost:3000/api/proveedor");
+                const response = await fetch("http://192.168.10.31:3000/api/proveedor");
                 if (!response.ok) {
                     throw new Error("Error al obtener proveedores");
                 }
@@ -499,7 +501,7 @@ export default {
         },
         async fetchFacturas() {
             try {
-                const response = await fetch("http://localhost:3000/api/facturas");
+                const response = await fetch("http://192.168.10.31:3000/api/facturas");
                 if (!response.ok) {
                     throw new Error("Error al obtener facturas");
                 }
@@ -531,8 +533,8 @@ export default {
                 const nameWithoutExtension = fileName.split('.').slice(0, -1).join('.'); // Quita la extensión
 
                 return {
-                    url: `http://localhost:3000/api/facturas-files/${nameWithoutExtension}`, // URL sin extensión para visualización
-                    downloadUrl: `http://localhost:3000/api/facturas-files/${nameWithoutExtension}`, // URL sin extensión para descarga
+                    url: `http://192.168.10.31:3000/api/facturas-files/${nameWithoutExtension}`, // URL sin extensión para visualización
+                    downloadUrl: `http://192.168.10.31:3000/api/facturas-files/${nameWithoutExtension}`, // URL sin extensión para descarga
                     name: nameWithoutExtension // Nombre sin extensión
                 };
             });
@@ -676,7 +678,7 @@ export default {
         async saveChanges() {
             try {
             // 1. Actualizar datos básicos de la factura
-            const response = await fetch(`http://localhost:3000/api/facturas/${this.currentFactura.id}`, {
+            const response = await fetch(`http://192.168.10.31:3000/api/facturas/${this.currentFactura.id}`, {
                 method: 'PUT',
                 headers: {
                 'Content-Type': 'application/json',
@@ -694,7 +696,7 @@ export default {
                 const pdfFormData = new FormData();
                 pdfFormData.append('archivo_pdf', this.selectedPdfFile);
 
-                const pdfResponse = await fetch(`http://localhost:3000/api/facturas/${this.currentFactura.id}/reemplazar-pdf`, {
+                const pdfResponse = await fetch(`http://192.168.10.31:3000/api/facturas/${this.currentFactura.id}/reemplazar-pdf`, {
                 method: 'PUT',
                 body: pdfFormData,
                 });
@@ -707,7 +709,7 @@ export default {
                 const contratoFormData = new FormData();
                 contratoFormData.append('contrato_compra', this.selectedContratoFile);
 
-                const contratoResponse = await fetch(`http://localhost:3000/api/facturas/${this.currentFactura.id}/reemplazar-contrato`, {
+                const contratoResponse = await fetch(`http://192.168.10.31:3000/api/facturas/${this.currentFactura.id}/reemplazar-contrato`, {
                 method: 'PUT',
                 body: contratoFormData,
                 });
@@ -744,7 +746,7 @@ export default {
         },
         async confirmDelete() {
             try {
-                const response = await fetch(`http://localhost:3000/api/facturas/${this.deleteId}`, {
+                const response = await fetch(`http://192.168.10.31:3000/api/facturas/${this.deleteId}`, {
                     method: 'DELETE',
                 });
 

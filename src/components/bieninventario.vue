@@ -36,6 +36,7 @@
                     <button @click="navigateTo('proveedor')">Ver proveedores</button>
                     <button @click="navigateTo('factura')">Facturas</button>
                     <button @click="navigateTo('existencia')">Entrada de artículos</button>
+                    <button @click="navigateTo('articulos')">Existencias</button>
                     <button @click="navigateTo('solicitudmaterial')">Salida de material</button>
                     <button @click="navigateTo('recepcionsolicitudes')">Recepción de solicitudes</button>
                     <button @click="navigateTo('poliza')">Pólizas</button>
@@ -177,8 +178,7 @@
 </template>
 
 <script>
-import axios from 'axios'; // Asegúrate de tener axios importado
-
+import api from '../services/api';
 export default {
     name: "BienPage",
     data() {
@@ -277,7 +277,7 @@ export default {
         async loadLastInventoryNumber() {
             try {
                 console.log('Consultando último número de inventario...');
-                const response = await axios.get('http://localhost:3000/api/inventario');
+                const response = await api.get('/inventario');
                 const inventarios = response.data;
                 
                 if (inventarios && inventarios.length > 0) {
@@ -307,7 +307,7 @@ export default {
         async generateInventoryNumber() {
             try {
                 // Obtener todos los números de inventario existentes
-                const response = await axios.get('http://localhost:3000/api/inventario');
+                const response = await api.get('/inventario');
                 const inventarios = response.data;
                 
                 // Extraer todos los números de inventario existentes
@@ -373,7 +373,7 @@ export default {
 
                 try {
                     // Obtener todos los usuarios de la API
-                    const response = await fetch('http://localhost:3000/api/personas');
+                    const response = await api.get('/personas');
                     const users = await response.json();
 
                     // Buscar el usuario logueado por email
@@ -397,7 +397,7 @@ export default {
 
                         if (imageFileName) {
                             // Construir la URL completa para la imagen
-                            this.profileImage = `http://localhost:3000/api/users-files/${imageFileName}`;
+                            this.profileImage = `http://192.168.10.31:3000/api/users-files/${imageFileName}`;
                         } else {
                             // Usar una imagen por defecto si no hay imagen en la API
                             this.profileImage = "../assets/UserHombre.png";
@@ -418,7 +418,7 @@ export default {
         async loadArticulos() {
             this.isLoading = true;
             try {
-                const response = await axios.get('http://localhost:3000/api/articulos');
+                const response = await api.get('/articulos');
                 console.log('Artículos cargados:', response.data); // Verificar los datos cargados
                 
                 this.articulos = response.data
@@ -546,7 +546,7 @@ export default {
                 });
 
                 // Enviar la solicitud a la API
-                const response = await fetch("http://localhost:3000/api/inventario", {
+                const response = await fetch("http://192.168.10.31:3000/api/inventario", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",

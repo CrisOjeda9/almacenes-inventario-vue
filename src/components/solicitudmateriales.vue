@@ -36,6 +36,7 @@
                     <button @click="navigateTo('proveedor')">Ver proveedores</button>
                     <button @click="navigateTo('factura')">Facturas</button>
                     <button @click="navigateTo('existencia')">Entrada de artículos</button>
+                    <button @click="navigateTo('articulos')">Existencias</button>
                     <button @click="navigateTo('solicitudmaterial')">Salida de material</button>
                     <button @click="navigateTo('recepcionsolicitudes')">Recepción de solicitudes</button>
                     <button @click="navigateTo('poliza')">Pólizas</button>
@@ -75,9 +76,7 @@
                         <label>Núm. Solicitud:</label>
                         <input type="text" v-model="numeroSolicitud" readonly class="numero-solicitud-input" />
                     </div>
-                    <button type="button" @click="goToSolicitudes" class="btn-ver-solicitudes">
-                        <i class="fas fa-list"></i> Ver Solicitudes
-                    </button>
+                    
                 </div>
                 <div class="contenedor-tabla">
 
@@ -206,7 +205,7 @@
 
                 <div class="button-group" style="margin-top: 20px;">
                     <button @click="confirmAndGeneratePDF" class="boton">
-                        <i class="fas fa-file-pdf"></i> Generar PDF
+                         Aceptar
                     </button>
                     <button @click="showSignatureModal = false" class="boton-cancelar">
                         Cancelar
@@ -218,7 +217,7 @@
 </template>
 
 <script>
-import axios from 'axios';
+import api from '../services/api';
 
 export default {
     name: "solicitudMaterialPage",
@@ -538,7 +537,7 @@ export default {
         async obtenerNumeroSolicitud() {
             try {
                 // 1. Obtener todas las solicitudes existentes
-                const response = await axios.get('http://localhost:3000/api/solicitudes');
+                const response = await api.get('/solicitudes');
                 const solicitudes = response.data;
 
                 // 2. Extraer todos los números de solicitud
@@ -597,7 +596,7 @@ export default {
 
             try {
                 // Verificar que el número de solicitud no se haya usado
-                const checkResponse = await axios.get('http://localhost:3000/api/solicitudes');
+                const checkResponse = await api.get('/solicitudes');
                 const existeNumero = checkResponse.data.some(s => s.numero_solicitud === this.numeroSolicitud);
 
                 if (existeNumero) {
@@ -618,20 +617,19 @@ export default {
 
                 // Actualizar inventario y crear solicitudes
                 const updatePromises = this.items.map(item =>
-                    axios.put(`http://localhost:3000/api/articulos/${item.id_articulo}`, {
+                    api.put(`articulos/${item.id_articulo}`, {
                         cantidad: item.cantidadDisponible - item.cantidadEntregada
                     })
                 );
 
                 const solicitudPromises = solicitudes.map(solicitud =>
-                    axios.post('http://localhost:3000/api/solicitudes', solicitud)
+                    api.post('/solicitudes', solicitud)
                 );
 
                 // Ejecutar todas las promesas
                 await Promise.all([...updatePromises, ...solicitudPromises]);
 
-                // Generar PDF
-                await this.generarPDFSolicitud();
+                
 
                 // Actualizar datos locales
                 await this.cargarArticulos();
@@ -678,13 +676,9 @@ export default {
                 this.alertMessage = "";
             }, 3000);
         },
-        // Método para ir a solicitudes
-        goToSolicitudes() {
-            this.$router.push('/versolicitudes');
-        },
         async cargarArticulos() {
             try {
-                const response = await axios.get('http://localhost:3000/api/articulos');
+                const response = await api.get('/articulos');
                 this.articulos = response.data;
             } catch (error) {
                 console.error('Error al cargar artículos:', error);
@@ -797,6 +791,7 @@ export default {
         resetAndClose() {
             this.resetForm();
             this.showConfirmationModal = false;
+            this.$router.push('/versolicitudes');
         },
 
         async loadUserData() {
@@ -807,7 +802,7 @@ export default {
                 this.userName = storedUserName;
 
                 try {
-                    const response = await axios.get('http://localhost:3000/api/personas');
+                    const response = await api.get('/personas');
                     const users = response.data;
                     const user = users.find(u => u.email === storedUserEmail);
 
@@ -820,7 +815,7 @@ export default {
 
                         if (imageFileName) {
                             imageFileName = imageFileName.split('.').slice(0, -1).join('.');
-                            this.profileImage = `http://localhost:3000/api/users-files/${imageFileName}`;
+                            this.profileImage = `http://92.168.10.31:3000/api/users-files/${imageFileName}`;
                         } else {
                             this.profileImage = "../assets/UserHombre.png";
                         }

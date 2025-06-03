@@ -36,6 +36,7 @@
                     <button @click="navigateTo('proveedor')">Ver proveedores</button>
                     <button @click="navigateTo('factura')">Facturas</button>
                     <button @click="navigateTo('existencia')">Entrada de artículos</button>
+                    <button @click="navigateTo('articulos')">Existencia</button>
                     <button @click="navigateTo('solicitudmaterial')">Salida de material</button>
                     <button @click="navigateTo('recepcionsolicitudes')">Recepción de solicitudes</button>
                     <button @click="navigateTo('poliza')">Pólizas</button>
@@ -256,7 +257,7 @@
 </template>
 
 <script>
-import axios from 'axios';
+import api from '../services/api';
 
 export default {
     name: "proveedorPage",
@@ -328,7 +329,7 @@ export default {
 
                 try {
                     // Obtener todos los usuarios de la API
-                    const response = await fetch('http://localhost:3000/api/personas');
+                    const response = await api.get('/personas');
                     const users = await response.json();
 
                     // Buscar el usuario logueado por email
@@ -352,7 +353,7 @@ export default {
 
                         if (imageFileName) {
                             // Construir la URL completa para la imagen
-                            this.profileImage = `http://localhost:3000/api/users-files/${imageFileName}`;
+                            this.profileImage = `http://192.168.10.31:3000/api/users-files/${imageFileName}`;
                         } else {
                             // Usar una imagen por defecto si no hay imagen en la API
                             this.profileImage = "../assets/UserHombre.png";
@@ -371,7 +372,7 @@ export default {
         },
         async loadProveedores() {
             try {
-                const response = await axios.get('http://localhost:3000/api/proveedor');
+                const response = await api.get('/proveedor');
                 this.proveedor = response.data; // Asignar los datos obtenidos a la lista de proveedores
             } catch (error) {
                 console.error('Error al cargar los proveedores:', error);
@@ -432,7 +433,7 @@ export default {
         async confirmDelete() {
             try {
                 // Hacer la solicitud DELETE a la API
-                await axios.delete(`http://localhost:3000/api/proveedor/${this.deleteId}`);
+                await api.delete(`/proveedor/${this.deleteId}`);
 
                 // Si la eliminación es exitosa, eliminar el proveedor de la lista local
                 const index = this.proveedor.findIndex(proveedor => proveedor.id === this.deleteId);
@@ -485,8 +486,8 @@ export default {
                 const nameWithoutExtension = fileName.split('.').slice(0, -1).join('.'); // Quita la extensión
 
                 return {
-                    url: `http://localhost:3000/api/proveedores-files/${nameWithoutExtension}`, // URL sin extensión para visualización
-                    downloadUrl: `http://localhost:3000/api/proveedores-files/${fileName}`, // URL con extensión para descarga
+                    url: `http://192.168.10.31:3000/api/proveedores-files/${nameWithoutExtension}`, // URL sin extensión para visualización
+                    downloadUrl: `http://192.168.10.31:3000/api/proveedores-files/${fileName}`, // URL con extensión para descarga
                     name: nameWithoutExtension // Nombre sin extensión
                 };
             });
@@ -503,7 +504,7 @@ export default {
                 });
 
                 // Enviar los nombres de los archivos a la API de descarga ZIP
-                const response = await fetch('http://localhost:3000/api/proveedores/download-zip', {
+                const response = await api.get('/proveedores/download-zip', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -592,7 +593,7 @@ export default {
                 const proveedorId = this.currentProveedor.id;
 
                 // Enviar la solicitud DELETE al backend
-                await axios.delete(`http://localhost:3000/api/proveedor/${proveedorId}/archivos`, {
+                await api.delete(`/proveedor/${proveedorId}/archivos`, {
                     data: { fileName: fileName } // Enviar el nombre del archivo en el cuerpo
                 });
 
@@ -668,14 +669,14 @@ export default {
                 formData.append("cuenta_bancaria", this.currentProveedor.cuenta_bancaria);
 
                 // Enviar la solicitud PUT a la API para actualizar el proveedor
-                await axios.put(`http://localhost:3000/api/proveedor/${this.currentProveedor.id}`, formData, {
+                await api.put(`/proveedor/${this.currentProveedor.id}`, formData, {
                     headers: { "Content-Type": "multipart/form-data" }
                 });
 
                 // 2. Eliminar los archivos marcados para eliminación
                 if (this.archivosAEliminar.length > 0) {
                     for (const fileName of this.archivosAEliminar) {
-                        await axios.delete(`http://localhost:3000/api/proveedor/${this.currentProveedor.id}/archivos`, {
+                        await api.delete(`/proveedor/${this.currentProveedor.id}/archivos`, {
                             data: { fileName: fileName }
                         });
                     }
@@ -691,7 +692,7 @@ export default {
                     });
 
                     // Enviar los archivos nuevos al backend
-                    await axios.post(`http://localhost:3000/api/proveedor/${this.currentProveedor.id}/archivos`, archivosFormData, {
+                    await api.post(`/proveedor/${this.currentProveedor.id}/archivos`, archivosFormData, {
                         headers: { "Content-Type": "multipart/form-data" }
                     });
                 }
@@ -1135,14 +1136,14 @@ a {
 
 .proveedor-table {
     width: 100%;
-    min-width: 1200px; /* Ancho mínimo para que se active el scroll */
+    min-width: 1200px;
     border-collapse: separate;
     border-spacing: 0;
     background-color: white;
     color: #691B31;
     border-radius: 15px;
     overflow: hidden;
-    margin: 0; /* Quitar margen para que encaje perfectamente */
+    margin: 0; 
 }
 
 
@@ -1292,12 +1293,17 @@ a {
     position: fixed;
     top: 0;
     left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5);
+    right: 0; /* Agregar right: 0 */
+    bottom: 0; /* Agregar bottom: 0 */
+    width: 100%; /* Asegurar 100% de ancho */
+    height: 100%; /* Asegurar 100% de alto */
+    background: rgba(0, 0, 0, 0.7); /* Hacer el fondo más oscuro */
     display: flex;
     justify-content: center;
     align-items: center;
+    z-index: 9999; /* Z-index muy alto */
+    padding: 20px; /* Agregar padding */
+    overflow-y: auto; /* Permitir scroll si es necesario */
 }
 
 .modal-content {
@@ -1515,19 +1521,16 @@ button[type="button"]:hover {
 
 /* Asegurar que el contenedor padre no tenga overflow hidden */
 .container {
-    position: fixed;
-    top: 0;
-    left: 0;
+    position: relative; /* Cambiar de fixed a relative */
     width: 100%;
-    height: 100%;
+    min-height: 100vh; /* Cambiar de height: 100% a min-height: 100vh */
     display: flex;
     background: white;
     flex-direction: column;
     color: white;
-    overflow-x: visible; /* Cambiar de hidden a visible */
-    overflow-y: auto; /* Permitir scroll vertical si es necesario */
+    overflow-x: visible; /* Mantener visible */
+    overflow-y: auto; /* Mantener auto */
 }
-
 
 
 /* Media queries actualizadas */

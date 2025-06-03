@@ -37,6 +37,7 @@
                     <button @click="navigateTo('proveedor')">Ver proveedores</button>
                     <button @click="navigateTo('factura')">Facturas</button>
                     <button @click="navigateTo('existencia')">Entrada de artículos</button>
+                    <button @click="navigateTo('articulos')">Existencias</button>
                     <button @click="navigateTo('solicitudmaterial')">Salida de material</button>
                     <button @click="navigateTo('recepcionsolicitudes')">Recepción de solicitudes</button>
                     <button @click="navigateTo('poliza')">Pólizas</button>
@@ -218,6 +219,7 @@
 </template>
 
 <script>
+import api from '../services/api';
 export default {
     name: "polizasPage",
     data() {
@@ -295,7 +297,7 @@ export default {
 
                 try {
                     // Obtener todos los usuarios de la API
-                    const response = await fetch('http://localhost:3000/api/personas');
+                    const response = await api.get('/personas');
                     const users = await response.json();
 
                     // Buscar el usuario logueado por email
@@ -319,7 +321,7 @@ export default {
 
                         if (imageFileName) {
                             // Construir la URL completa para la imagen
-                            this.profileImage = `http://localhost:3000/api/users-files/${imageFileName}`;
+                            this.profileImage = `http://192.168.10.31:3000/api/users-files/${imageFileName}`;
                         } else {
                             // Usar una imagen por defecto si no hay imagen en la API
                             this.profileImage = "../assets/UserHombre.png";
@@ -356,7 +358,7 @@ export default {
         },
         async fetchPolizas() {
             try {
-                const response = await fetch("http://localhost:3000/api/polizas");
+                const response = await fetch("http://192.168.10.31:3000/api/polizas");
                 if (!response.ok) {
                     throw new Error("Error al obtener pólizas");
                 }
@@ -392,8 +394,8 @@ export default {
                 const nameWithoutExtension = fileName.split('.').slice(0, -1).join('.'); // Quita la extensión
 
                 return {
-                    url: `http://localhost:3000/api/polizas-files/${nameWithoutExtension}`, // URL sin extensión para visualización
-                    downloadUrl: `http://localhost:3000/api/polizas-files/${nameWithoutExtension}`, // URL sin extensión para descarga
+                    url: `http://192.168.10.31:3000/api/polizas-files/${nameWithoutExtension}`, // URL sin extensión para visualización
+                    downloadUrl: `http://192.168.10.31:3000/api/polizas-files/${nameWithoutExtension}`, // URL sin extensión para descarga
                     name: nameWithoutExtension // Nombre sin extensión
                 };
             });
@@ -501,7 +503,7 @@ export default {
                 };
 
                 // 1. Actualizar los datos de la poliza
-                const response = await fetch(`http://localhost:3000/api/polizas/${this.currentPoliza.id}`, {
+                const response = await fetch(`http://192.168.10.31:3000/api/polizas/${this.currentPoliza.id}`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
@@ -519,7 +521,7 @@ export default {
                     const formData = new FormData();
                     formData.append('archivo', this.selectedFile);
 
-                    const fileResponse = await fetch(`http://localhost:3000/api/polizas/${this.currentPoliza.id}/reemplazar-archivo`, {
+                    const fileResponse = await fetch(`http://192.168.10.31:3000/api/polizas/${this.currentPoliza.id}/reemplazar-archivo`, {
                         method: 'PUT',
                         body: formData,
                     });
@@ -552,7 +554,7 @@ export default {
         },
         async confirmDelete() {
             try {
-                const response = await fetch(`http://localhost:3000/api/polizas/${this.deleteId}`, {
+                const response = await fetch(`http://192.168.10.31:3000/api/polizas/${this.deleteId}`, {
                     method: 'DELETE',
                 });
 

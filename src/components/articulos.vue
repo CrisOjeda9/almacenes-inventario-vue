@@ -10,7 +10,7 @@
                     height="auto" style="cursor: pointer;" />
             </div>
             <div class="navbar-center">
-                <h1>Artículos</h1>
+                <h1>Existencias</h1>
                 <p>Sistema de Almacén e Inventarios de Radio y Televisión de Hidalgo</p>
             </div>
             <div class="navbar-right">
@@ -74,11 +74,11 @@
                 <input type="text" v-model="searchQuery" placeholder="Buscar..." />
                 <i class="fas fa-search"></i> <!-- Icono de la lupa -->
             </div>
-
-            <!-- Botón para agregar nuevo usuario -->
-            <button class="add-existencia-btn" @click="redirectToAddExistencia">
-                <i class="fas fa-file-invoice"></i> <i class="fas fa-plus"></i>
-            </button>
+            <div class="download-buttons">
+                <button @click="generarPDFArticulos()">
+                    <i class="fas fa-file-pdf"></i> Descargar PDF
+                </button>
+            </div>
         </div>
 
         <div class="contenedor-tabla">
@@ -86,48 +86,19 @@
                 <table class="existencia-table">
                     <thead>
                         <tr>
-                            <th>Núm. factura</th>
                             <th>Núm. partida</th>
                             <th>Descripcion</th>
-                            <th>Precio Unitario</th>
-                            <th>IVA</th>
-                            <th>Importe con IVA</th>
                             <th>Cantidad</th>
                             <th>Unidad de medida</th>
-                            <th>Total de ingreso</th>
-                            <th>Foto artículo</th>
-                            <th>Fecha de registro</th>
-                            <th>Acciones</th>
-                            <th>Agregar Inventario</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr v-for="existencia in paginatedExistencias" :key="existencia.id">
 
-                            <td>{{ getNumeroFactura(existencia.id_factura) }}</td>
                             <td>{{ getNumeroPartida(existencia.id_objetogasto) }}</td>
                             <td>{{ existencia.descripcion }}</td>
-                            <td>{{ existencia.precio_unitario }}</td>
-                            <td>{{ existencia.iva }}</td>
-                            <td>{{ existencia.importe_con_iva }}</td>
                             <td>{{ existencia.cantidad }}</td>
                             <td>{{ existencia.unidad_medida }}</td>
-                            <td>{{ existencia.total_ingreso }}</td>
-                            <td>
-                                <button @click="openModal(existencia.foto_articulo)" class="btn-download">
-                                    <i class="fas fa-eye"></i>
-                                </button>
-                            </td>
-                            <td>{{ formatDate(existencia.createdAt) }}</td>
-                            <td>
-                                <button @click="editExistencia(existencia)" class="btn-edit">Editar</button>
-                                <button @click="showDeleteModal(existencia.id)" class="btn-delete">Eliminar</button>
-                            </td>
-                            <td> 
-                                <button @click="addToInventario(existencia)" class="btn-inventario">
-                                    <i class="fas fa-plus"></i>
-                                </button>
-                            </td>
                         </tr>
                     </tbody>
                 </table>
@@ -287,21 +258,24 @@
     </div>
 </template>
 
+
 <script>
+import { jsPDF } from 'jspdf';
+import 'jspdf-autotable';
+import logoDorado from '../assets/RTH Y ESCUDO_Mesa de trabajo 1.png';
 import api from '../services/api';
 
+
 export default {
-    name: "existenciaPage",
+    name: "articulosPage",
     data() {
         return {
-            alertMessage: "",  // Mensaje de la alerta
-            alertClass: "",    // Clase de la alerta (ej. 'success' o 'error')
-            alertIcon: "",     // Icono para la alerta
-            userRole: localStorage.getItem('userRole') || '', // Obtener el rol desde el localStorage
-            userName: "Cargando...", // Mensaje temporal
-            profileImage: "",  // URL de la imagen del usuario
-            isDeleteModalVisible: false,
-            selectedArticuloId: null,
+            alertMessage: "",
+            alertClass: "",
+            alertIcon: "",
+            userRole: localStorage.getItem('userRole') || '',
+            userName: "Cargando...",
+            profileImage: "",
             inventario: [],
             menus: {
                 homeMenu: false,
@@ -312,45 +286,54 @@ export default {
             searchQuery: '',
             currentPage: 1,
             existenciasPerPage: 10,
-            showModal: false,
-            modalImages: [],
-            itemToRemove: null,
-            isEditing: false,
-            currentExistencia: {
-                foto_articulo: [],
-            },
-            errorMessage: "",
-            showImageModal: false,
-            existencias: [], // Lista de artículos obtenidos de la API
+            existencias: [],
             objetosGasto: [],
-            facturas: [],
-            deleteId: null, // ID del artículo a eliminar
-            isLoading: true, // Indicador de carga
-            imagesToDelete: [], // Lista temporal de imágenes a eliminar
-
+            isLoading: true,
         };
     },
     computed: {
+        // Agrupar productos por descripción y sumar cantidades
+        groupedExistencias() {
+            const grouped = {};
+            
+            this.existencias.forEach(existencia => {
+                const key = existencia.descripcion?.toLowerCase() || '';
+                
+                if (grouped[key]) {
+                    // Si ya existe, sumar la cantidad
+                    grouped[key].cantidad = (parseFloat(grouped[key].cantidad) + parseFloat(existencia.cantidad || 0)).toString();
+                } else {
+                    // Si no existe, crear nueva entrada
+                    grouped[key] = {
+                        id: existencia.id,
+                        numero_partida: this.getNumeroPartida(existencia.id_objetogasto),
+                        descripcion: existencia.descripcion,
+                        cantidad: existencia.cantidad || '0',
+                        unidad_medida: existencia.unidad_medida,
+                        id_objetogasto: existencia.id_objetogasto
+                    };
+                }
+            });
+            
+            return Object.values(grouped);
+        },
+        
         filteredExistencias() {
             const query = this.searchQuery.toLowerCase();
-            return this.existencias.filter(existencia => {
+            return this.groupedExistencias.filter(existencia => {
                 return (
-                    existencia.numero_factura?.toLowerCase().includes(query) || // Usar encadenamiento opcional
-                    existencia.numero_partida?.toLowerCase().includes(query) || // Usar encadenamiento opcional
-                    existencia.precio_unitario?.toLowerCase().includes(query) || // Usar encadenamiento opcional
-                    existencia.total_iva?.toLowerCase().includes(query) || // Usar encadenamiento opcional
-                    existencia.importe_con_iva?.toLowerCase().includes(query) || // Usar encadenamiento opcional
-                    existencia.cantidad?.toLowerCase().includes(query) || // Usar encadenamiento opcional
-                    existencia.unidad_medida?.toLowerCase().includes(query) || // Usar encadenamiento opcional
-                    existencia.total_ingreso?.toLowerCase().includes(query) || // Usar encadenamiento opcional
-                    existencia.fecha_registro?.toLowerCase().includes(query) || // Usar encadenamiento opcional
-                    existencia.descripcion?.toLowerCase().includes(query)      // Usar encadenamiento opcional
+                    existencia.numero_partida?.toLowerCase().includes(query) ||
+                    existencia.descripcion?.toLowerCase().includes(query) ||
+                    existencia.cantidad?.toLowerCase().includes(query) ||
+                    existencia.unidad_medida?.toLowerCase().includes(query)
                 );
             });
         },
+        
         totalPages() {
             return Math.ceil(this.filteredExistencias.length / this.existenciasPerPage);
         },
+        
         paginatedExistencias() {
             const start = (this.currentPage - 1) * this.existenciasPerPage;
             const end = start + this.existenciasPerPage;
@@ -361,9 +344,215 @@ export default {
         this.loadUserData();
         this.initializeData();
         this.loadObjetosGasto();
-        this.loadFacturas();
     },
     methods: {
+        async generarPDFArticulos() {
+            try {
+                // Función para convertir imagen a base64
+                const getImageBase64 = (imageUrl) => {
+                    return new Promise((resolve) => {
+                        const img = new Image();
+                        img.crossOrigin = 'anonymous';
+                        img.onload = () => {
+                            const canvas = document.createElement('canvas');
+                            const ctx = canvas.getContext('2d');
+                            canvas.width = img.width;
+                            canvas.height = img.height;
+                            ctx.drawImage(img, 0, 0);
+                            const dataURL = canvas.toDataURL('image/png');
+                            resolve(dataURL);
+                        };
+                        img.onerror = (error) => {
+                            console.warn('No se pudo cargar el logo, continuando sin él', error);
+                            resolve(null);
+                        };
+                        img.src = imageUrl;
+                    });
+                };
+
+
+                // Cargar el logo
+                let logoBase64 = null;
+                try {
+                    logoBase64 = await getImageBase64(logoDorado);
+                } catch (error) {
+                    console.warn('Error al cargar el logo:', error);
+                }
+
+                // Crear PDF
+                const doc = new jsPDF({
+                    orientation: 'portrait',
+                    unit: 'mm'
+                });
+
+                // Configuración de tabla
+                const headers = [
+                    'N° Partida','Descripción', 'Cantidad', 'Unidad'
+                ];
+
+                // Agrupar existencias por número de partida
+                const existenciasPorPartida = {};
+                this.filteredExistencias.forEach(existencia => {
+                    const numeroPartida = existencia.numero_partida || 'Sin Partida';
+                    if (!existenciasPorPartida[numeroPartida]) {
+                        existenciasPorPartida[numeroPartida] = [];
+                    }
+                    existenciasPorPartida[numeroPartida].push(existencia);
+                });
+
+                // Ordenar las partidas
+                const partidasOrdenadas = Object.keys(existenciasPorPartida).sort();
+
+                // Configuración de diseño
+                const pageWidth = 210;
+                const tableWidth = 40 + 80 + 30 + 30; // Ancho total de la tabla
+                const marginLeft = (pageWidth - tableWidth) / 2;
+
+                let isFirstPage = true;
+
+                // Función para agregar encabezado con logo a cada página
+                const addHeader = (doc) => {
+                    // Agregar logo en la esquina superior derecha si está disponible
+                    if (logoBase64) {
+                        const logoWidth = 40; // Ancho del logo en mm
+                        const logoHeight = 15; // Alto del logo en mm
+                        const logoX = pageWidth - logoWidth - 10; // 10mm de margen derecho
+                        const logoY = 8; // 8mm desde la parte superior
+                        
+                        doc.addImage(logoBase64, 'PNG', logoX, logoY, logoWidth, logoHeight);
+                    }
+
+                    // Título principal
+                    doc.setFont('helvetica', 'bold');
+                    doc.setFontSize(16);
+                    doc.text('REPORTE DE ARTÍCULOS DISPONIBLES', pageWidth / 2, 30, { align: 'center' });
+                    
+                    
+                    // Fecha del reporte
+                    doc.setFontSize(10);
+                    doc.setFont('helvetica', 'normal');
+                    const fechaActual = new Date().toLocaleDateString('es-MX', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                    });
+                    doc.text(`Fecha: ${fechaActual}`, pageWidth / 2, 35, { align: 'center' });
+                };
+
+                // Generar una página para cada partida
+                partidasOrdenadas.forEach((numeroPartida) => {
+                    if (!isFirstPage) {
+                        doc.addPage();
+                    }
+                    isFirstPage = false;
+
+                    // Agregar encabezado con logo
+                    addHeader(doc, numeroPartida);
+
+                    const articulosPartida = existenciasPorPartida[numeroPartida];
+                    
+                    // Calcular total de la partida
+                    const totalPartida = articulosPartida.reduce((total, existencia) => {
+                        return total + parseFloat(existencia.cantidad || 0);
+                    }, 0);
+
+                    // Información de la partida
+                    doc.setFont('helvetica', 'normal');
+                    doc.setFontSize(10);
+                    doc.text(`Tipos de artículos en esta partida: ${articulosPartida.length}`, 20, 50);
+                    doc.text(`Cantidad total: ${totalPartida.toFixed(2)}`, 20, 56);
+
+                    // Tabla de artículos de la partida
+                    doc.autoTable({
+                        head: [headers],
+                        body: articulosPartida.map(existencia => [
+                            existencia.numero_partida || 'N/A',
+                            existencia.descripcion || 'Sin descripción',
+                            parseFloat(existencia.cantidad || 0).toFixed(2),
+                            existencia.unidad_medida || 'N/A'
+                        ]),
+                        startY: 65,
+                        margin: { left: marginLeft, right: marginLeft },
+                        styles: { 
+                            fontSize: 9, 
+                            cellPadding: 3,
+                            halign: 'center'
+                        },
+                        headStyles: {
+                            fillColor: [188, 149, 91],
+                            textColor: [255, 255, 255],
+                            fontStyle: 'bold',
+                            halign: 'center'
+                        },
+                        columnStyles: {
+                            0: { cellWidth: 25, halign: 'center' }, // N° Partida
+                            1: { cellWidth: 100, halign: 'left' },   // Descripción
+                            2: { cellWidth: 30, halign: 'right' },   // Cantidad
+                            3: { cellWidth: 30, halign: 'center' }   // Unidad
+                        },
+                        alternateRowStyles: {
+                            fillColor: [245, 245, 245]
+                        },
+                        pageBreak: 'auto',
+                        showHead: 'firstPage',
+                        didDrawPage: function (data) {
+                            // Agregar logo en páginas adicionales si la tabla se divide
+                            if (data.pageNumber > 1 && logoBase64) {
+                                const logoWidth = 25;
+                                const logoHeight = 15;
+                                const logoX = pageWidth - logoWidth - 10;
+                                const logoY = 8;
+                                
+                                doc.addImage(logoBase64, 'PNG', logoX, logoY, logoWidth, logoHeight);
+                            }
+                        }
+                    });
+
+                    // Agregar resumen al final de cada partida
+                    let finalY = doc.lastAutoTable.finalY + 10;
+                    
+                    // Verificar si hay espacio para el resumen
+                    if (finalY > 250) {
+                        doc.addPage();
+                        // Agregar logo en la nueva página
+                        if (logoBase64) {
+                            const logoWidth = 25;
+                            const logoHeight = 15;
+                            const logoX = pageWidth - logoWidth - 10;
+                            const logoY = 8;
+                            
+                            doc.addImage(logoBase64, 'PNG', logoX, logoY, logoWidth, logoHeight);
+                        }
+                        finalY = 30;
+                    }
+                });
+
+                // Función para agregar número de página
+                const addPageNumber = (doc) => {
+                    const pageCount = doc.internal.getNumberOfPages();
+                    for (let i = 1; i <= pageCount; i++) {
+                        doc.setPage(i);
+                        doc.setFontSize(8);
+                        doc.setFont('helvetica', 'normal');
+                        doc.text(`Página ${i} de ${pageCount}`, pageWidth / 2, 285, { align: 'center' });
+                    }
+                };
+
+                // Agregar números de página
+                addPageNumber(doc);
+
+                // Guardar el PDF
+                const fileName = `reporte_articulos_${new Date().toISOString().split('T')[0]}.pdf`;
+                doc.save(fileName);
+
+                // Mostrar mensaje de éxito
+                this.showAlert('PDF enerado exitosamente con separación por partidas', 'success');
+
+            } catch (error) {
+                console.error('Error al generar PDF:', error);
+                this.showAlert('Error al generar el PDF', 'error');
+            }
+        },
         showAlert(message, type) {
             this.alertMessage = message;
             if (type === "success") {
@@ -377,69 +566,42 @@ export default {
                 this.alertIcon = "fa fa-exclamation-circle";
             }
 
-            // Ocultar la alerta después de 3 segundos
             setTimeout(() => {
                 this.alertMessage = "";
             }, 3000);
         },
 
-        formatDate(dateString) {
-            if (!dateString) return "N/A"; // Si no hay fecha, devuelve "N/A"
-            const options = { year: 'numeric', month: 'long', day: 'numeric' };
-            const date = new Date(dateString);
-            return date.toLocaleDateString('es-MX', options); // Usando la configuración en español de México
-        },
         async initializeData() {
             try {
-                await this.loadInventario(); // Esperar a que termine de cargar el inventario
-                await this.loadExistencias(); // Después cargar los artículos
+                await this.loadInventario();
+                await this.loadExistencias();
             } catch (error) {
                 console.error('Error al inicializar los datos:', error);
                 this.isLoading = false;
             }
         },
 
-        // Método loadInventario actualizado (asegúrate de que sea async)
         async loadInventario() {
             try {
                 const response = await api.get('/inventario');
                 this.inventario = response.data;
-                console.log('Inventario cargado:', this.inventario);
             } catch (error) {
                 console.error('Error al cargar el inventario:', error);
-                this.inventario = []; // Asegurar que inventario sea un array vacío en caso de error
+                this.inventario = [];
             }
         },
 
-        // Método loadExistencias actualizado
         async loadExistencias() {
             try {
                 const response = await api.get('/articulos');
-                console.log('Datos cargados:', response.data);
                 
-                // Verificar que inventario esté cargado
-                console.log('Inventario disponible:', this.inventario);
-                
-                // Obtener los IDs de artículos que ya están en inventario
                 const articulosEnInventario = this.inventario.map(item => item.id_articulo);
-                console.log('Artículos en inventario (IDs):', articulosEnInventario);
-                
-                // Filtrar los artículos que NO están en inventario
                 const articulosFiltrados = response.data.filter(articulo => {
-                    const estaEnInventario = articulosEnInventario.includes(articulo.id);
-                    console.log(`Artículo ${articulo.id} - ${articulo.descripcion}: ${estaEnInventario ? 'EN INVENTARIO (filtrado)' : 'DISPONIBLE'}`);
-                    return !estaEnInventario;
+                    return !articulosEnInventario.includes(articulo.id);
                 });
                 
-                this.existencias = articulosFiltrados
-                    .map(articulo => ({
-                        ...articulo,
-                        foto_articulo: articulo.foto_articulo ? this.extractFileNames(articulo.foto_articulo) : []
-                    }))
-                    .sort((a, b) => a.id_objetogasto - b.id_objetogasto);
-                    
-                console.log('Total artículos filtrados (sin inventario):', this.existencias.length);
-                console.log('Artículos mostrados:', this.existencias);
+                this.existencias = articulosFiltrados.sort((a, b) => a.id_objetogasto - b.id_objetogasto);
+                
             } catch (error) {
                 console.error('Error al cargar los artículos:', error);
             } finally {
@@ -447,72 +609,22 @@ export default {
             }
         },
 
-        // También actualizar el método addToInventario para refrescar la lista
-        async addToInventario(existencia) {
-            // Guardar el ID del artículo en localStorage para acceso posterior
-            localStorage.setItem('articuloId', existencia.id);
-            
-            // También puedes guardarlo en una variable del componente si lo necesitas
-            this.selectedArticuloId = existencia.id;
-            
-            console.log('ID del artículo seleccionado:', existencia.id);
-            
-            // Navegar a la página de inventario con los parámetros
-            this.$router.push({
-                name: 'bieninventario',
-                params: { 
-                    articuloId: existencia.id
-                }
-            });
-        },
-
-        // Agregar un método para refrescar los datos cuando regreses de otra página
-        async refreshData() {
-            this.isLoading = true;
-            await this.loadInventario();
-            await this.loadExistencias();
-        },
-        // Extraer nombres de archivos de las rutas completas y eliminar la extensión
-        extractFileNames(filePaths) {
-            return filePaths.split(';').map(path => {
-                // Extraer el nombre del archivo de la ruta completa
-                const fileName = path.split('\\').pop(); // Extrae "lista.png", "person_128dp_691B31_FILL0_wght400_GRAD0_opsz48.png", etc.
-                // Eliminar la extensión del archivo
-                return fileName.split('.').slice(0, -1).join('.'); // Elimina la extensión
-            });
-        },
-        // Cargar los objetos de gasto desde la API
         async loadObjetosGasto() {
             try {
                 const response = await api.get('/objetoGastos');
-                this.objetosGasto = response.data; // Guardar los objetos de gasto en la lista
+                this.objetosGasto = response.data;
             } catch (error) {
                 console.error('Error al cargar los objetos de gasto:', error);
             }
         },
-        async loadFacturas() {
-            try {
-                const response = await api.get('/facturas');
-                this.facturas = response.data; // Guardar las facturas en la lista
-            } catch (error) {
-                console.error('Error al cargar las facturas:', error);
-            }
-        },
-        // Obtener el número de partida a partir del id_objetogasto
+
         getNumeroPartida(idObjetogasto) {
             const objetoGasto = this.objetosGasto.find(
                 (objeto) => objeto.id === idObjetogasto
             );
             return objetoGasto ? objetoGasto.numero_partida : "N/A";
         },
-        getNumeroFactura(idFactura) {  // Cambiado de getNumeroDeFactura a getNumeroFactura
-            const factura = this.facturas.find(
-                (fact) => fact.id === idFactura
-            );
-            return factura ? factura.numero_de_factura : "N/A";
-        },
 
-        // Cargar los datos del usuario
         async loadUserData() {
             const storedUserName = localStorage.getItem("userName");
             const storedUserEmail = localStorage.getItem("userEmail");
@@ -521,369 +633,92 @@ export default {
                 this.userName = storedUserName;
 
                 try {
-                    // Obtener todos los usuarios de la API
                     const response = await api.get('/personas');
                     const users = await response.json();
-
-                    // Buscar el usuario logueado por email
                     const user = users.find(u => u.email === storedUserEmail);
 
                     if (user) {
-                        // Concatenar nombre y apellidos
                         const fullName = `${user.nombre || storedUserName} ${user.apellidos || ""}`.trim();
                         this.userName = fullName;
 
-                        // Obtener la ruta completa de la imagen del usuario
-                        const imagePath = user.imagen; // Suponiendo que la API devuelve la ruta completa
-
-                        // Extraer el nombre del archivo de la ruta completa
-                        let imageFileName = imagePath.split('\\').pop(); // Extrae "radio2.jpg"
-
-                        // Eliminar la extensión del nombre del archivo
-                        if (imageFileName) {
-                            imageFileName = imageFileName.split('.').slice(0, -1).join('.'); // Elimina la extensión
-                        }
+                        const imagePath = user.imagen;
+                        let imageFileName = imagePath?.split('\\').pop();
 
                         if (imageFileName) {
-                            // Construir la URL completa para la imagen
+                            imageFileName = imageFileName.split('.').slice(0, -1).join('.');
                             this.profileImage = `http://192.168.10.31:3000/api/users-files/${imageFileName}`;
                         } else {
-                            // Usar una imagen por defecto si no hay imagen en la API
                             this.profileImage = "../assets/UserHombre.png";
                         }
                     } else {
-                        this.profileImage = "../assets/UserHombre.png"; // Imagen por defecto
+                        this.profileImage = "../assets/UserHombre.png";
                     }
                 } catch (error) {
                     console.error('Error al cargar los datos del usuario:', error);
-                    this.profileImage = "../assets/UserHombre.png"; // Imagen por defecto en caso de error
+                    this.profileImage = "../assets/UserHombre.png";
                 }
             } else {
                 this.userName = "Usuario desconocido";
-                this.profileImage = "../assets/UserHombre.png"; // Imagen por defecto
+                this.profileImage = "../assets/UserHombre.png";
             }
         },
-        // Obtener la URL completa de la imagen sin extensión
-        getImageUrl(fileName) {
-            if (!fileName) return ''; // Asegúrate de que fileName no esté vacío
-            // Si fileName es un objeto File, generar una URL temporal
-            if (fileName instanceof File) {
-                return URL.createObjectURL(fileName);
-            }
-            // Si fileName es una cadena, construir la URL completa con extensión
-            return `http://192.168.10.31:3000/api/articulos-files/${fileName}`;
-        },
-        // Abrir el modal con las imágenes
-        openModal(fotos) {
-            // Filtrar solo las imágenes que son cadenas (nombres de archivos)
-            this.modalImages = fotos.filter(foto => typeof foto === 'string');
-            this.showModal = true;
-        },
-        // Cerrar el modal
-        closeModal() {
-            this.showModal = false;
-            this.modalImages = [];
-        },
-        // Métodos adicionales (abrir/cerrar modales, paginación, etc.)
-        triggerFileInput() {
-            this.$refs.fileInput.click();
-        },
-        handleFileChange(event) {
-            const files = Array.from(event.target.files);
-            const validFiles = files.filter(file => this.isImage(file));
 
-            if (validFiles.length + this.currentExistencia.foto_articulo.length > 10) {
-                this.errorMessage = "Solo puedes subir hasta 10 imágenes.";
-                return;
-            }
-
-            // Agregar las imágenes con su nombre completo (incluyendo extensión)
-            validFiles.forEach(file => {
-                file.preview = URL.createObjectURL(file); // Crear una URL temporal
+        async addToInventario(existencia) {
+            localStorage.setItem('articuloId', existencia.id);
+            this.selectedArticuloId = existencia.id;
+            
+            this.$router.push({
+                name: 'bieninventario',
+                params: { 
+                    articuloId: existencia.id
+                }
             });
-
-            this.currentExistencia.foto_articulo.push(...validFiles);
-            this.errorMessage = "";
         },
 
-        handleDrop(event) {
-            const files = Array.from(event.dataTransfer.files);
-            const validFiles = files.filter(file => this.isImage(file));
-
-            if (validFiles.length + this.currentExistencia.foto_articulo.length > 10) {
-                this.errorMessage = "Solo puedes subir hasta 10 imágenes.";
-                return;
-            }
-
-            // Agregar las imágenes con su nombre completo (incluyendo extensión)
-            validFiles.forEach(file => {
-                file.preview = URL.createObjectURL(file); // Crear una URL temporal
-            });
-
-            this.currentExistencia.foto_articulo.push(...validFiles);
-            this.errorMessage = "";
+        async refreshData() {
+            this.isLoading = true;
+            await this.loadInventario();
+            await this.loadExistencias();
         },
 
-        isImage(file) {
-            return file.type.startsWith("image/");
-        },
-
-
-        removeImage(index) {
-            const img = this.currentExistencia.foto_articulo[index];
-
-            // Si es una imagen existente (no un archivo nuevo), agregarla a la lista de imágenes a eliminar
-            if (typeof img === 'string') {
-                this.imagesToDelete.push(img); // Agregar a la lista temporal
-            }
-
-            // Eliminar la imagen de la lista local
-            this.currentExistencia.foto_articulo.splice(index, 1);
-        },
-        openImageModal() {
-            // Filtrar solo las imágenes que son cadenas (nombres de archivos)
-            this.modalImages = this.currentExistencia.foto_articulo.filter(foto => typeof foto === 'string');
-            this.showImageModal = true;
-        },
-        closeImageModal() {
-            this.showImageModal = false;
-        },
         goHome() {
             this.$router.push('home');
         },
+
         showMenu(menu) {
             this.menus[menu] = true;
         },
+
         hideMenu(menu) {
             this.menus[menu] = false;
         },
+
         navigateTo(page) {
             this.$router.push({ name: page });
         },
+
         goBack() {
             window.history.back();
         },
+
         prevPage() {
             if (this.currentPage > 1) {
                 this.currentPage--;
             }
         },
+
         nextPage() {
             if (this.currentPage < this.totalPages) {
                 this.currentPage++;
             }
         },
-        editExistencia(existencia) {
-            // Guardar una copia de las imágenes originales
-            this.originalImages = [...existencia.foto_articulo];
-            this.currentExistencia = { ...existencia, foto_articulo: [...existencia.foto_articulo] }; // Copiar las imágenes
-            this.isEditing = true;
-        },
 
-        cancelEdit() {
-            this.isEditing = false;
-            this.currentExistencia.foto_articulo = [...this.originalImages]; // Restaurar las imágenes originales
-            this.imagesToDelete = []; // Limpiar la lista temporal de imágenes a eliminar
-            this.errorMessage = ""; // Limpiar mensajes de error
-
-            // Resetear el input de archivo
-            if (this.$refs.fileInput) {
-                this.$refs.fileInput.value = ""; // Limpiar el valor del input
-            }
-
-            // Recargar la lista de artículos (opcional)
-            this.loadExistencias();
-        },
-       
-        async saveChanges() {
-            try {
-                // 1. Eliminar las imágenes marcadas para eliminación
-                if (this.imagesToDelete.length > 0) {
-                    for (const img of this.imagesToDelete) {
-                        await api.delete(`/articulos/${this.currentExistencia.id}/archivo`, {
-                            data: { fileName: img.split('/').pop() } // Enviar el nombre del archivo
-                        });
-                    }
-                    this.imagesToDelete = []; // Limpiar la lista temporal
-                }
-
-                // 2. Actualizar los datos generales del artículo
-                const formData = new FormData();
-                formData.append('id_factura', this.currentExistencia.id_factura);
-                formData.append('id_objetogasto', this.currentExistencia.id_objetogasto);
-                formData.append('descripcion', this.currentExistencia.descripcion);
-                formData.append('precio_unitario', this.currentExistencia.precio_unitario);
-                formData.append('iva', this.currentExistencia.iva);
-                formData.append('importe_con_iva', this.currentExistencia.importe_con_iva);
-                formData.append('cantidad', this.currentExistencia.cantidad);
-                formData.append('unidad_medida', this.currentExistencia.unidad_medida);
-                formData.append('total_ingreso', this.currentExistencia.total_ingreso);
-
-                // Enviar la solicitud PUT para actualizar el artículo
-                await api.put(`/articulos/${this.currentExistencia.id}`, formData, {
-                    headers: {
-                        'Content-Type': 'multipart/form-data'
-                    }
-                });
-
-                // 3. Agregar los archivos nuevos (imágenes)
-                const nuevosArchivos = this.currentExistencia.foto_articulo.filter(file => file instanceof File);
-                if (nuevosArchivos.length > 0) {
-                    const archivosFormData = new FormData();
-                    nuevosArchivos.forEach((file) => {
-                        archivosFormData.append('foto_articulo', file);
-                    });
-
-                    // Enviar la solicitud POST para agregar los archivos
-                    await api.post(`/articulos/${this.currentExistencia.id}/archivo`, archivosFormData, {
-                        headers: {
-                            'Content-Type': 'multipart/form-data'
-                        }
-                    });
-                }
-
-                // Recargar los datos después de guardar los cambios
-                await this.loadExistencias();
-
-                // Cerrar el modal de edición y limpiar el formulario
-                this.isEditing = false;
-                this.currentExistencia = {};
-                this.showAlert("Artículo actualizado correctamente", "success");
-            } catch (error) {
-                console.error('Error al actualizar el artículo:', error);
-                this.showAlert("Hubo un error al actualizar el artículo. Inténtalo de nuevo.", "error");
-            }
-        },
-
-        showDeleteModal(id) {
-            this.deleteId = id;
-            this.isDeleteModalVisible = true;
-        },
-
-        // Método para actualizar tanto la cantidad como el total de la factura
-        async updateFacturaData(facturaId, nuevaCantidad, nuevoTotal) {
-            try {
-                const response = await api.put(`facturas/${facturaId}`, {
-                    cantidad: nuevaCantidad,
-                    total: nuevoTotal
-                }, {
-                    headers: {
-                        'Authorization': `Bearer ${localStorage.getItem('token')}`
-                    }
-                });
-                
-                if (response.status === 200) {
-                    console.log('Datos de factura actualizados correctamente');
-                    return true;
-                }
-            } catch (error) {
-                console.error('Error al actualizar los datos de factura:', error);
-                return false;
-            }
-        },
-
-        // Método confirmDelete actualizado para incluir la resta del total
-        async confirmDelete() {
-            try {
-                // Encontrar el artículo que se va a eliminar
-                const articuloAEliminar = this.existencias.find(
-                    existencia => existencia.id === this.deleteId
-                );
-
-                if (!articuloAEliminar) {
-                    this.showAlert("No se encontró el artículo a eliminar", "error");
-                    return;
-                }
-
-                // Encontrar la factura correspondiente
-                const facturaId = articuloAEliminar.id_factura;
-                const factura = this.facturas.find(f => f.id === facturaId);
-
-                if (!factura) {
-                    this.showAlert("No se encontró la factura correspondiente", "error");
-                    return;
-                }
-
-                // Realizar la solicitud DELETE a la API
-                await api.delete(`/articulos/${this.deleteId}`, {
-                    headers: {
-                        'Authorization': `Bearer ${localStorage.getItem('token')}`
-                    }
-                });
-
-                // Calcular los nuevos valores para la factura
-                const cantidadArticuloEliminado = parseFloat(articuloAEliminar.cantidad) || 0;
-                const totalIngresoArticuloEliminado = parseFloat(articuloAEliminar.total_ingreso) || 0;
-                
-                const cantidadActualFactura = parseFloat(factura.cantidad) || 0;
-                const totalActualFactura = parseFloat(factura.total) || 0;
-                
-                const nuevaCantidadFactura = cantidadActualFactura + cantidadArticuloEliminado;
-                const nuevoTotalFactura = totalActualFactura + totalIngresoArticuloEliminado;
-
-                // Actualizar tanto la cantidad como el total en la factura
-                const facturaActualizada = await this.updateFacturaData(
-                    facturaId, 
-                    nuevaCantidadFactura, 
-                    nuevoTotalFactura
-                );
-
-                if (facturaActualizada) {
-                    // Actualizar la factura en el array local
-                    const facturaIndex = this.facturas.findIndex(f => f.id === facturaId);
-                    if (facturaIndex !== -1) {
-                        this.facturas[facturaIndex].cantidad = nuevaCantidadFactura;
-                        this.facturas[facturaIndex].total = nuevoTotalFactura;
-                        
-                        // Si tenía registrada_completa = true, cambiarla a false
-                        if (this.facturas[facturaIndex].registrada_completa) {
-                            this.facturas[facturaIndex].registrada_completa = false;
-                        }
-                    }
-                }
-
-                // Eliminar el artículo de la lista local
-                const index = this.existencias.findIndex(
-                    existencia => existencia.id === this.deleteId
-                );
-                if (index !== -1) {
-                    this.existencias.splice(index, 1);
-                }
-
-                // Cerrar el modal de confirmación
-                this.isDeleteModalVisible = false;
-                this.deleteId = null;
-
-                // Mostrar mensaje de éxito
-                if (facturaActualizada) {
-                    this.showAlert(
-                        `Artículo eliminado correctamente. Cantidad disponible: ${nuevaCantidadFactura}, Nuevo total: ${nuevoTotalFactura.toFixed(2)}`, 
-                        "success"
-                    );
-                } else {
-                    this.showAlert(
-                        "Artículo eliminado, pero hubo un error al actualizar la factura", 
-                        "warning"
-                    );
-                }
-
-            } catch (error) {
-                console.error('Error al eliminar el artículo:', error);
-                this.showAlert("Hubo un error al eliminar el artículo. Inténtalo de nuevo.", "error");
-            }
-        },
-        cancelDelete() {
-            this.isDeleteModalVisible = false;
-            this.deleteId = null;
-        },
         redirectToAddExistencia() {
             this.$router.push('/newexistencia');
-        },
-       
+        }
     }
 };
 </script>
-
 
 
 <style scoped>
@@ -1369,7 +1204,7 @@ a {
     border-spacing: 0;
     background-color: white;
     color: #691B31;
-    font-size: 14px;
+    font-size: 16px;
     border-radius: 15px;
     overflow: hidden;
     table-layout: auto;
@@ -1762,6 +1597,27 @@ button[type="button"]:hover {
         font-size: 12px;
         min-width: 70px;
     }
+}
+.download-buttons {
+    margin: 20px 0;
+    text-align: center;
+}
+
+.download-buttons button {
+    width: 150px;
+    margin: 0 10px;
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: red;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-family: 'Montserrat', sans-serif;
+}
+
+.download-buttons button:hover {
+    background-color: #e0a800;
 }
 
 </style>

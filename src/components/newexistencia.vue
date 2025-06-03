@@ -36,6 +36,7 @@
                     <button @click="navigateTo('proveedor')">Ver proveedores</button>
                     <button @click="navigateTo('factura')">Facturas</button>
                     <button @click="navigateTo('existencia')">Entrada de artículos</button>
+                    <button @click="navigateTo('articulos')">Existencias</button>
                     <button @click="navigateTo('solicitudmaterial')">Salida de material</button>
                     <button @click="navigateTo('recepcionsolicitudes')">Recepción de solicitudes</button>
                     <button @click="navigateTo('poliza')">Pólizas</button>
@@ -107,20 +108,32 @@
                                 <input type="number" step="0.01" min="0" id="precio_unitario"
                                     v-model="form.precio_unitario" @input="calcularTotales" required />
                             </div>
+                            <!-- descuento -->
                             <div class="form-field">
-                                <label for="iva">IVA (16%)</label>
-                                <input type="number" step="0.01" min="0" id="iva" v-model="form.iva" readonly
-                                    style="background-color: #dcddcd;" />
+                                <label for="descuento">Descuento</label>
+                                <input type="number" id="descuento" step="0.01" placeholder="" v-model="form.descuento" min="0"
+                                    required />
                             </div>
+                            <div class="form-field iva-field">
+                                <div class="iva-checkbox-container">
+                                    <label for="iva_habilitado" class="checkbox-label">
+                                        <input type="checkbox" id="iva_habilitado" v-model="form.iva_habilitado" />
+                                        <span class="checkmark"></span>
+                                    </label>
+                                    <label for="iva">IVA (16%)</label>
+                                </div>
+                                <input type="number" id="iva" step="0.01" placeholder="" v-model="form.iva" readonly min="0" 
+                                    :style="{ backgroundColor: form.iva_habilitado ? '#dcddcd' : '#f0f0f0' }" required />
+                            </div>
+                        </div>
+
+                        <div class="form-row ">
                             <div class="form-field">
                                 <label for="importe_con_iva">Importe (Con IVA)</label>
                                 <input type="number" step="0.01" min="0" id="importe_con_iva"
                                     v-model="form.importe_con_iva" readonly required
                                     style="background-color: #dcddcd;" />
                             </div>
-                        </div>
-
-                        <div class="form-row ">
                             <div class="form-field">
                                 <label for="unidad_medida">Unidad de medida</label>
                                 <select id="unidad_medida" v-model="form.unidad_medida" required>
@@ -270,7 +283,7 @@
 </template>
 
 <script>
-import axios from 'axios';
+import api from '../services/api';
 
 export default {
     name: "newExistenciaPage",
@@ -292,6 +305,8 @@ export default {
                 numero_de_factura: "",
                 descripcion: "",
                 precio_unitario: "",
+                descuento: "",
+                iva_habilitado: false, // Checkbox para habilitar IVA
                 iva: "",
                 importe_con_iva: "",
                 cantidad: "",
@@ -322,6 +337,28 @@ export default {
 
         };
     },
+    watch: {
+        // Recalcular totales cuando cambia el precio unitario
+        "form.precio_unitario": function () {
+            this.calcularTotales();
+        },
+        // Recalcular totales cuando cambia el descuento
+        "form.descuento": function () {
+            this.calcularTotales();
+        },
+        // Recalcular totales cuando se habilita/deshabilita el IVA
+        "form.iva_habilitado": function () {
+            this.calcularTotales();
+        },
+        // Recalcular total de ingreso cuando cambia la cantidad
+        "form.cantidad": function () {
+            this.calcularTotalIngreso();
+        },
+        // Recalcular total de ingreso cuando cambia el importe con IVA
+        "form.importe_con_iva": function () {
+            this.calcularTotalIngreso();
+        }
+    },
     mounted() {
         this.loadUserData();
         this.loadObjetosGasto();
@@ -337,13 +374,30 @@ export default {
     methods: {
 
         calcularTotales() {
-            // Cálculo de IVA y Importe con IVA (como antes)
-            if (this.form.precio_unitario) {
-                const precio = parseFloat(this.form.precio_unitario);
-                this.form.iva = (precio * 0.16).toFixed(2);
-                this.form.importe_con_iva = (precio * 1.16).toFixed(2);
-                this.calcularTotalIngreso(); // Actualizar total ingreso si cambia el precio
+            const precioUnitario = parseFloat(this.form.precio_unitario) || 0;
+            const descuento = parseFloat(this.form.descuento) || 0;
+            
+            if (precioUnitario > 0) {
+                // Aplicar descuento al precio unitario
+                const precioConDescuento = precioUnitario - descuento;
+                
+                if (this.form.iva_habilitado) {
+                    // Calcular IVA sobre el precio con descuento
+                    const iva = precioConDescuento * 0.16;
+                    const importeConIva = precioConDescuento + iva;
+                    
+                    this.form.iva = iva.toFixed(2);
+                    this.form.importe_con_iva = importeConIva.toFixed(2);
+                } else {
+                    // Sin IVA
+                    this.form.iva = "0.00";
+                    this.form.importe_con_iva = precioConDescuento.toFixed(2);
+                }
+                
+                // Actualizar total ingreso
+                this.calcularTotalIngreso();
             } else {
+                // Limpiar campos si no hay precio unitario
                 this.form.iva = '';
                 this.form.importe_con_iva = '';
                 this.form.total_ingreso = '';
@@ -351,10 +405,11 @@ export default {
         },
 
         calcularTotalIngreso() {
-            if (this.form.cantidad && this.form.importe_con_iva) {
-                const cantidad = parseFloat(this.form.cantidad);
-                const importe = parseFloat(this.form.importe_con_iva);
-                this.form.total_ingreso = (cantidad * importe).toFixed(2);
+            const cantidad = parseFloat(this.form.cantidad) || 0;
+            const importeConIva = parseFloat(this.form.importe_con_iva) || 0;
+            
+            if (cantidad > 0 && importeConIva > 0) {
+                this.form.total_ingreso = (cantidad * importeConIva).toFixed(2);
             } else {
                 this.form.total_ingreso = '';
             }
@@ -479,7 +534,7 @@ export default {
                     updateData.total = nuevoTotal;
                 }
 
-                const response = await axios.put(`http://localhost:3000/api/facturas/${facturaId}`, updateData, {
+                const response = await api.put(`/facturas/${facturaId}`, updateData, {
                     headers: {
                         'Authorization': `Bearer ${localStorage.getItem('token')}`
                     }
@@ -562,7 +617,7 @@ export default {
 
             try {
                 // Registrar el artículo
-                const response = await axios.post('http://localhost:3000/api/articulos', formData, {
+                const response = await api.post('/articulos', formData, {
                     headers: {
                         'Content-Type': 'multipart/form-data',
                         'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -684,7 +739,7 @@ export default {
                         }
                     });
 
-                    return axios.post('http://localhost:3000/api/articulos', formData, {
+                    return api.post('/articulos', formData, {
                         headers: {
                             'Content-Type': 'multipart/form-data',
                             'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -787,7 +842,7 @@ export default {
 
                 try {
                     // Obtener todos los usuarios de la API
-                    const response = await fetch('http://localhost:3000/api/personas');
+                    const response = await api.get('/personas');
                     const users = await response.json();
 
                     // Buscar el usuario logueado por email
@@ -811,7 +866,7 @@ export default {
 
                         if (imageFileName) {
                             // Construir la URL completa para la imagen
-                            this.profileImage = `http://localhost:3000/api/users-files/${imageFileName}`;
+                            this.profileImage = `http://192.168.10.31:3000/api/users-files/${imageFileName}`;
                         } else {
                             // Usar una imagen por defecto si no hay imagen en la API
                             this.profileImage = "../assets/UserHombre.png";
@@ -830,7 +885,7 @@ export default {
         },
         async loadObjetosGasto() {
             try {
-                const response = await axios.get('http://localhost:3000/api/objetoGastos');
+                const response = await api.get('/objetoGastos');
                 this.objetosGasto = response.data.map(objeto => {
                     if (!objeto.numero_partida) {
                         console.warn('Objeto de gasto sin número de partida:', objeto);
@@ -844,7 +899,7 @@ export default {
         },
         async loadFacturas() {
             try {
-                const response = await axios.get('http://localhost:3000/api/facturas');
+                const response = await api.get('/facturas');
                 this.facturas = response.data.map(factura => {
                     if (!factura.numero_de_factura) {
                         console.warn('Factura sin número de factura:', factura);
@@ -1691,7 +1746,7 @@ a {
 .form-field {
     flex: 1;
     /* Cada campo ocupa un 100% del ancho disponible dentro de la fila */
-    min-width: 200px;
+    min-width: 150px;
     /* Establece un ancho mínimo para que no se colapse */
 
 }
@@ -1755,4 +1810,90 @@ a {
 .dropzone input[type="file"] {
     display: none;
 }
+.iva-field {
+        display: flex;
+        flex-direction: column;
+    }
+
+      .iva-checkbox-container {
+        display: flex;
+        align-items: center;
+        margin-bottom: -3px;
+    }
+
+    .checkbox-label {
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 500;
+        color: #333;
+        margin-right: 15px;
+    }
+
+    .checkbox-label input[type="checkbox"] {
+        display: none;
+    }
+
+    .checkmark {
+        height: 18px;
+        width: 18px;
+        background-color: #fff;
+        border: 2px solid #ddd;
+        border-radius: 4px;
+        margin-right: 8px;
+        position: relative;
+        transition: all 0.3s ease;
+    }
+
+    .checkbox-label:hover .checkmark {
+        border-color: #007bff;
+    }
+
+    .checkbox-label input:checked ~ .checkmark {
+        background-color: #007bff;
+        border-color: #007bff;
+    }
+
+    .checkmark:after {
+        content: "";
+        position: absolute;
+        display: none;
+    }
+
+    .checkbox-label input:checked ~ .checkmark:after {
+        display: block;
+    }
+
+    .checkbox-label .checkmark:after {
+        left: 5px;
+        top: 1px;
+        width: 5px;
+        height: 10px;
+        border: solid white;
+        border-width: 0 2px 2px 0;
+        transform: rotate(45deg);
+    }
+
+    .iva-checkbox-container label[for="iva"] {
+        font-size: 14px;
+        font-weight: 500;
+        color: #333;
+        margin: 0;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .iva-checkbox-container {
+            flex-direction: column;
+            align-items: flex-start;
+            margin-bottom: 10px;
+        }
+        
+        .checkbox-label {
+            margin-right: 0;
+            margin-bottom: 5px;
+            font-size: 13px;
+        }
+    }
 </style>

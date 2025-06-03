@@ -36,6 +36,7 @@
                     <button @click="navigateTo('proveedor')">Ver proveedores</button>
                     <button @click="navigateTo('factura')">Facturas</button>
                     <button @click="navigateTo('existencia')">Entrada de artículos</button>
+                    <button @click="navigateTo('articulos')">Existencias</button>
                     <button @click="navigateTo('solicitudmaterial')">Salida de material</button>
                     <button @click="navigateTo('recepcionsolicitudes')">Recepción de solicitudes</button>
                     <button @click="navigateTo('poliza')">Pólizas</button>
@@ -134,21 +135,33 @@
                         <input type="number" id="sub_total" step="0.01" placeholder="" v-model="form.sub_total" min="0"
                             required />
                     </div>
-                    <!-- IVA -->
+                    <!-- descuento -->
                     <div class="form-field">
-                        <label for="iva">IVA (16%)</label>
-                        <input type="number" id="iva" step="0.01" placeholder="" v-model="form.iva" readonly min="0" style="background-color: #dcddcd;"
+                        <label for="descuento">Descuento</label>
+                        <input type="number" id="descuento" step="0.01" placeholder="" v-model="form.descuento" min="0"
                             required />
                     </div>
+                    <div class="form-field iva-field">
+                        <div class="iva-checkbox-container">
+                            <label for="iva_habilitado" class="checkbox-label">
+                                <input type="checkbox" id="iva_habilitado" v-model="form.iva_habilitado" />
+                                <span class="checkmark"></span>
+                            </label>
+                            <label for="iva">IVA (16%)</label>
+                        </div>
+                        <input type="number" id="iva" step="0.01" placeholder="" v-model="form.iva" readonly min="0" 
+                            :style="{ backgroundColor: form.iva_habilitado ? '#dcddcd' : '#f0f0f0' }" required />
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    
                     <!-- Total -->
                     <div class="form-field">
                         <label for="total">Total</label>
                         <input type="number" id="total" step="0.01" placeholder="" v-model="form.total" readonly min="0" style="background-color: #dcddcd;"
                             required />
                     </div>
-                </div>
-
-                <div class="form-row">
                     <!-- Proveedor -->
                     <div class="form-field">
                         <label for="id_proveedor">Proveedor</label>
@@ -160,7 +173,6 @@
                         </select>
                     </div>
                     <!-- Documento de Factura -->
-
                     <div class="form-field">
                         <label for="archivo_pdf">Documento de Factura</label>
                         <div class="dropzone" @drop.prevent="handleDropFactura" @dragover.prevent
@@ -191,6 +203,7 @@
 </template>
 
 <script>
+import api from '../services/api';
 export default {
     name: "newFacturaPage",
     data() {
@@ -206,7 +219,9 @@ export default {
                 tipo_presupuesto: "", // Tipo de presupuesto
                 id_proveedor: "", // ID del proveedor
                 cantidad: "", // Cantidad
+                descuento: "", // Descuento
                 sub_total: "", // Subtotal
+                iva_habilitado: false, // Checkbox para habilitar IVA
                 iva: "", // IVA
                 total: "", // Total
                 archivo_pdf: null, // Archivo PDF de la factura
@@ -225,21 +240,15 @@ export default {
         };
     },
     watch: {
-        // Watcher para calcular el IVA y el Total cuando cambia el subtotal
-        "form.sub_total": function (newVal) {
-            if (newVal && !isNaN(newVal)) {
-                const subtotal = parseFloat(newVal);
-                const iva = subtotal * 0.16; // Calcular el IVA (16% del subtotal)
-                const total = subtotal + iva; // Calcular el Total (subtotal + IVA)
-
-                // Actualizar los campos de IVA y Total
-                this.form.iva = iva.toFixed(2); // Redondear a 2 decimales
-                this.form.total = total.toFixed(2); // Redondear a 2 decimales
-            } else {
-                // Si el subtotal no es válido, limpiar los campos de IVA y Total
-                this.form.iva = "";
-                this.form.total = "";
-            }
+        // Watcher para calcular el IVA y el Total cuando cambia el subtotal o el estado del IVA
+        "form.sub_total": function () {
+            this.calcularTotal();
+        },
+        "form.descuento": function () {
+            this.calcularTotal();
+        },
+        "form.iva_habilitado": function () {
+            this.calcularTotal();
         },
     },
     mounted() {
@@ -247,6 +256,31 @@ export default {
         this.fetchProveedores();
     },
     methods: {
+        // Método para calcular el total con o sin IVA
+        calcularTotal() {
+            const subtotal = parseFloat(this.form.sub_total) || 0;
+            const descuento = parseFloat(this.form.descuento) || 0;
+            
+            if (subtotal > 0) {
+                const subtotalConDescuento = subtotal - descuento;
+                
+                if (this.form.iva_habilitado) {
+                    const iva = subtotalConDescuento * 0.16; // Calcular el IVA (16% del subtotal con descuento)
+                    const total = subtotalConDescuento + iva; // Calcular el Total (subtotal con descuento + IVA)
+                    
+                    this.form.iva = iva.toFixed(2); // Redondear a 2 decimales
+                    this.form.total = total.toFixed(2); // Redondear a 2 decimales
+                } else {
+                    // Si el IVA no está habilitado, el total es igual al subtotal con descuento aplicado
+                    this.form.iva = "0.00";
+                    this.form.total = subtotalConDescuento.toFixed(2);
+                }
+            } else {
+                // Si el subtotal no es válido, limpiar los campos
+                this.form.iva = "";
+                this.form.total = "";
+            }
+        },
         
         navigateTo(page) {
             console.log(`Navegando a ${page}`);
@@ -268,7 +302,7 @@ export default {
 
                 try {
                     // Obtener todos los usuarios de la API
-                    const response = await fetch('http://localhost:3000/api/personas');
+                    const response = await api.get('/personas');
                     const users = await response.json();
 
                     // Buscar el usuario logueado por email
@@ -292,7 +326,7 @@ export default {
 
                         if (imageFileName) {
                             // Construir la URL completa para la imagen
-                            this.profileImage = `http://localhost:3000/api/users-files/${imageFileName}`;
+                            this.profileImage = `http://192.168.10.31:3000/api/users-files/${imageFileName}`;
                         } else {
                             // Usar una imagen por defecto si no hay imagen en la API
                             this.profileImage = "../assets/UserHombre.png";
@@ -313,7 +347,7 @@ export default {
         // Obtener lista de proveedores
         async fetchProveedores() {
             try {
-                const response = await fetch("http://localhost:3000/api/proveedor");
+                const response = await fetch("http://192.168.10.31:3000/api/proveedor");
                 if (!response.ok) {
                     throw new Error("Error ");
                 }
@@ -378,7 +412,9 @@ export default {
                 formData.append('tipo_presupuesto', this.form.tipo_presupuesto);
                 formData.append('id_proveedor', this.form.id_proveedor);
                 formData.append('cantidad', this.form.cantidad);
+                formData.append('descuento', this.form.descuento || '0');
                 formData.append('sub_total', this.form.sub_total);
+                formData.append('iva_habilitado', this.form.iva_habilitado);
                 formData.append('iva', this.form.iva);
                 formData.append('total', this.form.total);
 
@@ -393,7 +429,7 @@ export default {
                 }
 
                 // Enviar la solicitud a la API
-                const response = await fetch("http://localhost:3000/api/facturas", {
+                const response = await fetch("http://192.168.10.31:3000/api/facturas", {
                     method: "POST",
                     body: formData,
                 });
@@ -731,4 +767,91 @@ a {
 .dropzone input[type="file"] {
     display: none;
 }
+
+.iva-field {
+        display: flex;
+        flex-direction: column;
+    }
+
+      .iva-checkbox-container {
+        display: flex;
+        align-items: center;
+        margin-bottom: -3px;
+    }
+
+    .checkbox-label {
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 500;
+        color: #333;
+        margin-right: 15px;
+    }
+
+    .checkbox-label input[type="checkbox"] {
+        display: none;
+    }
+
+    .checkmark {
+        height: 18px;
+        width: 18px;
+        background-color: #fff;
+        border: 2px solid #ddd;
+        border-radius: 4px;
+        margin-right: 8px;
+        position: relative;
+        transition: all 0.3s ease;
+    }
+
+    .checkbox-label:hover .checkmark {
+        border-color: #007bff;
+    }
+
+    .checkbox-label input:checked ~ .checkmark {
+        background-color: #007bff;
+        border-color: #007bff;
+    }
+
+    .checkmark:after {
+        content: "";
+        position: absolute;
+        display: none;
+    }
+
+    .checkbox-label input:checked ~ .checkmark:after {
+        display: block;
+    }
+
+    .checkbox-label .checkmark:after {
+        left: 5px;
+        top: 1px;
+        width: 5px;
+        height: 10px;
+        border: solid white;
+        border-width: 0 2px 2px 0;
+        transform: rotate(45deg);
+    }
+
+    .iva-checkbox-container label[for="iva"] {
+        font-size: 14px;
+        font-weight: 500;
+        color: #333;
+        margin: 0;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .iva-checkbox-container {
+            flex-direction: column;
+            align-items: flex-start;
+            margin-bottom: 10px;
+        }
+        
+        .checkbox-label {
+            margin-right: 0;
+            margin-bottom: 5px;
+            font-size: 13px;
+        }
+    }
 </style>

@@ -36,6 +36,7 @@
                     <button @click="navigateTo('proveedor')">Ver proveedores</button>
                     <button @click="navigateTo('factura')">Facturas</button>
                     <button @click="navigateTo('existencia')">Entrada de artículos</button>
+                    <button @click="navigateTo('articulos')">Existencias</button>
                     <button @click="navigateTo('solicitudmaterial')">Salida de material</button>
                     <button @click="navigateTo('recepcionsolicitudes')">Recepción de solicitudes</button>
                     <button @click="navigateTo('poliza')">Pólizas</button>
@@ -73,12 +74,6 @@
                 <input type="text" v-model="searchQuery" placeholder="Buscar..." />
                 <i class="fas fa-search"></i>
             </div>
-            <div class="download-buttons">
-                <button @click="generarPDF">
-                    <i class="fas fa-file-pdf"></i> Descargar PDF
-                </button>
-            </div>
-
         </div>
 
         <div class="contenedor-tabla">
@@ -124,7 +119,7 @@
 <script>
 import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
-import axios from 'axios';
+import api from '../services/api';
 
 export default {
     name: "versolicitudesPage",
@@ -175,7 +170,7 @@ export default {
     methods: {
         async obtenerNombrePartida(numeroPartida) {
             try {
-                const response = await axios.get(`http://localhost:3000/api/objetoGastos?numero_partida=${numeroPartida}`);
+                const response = await api.get(`/objetoGastos?numero_partida=${numeroPartida}`);
                 const partida = response.data[0];
 
                 // Si no existe la partida
@@ -214,7 +209,7 @@ export default {
         async generarPDF() {
             try {
                 // Obtener datos de partidas
-                const partidasResponse = await axios.get('http://localhost:3000/api/objetoGastos');
+                const partidasResponse = await api.get('/objetoGastos');
                 const todasLasPartidas = partidasResponse.data;
 
                 // Agrupar solicitudes por partida
@@ -330,7 +325,7 @@ export default {
                 this.userName = storedUserName;
 
                 try {
-                    const response = await axios.get('http://localhost:3000/api/personas');
+                    const response = await api.get('/personas');
                     const users = response.data;
                     const user = users.find(u => u.email === storedUserEmail);
 
@@ -343,7 +338,7 @@ export default {
 
                         if (imageFileName) {
                             imageFileName = imageFileName.split('.').slice(0, -1).join('.');
-                            this.profileImage = `http://localhost:3000/api/users-files/${imageFileName}`;
+                            this.profileImage = `http://192.168.10.31:3000/api/users-files/${imageFileName}`;
                         } else {
                             this.profileImage = "../assets/UserHombre.png";
                         }
@@ -362,11 +357,11 @@ export default {
         async cargarDatos() {
             try {
                 // Cargar solicitudes
-                const solicitudesResponse = await axios.get('http://localhost:3000/api/solicitudes');
+                const solicitudesResponse = await api.get('/solicitudes');
                 this.solicitudes = solicitudesResponse.data;
 
                 // Cargar artículos
-                const articulosResponse = await axios.get('http://localhost:3000/api/articulos');
+                const articulosResponse = await api.get('/articulos');
                 this.articulos = articulosResponse.data;
 
                 // Combinar los datos y ordenar por fecha (más reciente primero)
