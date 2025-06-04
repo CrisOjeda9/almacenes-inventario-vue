@@ -1,297 +1,237 @@
 <template>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    <div class="page-wrapper">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+        <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+        <NavBarPage :pageTitle="'Artículos'" :showUserMenu="true" />
+        <div class="container">
+            <div class="search-bar">
+                <div class="input-wrapper">
+                    <input type="text" v-model="searchQuery" placeholder="Buscar..." />
+                    <i class="fas fa-search"></i> <!-- Icono de la lupa -->
+                </div>
 
-    <div class="container">
-        <!-- Menú de navegación -->
-        <nav class="navbar">
-            <div class="navbar-left">
-                <img src="../assets/LOGOS DORADOS-02.png" alt="Icono" class="navbar-icon" @click="goHome" width="50%"
-                    height="auto" style="cursor: pointer;" />
+                <!-- Botón para agregar nuevo usuario -->
+                <button class="add-existencia-btn" @click="redirectToAddExistencia">
+                    <i class="fas fa-file-invoice"></i> <i class="fas fa-plus"></i>
+                </button>
             </div>
-            <div class="navbar-center">
-                <h1>Artículos</h1>
-                <p>Sistema de Almacén e Inventarios de Radio y Televisión de Hidalgo</p>
-            </div>
-            <div class="navbar-right">
-                <div class="user-profile">
-                    <img :src="profileImage" alt="User Profile" class="profile-pic" />
-                    <div class="user-info">
-                        <p>{{ userName }}</p> <!-- Nombre dinámico del usuario -->
-                        <span><a href="profile" style="color: white;">Ver Perfil</a></span>
+
+            <div class="contenedor-tabla">
+                <div class="table-horizontal-scroll">
+                    <table class="existencia-table">
+                        <thead>
+                            <tr>
+                                <th>Núm. factura</th>
+                                <th>Núm. partida</th>
+                                <th>Descripcion</th>
+                                <th>Precio Unitario</th>
+                                <th>IVA</th>
+                                <th>Importe con IVA</th>
+                                <th>Cantidad</th>
+                                <th>Unidad de medida</th>
+                                <th>Total de ingreso</th>
+                                <th>Foto artículo</th>
+                                <th>Fecha de registro</th>
+                                <th>Acciones</th>
+                                <th>Agregar Inventario</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="existencia in paginatedExistencias" :key="existencia.id">
+
+                                <td>{{ getNumeroFactura(existencia.id_factura) }}</td>
+                                <td>{{ getNumeroPartida(existencia.id_objetogasto) }}</td>
+                                <td>{{ existencia.descripcion }}</td>
+                                <td>{{ existencia.precio_unitario }}</td>
+                                <td>{{ existencia.iva }}</td>
+                                <td>{{ existencia.importe_con_iva }}</td>
+                                <td>{{ existencia.cantidad }}</td>
+                                <td>{{ existencia.unidad_medida }}</td>
+                                <td>{{ existencia.total_ingreso }}</td>
+                                <td>
+                                    <button @click="openModal(existencia.foto_articulo)" class="btn-download">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </td>
+                                <td>{{ formatDate(existencia.createdAt) }}</td>
+                                <td>
+                                    <button @click="editExistencia(existencia)" class="btn-edit">Editar</button>
+                                    <button @click="showDeleteModal(existencia.id)" class="btn-delete">Eliminar</button>
+                                </td>
+                                <td> 
+                                    <button @click="addToInventario(existencia)" class="btn-inventario">
+                                        <i class="fas fa-plus"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>    
+
+                <!-- Modal de Edición -->
+                <div v-if="isEditing" class="edit-modal">
+                    <div class="modal-content">
+                        <h3>Editar Existencia</h3>
+                        <form @submit.prevent="saveChanges" class="edit-form">
+                            <div class="contenedorformulario">
+                                <!-- Primera columna -->
+                                <div class="form-column">
+                                    <div>
+                                        <label>Número de factura:</label>
+                                        <input v-model="currentExistencia.id_factura" type="text" />
+                                    </div>
+                                    <div>
+                                        <label>Número de partida:</label>
+                                        <input v-model="currentExistencia.id_objetogasto" type="text" />
+                                    </div>
+                                    <div>
+                                        <label>Descripcion:</label>
+                                        <input v-model="currentExistencia.descripcion" type="text" />
+                                    </div>
+                                </div>
+
+                                <!-- Segunda columna -->
+                                <div class="form-column">
+                                    <div>
+                                        <label>Precio Unitario:</label>
+                                        <input v-model="currentExistencia.precio_unitario" type="text" />
+                                    </div>
+                                    <div>
+                                        <label>IVA:</label>
+                                        <input v-model="currentExistencia.iva" type="text" />
+                                    </div>
+                                    <div>
+                                        <label>Importe con IVA:</label>
+                                        <input v-model="currentExistencia.importe_con_iva" type="text" />
+                                    </div>
+                                    <label for="foto_articulo">Foto artículo</label>
+                                    <div class="dropzone" @drop.prevent="handleDrop" @dragover.prevent
+                                        @click="triggerFileInput">
+                                        <input type="file" id="updatefoto_articulo" ref="fileInput"
+                                            @change="handleFileChange" accept="image/*" multiple style="display: none;" />
+                                        <i class="fas fa-cloud-upload-alt"></i>
+                                        <span v-if="currentExistencia.foto_articulo.length === 0">Arrastra o selecciona
+                                            imágenes (JPG, PNG)</span>
+                                        <span v-else>{{ currentExistencia.foto_articulo.length }} imágenes
+                                            seleccionadas</span>
+                                    </div>
+                                    <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
+                                    <button v-if="currentExistencia.foto_articulo.length > 0"
+                                        @click.prevent="openImageModal" class="view-images-btn">
+                                        Ver Imágenes
+                                    </button>
+                                </div>
+
+                                <!-- Tercera columna -->
+                                <div class="form-column">
+                                    <div>
+                                        <label>Cantidad:</label>
+                                        <input v-model="currentExistencia.cantidad" type="text" />
+                                    </div>
+                                    <div>
+                                        <label>Unidad de medida:</label>
+                                        <select v-model="currentExistencia.unidad_medida" class="form-input">
+                                            <option value="" disabled>Selecciona una opción</option>
+                                            <option value="piezas">Piezas</option>
+                                            <option value="paquetes">Paquetes</option>
+                                            <option value="cajas">Cajas</option>
+                                            <option value="kilogramos">Kilogramos</option>
+                                            <option value="litros">Litros</option>
+                                            <option value="metros">Metros</option>
+                                            <option value="rollos">Rollos</option>
+                                            <option value="bultos">Bultos</option>
+                                        </select>
+                                    </div>
+
+                                    <div>
+                                        <label>Total de ingreso:</label>
+                                        <input v-model="currentExistencia.total_ingreso" type="text" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Botones debajo del formulario -->
+                            <div class="form-buttons">
+                                <button type="submit" class="save-btn">Guardar cambios</button>
+                                <button @click="cancelEdit" type="button" class="cancel-btn">Cancelar</button>
+                            </div>
+                        </form>
                     </div>
                 </div>
-            </div>
-        </nav>
 
-        <!-- Barra de navegación amarilla -->
-        <div class="sub-navbar">
-            <a href="/home" class="nav-item">Inicio</a>
-            <a v-if="userRole === 'Administrador'" href="users" class="nav-item">Aministrador</a>
-            <div v-if="userRole === 'Almacenes' || userRole === 'Administrador'" class="nav-item" @mouseenter="showMenu('almacenMenu')"
-                @mouseleave="hideMenu('almacenMenu')">
-                Almacén
-                <span class="menu-icon">▼</span>
-                <div class="dropdown-menu" v-show="menus.almacenMenu">
-                    <button @click="navigateTo('proveedor')">Ver proveedores</button>
-                    <button @click="navigateTo('factura')">Facturas</button>
-                    <button @click="navigateTo('existencia')">Entrada de artículos</button>
-                    <button @click="navigateTo('articulos')">Existencias</button>
-                    <button @click="navigateTo('solicitudmaterial')">Salida de material</button>
-                    <button @click="navigateTo('recepcionsolicitudes')">Recepción de solicitudes</button>
-                    <button @click="navigateTo('poliza')">Pólizas</button>
-                </div>
-            </div>
-
-            <div v-if="userRole === 'Inventario' || userRole === 'Administrador'" class="nav-item" @mouseenter="showMenu('homeMenu')"
-                @mouseleave="hideMenu('homeMenu')">
-                Inventario
-                <span class="menu-icon">▼</span>
-                <div class="dropdown-menu" v-show="menus.homeMenu">
-                    <button @click="navigateTo('historialbienes')">Historial de bienes</button>
-                    <button @click="navigateTo('resguardo')">Bienes sin resguardo</button>
-                    <button @click="navigateTo('listaalmacen')">Bienes nuevos</button>
-                    <button @click="navigateTo('bienesnuevos')">Asignar resguardo</button>
-                    <button @click="navigateTo('liberarbien')">Liberar Bien</button>
-                    <button @click="navigateTo('bajabien')">Baja de bienes</button>
-                    <button @click="navigateTo('bajas')">Historial de bajas</button>
-                    <button @click="navigateTo('reportes')">Generación de reportes</button>
-                </div>
-            </div>
-            <div v-if="userRole === 'Usuarios' || userRole === 'Administrador'" class="nav-item" @mouseenter="showMenu('userMenu')"
-                @mouseleave="hideMenu('userMenu')">
-                Usuario
-                <span class="menu-icon">▼</span>
-                <div class="dropdown-menu" v-show="menus.userMenu">
-                    <button @click="navigateTo('')">Solicitud de Material</button>
-                    <button @click="navigateTo('resguardoUsuario')">Resguardo</button>
-                </div>
-            </div>
-        </div>
-
-        <div class="search-bar">
-            <div class="input-wrapper">
-                <input type="text" v-model="searchQuery" placeholder="Buscar..." />
-                <i class="fas fa-search"></i> <!-- Icono de la lupa -->
-            </div>
-
-            <!-- Botón para agregar nuevo usuario -->
-            <button class="add-existencia-btn" @click="redirectToAddExistencia">
-                <i class="fas fa-file-invoice"></i> <i class="fas fa-plus"></i>
-            </button>
-        </div>
-
-        <div class="contenedor-tabla">
-            <div class="table-horizontal-scroll">
-                <table class="existencia-table">
-                    <thead>
-                        <tr>
-                            <th>Núm. factura</th>
-                            <th>Núm. partida</th>
-                            <th>Descripcion</th>
-                            <th>Precio Unitario</th>
-                            <th>IVA</th>
-                            <th>Importe con IVA</th>
-                            <th>Cantidad</th>
-                            <th>Unidad de medida</th>
-                            <th>Total de ingreso</th>
-                            <th>Foto artículo</th>
-                            <th>Fecha de registro</th>
-                            <th>Acciones</th>
-                            <th>Agregar Inventario</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr v-for="existencia in paginatedExistencias" :key="existencia.id">
-
-                            <td>{{ getNumeroFactura(existencia.id_factura) }}</td>
-                            <td>{{ getNumeroPartida(existencia.id_objetogasto) }}</td>
-                            <td>{{ existencia.descripcion }}</td>
-                            <td>{{ existencia.precio_unitario }}</td>
-                            <td>{{ existencia.iva }}</td>
-                            <td>{{ existencia.importe_con_iva }}</td>
-                            <td>{{ existencia.cantidad }}</td>
-                            <td>{{ existencia.unidad_medida }}</td>
-                            <td>{{ existencia.total_ingreso }}</td>
-                            <td>
-                                <button @click="openModal(existencia.foto_articulo)" class="btn-download">
-                                    <i class="fas fa-eye"></i>
-                                </button>
-                            </td>
-                            <td>{{ formatDate(existencia.createdAt) }}</td>
-                            <td>
-                                <button @click="editExistencia(existencia)" class="btn-edit">Editar</button>
-                                <button @click="showDeleteModal(existencia.id)" class="btn-delete">Eliminar</button>
-                            </td>
-                            <td> 
-                                <button @click="addToInventario(existencia)" class="btn-inventario">
-                                    <i class="fas fa-plus"></i>
-                                </button>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>    
-
-            <!-- Modal de Edición -->
-            <div v-if="isEditing" class="edit-modal">
-                <div class="modal-content">
-                    <h3>Editar Existencia</h3>
-                    <form @submit.prevent="saveChanges" class="edit-form">
-                        <div class="contenedorformulario">
-                            <!-- Primera columna -->
-                            <div class="form-column">
-                                <div>
-                                    <label>Número de factura:</label>
-                                    <input v-model="currentExistencia.id_factura" type="text" />
+                <!-- Modal para mostrar las imágenes seleccionadas -->
+                <div v-if="showImageModal" class="modal-overlay3">
+                    <div class="modal3">
+                        <h2>Imágenes seleccionadas</h2>
+                        <div class="image-preview-container3">
+                            <div v-for="(img, index) in currentExistencia.foto_articulo" :key="index"
+                                class="image-preview3">
+                                <div class="image-container3">
+                                    <img :src="getImageUrl(img)" :alt="img.name" class="image-preview-img3" />
+                                    <button @click="removeImage(index)" class="remove-btn">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
                                 </div>
-                                <div>
-                                    <label>Número de partida:</label>
-                                    <input v-model="currentExistencia.id_objetogasto" type="text" />
-                                </div>
-                                <div>
-                                    <label>Descripcion:</label>
-                                    <input v-model="currentExistencia.descripcion" type="text" />
-                                </div>
-                            </div>
-
-                            <!-- Segunda columna -->
-                            <div class="form-column">
-                                <div>
-                                    <label>Precio Unitario:</label>
-                                    <input v-model="currentExistencia.precio_unitario" type="text" />
-                                </div>
-                                <div>
-                                    <label>IVA:</label>
-                                    <input v-model="currentExistencia.iva" type="text" />
-                                </div>
-                                <div>
-                                    <label>Importe con IVA:</label>
-                                    <input v-model="currentExistencia.importe_con_iva" type="text" />
-                                </div>
-                                <label for="foto_articulo">Foto artículo</label>
-                                <div class="dropzone" @drop.prevent="handleDrop" @dragover.prevent
-                                    @click="triggerFileInput">
-                                    <input type="file" id="updatefoto_articulo" ref="fileInput"
-                                        @change="handleFileChange" accept="image/*" multiple style="display: none;" />
-                                    <i class="fas fa-cloud-upload-alt"></i>
-                                    <span v-if="currentExistencia.foto_articulo.length === 0">Arrastra o selecciona
-                                        imágenes (JPG, PNG)</span>
-                                    <span v-else>{{ currentExistencia.foto_articulo.length }} imágenes
-                                        seleccionadas</span>
-                                </div>
-                                <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
-                                <button v-if="currentExistencia.foto_articulo.length > 0"
-                                    @click.prevent="openImageModal" class="view-images-btn">
-                                    Ver Imágenes
-                                </button>
-                            </div>
-
-                            <!-- Tercera columna -->
-                            <div class="form-column">
-                                <div>
-                                    <label>Cantidad:</label>
-                                    <input v-model="currentExistencia.cantidad" type="text" />
-                                </div>
-                                <div>
-                                    <label>Unidad de medida:</label>
-                                    <select v-model="currentExistencia.unidad_medida" class="form-input">
-                                        <option value="" disabled>Selecciona una opción</option>
-                                        <option value="piezas">Piezas</option>
-                                        <option value="paquetes">Paquetes</option>
-                                        <option value="cajas">Cajas</option>
-                                        <option value="kilogramos">Kilogramos</option>
-                                        <option value="litros">Litros</option>
-                                        <option value="metros">Metros</option>
-                                        <option value="rollos">Rollos</option>
-                                        <option value="bultos">Bultos</option>
-                                    </select>
-                                </div>
-
-                                <div>
-                                    <label>Total de ingreso:</label>
-                                    <input v-model="currentExistencia.total_ingreso" type="text" />
-                                </div>
+                                <p class="image-name3">{{ img.name }}</p>
                             </div>
                         </div>
-
-                        <!-- Botones debajo del formulario -->
-                        <div class="form-buttons">
-                            <button type="submit" class="save-btn">Guardar cambios</button>
-                            <button @click="cancelEdit" type="button" class="cancel-btn">Cancelar</button>
-                        </div>
-                    </form>
+                        <button @click="closeImageModal">Cerrar</button>
+                    </div>
                 </div>
-            </div>
 
-            <!-- Modal para mostrar las imágenes seleccionadas -->
-            <div v-if="showImageModal" class="modal-overlay3">
-                <div class="modal3">
-                    <h2>Imágenes seleccionadas</h2>
-                    <div class="image-preview-container3">
-                        <div v-for="(img, index) in currentExistencia.foto_articulo" :key="index"
-                            class="image-preview3">
-                            <div class="image-container3">
-                                <img :src="getImageUrl(img)" :alt="img.name" class="image-preview-img3" />
-                                <button @click="removeImage(index)" class="remove-btn">
-                                    <i class="fas fa-trash-alt"></i>
-                                </button>
-                            </div>
-                            <p class="image-name3">{{ img.name }}</p>
+                <!-- Modal de Confirmación de Eliminación -->
+                <div v-if="isDeleteModalVisible" class="modal-overlay">
+                    <div class="modal-content-delete">
+                        <h3>¿Estás seguro de eliminar esta existencia?</h3>
+                        <div class="modal-buttons">
+                            <button @click="confirmDelete" class="btn-confirm">Confirmar</button>
+                            <button @click="cancelDelete" class="btn-cancel">Cancelar</button>
                         </div>
                     </div>
-                    <button @click="closeImageModal">Cerrar</button>
+                </div>
+
+
+                <!-- Paginación -->
+                <div class="pagination">
+                    <button @click="prevPage" :disabled="currentPage === 1">Anterior</button>
+                    <span>Pagina {{ currentPage }} de {{ totalPages }}</span>
+                    <button @click="nextPage" :disabled="currentPage === totalPages">Siguiente</button>
                 </div>
             </div>
 
-            <!-- Modal de Confirmación de Eliminación -->
-            <div v-if="isDeleteModalVisible" class="modal-overlay">
-                <div class="modal-content-delete">
-                    <h3>¿Estás seguro de eliminar esta existencia?</h3>
-                    <div class="modal-buttons">
-                        <button @click="confirmDelete" class="btn-confirm">Confirmar</button>
-                        <button @click="cancelDelete" class="btn-cancel">Cancelar</button>
+            <!-- Modal para mostrar imágenes -->
+            <div v-if="showModal" class="modal-overlay2" @click="closeModal">
+                <div class="modal2" @click.stop>
+                    <h2>Imágenes</h2>
+                    <hr>
+                    <div class="image-container2">
+                        <div v-for="(foto, i) in modalImages" :key="i" class="image-box">
+                            <a :href="getImageUrl(foto)" target="_blank">
+                                <img :src="getImageUrl(foto)" alt="Foto del bien recibido" class="modal-img2" />
+                            </a>
+                            <p class="image-name2">{{ foto }}</p>
+                        </div>
                     </div>
+                    <button @click="closeModal">Cerrar</button>
                 </div>
             </div>
-
-
-            <!-- Paginación -->
-            <div class="pagination">
-                <button @click="prevPage" :disabled="currentPage === 1">Anterior</button>
-                <span>Pagina {{ currentPage }} de {{ totalPages }}</span>
-                <button @click="nextPage" :disabled="currentPage === totalPages">Siguiente</button>
+            <!-- Contenedor de notificaciones -->
+            <div v-if="alertMessage" :class="alertClass" class="notification">
+                <i :class="alertIcon"></i> {{ alertMessage }}
             </div>
         </div>
-
-        <!-- Modal para mostrar imágenes -->
-        <div v-if="showModal" class="modal-overlay2" @click="closeModal">
-            <div class="modal2" @click.stop>
-                <h2>Imágenes</h2>
-                <hr>
-                <div class="image-container2">
-                    <div v-for="(foto, i) in modalImages" :key="i" class="image-box">
-                        <a :href="getImageUrl(foto)" target="_blank">
-                            <img :src="getImageUrl(foto)" alt="Foto del bien recibido" class="modal-img2" />
-                        </a>
-                        <p class="image-name2">{{ foto }}</p>
-                    </div>
-                </div>
-                <button @click="closeModal">Cerrar</button>
-            </div>
-        </div>
-        <!-- Contenedor de notificaciones -->
-        <div v-if="alertMessage" :class="alertClass" class="notification">
-            <i :class="alertIcon"></i> {{ alertMessage }}
-        </div>
-    </div>
+    </div>    
 </template>
 
 <script>
 import api from '../services/api';
+import NavBarPage from './NavBar.vue';
 
 export default {
     name: "existenciaPage",
+    components: {
+        NavBarPage // Registrar el componente
+    },
     data() {
         return {
             alertMessage: "",  // Mensaje de la alerta
@@ -1074,14 +1014,6 @@ input[type="date"] {
     background-color: #691B31;
 }
 
-
-
-
-
-
-
-
-
 .image-container2 {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
@@ -1161,152 +1093,20 @@ input[type="date"] {
 }
 
 
-.titulo {
-    font-size: 30px;
-    font-weight: 100;
-    text-align: center;
+.page-wrapper {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    background-color: #f5f5f5;
 }
 
 .container {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    background: white;
-    flex-direction: column;
-    color: white;
-    overflow-x: hidden;
-}
-
-/* Menú de navegación */
-.navbar {
-    position: 0;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 30px 20px;
-    background: #691B31;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-}
-
-.navbar-left {
     flex: 1;
-    display: flex;
-    align-items: center;
-}
-
-.icon-back {
-    font-size: 24px;
-    cursor: pointer;
-    margin-right: 10px;
-    color: white;
-}
-
-.navbar-center {
-    flex: 3;
-    text-align: center;
-}
-
-.navbar-center h1 {
-    margin: 0;
-    font-size: 24px;
-}
-
-.navbar-center p {
-    margin: 0;
-    font-size: 18px;
-}
-
-
-.navbar-right {
-    flex: 1;
-    display: flex;
-    justify-content: flex-end;
-}
-
-.user-profile {
-    display: flex;
-    align-items: center;
-}
-
-.profile-pic {
-    border-radius: 50%;
-    width: 40px;
-    height: 40px;
-    margin-right: 10px;
-}
-
-.user-info p {
-    margin: 0;
-    font-weight: bold;
-}
-
-.user-info span {
-    font-size: 12px;
-    color: #ddd;
-}
-
-/* Barra de navegación amarilla */
-.sub-navbar {
-    display: flex;
-    justify-content: center;
-    background: linear-gradient(to right, #FFFFFF, #DDC9A3);
-    /* Degradado de izquierda a derecha */
-    padding: 10px 0;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-}
-
-.nav-item {
-    position: relative;
-    margin: 0 20px;
-    cursor: pointer;
-    font-size: 16px;
-    color: #691B31;
-}
-
-.nav-item:hover {
-    color: #590d22;
-}
-
-.dropdown-menu {
-    display: none;
-    position: absolute;
-    top: 100%;
-    left: 0;
-    background-color: #691B31;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    border-radius: 5px;
-    width: 150px;
-    z-index: 1000;
-
-    /* Asegurar que esté encima */
-}
-
-.dropdown-menu button {
     width: 100%;
-    padding: 10px;
-    border: none;
-    background: #691B31;
-    color: white;
-    text-align: left;
-    font-size: 14px;
-
+    padding: 20px;
+    background-color: #f5f5f5;
+    min-height: calc(100vh - 140px);
 }
-
-.dropdown-menu button:hover {
-    background: #590d22;
-}
-
-.nav-item:hover .dropdown-menu {
-    display: block;
-}
-
-
-
-
-
 
 button {
     width: 60%;

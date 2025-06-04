@@ -1,299 +1,240 @@
 <template>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
-
-    <div class="container">
-        <!-- Menú de navegación -->
-        <nav class="navbar">
-            <div class="navbar-left">
-                <img src="../assets/LOGOS DORADOS-02.png" alt="Icono" class="navbar-icon" @click="goHome" width="50%"
-                    height="auto" style="cursor: pointer;" />
-            </div>
-            <div class="navbar-center">
-                <h1>Facturas</h1>
-                <p>Sistema de Almacén e Inventarios de Radio y Televisión de Hidalgo</p>
-            </div>
-            <div class="navbar-right">
-                <div class="user-profile">
-                    <img :src="profileImage" alt="User Profile" class="profile-pic" />
-                    <div class="user-info">
-                        <p>{{ userName }}</p> <!-- Nombre dinámico del usuario -->
-                        <span><a href="profile" style="color: white;">Ver Perfil</a></span>
-                    </div>
+    <div class="page-wrapper">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+        <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+        <NavBarPage :pageTitle="'Facturas'" :showUserMenu="true" />
+        <div class="container">
+            <div class="search-bar">
+                <div class="input-wrapper">
+                    <input type="text" v-model="searchQuery" placeholder="Buscar..." />
+                    <i class="fas fa-search"></i> <!-- Icono de la lupa -->
                 </div>
-            </div>
-        </nav>
 
-        <!-- Barra de navegación amarilla -->
-        <div class="sub-navbar">
-            <a href="/home" class="nav-item">Inicio</a>
-            <a v-if="userRole === 'Administrador'" href="users" class="nav-item">Aministrador</a>
-            <div v-if="userRole === 'Almacenes' || userRole === 'Administrador'" class="nav-item" @mouseenter="showMenu('almacenMenu')"
-                @mouseleave="hideMenu('almacenMenu')">
-                Almacén
-                <span class="menu-icon">▼</span>
-                <div class="dropdown-menu" v-show="menus.almacenMenu">
-                    <button @click="navigateTo('proveedor')">Ver proveedores</button>
-                    <button @click="navigateTo('factura')">Facturas</button>
-                    <button @click="navigateTo('existencia')">Entrada de artículos</button>
-                    <button @click="navigateTo('articulos')">Existencias</button>
-                    <button @click="navigateTo('solicitudmaterial')">Salida de material</button>
-                    <button @click="navigateTo('recepcionsolicitudes')">Recepción de solicitudes</button>
-                    <button @click="navigateTo('poliza')">Pólizas</button>
+                <!-- Botón para agregar nuevo usuario -->
+                <button class="add-factura-btn" @click="redirectToAddfactura">
+                    <i class="fas fa-file-invoice"></i> <i class="fas fa-plus"></i>
+                </button>
+            </div>
+
+            <div class="contenedor-tabla">
+                <div class="table-horizontal-scroll">
+                    <table class="factura-table">
+                        <thead>
+                            <tr>
+                                <th>Tipo de compra</th>
+                                <th>Contrato de compra</th>
+                                <th>Fecha de adquisición</th>
+                                <th>No. Factura</th>
+                                <th>Tipo de Presupuesto</th>
+                                <th>Nombre Proveedor</th>
+                                <th>Cantidad</th>
+                                <th>Precio total sin IVA</th>
+                                <th>IVA</th>
+                                <th>Precio total con IVA</th>
+                                <th>Documento</th>
+                                <th>Fecha de registro</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="factura in paginatedfactura" :key="factura.id">
+                                <td>{{ factura.tipo_compra }}</td>
+                                <td>
+                                    <!-- Mostrar archivos de contrato_compra -->
+                                    <template v-if="factura.contrato_compra">
+                                        <ul>
+                                            <li v-for="(file, index) in getPdfFiles(factura.contrato_compra)" :key="index">
+                                                <a :href="file.url" target="_blank" :title="file.name">
+                                                    {{ truncateFileName(file.name, 20) }}
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </template>
+                                    <button @click="downloadZip(factura, 'contrato_compra')" class="btn-download">
+                                        <p class="textoDescarga">Descargar</p>
+                                    </button>
+                                </td>
+                                <td>{{ formatDate(factura.fecha_adquisicion) }}</td>
+                                <td>{{ factura.numero_de_factura }}</td>
+                                <td>{{ factura.tipo_presupuesto }}</td>
+                                <td>{{ getNombreProveedor(factura.id_proveedor) }}</td>
+                                <!-- Aquí se muestra el nombre del proveedor -->
+                                <td>{{ factura.cantidad }}</td>
+                                <td>{{ factura.sub_total }}</td>
+                                <td>{{ factura.iva }}</td>
+                                <td>{{ factura.total }}</td>
+                                <td>
+                                    <!-- Mostrar archivos de archivo_pdf -->
+                                    <template v-if="factura.archivo_pdf">
+                                        <ul>
+                                            <li v-for="(file, index) in getPdfFiles(factura.archivo_pdf)" :key="index">
+                                                <a :href="file.url" target="_blank" :title="file.name">
+                                                    {{ truncateFileName(file.name, 20) }}
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </template>
+                                    <button @click="downloadZip(factura, 'archivo_pdf')" class="btn-download">
+                                        <p class="textoDescarga">Descargar</p>
+                                    </button>
+                                </td>
+                                <td>{{ formatDate(factura.createdAt) }}</td>
+                                <td>
+                                    <button @click="editfactura(factura)" class="btn-edit">Editar</button>
+                                    <button @click="showDeleteModal(factura.id)" class="btn-delete">Eliminar</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
-            </div>
-
-            <div v-if="userRole === 'Inventario' || userRole === 'Administrador'" class="nav-item" @mouseenter="showMenu('homeMenu')"
-                @mouseleave="hideMenu('homeMenu')">
-                Inventario
-                <span class="menu-icon">▼</span>
-                <div class="dropdown-menu" v-show="menus.homeMenu">
-                    <button @click="navigateTo('historialbienes')">Historial de bienes</button>
-                    <button @click="navigateTo('resguardo')">Bienes sin resguardo</button>
-                    <button @click="navigateTo('listaalmacen')">Bienes nuevos</button>
-                    <button @click="navigateTo('bienesnuevos')">Asignar resguardo</button>
-                    <button @click="navigateTo('liberarbien')">Liberar Bien</button>
-                    <button @click="navigateTo('bajabien')">Baja de bienes</button>
-                    <button @click="navigateTo('bajas')">Historial de bajas</button>
-                    <button @click="navigateTo('reportes')">Generación de reportes</button>
-                </div>
-            </div>
-            <div v-if="userRole === 'Usuarios' || userRole === 'Administrador'" class="nav-item" @mouseenter="showMenu('userMenu')"
-                @mouseleave="hideMenu('userMenu')">
-                Usuario
-                <span class="menu-icon">▼</span>
-                <div class="dropdown-menu" v-show="menus.userMenu">
-                    <button @click="navigateTo('')">Solicitud de Material</button>
-                    <button @click="navigateTo('resguardoUsuario')">Resguardo</button>
-                </div>
-            </div>
-        </div>
-
-        <div class="search-bar">
-            <div class="input-wrapper">
-                <input type="text" v-model="searchQuery" placeholder="Buscar..." />
-                <i class="fas fa-search"></i> <!-- Icono de la lupa -->
-            </div>
-
-            <!-- Botón para agregar nuevo usuario -->
-            <button class="add-factura-btn" @click="redirectToAddfactura">
-                <i class="fas fa-file-invoice"></i> <i class="fas fa-plus"></i>
-            </button>
-        </div>
-
-        <div class="contenedor-tabla">
-            <div class="table-horizontal-scroll">
-                <table class="factura-table">
-                    <thead>
-                        <tr>
-                            <th>Tipo de compra</th>
-                            <th>Contrato de compra</th>
-                            <th>Fecha de adquisición</th>
-                            <th>No. Factura</th>
-                            <th>Tipo de Presupuesto</th>
-                            <th>Nombre Proveedor</th>
-                            <th>Cantidad</th>
-                            <th>Precio total sin IVA</th>
-                            <th>IVA</th>
-                            <th>Precio total con IVA</th>
-                            <th>Documento</th>
-                            <th>Fecha de registro</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr v-for="factura in paginatedfactura" :key="factura.id">
-                            <td>{{ factura.tipo_compra }}</td>
-                            <td>
-                                <!-- Mostrar archivos de contrato_compra -->
-                                <template v-if="factura.contrato_compra">
-                                    <ul>
-                                        <li v-for="(file, index) in getPdfFiles(factura.contrato_compra)" :key="index">
-                                            <a :href="file.url" target="_blank" :title="file.name">
-                                                {{ truncateFileName(file.name, 20) }}
-                                            </a>
-                                        </li>
-                                    </ul>
-                                </template>
-                                <button @click="downloadZip(factura, 'contrato_compra')" class="btn-download">
-                                    <p class="textoDescarga">Descargar</p>
-                                </button>
-                            </td>
-                            <td>{{ formatDate(factura.fecha_adquisicion) }}</td>
-                            <td>{{ factura.numero_de_factura }}</td>
-                            <td>{{ factura.tipo_presupuesto }}</td>
-                            <td>{{ getNombreProveedor(factura.id_proveedor) }}</td>
-                            <!-- Aquí se muestra el nombre del proveedor -->
-                            <td>{{ factura.cantidad }}</td>
-                            <td>{{ factura.sub_total }}</td>
-                            <td>{{ factura.iva }}</td>
-                            <td>{{ factura.total }}</td>
-                            <td>
-                                <!-- Mostrar archivos de archivo_pdf -->
-                                <template v-if="factura.archivo_pdf">
-                                    <ul>
-                                        <li v-for="(file, index) in getPdfFiles(factura.archivo_pdf)" :key="index">
-                                            <a :href="file.url" target="_blank" :title="file.name">
-                                                {{ truncateFileName(file.name, 20) }}
-                                            </a>
-                                        </li>
-                                    </ul>
-                                </template>
-                                <button @click="downloadZip(factura, 'archivo_pdf')" class="btn-download">
-                                    <p class="textoDescarga">Descargar</p>
-                                </button>
-                            </td>
-                            <td>{{ formatDate(factura.createdAt) }}</td>
-                            <td>
-                                <button @click="editfactura(factura)" class="btn-edit">Editar</button>
-                                <button @click="showDeleteModal(factura.id)" class="btn-delete">Eliminar</button>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
 
 
-            <!-- Modal de Edición -->
-            <div v-if="isEditing" class="edit-modal">
-                <div class="modal-content">
-                    <h3>Editar Factura</h3>
-                    <form @submit.prevent="saveChanges" class="edit-form">
-                        <div class="contenedorformulario">
-                            <!-- Primera columna del formulario -->
-                            <div class="form-column">
-                                <div>
-                                    <label>Tipo de compra:</label>
-                                    <select v-model="currentFactura.tipo_compra" class="form-input">
-                                        <option value="" disabled selected>Selecciona un tipo de compra</option>
-                                        <option v-for="tipo in tiposCompra" :key="tipo.value" :value="tipo.value">
-                                            {{ tipo.label }}
-                                        </option>
-                                    </select>
-                                </div>
-                                <div class="contenedor-dropzone">
-                                    <label for="contrato_compra">Contrato de compra</label>
-                                    <div class="dropzone" @drop.prevent="handleDropContrato" @dragover.prevent
-                                        @click="triggerFileInputContrato">
-                                        <input type="file" id="contrato_compra" ref="contratoInput"
-                                            @change="handleContratoChange" accept=".pdf" style="display: none;" />
-                                        <i class="fas fa-cloud-upload-alt"></i>
-                                        <span v-if="!selectedContratoName && !currentFactura.contrato_compra">
-                                            Arrastra aquí o haz clic para subir un contrato
-                                        </span>
-                                        <span v-else>
-                                            {{ selectedContratoName || getFileName(currentFactura.contrato_compra) }}
-                                        </span>
+                <!-- Modal de Edición -->
+                <div v-if="isEditing" class="edit-modal">
+                    <div class="modal-content">
+                        <h3>Editar Factura</h3>
+                        <form @submit.prevent="saveChanges" class="edit-form">
+                            <div class="contenedorformulario">
+                                <!-- Primera columna del formulario -->
+                                <div class="form-column">
+                                    <div>
+                                        <label>Tipo de compra:</label>
+                                        <select v-model="currentFactura.tipo_compra" class="form-input">
+                                            <option value="" disabled selected>Selecciona un tipo de compra</option>
+                                            <option v-for="tipo in tiposCompra" :key="tipo.value" :value="tipo.value">
+                                                {{ tipo.label }}
+                                            </option>
+                                        </select>
                                     </div>
+                                    <div class="contenedor-dropzone">
+                                        <label for="contrato_compra">Contrato de compra</label>
+                                        <div class="dropzone" @drop.prevent="handleDropContrato" @dragover.prevent
+                                            @click="triggerFileInputContrato">
+                                            <input type="file" id="contrato_compra" ref="contratoInput"
+                                                @change="handleContratoChange" accept=".pdf" style="display: none;" />
+                                            <i class="fas fa-cloud-upload-alt"></i>
+                                            <span v-if="!selectedContratoName && !currentFactura.contrato_compra">
+                                                Arrastra aquí o haz clic para subir un contrato
+                                            </span>
+                                            <span v-else>
+                                                {{ selectedContratoName || getFileName(currentFactura.contrato_compra) }}
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label>Factura No.:</label>
+                                        <input v-model="currentFactura.numero_de_factura" type="text" />
+                                    </div>
+                                    <div>
+                                        <label>Tipo de presupuesto:</label>
+                                        <select v-model="currentFactura.tipo_presupuesto" class="form-input">
+                                            <option value="" disabled selected>Selecciona un tipo de presupuesto</option>
+                                            <option v-for="tipo in tipoPresupuesto" :key="tipo.value" :value="tipo.value">
+                                                {{ tipo.label }}
+                                            </option>
+                                        </select>
+                                    </div>
+                                    <div style="width: 100%;">
+                                        <label>Proveedor: (Selecciona uno)</label>
+                                        <select v-model="currentFactura.id_proveedor" style="height: 40px; width: 320px;"
+                                            class="form-input">
+                                            <option value="" disabled>Selecciona una opción</option>
+                                            <option v-for="proveedor in proveedores" :key="proveedor.id"
+                                                :value="proveedor.id">
+                                                {{ proveedor.nombre }} {{ proveedor.apellidos }}
+                                            </option>
+                                        </select>
+                                    </div>
+
                                 </div>
 
-                                <div>
-                                    <label>Factura No.:</label>
-                                    <input v-model="currentFactura.numero_de_factura" type="text" />
-                                </div>
-                                <div>
-                                    <label>Tipo de presupuesto:</label>
-                                    <select v-model="currentFactura.tipo_presupuesto" class="form-input">
-                                        <option value="" disabled selected>Selecciona un tipo de presupuesto</option>
-                                        <option v-for="tipo in tipoPresupuesto" :key="tipo.value" :value="tipo.value">
-                                            {{ tipo.label }}
-                                        </option>
-                                    </select>
-                                </div>
-                                <div style="width: 100%;">
-                                    <label>Proveedor: (Selecciona uno)</label>
-                                    <select v-model="currentFactura.id_proveedor" style="height: 40px; width: 320px;"
-                                        class="form-input">
-                                        <option value="" disabled>Selecciona una opción</option>
-                                        <option v-for="proveedor in proveedores" :key="proveedor.id"
-                                            :value="proveedor.id">
-                                            {{ proveedor.nombre }} {{ proveedor.apellidos }}
-                                        </option>
-                                    </select>
+                                <!-- Segunda columna del formulario -->
+                                <div class="form-column">
+
+                                    <div>
+                                        <label>Cantidad:</label>
+                                        <input v-model="currentFactura.cantidad" type="text" />
+                                    </div>
+
+                                    <div>
+                                        <label>Total sin IVA:</label>
+                                        <input v-model="currentFactura.sub_total" type="number" step="0.01"
+                                            class="form-input" @input="validateNumber('sub_total')" />
+                                    </div>
+                                    <div>
+                                        <label>IVA (16%):</label>
+                                        <input v-model="currentFactura.iva" type="number" step="0.01" class="form-input"
+                                            style="background-color: #dcddcd;" readonly />
+                                    </div>
+                                    <div>
+                                        <label>Total con IVA:</label>
+                                        <input v-model="currentFactura.total" type="number" step="0.01" class="form-input"
+                                            style="background-color: #dcddcd;" readonly />
+                                    </div>
+                                    <div class="contenedor-dropzone">
+                                        <label for="archivo_pdf">Documento (PDF)</label>
+                                        <div class="dropzone" @drop.prevent="handleDropPdf" @dragover.prevent
+                                            @click="triggerFileInputPdf">
+                                            <input type="file" id="archivo_pdf" ref="pdfInput" @change="handlePdfChange"
+                                                accept=".pdf" style="display: none;" />
+                                            <i class="fas fa-cloud-upload-alt"></i>
+                                            <span v-if="!selectedPdfName && !currentFactura.archivo_pdf">
+                                                Arrastra aquí o haz clic para subir un archivo PDF
+                                            </span>
+                                            <span v-else>
+                                                {{ selectedPdfName || getFileName(currentFactura.archivo_pdf) }}
+                                            </span>
+                                        </div>
+                                    </div>
                                 </div>
 
                             </div>
 
-                            <!-- Segunda columna del formulario -->
-                            <div class="form-column">
-
-                                <div>
-                                    <label>Cantidad:</label>
-                                    <input v-model="currentFactura.cantidad" type="text" />
-                                </div>
-
-                                <div>
-                                    <label>Total sin IVA:</label>
-                                    <input v-model="currentFactura.sub_total" type="number" step="0.01"
-                                        class="form-input" @input="validateNumber('sub_total')" />
-                                </div>
-                                <div>
-                                    <label>IVA (16%):</label>
-                                    <input v-model="currentFactura.iva" type="number" step="0.01" class="form-input"
-                                        style="background-color: #dcddcd;" readonly />
-                                </div>
-                                <div>
-                                    <label>Total con IVA:</label>
-                                    <input v-model="currentFactura.total" type="number" step="0.01" class="form-input"
-                                        style="background-color: #dcddcd;" readonly />
-                                </div>
-                                <div class="contenedor-dropzone">
-                                    <label for="archivo_pdf">Documento (PDF)</label>
-                                    <div class="dropzone" @drop.prevent="handleDropPdf" @dragover.prevent
-                                        @click="triggerFileInputPdf">
-                                        <input type="file" id="archivo_pdf" ref="pdfInput" @change="handlePdfChange"
-                                            accept=".pdf" style="display: none;" />
-                                        <i class="fas fa-cloud-upload-alt"></i>
-                                        <span v-if="!selectedPdfName && !currentFactura.archivo_pdf">
-                                            Arrastra aquí o haz clic para subir un archivo PDF
-                                        </span>
-                                        <span v-else>
-                                            {{ selectedPdfName || getFileName(currentFactura.archivo_pdf) }}
-                                        </span>
-                                    </div>
-                                </div>
+                            <!-- Botones debajo del formulario -->
+                            <div class="form-buttons">
+                                <button type="submit" class="save-btn">Guardar cambios</button>
+                                <button @click="cancelEdit" type="button" class="cancel-btn">Cancelar</button>
                             </div>
-
-                        </div>
-
-                        <!-- Botones debajo del formulario -->
-                        <div class="form-buttons">
-                            <button type="submit" class="save-btn">Guardar cambios</button>
-                            <button @click="cancelEdit" type="button" class="cancel-btn">Cancelar</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-
-
-            <!-- Modal de Confirmación de Eliminación -->
-            <div v-if="isDeleteModalVisible" class="modal-overlay">
-                <div class="modal-content-delete">
-                    <h3>¿Estás seguro de eliminar esta factura?</h3>
-                    <div class="modal-buttons">
-                        <button @click="confirmDelete" class="btn-confirm">Confirmar</button>
-                        <button @click="cancelDelete" class="btn-cancel">Cancelar</button>
+                        </form>
                     </div>
                 </div>
+
+
+                <!-- Modal de Confirmación de Eliminación -->
+                <div v-if="isDeleteModalVisible" class="modal-overlay">
+                    <div class="modal-content-delete">
+                        <h3>¿Estás seguro de eliminar esta factura?</h3>
+                        <div class="modal-buttons">
+                            <button @click="confirmDelete" class="btn-confirm">Confirmar</button>
+                            <button @click="cancelDelete" class="btn-cancel">Cancelar</button>
+                        </div>
+                    </div>
+                </div>
+                <!-- Paginación -->
+                <div class="pagination">
+                    <button @click="prevPage" :disabled="currentPage === 1">Anterior</button>
+                    <span>Pagina {{ currentPage }} de {{ totalPages }}</span>
+                    <button @click="nextPage" :disabled="currentPage === totalPages">Siguiente</button>
+                </div>
             </div>
-            <!-- Paginación -->
-            <div class="pagination">
-                <button @click="prevPage" :disabled="currentPage === 1">Anterior</button>
-                <span>Pagina {{ currentPage }} de {{ totalPages }}</span>
-                <button @click="nextPage" :disabled="currentPage === totalPages">Siguiente</button>
+            <!-- Contenedor de notificaciones -->
+            <div v-if="alertMessage" :class="alertClass" class="notification">
+                <i :class="alertIcon"></i> {{ alertMessage }}
             </div>
         </div>
-        <!-- Contenedor de notificaciones -->
-        <div v-if="alertMessage" :class="alertClass" class="notification">
-            <i :class="alertIcon"></i> {{ alertMessage }}
-        </div>
-    </div>
+    </div>    
 </template>
 
 <script>
 import api from '../services/api';
+import NavBarPage from './NavBar.vue';
+
 export default {
     name: "facturaPage",
+    components: {
+        NavBarPage // Registrar el componente
+    },
     data() {
         return {
             alertMessage: "",  // Mensaje de la alerta
@@ -883,153 +824,20 @@ td ul li a:hover {
 
 }
 
-.titulo {
-    font-size: 30px;
-    font-weight: 100;
-    text-align: center;
+.page-wrapper {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    background-color: #f5f5f5;
 }
 
 .container {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    background: white;
-    flex-direction: column;
-    color: white;
-    overflow-x: hidden;
-
-}
-
-/* Menú de navegación */
-.navbar {
-    position: 0;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 30px 20px;
-    background: #691B31;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-}
-
-.navbar-left {
     flex: 1;
-    display: flex;
-    align-items: center;
-}
-
-.icon-back {
-    font-size: 24px;
-    cursor: pointer;
-    margin-right: 10px;
-    color: white;
-}
-
-.navbar-center {
-    flex: 3;
-    text-align: center;
-}
-
-.navbar-center h1 {
-    margin: 0;
-    font-size: 24px;
-}
-
-.navbar-center p {
-    margin: 0;
-    font-size: 18px;
-}
-
-
-.navbar-right {
-    flex: 1;
-    display: flex;
-    justify-content: flex-end;
-}
-
-.user-profile {
-    display: flex;
-    align-items: center;
-}
-
-.profile-pic {
-    border-radius: 50%;
-    width: 40px;
-    height: 40px;
-    margin-right: 10px;
-}
-
-.user-info p {
-    margin: 0;
-    font-weight: bold;
-}
-
-.user-info span {
-    font-size: 12px;
-    color: #ddd;
-}
-
-/* Barra de navegación amarilla */
-.sub-navbar {
-    display: flex;
-    justify-content: center;
-    background: linear-gradient(to right, #FFFFFF, #DDC9A3);
-    /* Degradado de izquierda a derecha */
-    padding: 10px 0;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-}
-
-.nav-item {
-    position: relative;
-    margin: 0 20px;
-    cursor: pointer;
-    font-size: 16px;
-    color: #691B31;
-}
-
-.nav-item:hover {
-    color: #590d22;
-}
-
-.dropdown-menu {
-    display: none;
-    position: absolute;
-    top: 100%;
-    left: 0;
-    background-color: #691B31;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    border-radius: 5px;
-    width: 150px;
-    z-index: 1000;
-
-    /* Asegurar que esté encima */
-}
-
-.dropdown-menu button {
     width: 100%;
-    padding: 10px;
-    border: none;
-    background: #691B31;
-    color: white;
-    text-align: left;
-    font-size: 14px;
-
+    padding: 20px;
+    background-color: #f5f5f5;
+    min-height: calc(100vh - 140px);
 }
-
-.dropdown-menu button:hover {
-    background: #590d22;
-}
-
-.nav-item:hover .dropdown-menu {
-    display: block;
-}
-
-
-
-
-
 
 button {
     width: 60%;

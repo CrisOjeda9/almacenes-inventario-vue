@@ -1,171 +1,109 @@
 <template>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    <div class="page-wrapper">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+        <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+        <NavBarPage :pageTitle="'Liberar Bien de Usuario'" :showUserMenu="true" />
+        <div class="container">
+            <div class="search-bar">
+                <!-- Caja de selección para el filtro -->
+                <select v-model="filterTerm">
+                    <option value="">Tipo de Procedencia</option>
+                    <option value="RTH">RTH</option>
+                    <option value="GA">GA</option>
+                    <option value="NT">NT</option>
+                    <option value="DON">DON</option>
+                    <option value="PG">PG</option>
+                </select>
+                <div class="input-wrapper">
+                    <input type="text" v-model="searchQuery" placeholder="Buscar..." />
+                    <i class="fas fa-search"></i> <!-- Icono de la lupa -->
+                </div>
+            </div>
 
-    <div class="container">
-        <!-- Menú de navegación -->
-        <nav class="navbar">
-            <div class="navbar-left">
-                <img src="../assets/LOGOS DORADOS-02.png" alt="Icono" class="navbar-icon" @click="goHome" width="50%"
-                    height="auto" style="cursor: pointer;" />
+            <div class="contenedor-tabla">
+                <table class="bajas-table">
+                    <thead>
+                        <tr>
+                            <th>No. Inventario</th>
+                            <th>Descripción</th>
+                            <th>Modelo</th>
+                            <th>Marca</th>
+                            <th>Serie</th>
+                            <th>Nombre del responsable</th>
+                            <th>Foto Bien</th>
+                            <th>Fecha de Baja</th>
+                            <th>Remover el bien del usuario</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="baja in paginatedBajas" :key="baja.numeroinventario"
+                            :class="{ 'removed-row': baja.removido }">
+                            <td>{{ baja.numeroinventario }}</td>
+                            <td>{{ baja.descripcion }}</td>
+                            <td>{{ baja.modelo }}</td>
+                            <td>{{ baja.marca }}</td>
+                            <td>{{ baja.serie }}</td>
+                            <td style="background-color: #ddc9a3;;">{{ baja.nombreresponsable }}</td>
+                            <td>
+                                <button @click="openModal(baja.fotoBien)" class="btn-download">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </td>
+                            <td>{{ baja.fechaBaja }}</td>
+                            <td>
+                                <button @click="confirmRemove(baja)" class="btn-delete" :disabled="baja.removido">
+                                    Remover
+                                </button>
+                            </td>
+                        </tr>
+
+                    </tbody>
+                </table>
+                <!-- Paginador -->
+                <div class="pagination">
+                    <button :disabled="currentPage === 1" @click="changePage(currentPage - 1)">Anterior</button>
+                    <span>Página {{ currentPage }} de {{ totalPages }}</span>
+                    <button :disabled="currentPage === totalPages" @click="changePage(currentPage + 1)">Siguiente</button>
+                </div>
             </div>
-            <div class="navbar-center">
-                <h1>Liberar Bien de Usuario</h1>
-                <p>Sistema de Almacén e Inventarios de Radio y Televisión de Hidalgo</p>
-            </div>
-            <div class="navbar-right">
-                <div class="user-profile">
-                    <img :src="profileImage" alt="User Profile" class="profile-pic" />
-                    <div class="user-info">
-                        <p>{{ userName }}</p> <!-- Nombre dinámico del usuario -->
-                        <span><a href="profile" style="color: white;">Ver Perfil</a></span>
+            <!-- Modal de Confirmación -->
+            <div v-if="showConfirmModal" class="modal-overlay">
+                <div class="modal-content-delete">
+                    <p>¿Estás seguro de que deseas remover este bien?</p>
+                    <div class="modal-buttons">
+                        <button @click="removeGood" class="btn-confirm">Confirmar</button>
+                        <button @click="showConfirmModal = false" class="btn-cancel">Cancelar</button>
                     </div>
                 </div>
             </div>
-        </nav>
 
-        <!-- Barra de navegación amarilla -->
-        <div class="sub-navbar">
-            <a href="/home" class="nav-item">Inicio</a>
-            <a v-if="userRole === 'Administrador'" href="users" class="nav-item">Aministrador</a>
-            <div v-if="userRole === 'Almacenes' || userRole === 'Administrador'" class="nav-item" @mouseenter="showMenu('almacenMenu')"
-                @mouseleave="hideMenu('almacenMenu')">
-                Almacén
-                <span class="menu-icon">▼</span>
-                <div class="dropdown-menu" v-show="menus.almacenMenu">
-                    <button @click="navigateTo('proveedor')">Ver proveedores</button>
-                    <button @click="navigateTo('factura')">Facturas</button>>
-                    <button @click="navigateTo('existencia')">Entrada de artículos</button>
-                    <button @click="navigateTo('articulos')">Existencias</button>
-                    <button @click="navigateTo('solicitudmaterial')">Salida de material</button>
-                    <button @click="navigateTo('recepcionsolicitudes')">Recepción de solicitudes</button>
-                    <button @click="navigateTo('poliza')">Pólizas</button>
-                </div>
-            </div>
-
-            <div v-if="userRole === 'Inventario' || userRole === 'Administrador'" class="nav-item" @mouseenter="showMenu('homeMenu')"
-                @mouseleave="hideMenu('homeMenu')">
-                Inventario
-                <span class="menu-icon">▼</span>
-                <div class="dropdown-menu" v-show="menus.homeMenu">
-                    <button @click="navigateTo('historialbienes')">Historial de bienes</button>
-                    <button @click="navigateTo('resguardo')">Bienes sin resguardo</button>
-                    <button @click="navigateTo('listaalmacen')">Bienes nuevos</button>
-                    <button @click="navigateTo('bienesnuevos')">Asignar resguardo</button>
-                    <button @click="navigateTo('liberarbien')">Liberar Bien</button>
-                    <button @click="navigateTo('bajabien')">Baja de bienes</button>
-                    <button @click="navigateTo('bajas')">Historial de bajas</button>
-                    <button @click="navigateTo('reportes')">Generación de reportes</button>
-                </div>
-            </div>
-            <div v-if="userRole === 'Usuarios' || userRole === 'Administrador'" class="nav-item" @mouseenter="showMenu('userMenu')"
-                @mouseleave="hideMenu('userMenu')">
-                Usuario
-                <span class="menu-icon">▼</span>
-                <div class="dropdown-menu" v-show="menus.userMenu">
-                    <button @click="navigateTo('')">Solicitud de Material</button>
-                    <button @click="navigateTo('resguardoUsuario')">Resguardo</button>
-                </div>
-            </div>
-
-        </div>
-
-        <div class="search-bar">
-            <!-- Caja de selección para el filtro -->
-            <select v-model="filterTerm">
-                <option value="">Tipo de Procedencia</option>
-                <option value="RTH">RTH</option>
-                <option value="GA">GA</option>
-                <option value="NT">NT</option>
-                <option value="DON">DON</option>
-                <option value="PG">PG</option>
-            </select>
-            <div class="input-wrapper">
-                <input type="text" v-model="searchQuery" placeholder="Buscar..." />
-                <i class="fas fa-search"></i> <!-- Icono de la lupa -->
-            </div>
-        </div>
-
-        <div class="contenedor-tabla">
-            <table class="bajas-table">
-                <thead>
-                    <tr>
-                        <th>No. Inventario</th>
-                        <th>Descripción</th>
-                        <th>Modelo</th>
-                        <th>Marca</th>
-                        <th>Serie</th>
-                        <th>Nombre del responsable</th>
-                        <th>Foto Bien</th>
-                        <th>Fecha de Baja</th>
-                        <th>Remover el bien del usuario</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr v-for="baja in paginatedBajas" :key="baja.numeroinventario"
-                        :class="{ 'removed-row': baja.removido }">
-                        <td>{{ baja.numeroinventario }}</td>
-                        <td>{{ baja.descripcion }}</td>
-                        <td>{{ baja.modelo }}</td>
-                        <td>{{ baja.marca }}</td>
-                        <td>{{ baja.serie }}</td>
-                        <td style="background-color: #ddc9a3;;">{{ baja.nombreresponsable }}</td>
-                        <td>
-                            <button @click="openModal(baja.fotoBien)" class="btn-download">
-                                <i class="fas fa-eye"></i>
-                            </button>
-                        </td>
-                        <td>{{ baja.fechaBaja }}</td>
-                        <td>
-                            <button @click="confirmRemove(baja)" class="btn-delete" :disabled="baja.removido">
-                                Remover
-                            </button>
-                        </td>
-                    </tr>
-
-                </tbody>
-            </table>
-            <!-- Paginador -->
-            <div class="pagination">
-                <button :disabled="currentPage === 1" @click="changePage(currentPage - 1)">Anterior</button>
-                <span>Página {{ currentPage }} de {{ totalPages }}</span>
-                <button :disabled="currentPage === totalPages" @click="changePage(currentPage + 1)">Siguiente</button>
-            </div>
-        </div>
-        <!-- Modal de Confirmación -->
-        <div v-if="showConfirmModal" class="modal-overlay">
-            <div class="modal-content-delete">
-                <p>¿Estás seguro de que deseas remover este bien?</p>
-                <div class="modal-buttons">
-                    <button @click="removeGood" class="btn-confirm">Confirmar</button>
-                    <button @click="showConfirmModal = false" class="btn-cancel">Cancelar</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Modal para mostrar imágenes -->
-        <div v-if="showImageModal" class="modal-overlay2" @click="closeModal">
-            <div class="modal2" @click.stop>
-                <h2>Imágenes</h2>
-                <hr>
-                <div class="image-container">
-                    <div v-for="(foto, i) in modalImages" :key="i" class="image-box">
-                        <a :href="getImageUrl(foto)" target="_blank">
-                            <img :src="getImageUrl(foto)" alt="Foto del bien recibido" class="modal-img" />
-                        </a>
-                        <p class="image-name">{{ foto }}</p>
+            <!-- Modal para mostrar imágenes -->
+            <div v-if="showImageModal" class="modal-overlay2" @click="closeModal">
+                <div class="modal2" @click.stop>
+                    <h2>Imágenes</h2>
+                    <hr>
+                    <div class="image-container">
+                        <div v-for="(foto, i) in modalImages" :key="i" class="image-box">
+                            <a :href="getImageUrl(foto)" target="_blank">
+                                <img :src="getImageUrl(foto)" alt="Foto del bien recibido" class="modal-img" />
+                            </a>
+                            <p class="image-name">{{ foto }}</p>
+                        </div>
                     </div>
+                    <button @click="closeModal">Cerrar</button>
                 </div>
-                <button @click="closeModal">Cerrar</button>
             </div>
         </div>
-
     </div>
 </template>
 
 <script>
+import NavBarPage from './NavBar.vue';
 export default {
     name: "liberarBienPage",
+    components: {
+        NavBarPage // Registrar el componente
+    },
     data() {
         return {
             userRole: localStorage.getItem('userRole') || '', // Obtener el rol desde el localStorage
@@ -513,152 +451,20 @@ export default {
     margin-right: 20px;
 }
 
-.titulo {
-    font-size: 30px;
-    font-weight: 100;
-    text-align: center;
+.page-wrapper {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    background-color: #f5f5f5;
 }
 
 .container {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    background: white;
-    flex-direction: column;
-    color: white;
-    overflow-x: hidden;
-}
-
-/* Menú de navegación */
-.navbar {
-    position: 0;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 30px 20px;
-    background: #691B31;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-}
-
-.navbar-left {
     flex: 1;
-    display: flex;
-    align-items: center;
-}
-
-.icon-back {
-    font-size: 24px;
-    cursor: pointer;
-    margin-right: 10px;
-    color: white;
-}
-
-.navbar-center {
-    flex: 3;
-    text-align: center;
-}
-
-.navbar-center h1 {
-    margin: 0;
-    font-size: 24px;
-}
-
-.navbar-center p {
-    margin: 0;
-    font-size: 18px;
-}
-
-
-.navbar-right {
-    flex: 1;
-    display: flex;
-    justify-content: flex-end;
-}
-
-.user-profile {
-    display: flex;
-    align-items: center;
-}
-
-.profile-pic {
-    border-radius: 50%;
-    width: 40px;
-    height: 40px;
-    margin-right: 10px;
-}
-
-.user-info p {
-    margin: 0;
-    font-weight: bold;
-}
-
-.user-info span {
-    font-size: 12px;
-    color: #ddd;
-}
-
-/* Barra de navegación amarilla */
-.sub-navbar {
-    display: flex;
-    justify-content: center;
-    background: linear-gradient(to right, #FFFFFF, #DDC9A3);
-    /* Degradado de izquierda a derecha */
-    padding: 10px 0;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-}
-
-.nav-item {
-    position: relative;
-    margin: 0 20px;
-    cursor: pointer;
-    font-size: 16px;
-    color: #691B31;
-}
-
-.nav-item:hover {
-    color: #590d22;
-}
-
-.dropdown-menu {
-    display: none;
-    position: absolute;
-    top: 100%;
-    left: 0;
-    background-color: #691B31;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    border-radius: 5px;
-    width: 150px;
-    z-index: 1000;
-
-    /* Asegurar que esté encima */
-}
-
-.dropdown-menu button {
     width: 100%;
-    padding: 10px;
-    border: none;
-    background: #691B31;
-    color: white;
-    text-align: left;
-    font-size: 14px;
-
+    padding: 20px;
+    background-color: #f5f5f5;
+    min-height: calc(100vh - 140px);
 }
-
-.dropdown-menu button:hover {
-    background: #590d22;
-}
-
-.nav-item:hover .dropdown-menu {
-    display: block;
-}
-
-
-
-
-
 
 button {
     width: 60%;

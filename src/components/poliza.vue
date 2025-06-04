@@ -1,227 +1,166 @@
 <template>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
-
-    <div class="container">
-        <!-- Menú de navegación -->
-        <nav class="navbar">
-            <div class="navbar-left">
-                <img src="../assets/LOGOS DORADOS-02.png" alt="Icono" class="navbar-icon" @click="goHome" width="50%"
-                    height="auto" style="cursor: pointer;" />
-            </div>
-
-            <div class="navbar-center">
-                <h1>Polizas</h1>
-                <p>Sistema de Almacén e Inventarios de Radio y Televisión de Hidalgo</p>
-            </div>
-            <div class="navbar-right">
-                <div class="user-profile">
-                    <img :src="profileImage" alt="User Profile" class="profile-pic" />
-                    <div class="user-info">
-                        <p>{{ userName }}</p> <!-- Nombre dinámico del usuario -->
-                        <span><a href="profile" style="color: white;">Ver Perfil</a></span>
+    <div class="page-wrapper">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+        <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+        <NavBarPage :pageTitle="'Polizas'" :showUserMenu="true" />
+        <div class="container">
+        
+                <!-- Barra de búsqueda (mantener arriba de la tabla) -->
+                <div class="search-bar">
+                    <div class="input-wrapper">
+                        <input type="text" v-model="searchQuery" placeholder="Buscar..." />
+                        <i class="fas fa-search"></i>
                     </div>
+                    <!-- Botón para agregar nueva poliza -->
+                    <button class="add-poliza-btn" @click="redirectToAddPoliza">
+                        <i class="fas fa-file-invoice"></i> <i class="fas fa-plus"></i>
+                    </button>
                 </div>
-            </div>
-        </nav>
+                <div class="contenedor-tabla">
+                <!-- Wrapper para el scroll horizontal -->
+                <div class="table-wrapper">
+                    <table class="poliza-table">
+                        <thead>
+                            <tr>
+                                <th>Descripcion</th>
+                                <th>Número de Poliza</th>
+                                <th>Tipo de poliza</th>
+                                <th>Fecha de poliza</th>
+                                <th>Documento</th>
+                                <th>Fecha de registro</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="poliza in paginatedpoliza" :key="poliza.id">
+                                <td>{{ poliza.descripcion }}</td>
+                                <td>{{ poliza.cobertura }}</td>
+                                <td>{{ poliza.tipo }}</td>
+                                <td>{{ poliza.fecha }}</td>
+                                <td>
+                                    <template v-if="poliza.archivo">
+                                        <ul>
+                                            <li v-for="(file, index) in getPdfFiles(poliza.archivo)" :key="index">
+                                                <!-- Aplicar truncateFileName al nombre del archivo -->
+                                                <a :href="file.url" target="_blank" :title="file.name">
+                                                    {{ truncateFileName(file.name, 20) }}
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </template>
+                                    <button @click="downloadZip(poliza)" class="btn-download">
+                                        <p class="textoDescarga">Descargar</p>
+                                    </button>
+                                </td>
+                                <td>{{ formatDate(poliza.createdAt) }}</td>
+                                
+                                <td>
+                                    <div class="actions-container">
+                                        <button @click="editpoliza(poliza)" class="btn-edit">Editar</button>
+                                        <button @click="showDeleteModal(poliza.id)" class="btn-delete">Eliminar</button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
 
-        <!-- Barra de navegación amarilla -->
-        <div class="sub-navbar">
-            <a href="/home" class="nav-item">Inicio</a>
-            <a v-if="userRole === 'Administrador'" href="users" class="nav-item">Aministrador</a>
-           <div v-if="userRole === 'Almacenes' || userRole === 'Administrador'" class="nav-item" @mouseenter="showMenu('almacenMenu')"
-                @mouseleave="hideMenu('almacenMenu')">
-                Almacén
-                <span class="menu-icon">▼</span>
-                <div class="dropdown-menu" v-show="menus.almacenMenu">
-                    <button @click="navigateTo('proveedor')">Ver proveedores</button>
-                    <button @click="navigateTo('factura')">Facturas</button>
-                    <button @click="navigateTo('existencia')">Entrada de artículos</button>
-                    <button @click="navigateTo('articulos')">Existencias</button>
-                    <button @click="navigateTo('solicitudmaterial')">Salida de material</button>
-                    <button @click="navigateTo('recepcionsolicitudes')">Recepción de solicitudes</button>
-                    <button @click="navigateTo('poliza')">Pólizas</button>
+                <!-- Paginación (mantener abajo de la tabla) -->
+                <div class="pagination">
+                    <button @click="prevPage" :disabled="currentPage === 1">Anterior</button>
+                    <span>Pagina {{ currentPage }} de {{ totalPages }}</span>
+                    <button @click="nextPage" :disabled="currentPage === totalPages">Siguiente</button>
                 </div>
             </div>
 
-            <div v-if="userRole === 'Inventario' || userRole === 'Administrador'" class="nav-item" @mouseenter="showMenu('homeMenu')"
-                @mouseleave="hideMenu('homeMenu')">
-                Inventario
-                <span class="menu-icon">▼</span>
-                <div class="dropdown-menu" v-show="menus.homeMenu">
-                    <button @click="navigateTo('historialbienes')">Historial de bienes</button>
-                    <button @click="navigateTo('resguardo')">Bienes sin resguardo</button>
-                    <button @click="navigateTo('listaalmacen')">Bienes nuevos</button>
-                    <button @click="navigateTo('bienesnuevos')">Asignar resguardo</button>
-                    <button @click="navigateTo('liberarbien')">Liberar Bien</button>
-                    <button @click="navigateTo('bajabien')">Baja de bienes</button>
-                    <button @click="navigateTo('bajas')">Historial de bajas</button>
-                    <button @click="navigateTo('reportes')">Generación de reportes</button>
-                </div>
-            </div>
-            <div v-if="userRole === 'Usuarios' || userRole === 'Administrador'" class="nav-item" @mouseenter="showMenu('userMenu')"
-                @mouseleave="hideMenu('userMenu')">
-                Usuario
-                <span class="menu-icon">▼</span>
-                <div class="dropdown-menu" v-show="menus.userMenu">
-                    <button @click="navigateTo('')">Solicitud de Material</button>
-                    <button @click="navigateTo('resguardoUsuario')">Resguardo</button>
-                </div>
-            </div>
-        </div>
-
-       
-            <!-- Barra de búsqueda (mantener arriba de la tabla) -->
-            <div class="search-bar">
-                <div class="input-wrapper">
-                    <input type="text" v-model="searchQuery" placeholder="Buscar..." />
-                    <i class="fas fa-search"></i>
-                </div>
-                <!-- Botón para agregar nueva poliza -->
-                <button class="add-poliza-btn" @click="redirectToAddPoliza">
-                    <i class="fas fa-file-invoice"></i> <i class="fas fa-plus"></i>
-                </button>
-            </div>
-            <div class="contenedor-tabla">
-            <!-- Wrapper para el scroll horizontal -->
-            <div class="table-wrapper">
-                <table class="poliza-table">
-                    <thead>
-                        <tr>
-                            <th>Descripcion</th>
-                            <th>Número de Poliza</th>
-                            <th>Tipo de poliza</th>
-                            <th>Fecha de poliza</th>
-                            <th>Documento</th>
-                            <th>Fecha de registro</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr v-for="poliza in paginatedpoliza" :key="poliza.id">
-                            <td>{{ poliza.descripcion }}</td>
-                            <td>{{ poliza.cobertura }}</td>
-                            <td>{{ poliza.tipo }}</td>
-                            <td>{{ poliza.fecha }}</td>
-                            <td>
-                                <template v-if="poliza.archivo">
-                                    <ul>
-                                        <li v-for="(file, index) in getPdfFiles(poliza.archivo)" :key="index">
-                                            <!-- Aplicar truncateFileName al nombre del archivo -->
-                                            <a :href="file.url" target="_blank" :title="file.name">
-                                                {{ truncateFileName(file.name, 20) }}
-                                            </a>
-                                        </li>
-                                    </ul>
-                                </template>
-                                <button @click="downloadZip(poliza)" class="btn-download">
-                                    <p class="textoDescarga">Descargar</p>
-                                </button>
-                            </td>
-                            <td>{{ formatDate(poliza.createdAt) }}</td>
-                            
-                            <td>
-                                <div class="actions-container">
-                                    <button @click="editpoliza(poliza)" class="btn-edit">Editar</button>
-                                    <button @click="showDeleteModal(poliza.id)" class="btn-delete">Eliminar</button>
+            <!-- Modal de Edición (FUERA del contenedor de tabla) -->
+            <div v-if="isEditing" class="edit-modal">
+                <div class="modal-content">
+                    <h3>Editar Póliza</h3>
+                    <form @submit.prevent="saveChanges" class="edit-form">
+                        <div class="contenedorformulario">
+                            <div class="form-column">
+                                <div>
+                                    <label>Descripción:</label>
+                                    <input v-model="currentPoliza.descripcion" type="text" />
                                 </div>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- Paginación (mantener abajo de la tabla) -->
-            <div class="pagination">
-                <button @click="prevPage" :disabled="currentPage === 1">Anterior</button>
-                <span>Pagina {{ currentPage }} de {{ totalPages }}</span>
-                <button @click="nextPage" :disabled="currentPage === totalPages">Siguiente</button>
-            </div>
-        </div>
-
-        <!-- Modal de Edición (FUERA del contenedor de tabla) -->
-        <div v-if="isEditing" class="edit-modal">
-            <div class="modal-content">
-                <h3>Editar Póliza</h3>
-                <form @submit.prevent="saveChanges" class="edit-form">
-                    <div class="contenedorformulario">
-                        <div class="form-column">
-                            <div>
-                                <label>Descripción:</label>
-                                <input v-model="currentPoliza.descripcion" type="text" />
-                            </div>
-                            <div>
-                                <label>Número de Poliza:</label>
-                                <input v-model="currentPoliza.cobertura" type="text" />
-                            </div>
-                            <div style="width: 100%;">
-                                <label>Tipo de póliza:</label>
-                                <select v-model="currentPoliza.tipo" class="form-input">
-                                    <option value="">Seleccione una opción</option>
-                                    <option v-for="option in tipoPolizaOptions" :key="option.value" :value="option.value">
-                                        {{ option.text }}
-                                    </option>
-                                </select>
-                            </div>
-                            
-                        </div>
-
-                        <div class="form-column">
-                            <div>
-                                <label>Fecha de póliza:</label>
-                                <input v-model="currentPoliza.fecha" type="date" />
-                            </div>
-                            <div class="contenedor-dropzone">
-                                <label for="archivo">Documento (PDF)</label>
-                                <div class="dropzone" @drop.prevent="handleDrop" @dragover.prevent @click="triggerFileInput">
-                                    <!-- Campo de subida de archivo -->
-                                    <input type="file" id="archivo" ref="fileInput" @change="handleFileChange"
-                                        accept=".pdf" style="display: none;" multiple />
-
-                                    <!-- Ícono y mensaje -->
-                                    <i class="fas fa-cloud-upload-alt"></i>
-                                    <span v-if="!currentPoliza.archivo">
-                                        Arrastra aquí o haz clic para subir un archivo
-                                    </span>
-                                    <span v-else>
-                                        Archivo: {{ getFileName(currentPoliza.archivo) }}
-                                    </span>
+                                <div>
+                                    <label>Número de Poliza:</label>
+                                    <input v-model="currentPoliza.cobertura" type="text" />
                                 </div>
-                                <span v-if="errorMessage" class="error-message">{{ errorMessage }}</span>
+                                <div style="width: 100%;">
+                                    <label>Tipo de póliza:</label>
+                                    <select v-model="currentPoliza.tipo" class="form-input">
+                                        <option value="">Seleccione una opción</option>
+                                        <option v-for="option in tipoPolizaOptions" :key="option.value" :value="option.value">
+                                            {{ option.text }}
+                                        </option>
+                                    </select>
+                                </div>
+                                
+                            </div>
+
+                            <div class="form-column">
+                                <div>
+                                    <label>Fecha de póliza:</label>
+                                    <input v-model="currentPoliza.fecha" type="date" />
+                                </div>
+                                <div class="contenedor-dropzone">
+                                    <label for="archivo">Documento (PDF)</label>
+                                    <div class="dropzone" @drop.prevent="handleDrop" @dragover.prevent @click="triggerFileInput">
+                                        <!-- Campo de subida de archivo -->
+                                        <input type="file" id="archivo" ref="fileInput" @change="handleFileChange"
+                                            accept=".pdf" style="display: none;" multiple />
+
+                                        <!-- Ícono y mensaje -->
+                                        <i class="fas fa-cloud-upload-alt"></i>
+                                        <span v-if="!currentPoliza.archivo">
+                                            Arrastra aquí o haz clic para subir un archivo
+                                        </span>
+                                        <span v-else>
+                                            Archivo: {{ getFileName(currentPoliza.archivo) }}
+                                        </span>
+                                    </div>
+                                    <span v-if="errorMessage" class="error-message">{{ errorMessage }}</span>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    <!-- Botones debajo del formulario -->
-                    <div class="form-buttons">
-                        <button type="submit" class="save-btn">Guardar cambios</button>
-                        <button @click="cancelEdit" type="button" class="cancel-btn">Cancelar</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-
-        <!-- Modal de Confirmación de Eliminación (FUERA del contenedor de tabla) -->
-        <div v-if="isDeleteModalVisible" class="modal-overlay">
-            <div class="modal-content-delete">
-                <h3>¿Estás seguro de eliminar esta póliza?</h3>
-                <div class="modal-buttons">
-                    <button @click="confirmDelete" class="btn-confirm">Confirmar</button>
-                    <button @click="cancelDelete" class="btn-cancel">Cancelar</button>
+                        <!-- Botones debajo del formulario -->
+                        <div class="form-buttons">
+                            <button type="submit" class="save-btn">Guardar cambios</button>
+                            <button @click="cancelEdit" type="button" class="cancel-btn">Cancelar</button>
+                        </div>
+                    </form>
                 </div>
             </div>
-        </div>
 
-        <!-- Contenedor de notificaciones (FUERA del contenedor de tabla) -->
-        <div v-if="alertMessage" :class="alertClass" class="notification">
-            <i :class="alertIcon"></i> {{ alertMessage }}
+            <!-- Modal de Confirmación de Eliminación (FUERA del contenedor de tabla) -->
+            <div v-if="isDeleteModalVisible" class="modal-overlay">
+                <div class="modal-content-delete">
+                    <h3>¿Estás seguro de eliminar esta póliza?</h3>
+                    <div class="modal-buttons">
+                        <button @click="confirmDelete" class="btn-confirm">Confirmar</button>
+                        <button @click="cancelDelete" class="btn-cancel">Cancelar</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contenedor de notificaciones (FUERA del contenedor de tabla) -->
+            <div v-if="alertMessage" :class="alertClass" class="notification">
+                <i :class="alertIcon"></i> {{ alertMessage }}
+            </div>
         </div>
-    </div>
+    </div>    
 </template>
 
 <script>
 import api from '../services/api';
+import NavBarPage from './NavBar.vue';
 export default {
     name: "polizasPage",
+    components: {
+        NavBarPage // Registrar el componente
+    },
     data() {
         return {
             alertMessage: "",  // Mensaje de la alerta
@@ -701,152 +640,20 @@ td ul li a:hover {
     text-decoration: underline;
 }
 
-.titulo {
-    font-size: 30px;
-    font-weight: 100;
-    text-align: center;
+.page-wrapper {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    background-color: #f5f5f5;
 }
 
 .container {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    background:white;
-    flex-direction: column;
-    color: white;
-    overflow-x: hidden;
-}
-
-/* Menú de navegación */
-.navbar {
-    position: 0;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 30px 20px;
-    background: #691B31;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-}
-
-.navbar-left {
     flex: 1;
-    display: flex;
-    align-items: center;
-}
-
-.icon-back {
-    font-size: 24px;
-    cursor: pointer;
-    margin-right: 10px;
-    color: white;
-}
-
-.navbar-center {
-    flex: 3;
-    text-align: center;
-}
-
-.navbar-center h1 {
-    margin: 0;
-    font-size: 24px;
-}
-
-.navbar-center p {
-    margin: 0;
-    font-size: 18px;
-}
-
-
-.navbar-right {
-    flex: 1;
-    display: flex;
-    justify-content: flex-end;
-}
-
-.user-profile {
-    display: flex;
-    align-items: center;
-}
-
-.profile-pic {
-    border-radius: 50%;
-    width: 40px;
-    height: 40px;
-    margin-right: 10px;
-}
-
-.user-info p {
-    margin: 0;
-    font-weight: bold;
-}
-
-.user-info span {
-    font-size: 12px;
-    color: #ddd;
-}
-
-/* Barra de navegación amarilla */
-.sub-navbar {
-    display: flex;
-    justify-content: center;
-    background: linear-gradient(to right, #FFFFFF, #DDC9A3);
-    /* Degradado de izquierda a derecha */
-    padding: 10px 0;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-}
-
-.nav-item {
-    position: relative;
-    margin: 0 20px;
-    cursor: pointer;
-    font-size: 16px;
-    color: #691B31;
-}
-
-.nav-item:hover {
-    color: #590d22;
-}
-
-.dropdown-menu {
-    display: none;
-    position: absolute;
-    top: 100%;
-    left: 0;
-    background-color: #691B31;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    border-radius: 5px;
-    width: 150px;
-    z-index: 1000;
-
-    /* Asegurar que esté encima */
-}
-
-.dropdown-menu button {
     width: 100%;
-    padding: 10px;
-    border: none;
-    background: #691B31;
-    color: white;
-    text-align: left;
-    font-size: 14px;
-
+    padding: 20px;
+    background-color: #f5f5f5;
+    min-height: calc(100vh - 140px);
 }
-
-.dropdown-menu button:hover {
-    background: #590d22;
-}
-
-.nav-item:hover .dropdown-menu {
-    display: block;
-}
-
-
-
-
-
 
 button {
     width: 60%;
@@ -1324,7 +1131,6 @@ button[type="button"]:hover {
 .contenedor-dropzone label {
     color: white;
 }
-/* Responsive - Para pantallas más pequeñas */
 @media (max-width: 768px) {
     .contenedor-tabla {
         padding: 0 10px;

@@ -1,292 +1,231 @@
 <template>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
-
-    <div class="container">
-        <!-- Menú de navegación -->
-        <nav class="navbar">
-            <div class="navbar-left">
-                <img src="../assets/LOGOS DORADOS-02.png" alt="Icono" class="navbar-icon" @click="goHome" width="50%"
-                    height="auto" style="cursor: pointer;" />
-            </div>
-            <div class="navbar-center">
-                <h1>Entrada de Artículos</h1>
-                <p>Sistema de Almacén e Inventarios de Radio y Televisión de Hidalgo</p>
-            </div>
-            <div class="navbar-right">
-                <div class="user-profile">
-                    <img :src="profileImage" alt="User Profile" class="profile-pic" />
-                    <div class="user-info">
-                        <p>{{ userName }}</p>
-                        <span><a href="profile" style="color: white;">Ver Perfil</a></span>
-                    </div>
-                </div>
-            </div>
-        </nav>
-
-        <!-- Barra de navegación amarilla -->
-        <div class="sub-navbar">
-            <a href="/home" class="nav-item">Inicio</a>
-            <a v-if="userRole === 'Administrador'" href="users" class="nav-item">Aministrador</a>
-            <div v-if="userRole === 'Almacenes' || userRole === 'Administrador'" class="nav-item" @mouseenter="showMenu('almacenMenu')"
-                @mouseleave="hideMenu('almacenMenu')">
-                Almacén
-                <span class="menu-icon">▼</span>
-                <div class="dropdown-menu" v-show="menus.almacenMenu">
-                    <button @click="navigateTo('proveedor')">Ver proveedores</button>
-                    <button @click="navigateTo('factura')">Facturas</button>
-                    <button @click="navigateTo('existencia')">Entrada de artículos</button>
-                    <button @click="navigateTo('articulos')">Existencias</button>
-                    <button @click="navigateTo('solicitudmaterial')">Salida de material</button>
-                    <button @click="navigateTo('recepcionsolicitudes')">Recepción de solicitudes</button>
-                    <button @click="navigateTo('poliza')">Pólizas</button>
-                </div>
-            </div>
-
-            <div v-if="userRole === 'Inventario' || userRole === 'Administrador'" class="nav-item" @mouseenter="showMenu('homeMenu')"
-                @mouseleave="hideMenu('homeMenu')">
-                Inventario
-                <span class="menu-icon">▼</span>
-                <div class="dropdown-menu" v-show="menus.homeMenu">
-                    <button @click="navigateTo('historialbienes')">Historial de bienes</button>
-                    <button @click="navigateTo('resguardo')">Bienes sin resguardo</button>
-                    <button @click="navigateTo('listaalmacen')">Bienes nuevos</button>
-                    <button @click="navigateTo('bienesnuevos')">Asignar resguardo</button>
-                    <button @click="navigateTo('liberarbien')">Liberar Bien</button>
-                    <button @click="navigateTo('bajabien')">Baja de bienes</button>
-                    <button @click="navigateTo('bajas')">Historial de bajas</button>
-                    <button @click="navigateTo('reportes')">Generación de reportes</button>
-                </div>
-            </div>
-            <div v-if="userRole === 'Usuarios' || userRole === 'Administrador'" class="nav-item" @mouseenter="showMenu('userMenu')"
-                @mouseleave="hideMenu('userMenu')">
-                Usuario
-                <span class="menu-icon">▼</span>
-                <div class="dropdown-menu" v-show="menus.userMenu">
-                    <button @click="navigateTo('')">Solicitud de Material</button>
-                    <button @click="navigateTo('resguardoUsuario')">Resguardo</button>
-                </div>
-            </div>
-        </div>
-
-        <div class="content-wrapper">
-            <div class="form-table-container">
-                <div class="form-section">
-                    <form @submit.prevent="addToTable">
-                        <!-- Primera fila (3 campos) -->
-                        <div class="form-row triple">
-                            <div class="form-field">
-                                <label for="id_objetogasto">Número de partida</label>
-                                <input type="number" min="0" id="id_objetogasto" v-model="form.numero_partida"
-                                    @input="validarNumeroPartida" required />
-                            </div>
-                            <div class="form-field">
-                                <label for="id_factura">Número de factura</label>
-                                <input type="text" id="id_factura" v-model="form.numero_de_factura"
-                                    @blur="validarNumeroFactura" :disabled="facturaBloqueada !== null" required />
-                                <span v-if="facturaBloqueada !== null" class="factura-bloqueada-nota">
-                                </span>
-                            </div>
-                            <div class="form-field">
-                                <label for="cantidad">Cantidad</label>
-                                <input type="number" min="0" id="cantidad" v-model="form.cantidad" required />
-                            </div>
-
-                        </div>
-
-                        <!-- Descripción (fila completa) -->
-                        <div class="form-row single">
-                            <div class="form-field full-width">
-                                <label for="descripcion">Descripción</label>
-                                <input type="text" id="descripcion" v-model="form.descripcion" required />
-                            </div>
-                        </div>
-
-                        <div class="form-row triple">
-                            <div class="form-field">
-                                <label for="precio_unitario">Precio Unitario (Sin IVA)</label>
-                                <input type="number" step="0.01" min="0" id="precio_unitario"
-                                    v-model="form.precio_unitario" @input="calcularTotales" required />
-                            </div>
-                            <!-- descuento -->
-                            <div class="form-field">
-                                <label for="descuento">Descuento</label>
-                                <input type="number" id="descuento" step="0.01" placeholder="" v-model="form.descuento" min="0"
-                                    required />
-                            </div>
-                            <div class="form-field iva-field">
-                                <div class="iva-checkbox-container">
-                                    <label for="iva_habilitado" class="checkbox-label">
-                                        <input type="checkbox" id="iva_habilitado" v-model="form.iva_habilitado" />
-                                        <span class="checkmark"></span>
-                                    </label>
-                                    <label for="iva">IVA (16%)</label>
+    <div class="page-wrapper">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+        <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+        <NavBarPage :pageTitle="'Entrada de Artículos'" :showUserMenu="true" />
+        <div class="container">
+            <div class="content-wrapper">
+                <div class="form-table-container">
+                    <div class="form-section">
+                        <form @submit.prevent="addToTable">
+                            <!-- Primera fila (3 campos) -->
+                            <div class="form-row triple">
+                                <div class="form-field">
+                                    <label for="id_objetogasto">Número de partida</label>
+                                    <input type="number" min="0" id="id_objetogasto" v-model="form.numero_partida"
+                                        @input="validarNumeroPartida" required />
                                 </div>
-                                <input type="number" id="iva" step="0.01" placeholder="" v-model="form.iva" readonly min="0" 
-                                    :style="{ backgroundColor: form.iva_habilitado ? '#dcddcd' : '#f0f0f0' }" required />
-                            </div>
-                        </div>
-
-                        <div class="form-row ">
-                            <div class="form-field">
-                                <label for="importe_con_iva">Importe (Con IVA)</label>
-                                <input type="number" step="0.01" min="0" id="importe_con_iva"
-                                    v-model="form.importe_con_iva" readonly required
-                                    style="background-color: #dcddcd;" />
-                            </div>
-                            <div class="form-field">
-                                <label for="unidad_medida">Unidad de medida</label>
-                                <select id="unidad_medida" v-model="form.unidad_medida" required>
-                                    <option value="" disabled>Selecciona una opción</option>
-                                    <option value="Piezas">Piezas</option>
-                                    <option value="Paquetes">Paquetes</option>
-                                    <option value="Cajas">Cajas</option>
-                                    <option value="Kilogramos">Kilogramos</option>
-                                    <option value="Litros">Litros</option>
-                                    <option value="Metros">Metros</option>
-                                    <option value="Rollos">Rollos</option>
-                                    <option value="Bultos">Bultos</option>
-                                </select>
-                            </div>
-                            <div class="form-field">
-                                <label for="total_ingreso">Total de ingreso</label>
-                                <input type="number" step="0.01" min="0" id="total_ingreso" v-model="form.total_ingreso"
-                                    style="background-color: #dcddcd;" readonly required />
-                            </div>
-                            <div class="form-field"></div>
-                        </div>
-
-                        <!-- Foto artículo (fila completa) -->
-                        <div class="form-row single">
-                            <div class="form-field full-width">
-                                <label for="foto_articulo">Foto artículo</label>
-                                <div class="dropzone" @drop.prevent="handleDrop" @dragover.prevent
-                                    @click="triggerFileInput">
-                                    <input type="file" id="foto_articulo" ref="fileInputExistencia" multiple
-                                        @change="handleFileUpload" accept="image/*" />
-                                    <i class="fas fa-cloud-upload-alt"></i>
-                                    <span v-if="form.foto_articulo.length === 0">Arrastra o selecciona imágenes (JPG,
-                                        PNG)</span>
-                                    <span v-else>{{ form.foto_articulo.length }} imágenes seleccionadas</span>
+                                <div class="form-field">
+                                    <label for="id_factura">Número de factura</label>
+                                    <input type="text" id="id_factura" v-model="form.numero_de_factura"
+                                        @blur="validarNumeroFactura" :disabled="facturaBloqueada !== null" required />
+                                    <span v-if="facturaBloqueada !== null" class="factura-bloqueada-nota">
+                                    </span>
                                 </div>
-                                <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
+                                <div class="form-field">
+                                    <label for="cantidad">Cantidad</label>
+                                    <input type="number" min="0" id="cantidad" v-model="form.cantidad" required />
+                                </div>
 
-                                <button v-if="form.foto_articulo.length > 0" @click.prevent="openImageModal"
-                                    class="view-images-btn">
-                                    Ver Imágenes
+                            </div>
+
+                            <!-- Descripción (fila completa) -->
+                            <div class="form-row single">
+                                <div class="form-field full-width">
+                                    <label for="descripcion">Descripción</label>
+                                    <input type="text" id="descripcion" v-model="form.descripcion" required />
+                                </div>
+                            </div>
+
+                            <div class="form-row triple">
+                                <div class="form-field">
+                                    <label for="precio_unitario">Precio Unitario (Sin IVA)</label>
+                                    <input type="number" step="0.01" min="0" id="precio_unitario"
+                                        v-model="form.precio_unitario" @input="calcularTotales" required />
+                                </div>
+                                <!-- descuento -->
+                                <div class="form-field">
+                                    <label for="descuento">Descuento</label>
+                                    <input type="number" id="descuento" step="0.01" placeholder="" v-model="form.descuento" min="0"
+                                        required />
+                                </div>
+                                <div class="form-field iva-field">
+                                    <div class="iva-checkbox-container">
+                                        <label for="iva_habilitado" class="checkbox-label">
+                                            <input type="checkbox" id="iva_habilitado" v-model="form.iva_habilitado" />
+                                            <span class="checkmark"></span>
+                                        </label>
+                                        <label for="iva">IVA (16%)</label>
+                                    </div>
+                                    <input type="number" id="iva" step="0.01" placeholder="" v-model="form.iva" readonly min="0" 
+                                        :style="{ backgroundColor: form.iva_habilitado ? '#dcddcd' : '#f0f0f0' }" required />
+                                </div>
+                            </div>
+
+                            <div class="form-row ">
+                                <div class="form-field">
+                                    <label for="importe_con_iva">Importe (Con IVA)</label>
+                                    <input type="number" step="0.01" min="0" id="importe_con_iva"
+                                        v-model="form.importe_con_iva" readonly required
+                                        style="background-color: #dcddcd;" />
+                                </div>
+                                <div class="form-field">
+                                    <label for="unidad_medida">Unidad de medida</label>
+                                    <select id="unidad_medida" v-model="form.unidad_medida" required>
+                                        <option value="" disabled>Selecciona una opción</option>
+                                        <option value="Piezas">Piezas</option>
+                                        <option value="Paquetes">Paquetes</option>
+                                        <option value="Cajas">Cajas</option>
+                                        <option value="Kilogramos">Kilogramos</option>
+                                        <option value="Litros">Litros</option>
+                                        <option value="Metros">Metros</option>
+                                        <option value="Rollos">Rollos</option>
+                                        <option value="Bultos">Bultos</option>
+                                    </select>
+                                </div>
+                                <div class="form-field">
+                                    <label for="total_ingreso">Total de ingreso</label>
+                                    <input type="number" step="0.01" min="0" id="total_ingreso" v-model="form.total_ingreso"
+                                        style="background-color: #dcddcd;" readonly required />
+                                </div>
+                                <div class="form-field"></div>
+                            </div>
+
+                            <!-- Foto artículo (fila completa) -->
+                            <div class="form-row single">
+                                <div class="form-field full-width">
+                                    <label for="foto_articulo">Foto artículo</label>
+                                    <div class="dropzone" @drop.prevent="handleDrop" @dragover.prevent
+                                        @click="triggerFileInput">
+                                        <input type="file" id="foto_articulo" ref="fileInputExistencia" multiple
+                                            @change="handleFileUpload" accept="image/*" />
+                                        <i class="fas fa-cloud-upload-alt"></i>
+                                        <span v-if="form.foto_articulo.length === 0">Arrastra o selecciona imágenes (JPG,
+                                            PNG)</span>
+                                        <span v-else>{{ form.foto_articulo.length }} imágenes seleccionadas</span>
+                                    </div>
+                                    <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
+
+                                    <button v-if="form.foto_articulo.length > 0" @click.prevent="openImageModal"
+                                        class="view-images-btn">
+                                        Ver Imágenes
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="button-container">
+                                <button class="boton" type="submit">
+                                    <i class="fas fa-plus-square"></i> Agregar a Tabla
                                 </button>
                             </div>
-                        </div>
+                        </form>
+                    </div>
 
-                        <div class="button-container">
-                            <button class="boton" type="submit">
-                                <i class="fas fa-plus-square"></i> Agregar a Tabla
+                    <!-- Tabla (derecha) -->
+                    <div class="table-section">
+                        <h2>Artículos a Registrar</h2>
+                        <div class="table-wrapper">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>No. Partida</th>
+                                        <th>Descripción</th>
+                                        <th>Cantidad</th>
+                                        <th>Unidad</th>
+                                        <th>Total</th>
+                                        <th>Eliminar</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="(articulo, index) in articulosTabla" :key="index">
+                                        <td>{{ articulo.numero_partida }}</td>
+                                        <td>{{ articulo.descripcion }}</td>
+                                        <td>{{ articulo.cantidad }}</td>
+                                        <td>{{ articulo.unidad_medida }}</td>
+                                        <td>${{ formatCurrency(articulo.total_ingreso) }}</td>
+
+                                        <td>
+                                            <button @click="showDeleteModal(index)" class="delete-btn">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+
+                                <tfoot>
+                                    <tr class="total-row">
+                                        <td colspan="4" class="text-right"><strong>Total General:</strong></td>
+                                        <td><strong>${{ formatCurrency(totalGeneral) }}</strong></td>
+                                    </tr>
+                                </tfoot>
+
+                            </table>
+
+                        </div>
+                        <div class="table-actions">
+                            <button @click="registerAllArticles" class="register-btn"
+                                :disabled="articulosTabla.length === 0">
+                                <i class="fas fa-save"></i> Registrar Artículos
                             </button>
                         </div>
-                    </form>
-                </div>
-
-                <!-- Tabla (derecha) -->
-                <div class="table-section">
-                    <h2>Artículos a Registrar</h2>
-                    <div class="table-wrapper">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>No. Partida</th>
-                                    <th>Descripción</th>
-                                    <th>Cantidad</th>
-                                    <th>Unidad</th>
-                                    <th>Total</th>
-                                    <th>Eliminar</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr v-for="(articulo, index) in articulosTabla" :key="index">
-                                    <td>{{ articulo.numero_partida }}</td>
-                                    <td>{{ articulo.descripcion }}</td>
-                                    <td>{{ articulo.cantidad }}</td>
-                                    <td>{{ articulo.unidad_medida }}</td>
-                                    <td>${{ formatCurrency(articulo.total_ingreso) }}</td>
-
-                                    <td>
-                                        <button @click="showDeleteModal(index)" class="delete-btn">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-                            </tbody>
-
-                            <tfoot>
-                                <tr class="total-row">
-                                    <td colspan="4" class="text-right"><strong>Total General:</strong></td>
-                                    <td><strong>${{ formatCurrency(totalGeneral) }}</strong></td>
-                                </tr>
-                            </tfoot>
-
-                        </table>
-
-                    </div>
-                    <div class="table-actions">
-                        <button @click="registerAllArticles" class="register-btn"
-                            :disabled="articulosTabla.length === 0">
-                            <i class="fas fa-save"></i> Registrar Artículos
-                        </button>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Modal para mostrar las imágenes -->
-        <div v-if="showImageModal" class="modal-overlay2">
-            <div class="modal2">
-                <h2>Imágenes seleccionadas</h2>
-                <div class="image-preview-container">
-                    <div v-for="(img, index) in form.foto_articulo" :key="index" class="image-preview">
-                        <div class="image-container">
-                            <img :src="getImageUrl(img)" :alt="img.name" class="image-preview-img" />
-                            <button @click="removeImage(index)" class="remove-btn">
-                                <i class="fas fa-trash-alt"></i>
-                            </button>
+            <!-- Modal para mostrar las imágenes -->
+            <div v-if="showImageModal" class="modal-overlay2">
+                <div class="modal2">
+                    <h2>Imágenes seleccionadas</h2>
+                    <div class="image-preview-container">
+                        <div v-for="(img, index) in form.foto_articulo" :key="index" class="image-preview">
+                            <div class="image-container">
+                                <img :src="getImageUrl(img)" :alt="img.name" class="image-preview-img" />
+                                <button @click="removeImage(index)" class="remove-btn">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </div>
+                            <p class="image-name">{{ img.name }}</p>
                         </div>
-                        <p class="image-name">{{ img.name }}</p>
+                    </div>
+                    <button @click="closeImageModal">Cerrar</button>
+                </div>
+            </div>
+
+            <!-- Modal de Éxito -->
+            <div v-if="modalVisible" class="modal">
+                <div class="modal-content">
+                    <span class="close" @click="cerrarModal">&times;</span>
+                    <h2>¡Registro Exitoso!</h2>
+                    <p>Los artículos han sido registrados correctamente.</p>
+                    <button @click="redirigirPagina">Aceptar</button>
+                </div>
+            </div>
+            <!-- Contenedor de notificaciones -->
+            <div v-if="alertMessage" :class="alertClass" class="notification">
+                <i :class="alertIcon"></i> {{ alertMessage }}
+            </div>
+            <!-- Modal de Confirmación de Eliminación -->
+            <div v-if="isDeleteModalVisible" class="modal-overlay">
+                <div class="modal-content-delete">
+                    <h3>¿Estás seguro de eliminar este artículo?</h3>
+                    <div class="modal-buttons">
+                        <button @click="confirmDelete" class="btn-confirm">Confirmar</button>
+                        <button @click="cancelDelete" class="btn-cancel">Cancelar</button>
                     </div>
                 </div>
-                <button @click="closeImageModal">Cerrar</button>
             </div>
         </div>
-
-        <!-- Modal de Éxito -->
-        <div v-if="modalVisible" class="modal">
-            <div class="modal-content">
-                <span class="close" @click="cerrarModal">&times;</span>
-                <h2>¡Registro Exitoso!</h2>
-                <p>Los artículos han sido registrados correctamente.</p>
-                <button @click="redirigirPagina">Aceptar</button>
-            </div>
-        </div>
-        <!-- Contenedor de notificaciones -->
-        <div v-if="alertMessage" :class="alertClass" class="notification">
-            <i :class="alertIcon"></i> {{ alertMessage }}
-        </div>
-        <!-- Modal de Confirmación de Eliminación -->
-        <div v-if="isDeleteModalVisible" class="modal-overlay">
-            <div class="modal-content-delete">
-                <h3>¿Estás seguro de eliminar este artículo?</h3>
-                <div class="modal-buttons">
-                    <button @click="confirmDelete" class="btn-confirm">Confirmar</button>
-                    <button @click="cancelDelete" class="btn-cancel">Cancelar</button>
-                </div>
-            </div>
-        </div>
-    </div>
+    </div>    
 </template>
 
 <script>
 import api from '../services/api';
-
+import NavBarPage from './NavBar.vue';
 export default {
     name: "newExistenciaPage",
+    components: {
+        NavBarPage // Registrar el componente
+    },
     data() {
         return {
 
@@ -1539,136 +1478,19 @@ tr:hover {
     cursor: pointer;
 }
 
+.page-wrapper {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    background-color: #f5f5f5;
+}
 
 .container {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    background: white;
-    flex-direction: column;
-    color: white;
-}
-
-/* Menú de navegación */
-.navbar {
-    position: 0;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 30px 20px;
-    background: #691B31;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-}
-
-.navbar-left {
     flex: 1;
-    display: flex;
-    align-items: center;
-}
-
-.icon-back {
-    font-size: 24px;
-    cursor: pointer;
-    margin-right: 10px;
-    color: white;
-}
-
-.navbar-center {
-    flex: 3;
-    text-align: center;
-}
-
-.navbar-center h1 {
-    margin: 0;
-    font-size: 24px;
-}
-
-.navbar-center p {
-    margin: 0;
-    font-size: 18px;
-}
-
-.navbar-right {
-    flex: 1;
-    display: flex;
-    justify-content: flex-end;
-}
-
-.user-profile {
-    display: flex;
-    align-items: center;
-}
-
-.profile-pic {
-    border-radius: 50%;
-    width: 40px;
-    height: 40px;
-    margin-right: 10px;
-}
-
-.user-info p {
-    margin: 0;
-    font-weight: bold;
-}
-
-.user-info span {
-    font-size: 12px;
-    color: #ddd;
-}
-
-/* Barra de navegación amarilla */
-.sub-navbar {
-    display: flex;
-    justify-content: center;
-    background: linear-gradient(to right, #FFFFFF, #DDC9A3);
-    /* Degradado de izquierda a derecha */
-    padding: 10px 0;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-}
-
-.nav-item {
-    position: relative;
-    margin: 0 20px;
-    cursor: pointer;
-    font-size: 16px;
-    color: #691B31;
-}
-
-.nav-item:hover {
-    color: #590d22;
-}
-
-.dropdown-menu {
-    display: none;
-    position: absolute;
-    top: 100%;
-    left: 0;
-    background-color: #691B31;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    border-radius: 5px;
-    width: 150px;
-    z-index: 1;
-}
-
-.dropdown-menu button {
     width: 100%;
-    padding: 10px;
-    border: none;
-    background: #691B31;
-    color: white;
-    text-align: left;
-    font-size: 14px;
-}
-
-.dropdown-menu button:hover {
-    background: #590d22;
-}
-
-.nav-item:hover .dropdown-menu {
-    display: block;
+    padding: 20px;
+    background-color: #f5f5f5;
+    min-height: calc(100vh - 140px);
 }
 
 /* Formulario */

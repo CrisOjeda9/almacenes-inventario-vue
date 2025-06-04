@@ -1,243 +1,248 @@
 <template>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    <div class="page-wrapper">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+        <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+        <NavBarPage :pageTitle="'Nuevo Usuario'" :showUserMenu="true" />
+        <div class="container">
+            <!-- Menú de navegación -->
+            <nav class="navbar">
+                <div class="navbar-left">
+                    <img src="../assets/LOGOS DORADOS-02.png" alt="Icono" class="navbar-icon" @click="goHome" width="50%"
+                        height="auto" style="cursor: pointer;" />
+                </div>
+                <div class="navbar-center">
+                    <h1>Nuevo Usuario</h1>
+                    <p>Sistema de Almacén e Inventarios de Radio y Televisión de Hidalgo</p>
+                </div>
+                <div class="navbar-right">
+                    <div class="user-profile">
+                        <img :src="profileImage" alt="User Profile" class="profile-pic" />
+                        <div class="user-info">
+                            <p>{{ userName }}</p>
+                            <span><a href="profile" style="color: white;">Ver Perfil</a></span>
+                        </div>
+                    </div>
+                </div>
+            </nav>
 
-    <div class="container">
-        <!-- Menú de navegación -->
-        <nav class="navbar">
-            <div class="navbar-left">
-                <img src="../assets/LOGOS DORADOS-02.png" alt="Icono" class="navbar-icon" @click="goHome" width="50%"
-                    height="auto" style="cursor: pointer;" />
-            </div>
-            <div class="navbar-center">
-                <h1>Nuevo Usuario</h1>
-                <p>Sistema de Almacén e Inventarios de Radio y Televisión de Hidalgo</p>
-            </div>
-            <div class="navbar-right">
-                <div class="user-profile">
-                    <img :src="profileImage" alt="User Profile" class="profile-pic" />
-                    <div class="user-info">
-                        <p>{{ userName }}</p>
-                        <span><a href="profile" style="color: white;">Ver Perfil</a></span>
+            <!-- Barra de navegación amarilla -->
+            <div class="sub-navbar">
+                <a href="/home" class="nav-item">Inicio</a>
+                <a href="users" class="nav-item" style="color: #6F7271; ">Aministrador</a>
+                
+
+                <div class="nav-item" @mouseenter="showMenu('usersMenu')" @mouseleave="hideMenu('usersMenu')">
+                    Almacen
+                    <span class="menu-icon">▼</span>
+                    <div class="dropdown-menu" v-show="menus.usersMenu">
+                        <button @click="navigateTo('proveedor')">Ver proveedores</button>
+                        <button @click="navigateTo('factura')">Facturas</button>
+                        <button @click="navigateTo('existencia')">Entrada de artículos</button>
+                        <button @click="navigateTo('articulos')">Existencias</button>
+                        <button @click="navigateTo('solicitudmaterial')">Salida de material</button>
+                        <button @click="navigateTo('recepcionsolicitudes')">Recepción de solicitudes</button>
+                        <button @click="navigateTo('poliza')">Pólizas</button>
+                    </div>
+                </div>
+
+                <div class="nav-item" @mouseenter="showMenu('homeMenu')" @mouseleave="hideMenu('homeMenu')">
+                    Inventario
+                    <span class="menu-icon">▼</span>
+                    <div class="dropdown-menu" v-show="menus.homeMenu">
+                        <button @click="navigateTo('historialbienes')">Historial de bienes</button>
+                        <button @click="navigateTo('resguardo')">Bienes sin resguardo</button>
+                        <button @click="navigateTo('listaalmacen')">Bienes nuevos</button>
+                        <button @click="navigateTo('bienesnuevos')">Asignar resguardo</button>
+                        <button @click="navigateTo('liberarbien')">Liberar Bien</button>
+                        <button @click="navigateTo('bajabien')">Baja de bienes</button>
+                        <button @click="navigateTo('bajas')">Historial de bajas</button>
+                        <button @click="navigateTo('reportes')">Generación de reportes</button>
+                    </div>
+                </div>
+                <div v-if="userRole === 'Usuarios' || userRole === 'Administrador'" class="nav-item" @mouseenter="showMenu('userMenu')"
+                    @mouseleave="hideMenu('userMenu')">
+                    Usuario
+                    <span class="menu-icon">▼</span>
+                    <div class="dropdown-menu" v-show="menus.userMenu">
+                        <button @click="navigateTo('')">Solicitud de Material</button>
+                        <button @click="navigateTo('resguardoUsuario')">Resguardo</button>
                     </div>
                 </div>
             </div>
-        </nav>
 
-        <!-- Barra de navegación amarilla -->
-        <div class="sub-navbar">
-            <a href="/home" class="nav-item">Inicio</a>
-            <a href="users" class="nav-item" style="color: #6F7271; ">Aministrador</a>
+            <!-- Formulario -->
+            <div class="form-container">
+                <form @submit.prevent="registerUser">
+                    <!-- Primera fila de campos -->
+                    <div class="form-row">
+                        <div class="form-field">
+                            <label for="rol">Rol de usuario</label>
+                            <select v-model="form.rol" required>
+                                <option value="" disabled>Selecciona una opción</option>
+                                <option value="Administrador">Administrador</option>
+                                <option value="Inventario">Inventario</option>
+                                <option value="Almacenes">Almacenes</option>
+                                <option value="Usuario">Usuario</option>
+                            </select>
+                        </div>
+                        <div class="form-field">
+                            <label for="nombre">Nombre(s)</label>
+                            <input type="text" v-model="searchName" @input="filterUsers" required />
+                            <ul v-if="filteredUsers.length > 0" class="autocomplete-list">
+                                <li v-for="user in filteredUsers" :key="user.id" @click="selectUser(user)">
+                                    {{ user.nombre }} {{ user.apellidos }}
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="form-field">
+                            <label for="apellidos">Apellidos</label>
+                            <input type="text" v-model="form.apellidos" readonly style="background-color: #dcddcd;" />
+                        </div>
+                        <div class="form-field">
+                            <label for="RFC">RFC</label>
+                            <input type="text" v-model="form.RFC" readonly style="background-color: #dcddcd;" />
+                        </div>
+                    </div>
+
+                    <!-- Segunda fila de campos -->
+                    <div class="form-row">
+                        <div class="form-field">
+                            <label for="numero_trabajador">Num. Trabajador</label>
+                            <input type="number" v-model="form.numero_trabajador" readonly
+                                style="background-color: #dcddcd;" />
+                        </div>
+                        <div class="form-field">
+                            <label for="CURP">CURP</label>
+                            <input type="text" v-model="form.CURP" readonly style="background-color: #dcddcd;" />
+                        </div>
+                        <div class="form-field">
+                            <label for="nivel">Nivel</label>
+                            <input type="text" v-model="form.nivel" readonly style="background-color: #dcddcd;" />
+                        </div>
+                        <div class="form-field">
+                            <label for="cargo">Cargo</label>
+                            <input type="text" v-model="form.cargo" readonly style="background-color: #dcddcd;" />
+                        </div>
+                        <div class="form-field">
+                            <label for="direccion_pertenencia">Direc. Pertenencia</label>
+                            <input type="text" v-model="form.direccion_pertenencia" readonly
+                                style="background-color: #dcddcd;" />
+                        </div>
+                    </div>
+
+                    <!-- Tercera fila de campos -->
+                    <div class="form-row">
+                        <div class="form-field">
+                            <label for="departamento">Departamento</label>
+                            <input type="text" v-model="form.departamento" readonly style="background-color: #dcddcd;" />
+                        </div>
+                        <div class="form-field">
+                            <label for="organo_superior">Organo Superior</label>
+                            <input type="text" v-model="form.organo_superior" readonly style="background-color: #dcddcd;" />
+                        </div>
+                        <div class="form-field">
+                            <label for="area_presupuestal">Área Presupuestal</label>
+                            <input type="text" v-model="form.area_presupuestal" readonly
+                                style="background-color: #dcddcd;" />
+                        </div>
+                        <div class="form-field">
+                            <label for="email">Correo electrónico</label>
+                            <input type="email" v-model="form.email" readonly style="background-color: #dcddcd;" />
+                        </div>
+                    </div>
+
+                    <!-- Cuarta fila de campos -->
+                    <div class="form-row">
+                        <!-- Campo Doc -->
+                        <div class="form-field">
+                            <label for="identificacion">Identificación</label>
+                            <div class="dropzone" style="background-color: #dcddcd;">
+                                <span>{{ form.identificacion ? form.identificacion.split('/').pop() : 'No se ha seleccionado ninguna foto' }}</span>
+                            </div>
+                        </div>
+                        <!-- Campo Foto -->
+                        <div class="form-field">
+                            <label for="imagen">Foto</label>
+                            <div class="dropzone" style="background-color: #dcddcd;">
+                                <span>{{ form.imagen ? form.imagen.split('/').pop() : 'No se ha seleccionado ninguna foto'
+                                }}</span>
+                            </div>
+                        </div>
+                        <div class="form-field">
+                            <label for="password">Contraseña</label>
+                            <div class="input-wrapper">
+                                <input 
+                                    :type="showPassword ? 'text' : 'password'" 
+                                    v-model="form.password" 
+                                    @input="validatePassword"
+                                    @blur="validatePassword"
+                                    required
+                                    ref="passwordField"
+                                />
+                                <i :class="showPassword ? 'fa fa-eye-slash' : 'fa fa-eye'"
+                                    @click="showPassword = !showPassword"></i>
+                            </div>
+                            <span class="error-message" v-if="errors.password">{{ errors.password }}</span>
+                        </div>
+                        <div class="form-field" style="margin-bottom: 15px;">
+                            <label for="confirm_password">Confirmar Contraseña</label>
+                            <div class="input-wrapper">
+                                <input 
+                                    :type="showConfirmPassword ? 'text' : 'password'" 
+                                    v-model="form.confirm_password" 
+                                    @input="validateConfirmPassword"
+                                    @blur="validateConfirmPassword"
+                                    required
+                                />
+                                <i :class="showConfirmPassword ? 'fa fa-eye-slash' : 'fa fa-eye'"
+                                    @click="showConfirmPassword = !showConfirmPassword"></i>
+                            </div>
+                            <span class="error-message" v-if="errors.confirm_password">{{ errors.confirm_password }}</span>
+                        </div>
+                    </div>
+
+                    <!-- Botón de registro -->
+                    <div class="button-container">
+                        <button class="boton" type="submit">
+                            <i class="fas fa-user"></i> Registrar
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <div v-if="showAlertModal" class="modal">
+                <div class="modal-content">
+                    <h2>¡Error!</h2>
+                    <ul>
+                        <li v-for="(message, index) in alertMessageList" :key="index">{{ message }}</li>
+                    </ul>
+                    <button @click="closeAlertModal">Aceptar</button>
+                </div>
+            </div>
+
+            <!-- Modal -->
+            <div v-if="showModal" class="modal">
+                <div class="modal-content">
+                    <h2>Usuario registrado con éxito.</h2>
+                    <button @click="closeModal">Aceptar</button>
+                </div>
+            </div>
             
-
-            <div class="nav-item" @mouseenter="showMenu('usersMenu')" @mouseleave="hideMenu('usersMenu')">
-                Almacen
-                <span class="menu-icon">▼</span>
-                <div class="dropdown-menu" v-show="menus.usersMenu">
-                    <button @click="navigateTo('proveedor')">Ver proveedores</button>
-                    <button @click="navigateTo('factura')">Facturas</button>
-                    <button @click="navigateTo('existencia')">Entrada de artículos</button>
-                    <button @click="navigateTo('articulos')">Existencias</button>
-                    <button @click="navigateTo('solicitudmaterial')">Salida de material</button>
-                    <button @click="navigateTo('recepcionsolicitudes')">Recepción de solicitudes</button>
-                    <button @click="navigateTo('poliza')">Pólizas</button>
-                </div>
-            </div>
-
-            <div class="nav-item" @mouseenter="showMenu('homeMenu')" @mouseleave="hideMenu('homeMenu')">
-                Inventario
-                <span class="menu-icon">▼</span>
-                <div class="dropdown-menu" v-show="menus.homeMenu">
-                     <button @click="navigateTo('historialbienes')">Historial de bienes</button>
-                    <button @click="navigateTo('resguardo')">Bienes sin resguardo</button>
-                    <button @click="navigateTo('listaalmacen')">Bienes nuevos</button>
-                    <button @click="navigateTo('bienesnuevos')">Asignar resguardo</button>
-                    <button @click="navigateTo('liberarbien')">Liberar Bien</button>
-                    <button @click="navigateTo('bajabien')">Baja de bienes</button>
-                    <button @click="navigateTo('bajas')">Historial de bajas</button>
-                    <button @click="navigateTo('reportes')">Generación de reportes</button>
-                </div>
-            </div>
-            <div v-if="userRole === 'Usuarios' || userRole === 'Administrador'" class="nav-item" @mouseenter="showMenu('userMenu')"
-                @mouseleave="hideMenu('userMenu')">
-                Usuario
-                <span class="menu-icon">▼</span>
-                <div class="dropdown-menu" v-show="menus.userMenu">
-                    <button @click="navigateTo('')">Solicitud de Material</button>
-                    <button @click="navigateTo('resguardoUsuario')">Resguardo</button>
-                </div>
+            <div v-if="alertMessage" :class="alertClass" class="notification">
+                <i :class="alertIcon"></i> {{ alertMessage }}
             </div>
         </div>
-
-        <!-- Formulario -->
-        <div class="form-container">
-            <form @submit.prevent="registerUser">
-                <!-- Primera fila de campos -->
-                <div class="form-row">
-                    <div class="form-field">
-                        <label for="rol">Rol de usuario</label>
-                        <select v-model="form.rol" required>
-                            <option value="" disabled>Selecciona una opción</option>
-                            <option value="Administrador">Administrador</option>
-                            <option value="Inventario">Inventario</option>
-                            <option value="Almacenes">Almacenes</option>
-                            <option value="Usuario">Usuario</option>
-                        </select>
-                    </div>
-                    <div class="form-field">
-                        <label for="nombre">Nombre(s)</label>
-                        <input type="text" v-model="searchName" @input="filterUsers" required />
-                        <ul v-if="filteredUsers.length > 0" class="autocomplete-list">
-                            <li v-for="user in filteredUsers" :key="user.id" @click="selectUser(user)">
-                                {{ user.nombre }} {{ user.apellidos }}
-                            </li>
-                        </ul>
-                    </div>
-                    <div class="form-field">
-                        <label for="apellidos">Apellidos</label>
-                        <input type="text" v-model="form.apellidos" readonly style="background-color: #dcddcd;" />
-                    </div>
-                    <div class="form-field">
-                        <label for="RFC">RFC</label>
-                        <input type="text" v-model="form.RFC" readonly style="background-color: #dcddcd;" />
-                    </div>
-                </div>
-
-                <!-- Segunda fila de campos -->
-                <div class="form-row">
-                    <div class="form-field">
-                        <label for="numero_trabajador">Num. Trabajador</label>
-                        <input type="number" v-model="form.numero_trabajador" readonly
-                            style="background-color: #dcddcd;" />
-                    </div>
-                    <div class="form-field">
-                        <label for="CURP">CURP</label>
-                        <input type="text" v-model="form.CURP" readonly style="background-color: #dcddcd;" />
-                    </div>
-                    <div class="form-field">
-                        <label for="nivel">Nivel</label>
-                        <input type="text" v-model="form.nivel" readonly style="background-color: #dcddcd;" />
-                    </div>
-                    <div class="form-field">
-                        <label for="cargo">Cargo</label>
-                        <input type="text" v-model="form.cargo" readonly style="background-color: #dcddcd;" />
-                    </div>
-                    <div class="form-field">
-                        <label for="direccion_pertenencia">Direc. Pertenencia</label>
-                        <input type="text" v-model="form.direccion_pertenencia" readonly
-                            style="background-color: #dcddcd;" />
-                    </div>
-                </div>
-
-                <!-- Tercera fila de campos -->
-                <div class="form-row">
-                    <div class="form-field">
-                        <label for="departamento">Departamento</label>
-                        <input type="text" v-model="form.departamento" readonly style="background-color: #dcddcd;" />
-                    </div>
-                    <div class="form-field">
-                        <label for="organo_superior">Organo Superior</label>
-                        <input type="text" v-model="form.organo_superior" readonly style="background-color: #dcddcd;" />
-                    </div>
-                    <div class="form-field">
-                        <label for="area_presupuestal">Área Presupuestal</label>
-                        <input type="text" v-model="form.area_presupuestal" readonly
-                            style="background-color: #dcddcd;" />
-                    </div>
-                    <div class="form-field">
-                        <label for="email">Correo electrónico</label>
-                        <input type="email" v-model="form.email" readonly style="background-color: #dcddcd;" />
-                    </div>
-                </div>
-
-                <!-- Cuarta fila de campos -->
-                <div class="form-row">
-                    <!-- Campo Doc -->
-                    <div class="form-field">
-                        <label for="identificacion">Identificación</label>
-                        <div class="dropzone" style="background-color: #dcddcd;">
-                            <span>{{ form.identificacion ? form.identificacion.split('/').pop() : 'No se ha seleccionado ninguna foto' }}</span>
-                        </div>
-                    </div>
-                    <!-- Campo Foto -->
-                    <div class="form-field">
-                        <label for="imagen">Foto</label>
-                        <div class="dropzone" style="background-color: #dcddcd;">
-                            <span>{{ form.imagen ? form.imagen.split('/').pop() : 'No se ha seleccionado ninguna foto'
-                            }}</span>
-                        </div>
-                    </div>
-                    <div class="form-field">
-                        <label for="password">Contraseña</label>
-                        <div class="input-wrapper">
-                            <input 
-                                :type="showPassword ? 'text' : 'password'" 
-                                v-model="form.password" 
-                                @input="validatePassword"
-                                @blur="validatePassword"
-                                required
-                                ref="passwordField"
-                            />
-                            <i :class="showPassword ? 'fa fa-eye-slash' : 'fa fa-eye'"
-                                @click="showPassword = !showPassword"></i>
-                        </div>
-                        <span class="error-message" v-if="errors.password">{{ errors.password }}</span>
-                    </div>
-                    <div class="form-field" style="margin-bottom: 15px;">
-                        <label for="confirm_password">Confirmar Contraseña</label>
-                        <div class="input-wrapper">
-                            <input 
-                                :type="showConfirmPassword ? 'text' : 'password'" 
-                                v-model="form.confirm_password" 
-                                @input="validateConfirmPassword"
-                                @blur="validateConfirmPassword"
-                                required
-                            />
-                            <i :class="showConfirmPassword ? 'fa fa-eye-slash' : 'fa fa-eye'"
-                                @click="showConfirmPassword = !showConfirmPassword"></i>
-                        </div>
-                        <span class="error-message" v-if="errors.confirm_password">{{ errors.confirm_password }}</span>
-                    </div>
-                </div>
-
-                <!-- Botón de registro -->
-                <div class="button-container">
-                    <button class="boton" type="submit">
-                        <i class="fas fa-user"></i> Registrar
-                    </button>
-                </div>
-            </form>
-        </div>
-
-        <div v-if="showAlertModal" class="modal">
-            <div class="modal-content">
-                <h2>¡Error!</h2>
-                <ul>
-                    <li v-for="(message, index) in alertMessageList" :key="index">{{ message }}</li>
-                </ul>
-                <button @click="closeAlertModal">Aceptar</button>
-            </div>
-        </div>
-
-        <!-- Modal -->
-        <div v-if="showModal" class="modal">
-            <div class="modal-content">
-                <h2>Usuario registrado con éxito.</h2>
-                <button @click="closeModal">Aceptar</button>
-            </div>
-        </div>
-        
-        <div v-if="alertMessage" :class="alertClass" class="notification">
-            <i :class="alertIcon"></i> {{ alertMessage }}
-        </div>
-    </div>
+    </div>    
 </template>
 
 <script>
 import axios from 'axios';
-
+import NavBarPage from './NavBar.vue';
 export default {
     name: "RegisterPage",
+    components: {
+        NavBarPage // Registrar el componente
+    },
     data() {
         return {
             userName: "Cargando...",
@@ -669,136 +674,19 @@ input:invalid {
     width: 500px;
 }
 
-.container {
-    position: fixed;
-    top: 0;
-    left: 0;
+.page-wrapper {
     width: 100%;
-    height: 100%;
     display: flex;
-    background: white;
     flex-direction: column;
-    color: white;
-    overflow-x: hidden;
-    overflow-y: auto;
+    background-color: #f5f5f5;
 }
 
-/* Menú de navegación */
-.navbar {
-    position: 0;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 30px 20px;
-    background: #691B31;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-}
-
-.navbar-left {
+.container {
     flex: 1;
-    display: flex;
-    align-items: center;
-}
-
-.icon-back {
-    font-size: 24px;
-    cursor: pointer;
-    margin-right: 10px;
-    color: white;
-}
-
-.navbar-center {
-    flex: 3;
-    text-align: center;
-}
-
-.navbar-center h1 {
-    margin: 0;
-    font-size: 24px;
-}
-
-.navbar-center p {
-    margin: 0;
-    font-size: 18px;
-}
-
-.navbar-right {
-    flex: 1;
-    display: flex;
-    justify-content: flex-end;
-}
-
-.user-profile {
-    display: flex;
-    align-items: center;
-}
-
-.profile-pic {
-    border-radius: 50%;
-    width: 40px;
-    height: 40px;
-    margin-right: 10px;
-}
-
-.user-info p {
-    margin: 0;
-    font-weight: bold;
-}
-
-.user-info span {
-    font-size: 12px;
-    color: #ddd;
-}
-
-/* Barra de navegación amarilla */
-.sub-navbar {
-    display: flex;
-    justify-content: center;
-    background: linear-gradient(to right, #FFFFFF, #DDC9A3);
-    /* Degradado de izquierda a derecha */
-    padding: 10px 0;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-}
-
-.nav-item {
-    position: relative;
-    margin: 0 20px;
-    cursor: pointer;
-    font-size: 16px;
-    color: #691B31;
-}
-
-.nav-item:hover {
-    color: #590d22;
-}
-
-.dropdown-menu {
-    display: none;
-    position: absolute;
-    top: 100%;
-    left: 0;
-    background-color: #691B31;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    border-radius: 5px;
-    width: 150px;
-}
-
-.dropdown-menu button {
     width: 100%;
-    padding: 10px;
-    border: none;
-    background: #691B31;
-    color: white;
-    text-align: left;
-    font-size: 14px;
-}
-
-.dropdown-menu button:hover {
-    background: #590d22;
-}
-
-.nav-item:hover .dropdown-menu {
-    display: block;
+    padding: 20px;
+    background-color: #f5f5f5;
+    min-height: calc(100vh - 140px);
 }
 
 /* Formulario */
