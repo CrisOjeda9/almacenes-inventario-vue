@@ -29,6 +29,9 @@ import historialBienesPage from '@/components/historialbienes.vue';
 import reportesPage from '@/components/reportes.vue';
 import salidaExistenciasPage from '@/components/salidaExistencias.vue';
 import liberarBienPage from '@/components/liberarBien.vue';
+import resguardoUsuarioPage from '@/components/resguardoUsuario.vue';
+import articulosPage from '@/components/articulos.vue';
+import navBarPage from '@/components/NavBar.vue';
 
 const router = createRouter({
   history: createWebHistory(),
@@ -184,6 +187,21 @@ const router = createRouter({
       path: '/liberarbien',
       name: 'liberarbien',
       component: liberarBienPage, // Cambia el nombre aquí
+    },
+    {
+      path: '/resguardoUsuario',
+      name: 'resguardoUsuario',
+      component: resguardoUsuarioPage, // Cambia el nombre aquí
+    },
+    {
+      path: '/articulos',
+      name: 'articulos',
+      component: articulosPage, // Cambia el nombre aquí
+    },
+    {
+      path: '/NavBar',
+      name: '/NavBar',
+      component: navBarPage,
     }
   ],
 });

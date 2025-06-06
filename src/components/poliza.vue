@@ -1,137 +1,79 @@
 <template>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
-
-    <div class="container">
-        <!-- Menú de navegación -->
-        <nav class="navbar">
-            <div class="navbar-left">
-                <img src="../assets/LOGOS DORADOS-02.png" alt="Icono" class="navbar-icon" @click="goHome" width="50%"
-                    height="auto" style="cursor: pointer;" />
-            </div>
-
-            <div class="navbar-center">
-                <h1>Polizas</h1>
-                <p>Sistema de Almacén e Inventarios de Radio y Televisión de Hidalgo</p>
-            </div>
-            <div class="navbar-right">
-                <div class="user-profile">
-                    <img :src="profileImage" alt="User Profile" class="profile-pic" />
-                    <div class="user-info">
-                        <p>{{ userName }}</p> <!-- Nombre dinámico del usuario -->
-                        <span><a href="profile" style="color: white;">Ver Perfil</a></span>
+    <div class="page-wrapper">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+        <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+        <NavBarPage :pageTitle="'Polizas'" :showUserMenu="true" />
+        <div class="container">
+        
+                <!-- Barra de búsqueda (mantener arriba de la tabla) -->
+                <div class="search-bar">
+                    <div class="input-wrapper">
+                        <input type="text" v-model="searchQuery" placeholder="Buscar..." />
+                        <i class="fas fa-search"></i>
                     </div>
+                    <!-- Botón para agregar nueva poliza -->
+                    <button class="add-poliza-btn" @click="redirectToAddPoliza">
+                        <i class="fas fa-file-invoice"></i> <i class="fas fa-plus"></i>
+                    </button>
+                </div>
+                <div class="contenedor-tabla">
+                <!-- Wrapper para el scroll horizontal -->
+                <div class="table-wrapper">
+                    <table class="poliza-table">
+                        <thead>
+                            <tr>
+                                <th>Descripcion</th>
+                                <th>Número de Poliza</th>
+                                <th>Tipo de poliza</th>
+                                <th>Fecha de poliza</th>
+                                <th>Documento</th>
+                                <th>Fecha de registro</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="poliza in paginatedpoliza" :key="poliza.id">
+                                <td>{{ poliza.descripcion }}</td>
+                                <td>{{ poliza.cobertura }}</td>
+                                <td>{{ poliza.tipo }}</td>
+                                <td>{{ poliza.fecha }}</td>
+                                <td>
+                                    <template v-if="poliza.archivo">
+                                        <ul>
+                                            <li v-for="(file, index) in getPdfFiles(poliza.archivo)" :key="index">
+                                                <!-- Aplicar truncateFileName al nombre del archivo -->
+                                                <a :href="file.url" target="_blank" :title="file.name">
+                                                    {{ truncateFileName(file.name, 20) }}
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </template>
+                                    <button @click="downloadZip(poliza)" class="btn-download">
+                                        <p class="textoDescarga">Descargar</p>
+                                    </button>
+                                </td>
+                                <td>{{ formatDate(poliza.createdAt) }}</td>
+                                
+                                <td>
+                                    <div class="actions-container">
+                                        <button @click="editpoliza(poliza)" class="btn-edit">Editar</button>
+                                        <button @click="showDeleteModal(poliza.id)" class="btn-delete">Eliminar</button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Paginación (mantener abajo de la tabla) -->
+                <div class="pagination">
+                    <button @click="prevPage" :disabled="currentPage === 1">Anterior</button>
+                    <span>Pagina {{ currentPage }} de {{ totalPages }}</span>
+                    <button @click="nextPage" :disabled="currentPage === totalPages">Siguiente</button>
                 </div>
             </div>
-        </nav>
 
-        <!-- Barra de navegación amarilla -->
-        <div class="sub-navbar">
-            <a href="/home" class="nav-item">Inicio</a>
-            <a v-if="userRole === 'Administrador'" href="users" class="nav-item">Usuarios</a>
-           <div v-if="userRole === 'Almacenes' || userRole === 'Administrador'" class="nav-item" @mouseenter="showMenu('almacenMenu')"
-                @mouseleave="hideMenu('almacenMenu')">
-                Almacén
-                <span class="menu-icon">▼</span>
-                <div class="dropdown-menu" v-show="menus.almacenMenu">
-                    <button @click="navigateTo('proveedor')">Ver proveedores</button>
-                    <button @click="navigateTo('factura')">Facturas</button>
-                    <button @click="navigateTo('existencia')">Entrada de artículos</button>
-                    <button @click="navigateTo('solicitudmaterial')">Salida de material</button>
-                    <button @click="navigateTo('recepcionsolicitudes')">Recepción de solicitudes</button>
-                    <button @click="navigateTo('bieninventario')">Agregar un bien para inventario</button>
-                    <button @click="navigateTo('poliza')">Pólizas</button>
-                </div>
-            </div>
-
-            <div v-if="userRole === 'Inventario' || userRole === 'Administrador'" class="nav-item" @mouseenter="showMenu('homeMenu')"
-                @mouseleave="hideMenu('homeMenu')">
-                Inventario
-                <span class="menu-icon">▼</span>
-                <div class="dropdown-menu" v-show="menus.homeMenu">
-                    <button @click="navigateTo('historialbienes')">Historial de bienes</button>
-                    <button @click="navigateTo('resguardo')">Bienes sin resguardo</button>
-                    <button @click="navigateTo('listaalmacen')">Bienes nuevos</button>
-                    <button @click="navigateTo('bienesnuevos')">Asignar resguardo</button>
-                    <button @click="navigateTo('liberarbien')">Liberar Bien</button>
-                    <button @click="navigateTo('bajabien')">Baja de bienes</button>
-                    <button @click="navigateTo('bajas')">Historial de bajas</button>
-                    <button @click="navigateTo('reportes')">Generación de reportes</button>
-                </div>
-            </div>
-        </div>
-
-        <div class="search-bar">
-            <div class="input-wrapper">
-                <input type="text" v-model="searchQuery" placeholder="Buscar..." />
-                <i class="fas fa-search"></i> <!-- Icono de la lupa -->
-            </div>
-
-            <!-- Botón para agregar nueva poliza -->
-            <button class="add-poliza-btn" @click="redirectToAddPoliza">
-                <i class="fas fa-file-invoice"></i> <i class="fas fa-plus"></i>
-            </button>
-        </div>
-
-        <div class="contenedor-tabla">
-            <table class="poliza-table">
-                <thead>
-                    <tr>
-                        <th>Descripcion</th>
-                        <th>Cobertura</th>
-                        <th>Tipo de poliza</th>
-                        <th>Calidad</th>
-                        <th>Deducible</th>
-                        <th>Prima</th>
-                        <th>Cantidad</th>
-                        <th>Limite de indemnización</th>
-                        <th>Periodo de validación</th>
-                        <th>Clausulas de exclusion</th>
-                        <th>Fecha de poliza</th>
-                        <th>Documento</th>
-                        <th>Fecha de registro</th>
-                        <th>Acciones</th>
-
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr v-for="poliza in paginatedpoliza" :key="poliza.id">
-                        <td>{{ poliza.descripcion }}</td>
-                        <td>{{ poliza.cobertura }}</td>
-                        <td>{{ poliza.tipo }}</td>
-                        <td>{{ poliza.calidad }}</td>
-                        <td>{{ poliza.deducible }}</td>
-                        <td>{{ poliza.prima }}</td>
-                        <td>{{ poliza.cantidad }}</td>
-                        <td>{{ poliza.limites_indemnizacion }}</td>
-                        <td>{{ poliza.periodo_vigencia }}</td>
-                        <td>{{ poliza.clausulas_exclusion }}</td>
-                        <td>{{ poliza.fecha }}</td>
-                        <td>
-                            <template v-if="poliza.archivo">
-                                <ul>
-                                    <li v-for="(file, index) in getPdfFiles(poliza.archivo)" :key="index">
-                                        <!-- Aplicar truncateFileName al nombre del archivo -->
-                                        <a :href="file.url" target="_blank" :title="file.name">
-                                            {{ truncateFileName(file.name, 20) }}
-                                        </a>
-                                    </li>
-                                </ul>
-                            </template>
-                            <button @click="downloadZip(poliza)" class="btn-download">
-                                <p class="textoDescarga">Descargar</p>
-                            </button>
-                        </td>
-                        <td>{{ formatDate(poliza.createdAt) }}</td>
-                        <td>
-                            <button @click="editpoliza(poliza)" class="btn-edit">Editar</button>
-                            <button @click="showDeleteModal(poliza.id)" class="btn-delete">Eliminar</button>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-
-            <!-- Modal de Edición -->
+            <!-- Modal de Edición (FUERA del contenedor de tabla) -->
             <div v-if="isEditing" class="edit-modal">
                 <div class="modal-content">
                     <h3>Editar Póliza</h3>
@@ -143,58 +85,29 @@
                                     <input v-model="currentPoliza.descripcion" type="text" />
                                 </div>
                                 <div>
-                                    <label>Cobertura:</label>
+                                    <label>Número de Poliza:</label>
                                     <input v-model="currentPoliza.cobertura" type="text" />
                                 </div>
                                 <div style="width: 100%;">
                                     <label>Tipo de póliza:</label>
                                     <select v-model="currentPoliza.tipo" class="form-input">
                                         <option value="">Seleccione una opción</option>
-                                        <option v-for="option in tipoPolizaOptions" :key="option.value"
-                                            :value="option.value">
+                                        <option v-for="option in tipoPolizaOptions" :key="option.value" :value="option.value">
                                             {{ option.text }}
                                         </option>
                                     </select>
                                 </div>
-                                <div>
-                                    <label>Calidad:</label>
-                                    <input v-model="currentPoliza.calidad" type="text" />
-                                </div>
-                                <div>
-                                    <label>Deducible:</label>
-                                    <input v-model="currentPoliza.deducible" type="text" />
-                                </div>
-                                <div>
-                                    <label>Prima:</label>
-                                    <input v-model="currentPoliza.prima" type="text" />
-                                </div>
-                                <div>
-                                    <label>Cantidad:</label>
-                                    <input v-model="currentPoliza.cantidad" type="text" />
-                                </div>
+                                
                             </div>
 
                             <div class="form-column">
-                                <div>
-                                    <label>Límite de indemnización:</label>
-                                    <input v-model="currentPoliza.limites_indemnizacion" type="text" />
-                                </div>
-                                <div>
-                                    <label>Periodo de validación:</label>
-                                    <input v-model="currentPoliza.periodo_vigencia" type="date" />
-                                </div>
-                                <div>
-                                    <label>Cláusulas de exclusión:</label>
-                                    <input v-model="currentPoliza.clausulas_exclusion" type="text" />
-                                </div>
                                 <div>
                                     <label>Fecha de póliza:</label>
                                     <input v-model="currentPoliza.fecha" type="date" />
                                 </div>
                                 <div class="contenedor-dropzone">
                                     <label for="archivo">Documento (PDF)</label>
-                                    <div class="dropzone" @drop.prevent="handleDrop" @dragover.prevent
-                                        @click="triggerFileInput">
+                                    <div class="dropzone" @drop.prevent="handleDrop" @dragover.prevent @click="triggerFileInput">
                                         <!-- Campo de subida de archivo -->
                                         <input type="file" id="archivo" ref="fileInput" @change="handleFileChange"
                                             accept=".pdf" style="display: none;" multiple />
@@ -221,7 +134,7 @@
                 </div>
             </div>
 
-            <!-- Modal de Confirmación de Eliminación -->
+            <!-- Modal de Confirmación de Eliminación (FUERA del contenedor de tabla) -->
             <div v-if="isDeleteModalVisible" class="modal-overlay">
                 <div class="modal-content-delete">
                     <h3>¿Estás seguro de eliminar esta póliza?</h3>
@@ -231,23 +144,23 @@
                     </div>
                 </div>
             </div>
-            <!-- Paginación -->
-            <div class="pagination">
-                <button @click="prevPage" :disabled="currentPage === 1">Anterior</button>
-                <span>Pagina {{ currentPage }} de {{ totalPages }}</span>
-                <button @click="nextPage" :disabled="currentPage === totalPages">Siguiente</button>
+
+            <!-- Contenedor de notificaciones (FUERA del contenedor de tabla) -->
+            <div v-if="alertMessage" :class="alertClass" class="notification">
+                <i :class="alertIcon"></i> {{ alertMessage }}
             </div>
         </div>
-        <!-- Contenedor de notificaciones -->
-        <div v-if="alertMessage" :class="alertClass" class="notification">
-            <i :class="alertIcon"></i> {{ alertMessage }}
-        </div>
-    </div>
+    </div>    
 </template>
 
 <script>
+import api from '../services/api';
+import NavBarPage from './NavBar.vue';
 export default {
     name: "polizasPage",
+    components: {
+        NavBarPage // Registrar el componente
+    },
     data() {
         return {
             alertMessage: "",  // Mensaje de la alerta
@@ -261,6 +174,7 @@ export default {
                 homeMenu: false,
                 polizaMenu: false,
                 settingsMenu: false,
+                userMenu: false, 
             },
             searchQuery: '',
             currentPage: 1,
@@ -322,7 +236,7 @@ export default {
 
                 try {
                     // Obtener todos los usuarios de la API
-                    const response = await fetch('http://localhost:3000/api/personas');
+                    const response = await api.get('/personas');
                     const users = await response.json();
 
                     // Buscar el usuario logueado por email
@@ -346,7 +260,7 @@ export default {
 
                         if (imageFileName) {
                             // Construir la URL completa para la imagen
-                            this.profileImage = `http://localhost:3000/api/users-files/${imageFileName}`;
+                            this.profileImage = `http://192.168.10.31:3000/api/users-files/${imageFileName}`;
                         } else {
                             // Usar una imagen por defecto si no hay imagen en la API
                             this.profileImage = "../assets/UserHombre.png";
@@ -383,11 +297,17 @@ export default {
         },
         async fetchPolizas() {
             try {
-                const response = await fetch("http://localhost:3000/api/polizas");
+                const response = await fetch("http://192.168.10.31:3000/api/polizas");
                 if (!response.ok) {
                     throw new Error("Error al obtener pólizas");
                 }
-                this.poliza = await response.json(); // Asignar los datos a this.poliza
+                const polizasData = await response.json();
+                
+                // Mapear los datos para asignar numero_poliza a cobertura
+                this.poliza = polizasData.map(poliza => ({
+                    ...poliza,
+                    cobertura: poliza.numero_poliza || poliza.cobertura // Usa numero_poliza si existe, si no mantiene cobertura
+                }));
             } catch (error) {
                 console.error("Error al cargar las pólizas:", error);
             }
@@ -413,8 +333,8 @@ export default {
                 const nameWithoutExtension = fileName.split('.').slice(0, -1).join('.'); // Quita la extensión
 
                 return {
-                    url: `http://localhost:3000/api/polizas-files/${nameWithoutExtension}`, // URL sin extensión para visualización
-                    downloadUrl: `http://localhost:3000/api/polizas-files/${nameWithoutExtension}`, // URL sin extensión para descarga
+                    url: `http://192.168.10.31:3000/api/polizas-files/${nameWithoutExtension}`, // URL sin extensión para visualización
+                    downloadUrl: `http://192.168.10.31:3000/api/polizas-files/${nameWithoutExtension}`, // URL sin extensión para descarga
                     name: nameWithoutExtension // Nombre sin extensión
                 };
             });
@@ -511,18 +431,23 @@ export default {
             this.isEditing = true; // Abrir el modal de edición
             this.selectedFile = null; // Resetear archivo seleccionado
         },
+        
 
         async saveChanges() {
             try {
+                // Preparar los datos para enviar, asegurándose de que cobertura contenga numero_poliza
+                const dataToSend = {
+                    ...this.currentPoliza,
+                    numero_poliza: this.currentPoliza.cobertura // Asignar cobertura a numero_poliza antes de enviar
+                };
+
                 // 1. Actualizar los datos de la poliza
-                const response = await fetch(`http://localhost:3000/api/polizas/${this.currentPoliza.id}`, {
+                const response = await fetch(`http://192.168.10.31:3000/api/polizas/${this.currentPoliza.id}`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({
-                        ...this.currentPoliza
-                    }),
+                    body: JSON.stringify(dataToSend),
                 });
 
                 if (!response.ok) {
@@ -535,7 +460,7 @@ export default {
                     const formData = new FormData();
                     formData.append('archivo', this.selectedFile);
 
-                    const fileResponse = await fetch(`http://localhost:3000/api/polizas/${this.currentPoliza.id}/reemplazar-archivo`, {
+                    const fileResponse = await fetch(`http://192.168.10.31:3000/api/polizas/${this.currentPoliza.id}/reemplazar-archivo`, {
                         method: 'PUT',
                         body: formData,
                     });
@@ -552,7 +477,7 @@ export default {
                 await this.fetchPolizas();
                 this.isEditing = false;
                 this.currentPoliza = {};
-                this.selectedFile = null; // Limpiar el archivo seleccionado después de guardar
+                this.selectedFile = null;
             } catch (error) {
                 console.error('Error:', error);
                 this.showAlert(error.message || 'Hubo un error al actualizar la poliza. Por favor, inténtalo de nuevo', "error");
@@ -560,7 +485,7 @@ export default {
         },
         cancelEdit() {
             this.isEditing = false;
-            this.currentPoliza = {}; // Limpiar el objeto
+            this.currentPoliza = {}; 
         },
         showDeleteModal(id) {
             this.deleteId = id;
@@ -568,7 +493,7 @@ export default {
         },
         async confirmDelete() {
             try {
-                const response = await fetch(`http://localhost:3000/api/polizas/${this.deleteId}`, {
+                const response = await fetch(`http://192.168.10.31:3000/api/polizas/${this.deleteId}`, {
                     method: 'DELETE',
                 });
 
@@ -715,152 +640,20 @@ td ul li a:hover {
     text-decoration: underline;
 }
 
-.titulo {
-    font-size: 30px;
-    font-weight: 100;
-    text-align: center;
+.page-wrapper {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    background-color: #f5f5f5;
 }
 
 .container {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    background:white;
-    flex-direction: column;
-    color: white;
-    overflow-x: hidden;
-}
-
-/* Menú de navegación */
-.navbar {
-    position: 0;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 30px 20px;
-    background: #691B31;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-}
-
-.navbar-left {
     flex: 1;
-    display: flex;
-    align-items: center;
-}
-
-.icon-back {
-    font-size: 24px;
-    cursor: pointer;
-    margin-right: 10px;
-    color: white;
-}
-
-.navbar-center {
-    flex: 3;
-    text-align: center;
-}
-
-.navbar-center h1 {
-    margin: 0;
-    font-size: 24px;
-}
-
-.navbar-center p {
-    margin: 0;
-    font-size: 18px;
-}
-
-
-.navbar-right {
-    flex: 1;
-    display: flex;
-    justify-content: flex-end;
-}
-
-.user-profile {
-    display: flex;
-    align-items: center;
-}
-
-.profile-pic {
-    border-radius: 50%;
-    width: 40px;
-    height: 40px;
-    margin-right: 10px;
-}
-
-.user-info p {
-    margin: 0;
-    font-weight: bold;
-}
-
-.user-info span {
-    font-size: 12px;
-    color: #ddd;
-}
-
-/* Barra de navegación amarilla */
-.sub-navbar {
-    display: flex;
-    justify-content: center;
-    background: linear-gradient(to right, #FFFFFF, #DDC9A3);
-    /* Degradado de izquierda a derecha */
-    padding: 10px 0;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-}
-
-.nav-item {
-    position: relative;
-    margin: 0 20px;
-    cursor: pointer;
-    font-size: 16px;
-    color: #691B31;
-}
-
-.nav-item:hover {
-    color: #590d22;
-}
-
-.dropdown-menu {
-    display: none;
-    position: absolute;
-    top: 100%;
-    left: 0;
-    background-color: #691B31;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    border-radius: 5px;
-    width: 150px;
-    z-index: 1000;
-
-    /* Asegurar que esté encima */
-}
-
-.dropdown-menu button {
     width: 100%;
-    padding: 10px;
-    border: none;
-    background: #691B31;
-    color: white;
-    text-align: left;
-    font-size: 14px;
-
+    padding: 20px;
+    background-color: #f5f5f5;
+    min-height: calc(100vh - 140px);
 }
-
-.dropdown-menu button:hover {
-    background: #590d22;
-}
-
-.nav-item:hover .dropdown-menu {
-    display: block;
-}
-
-
-
-
-
 
 button {
     width: 60%;
@@ -915,33 +708,55 @@ a {
 }
 
 .poliza-table {
-    width: 95%;
+    width: 100%;
+    min-width: 1200px; /* Ancho mínimo para que se active el scroll */
     border-collapse: separate;
     border-spacing: 0;
     background-color: white;
     color: #691B31;
     border-radius: 15px;
-    /* Redondear las esquinas de la tabla */
     overflow: hidden;
-    /* Para que los bordes no sobresalgan */
+    margin: 0; /* Quitar margen para que encaje perfectamente */
 }
 
 .poliza-table th,
 .poliza-table td {
-    padding: 10px;
+    padding: 12px 8px;
     text-align: center;
+    word-wrap: break-word; /* Evitar que el texto se divida en líneas */
+    min-width: 100px; /* Ancho mínimo para cada columna */
 }
+
+
+.poliza-table th:nth-child(12), /* Documento */
+.poliza-table td:nth-child(12) {
+    min-width: 150px;
+}
+
+
 
 .poliza-table th {
     background-color: #BC955B;
     color: white;
+    
 }
 
+/* Efecto hover mejorado */
 .poliza-table tr:hover {
     background-color: #70727265;
     color: #A02142;
     transition: background-color 0.3s ease;
 }
+
+.actions-container {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Ajustes para los botones dentro de las celdas */
 
 .btn-edit,
 .btn-delete {
@@ -952,23 +767,18 @@ a {
     padding-right: 15px;
     border: none;
     cursor: pointer;
-    max-width: 90px;
+    width: 100px;
 }
-
 .btn-edit {
     background-color: #4CAF50;
     color: white;
     margin-bottom: 4px;
-    width: 100%;
 }
-
 .btn-delete {
     background-color: #f44336;
     color: white;
-    width: 100%;
 
 }
-
 .btn-edit:hover {
     background-color: #45a049;
 }
@@ -976,14 +786,60 @@ a {
 .btn-delete:hover {
     background-color: #e41f1f;
 }
+.btn-download {
+    display: flex;
+    text-align: center;
+    justify-content: center;
+    align-items: center;
+    border-radius: 6px;
+    width: 100%;
+    height: 30px;
+    font-size: 12px;
+    background-color: #BC955B;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-download:hover {
+    background: #a4733a;
+}
 
 .contenedor-tabla {
     width: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
-    display: flex;
     flex-direction: column;
+    padding: 0 20px; /* Añadir padding lateral */
+    box-sizing: border-box;
+}
+ .table-wrapper {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    overflow-y: visible;
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    scrollbar-width: thin;
+}
+.table-wrapper::-webkit-scrollbar {
+    height: 8px;
+}
+
+.table-wrapper::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+.table-wrapper::-webkit-scrollbar-thumb {
+    background: #BC955B;
+    border-radius: 10px;
+}
+
+.table-wrapper::-webkit-scrollbar-thumb:hover {
+    background: #a4733a;
 }
 
 /* Barra de búsqueda */
@@ -1035,6 +891,7 @@ a {
     border-radius: 50%;
     cursor: pointer;
     font-size: 18px;
+
 }
 
 .add-poliza-btn:hover {
@@ -1273,5 +1130,36 @@ button[type="button"]:hover {
 
 .contenedor-dropzone label {
     color: white;
+}
+@media (max-width: 768px) {
+    .contenedor-tabla {
+        padding: 0 10px;
+    }
+    
+    .poliza-table {
+        min-width: 1000px;
+    }
+    
+    .poliza-table th,
+    .poliza-table td {
+        padding: 8px 6px;
+        font-size: 14px;
+    }
+}
+
+@media (max-width: 480px) {
+    .contenedor-tabla {
+        padding: 0 5px;
+    }
+    
+    .poliza-table {
+        min-width: 900px;
+    }
+    
+    .poliza-table th,
+    .poliza-table td {
+        padding: 6px 4px;
+        font-size: 12px;
+    }
 }
 </style>

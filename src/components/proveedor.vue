@@ -1,261 +1,204 @@
 <template>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
-
-    <div class="container">
-        <!-- Menú de navegación -->
-        <nav class="navbar">
-            <div class="navbar-left">
-                <img src="../assets/LOGOS DORADOS-02.png" alt="Icono" class="navbar-icon" @click="goHome" width="50%"
-                    height="auto" style="cursor: pointer;" />
-            </div>
-            <div class="navbar-center">
-                <h1>Proveedores</h1>
-                <p>Sistema de Almacén e Inventarios de Radio y Televisión de Hidalgo</p>
-            </div>
-            <div class="navbar-right">
-                <div class="user-profile">
-                    <img :src="profileImage" alt="User Profile" class="profile-pic" />
-                    <div class="user-info">
-                        <p>{{ userName }}</p> <!-- Nombre dinámico del usuario -->
-                        <span><a href="profile" style="color: white;">Ver Perfil</a></span>
-                    </div>
+    <div class="page-wrapper">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+        <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+        <NavBarPage :pageTitle="'Proveedores'" :showUserMenu="true" />
+        <div class="container">
+            <div class="search-bar">
+                <div class="input-wrapper">
+                    <input type="text" v-model="searchQuery" placeholder="Buscar..." />
+                    <i class="fas fa-search"></i> <!-- Icono de la lupa -->
                 </div>
-            </div>
-        </nav>
 
-        <!-- Barra de navegación amarilla -->
-        <div class="sub-navbar">
-            <a href="/home" class="nav-item">Inicio</a>
-            <a v-if="userRole === 'Administrador'" href="users" class="nav-item">Usuarios</a>
-            <div v-if="userRole === 'Almacenes' || userRole === 'Administrador'" class="nav-item" @mouseenter="showMenu('almacenMenu')"
-                @mouseleave="hideMenu('almacenMenu')">
-                Almacén
-                <span class="menu-icon">▼</span>
-                <div class="dropdown-menu" v-show="menus.almacenMenu">
-                    <button @click="navigateTo('proveedor')">Ver proveedores</button>
-                    <button @click="navigateTo('factura')">Facturas</button>
-                    <button @click="navigateTo('existencia')">Entrada de artículos</button>
-                    <button @click="navigateTo('solicitudmaterial')">Salida de material</button>
-                    <button @click="navigateTo('recepcionsolicitudes')">Recepción de solicitudes</button>
-                    <button @click="navigateTo('bieninventario')">Agregar un bien para inventario</button>
-                    <button @click="navigateTo('poliza')">Pólizas</button>
-                </div>
+                <!-- Botón para agregar nuevo usuario -->
+                <button class="add-proveedor-btn" @click="redirectToAddproveedor">
+                    <i class="fas fa-user"></i> <i class="fas fa-plus"></i>
+                </button>
             </div>
 
-            <div v-if="userRole === 'Inventario' || userRole === 'Administrador'" class="nav-item" @mouseenter="showMenu('homeMenu')"
-                @mouseleave="hideMenu('homeMenu')">
-                Inventario
-                <span class="menu-icon">▼</span>
-                <div class="dropdown-menu" v-show="menus.homeMenu">
-                    <button @click="navigateTo('historialbienes')">Historial de bienes</button>
-                    <button @click="navigateTo('resguardo')">Bienes sin resguardo</button>
-                    <button @click="navigateTo('listaalmacen')">Bienes nuevos</button>
-                    <button @click="navigateTo('bienesnuevos')">Asignar resguardo</button>
-                    <button @click="navigateTo('liberarbien')">Liberar Bien</button>
-                    <button @click="navigateTo('bajabien')">Baja de bienes</button>
-                    <button @click="navigateTo('bajas')">Historial de bajas</button>
-                    <button @click="navigateTo('reportes')">Generación de reportes</button>
-                </div>
-            </div>
-        </div>
-
-        <div class="search-bar">
-            <div class="input-wrapper">
-                <input type="text" v-model="searchQuery" placeholder="Buscar..." />
-                <i class="fas fa-search"></i> <!-- Icono de la lupa -->
-            </div>
-
-            <!-- Botón para agregar nuevo usuario -->
-            <button class="add-proveedor-btn" @click="redirectToAddproveedor">
-                <i class="fas fa-user"></i> <i class="fas fa-plus"></i>
-            </button>
-        </div>
-
-        <div class="contenedor-tabla">
-            <table class="proveedor-table">
-                <thead>
-                    <tr>
-                        <th>Nombre</th>
-                        <th>Apellidos</th>
-                        <th>Tipo de Proveedor</th>
-                        <th>RFC</th>
-                        <th>Dirección</th>
-                        <th>Teléfono</th>
-                        <th>Correo Electronico</th>
-                        <th>Cuenta Bancaria</th>
-                        <th>Documento</th>
-                        <th>Fecha de registro</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr v-for="proveedor in paginatedproveedor" :key="proveedor.id">
-                        <td>{{ proveedor.nombre }}</td>
-                        <td>{{ proveedor.apellidos }}</td>
-                        <td>{{ proveedor.tipo_proveedor }}</td>
-                        <td>{{ proveedor.RFC }}</td>
-                        <td>{{ proveedor.direccion }}</td>
-                        <td>{{ proveedor.telefono }}</td>
-                        <td>{{ proveedor.email }}</td>
-                        <td>{{ proveedor.cuenta_bancaria }}</td>
-                        <td>
-                            <template v-if="proveedor.archivos">
-                                <ul>
-                                    <li v-for="(file, index) in getPdfFiles(proveedor.archivos)" :key="index">
-                                        <!-- Aplicar truncateFileName al nombre del archivo -->
-                                        <a :href="file.url" target="_blank" :title="file.name">
-                                            {{ truncateFileName(file.name, 20) }}
-                                        </a>
-                                    </li>
-                                </ul>
-                            </template>
-                            <!-- Botón para descargar todos los archivos en un ZIP -->
-                            <button @click="downloadZip(proveedor)" class="btn-download">
-                                <p class="textoDescarga">Descargar</p>
-                            </button>
-                        </td>
-                        <td>{{ formatDate(proveedor.createdAt) }}</td>
-
-                        <td>
-                            <button @click="editproveedor(proveedor)" class="btn-edit">Editar</button>
-                            <button @click="showDeleteModal(proveedor.id)" class="btn-delete">Eliminar</button>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-
-            <!-- Modal de Edición -->
-            <!-- Modal de Edición de Proveedor -->
-            <div v-if="isEditing" class="edit-modal">
-                <div class="modal-content">
-                    <h3>Editar Proveedor</h3>
-                    <form @submit.prevent="saveChanges" class="edit-form">
-                        <div class="contenedorformulario">
-                            <div class="form-column">
-                                <div>
-                                    <label>Nombre:</label>
-                                    <input v-model="currentProveedor.nombre" type="text" />
-                                </div>
-                                <div>
-                                    <label>Apellidos:</label>
-                                    <input v-model="currentProveedor.apellidos" type="text" />
-                                </div>
-                                <div style="width: 100%; margin-left: 0px;">
-                                    <label>Tipo de Proveedor:</label>
-                                    <select v-model="currentProveedor.tipo_proveedor" class="form-input">
-                                        <option value="" disabled>Selecciona el tipo de proveedor</option>
-                                        <option value="Fisico">Físico</option>
-                                        <option value="Moral">Moral</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label>RFC:</label>
-                                    <input v-model="currentProveedor.RFC" type="text" />
-                                </div>
-
-                            </div>
-
-                            <div class="form-column">
-                                <div>
-                                    <label>Dirección:</label>
-                                    <input v-model="currentProveedor.direccion" type="text" />
-                                </div>
-                                <div>
-                                    <label>Teléfono:</label>
-                                    <input v-model="currentProveedor.telefono" type="text" />
-                                </div>
-                                <div>
-                                    <label>email Electrónico:</label>
-                                    <input v-model="currentProveedor.email" type="email" class='email' />
-                                </div>
-                                <div>
-                                    <label>Cuenta Bancaria:</label>
-                                    <input v-model="currentProveedor.cuenta_bancaria" type="text" />
-                                </div>
-
-                            </div>
-                            <!-- Tercera columna (Archivos) -->
-                            <div class="form-column">
-                                <div class="form-field">
-                                    <label for="archivos">Archivos</label>
-                                    <div class="dropzone" @drop.prevent="handleDrop('archivos')" @dragover.prevent
-                                        @click="triggerFileInput('archivos')">
-                                        <input type="file" id="archivos" ref="fileInputDoc"
-                                            @change="handleFileUpload('archivos')" accept=".pdf" multiple />
-                                        <i class="fas fa-cloud-upload-alt"></i>
-                                        <span v-if="currentProveedor.archivos.length === 0">Arrastra o selecciona
-                                            archivos
-                                            (PDF)</span>
-                                        <span v-else>{{ currentProveedor.archivos.length }} archivos
-                                            seleccionados</span>
-                                        <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
-                                    </div>
-                                    <button type="button" v-if="currentProveedor.archivos.length > 0"
-                                        @click="openDocumentModal" class="view-documents-btn">
-                                        Ver archivos
+            <div class="contenedor-tabla">
+                <div class="table-horizontal-scroll">
+                    <table class="proveedor-table">
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Apellidos</th>
+                                <th>Tipo de Proveedor</th>
+                                <th>RFC</th>
+                                <th>Dirección</th>
+                                <th>Teléfono</th>
+                                <th>Correo Electronico</th>
+                                <th>Cuenta Bancaria</th>
+                                <th>Documento</th>
+                                <th>Fecha de registro</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="proveedor in paginatedproveedor" :key="proveedor.id">
+                                <td>{{ proveedor.nombre }}</td>
+                                <td>{{ proveedor.apellidos }}</td>
+                                <td>{{ proveedor.tipo_proveedor }}</td>
+                                <td>{{ proveedor.RFC }}</td>
+                                <td>{{ proveedor.direccion }}</td>
+                                <td>{{ proveedor.telefono }}</td>
+                                <td>{{ proveedor.email }}</td>
+                                <td>{{ proveedor.cuenta_bancaria }}</td>
+                                <td>
+                                    <template v-if="proveedor.archivos">
+                                        <ul>
+                                            <li v-for="(file, index) in getPdfFiles(proveedor.archivos)" :key="index">
+                                                <!-- Aplicar truncateFileName al nombre del archivo -->
+                                                <a :href="file.url" target="_blank" :title="file.name">
+                                                    {{ truncateFileName(file.name, 20) }}
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </template>
+                                    <!-- Botón para descargar todos los archivos en un ZIP -->
+                                    <button @click="downloadZip(proveedor)" class="btn-download">
+                                        <p class="textoDescarga">Descargar</p>
                                     </button>
+                                </td>
+                                <td>{{ formatDate(proveedor.createdAt) }}</td>
+
+                                <td>
+                                    <button @click="editproveedor(proveedor)" class="btn-edit">Editar</button>
+                                    <button @click="showDeleteModal(proveedor.id)" class="btn-delete">Eliminar</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div v-if="isEditing" class="edit-modal">
+                    <div class="modal-content">
+                        <h3>Editar Proveedor</h3>
+                        <form @submit.prevent="saveChanges" class="edit-form">
+                            <div class="contenedorformulario">
+                                <div class="form-column">
+                                    <div>
+                                        <label>Nombre:</label>
+                                        <input v-model="currentProveedor.nombre" type="text" />
+                                    </div>
+                                    <div>
+                                        <label>Apellidos:</label>
+                                        <input v-model="currentProveedor.apellidos" type="text" />
+                                    </div>
+                                    <div style="width: 100%; margin-left: 0px;">
+                                        <label>Tipo de Proveedor:</label>
+                                        <select v-model="currentProveedor.tipo_proveedor" class="form-input">
+                                            <option value="" disabled>Selecciona el tipo de proveedor</option>
+                                            <option value="Fisico">Físico</option>
+                                            <option value="Moral">Moral</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label>RFC:</label>
+                                        <input v-model="currentProveedor.RFC" type="text" />
+                                    </div>
+                                </div>
+
+                                <div class="form-column">
+                                    <div>
+                                        <label>Dirección:</label>
+                                        <input v-model="currentProveedor.direccion" type="text" />
+                                    </div>
+                                    <div>
+                                        <label>Teléfono:</label>
+                                        <input v-model="currentProveedor.telefono" type="text" />
+                                    </div>
+                                    <div>
+                                        <label>email Electrónico:</label>
+                                        <input v-model="currentProveedor.email" type="email" class='email' />
+                                    </div>
+                                    <div>
+                                        <label>Cuenta Bancaria:</label>
+                                        <input v-model="currentProveedor.cuenta_bancaria" type="text" />
+                                    </div>
+                                </div>
+                                <!-- Tercera columna (Archivos) -->
+                                <div class="form-column">
+                                    <div class="form-field">
+                                        <label for="archivos">Archivos</label>
+                                        <div class="dropzone" @drop.prevent="handleDrop('archivos')" @dragover.prevent
+                                            @click="triggerFileInput('archivos')">
+                                            <input type="file" id="archivos" ref="fileInputDoc"
+                                                @change="handleFileUpload('archivos')" accept=".pdf" multiple />
+                                            <i class="fas fa-cloud-upload-alt"></i>
+                                            <span v-if="currentProveedor.archivos.length === 0">Arrastra o selecciona
+                                                archivos
+                                                (PDF)</span>
+                                            <span v-else>{{ currentProveedor.archivos.length }} archivos
+                                                seleccionados</span>
+                                            <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
+                                        </div>
+                                        <button type="button" v-if="currentProveedor.archivos.length > 0"
+                                            @click="openDocumentModal" class="view-documents-btn">
+                                            Ver archivos
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
 
-
-
-                        </div>
-
-                        <!-- Botones debajo del formulario -->
-                        <div class="form-buttons">
-                            <button type="submit" class="save-btn">Guardar cambios</button>
-                            <button @click="cancelEdit" type="button" class="cancel-btn">Cancelar</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-
-            <div v-if="isDeleteModalVisible" class="modal-overlay">
-                <div class="modal-content-delete">
-                    <h3>¿Estás seguro de eliminar este proveedor?</h3>
-                    <div class="modal-buttons">
-                        <button @click="confirmDelete" class="btn-confirm">Confirmar</button>
-                        <button @click="cancelDelete" class="btn-cancel">Cancelar</button>
+                            <!-- Botones debajo del formulario -->
+                            <div class="form-buttons">
+                                <button type="submit" class="save-btn">Guardar cambios</button>
+                                <button @click="cancelEdit" type="button" class="cancel-btn">Cancelar</button>
+                            </div>
+                        </form>
                     </div>
                 </div>
-            </div>
 
-            <!-- Paginación -->
-            <div class="pagination">
-                <button @click="prevPage" :disabled="currentPage === 1">Anterior</button>
-                <span>Pagina {{ currentPage }} de {{ totalPages }}</span>
-                <button @click="nextPage" :disabled="currentPage === totalPages">Siguiente</button>
-            </div>
-        </div>
-        <!-- Modal para mostrar los archivos cargados -->
-        <div v-if="showDocumentModal" class="modal-overlay2">
-            <div class="modal2">
-                <h2>Archivos Cargados</h2>
-                <div class="document-list2">
-                    <div v-for="(doc, index) in currentProveedor.archivos" :key="index" class="document-item2">
-                        <!-- Mostrar solo el nombre del archivo sin la ruta -->
-                        <span>{{ getFileName(doc) }}</span>
-                        <button @click="removeDocument(index)" class="remove-btn2">
-                            <i class="fas fa-trash-alt"></i>
-                        </button>
+                <div v-if="isDeleteModalVisible" class="modal-overlay">
+                    <div class="modal-content-delete">
+                        <h3>¿Estás seguro de eliminar este proveedor?</h3>
+                        <div class="modal-buttons">
+                            <button @click="confirmDelete" class="btn-confirm">Confirmar</button>
+                            <button @click="cancelDelete" class="btn-cancel">Cancelar</button>
+                        </div>
                     </div>
                 </div>
-                <button @click="closeDocumentModal">Cerrar</button>
+
+                <!-- Paginación -->
+                <div class="pagination">
+                    <button @click="prevPage" :disabled="currentPage === 1">Anterior</button>
+                    <span>Pagina {{ currentPage }} de {{ totalPages }}</span>
+                    <button @click="nextPage" :disabled="currentPage === totalPages">Siguiente</button>
+                </div>
             </div>
-        </div>
-        <!-- Contenedor de notificaciones -->
-        <div v-if="alertMessage" :class="alertClass" class="notification">
-            <i :class="alertIcon"></i> {{ alertMessage }}
+            <!-- Modal para mostrar los archivos cargados -->
+            <div v-if="showDocumentModal" class="modal-overlay2">
+                <div class="modal2">
+                    <h2>Archivos Cargados</h2>
+                    <div class="document-list2">
+                        <div v-for="(doc, index) in currentProveedor.archivos" :key="index" class="document-item2">
+                            <!-- Mostrar solo el nombre del archivo sin la ruta -->
+                            <span>{{ getFileName(doc) }}</span>
+                            <button @click="removeDocument(index)" class="remove-btn2">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <button @click="closeDocumentModal">Cerrar</button>
+                </div>
+            </div>
+            <!-- Contenedor de notificaciones -->
+            <div v-if="alertMessage" :class="alertClass" class="notification">
+                <i :class="alertIcon"></i> {{ alertMessage }}
+            </div>
         </div>
     </div>
 </template>
 
 <script>
-import axios from 'axios';
-
+import api from '../services/api';
+import NavBarPage from './NavBar.vue';
 export default {
     name: "proveedorPage",
+    components: {
+        NavBarPage // Registrar el componente
+    },
     data() {
         return {
             alertMessage: "",  // Mensaje de la alerta
@@ -276,6 +219,7 @@ export default {
                 homeMenu: false,
                 proveedorMenu: false,
                 settingsMenu: false,
+                userMenu: false,
             },
             searchQuery: '',
             currentPage: 1,
@@ -323,7 +267,7 @@ export default {
 
                 try {
                     // Obtener todos los usuarios de la API
-                    const response = await fetch('http://localhost:3000/api/personas');
+                    const response = await api.get('/personas');
                     const users = await response.json();
 
                     // Buscar el usuario logueado por email
@@ -347,7 +291,7 @@ export default {
 
                         if (imageFileName) {
                             // Construir la URL completa para la imagen
-                            this.profileImage = `http://localhost:3000/api/users-files/${imageFileName}`;
+                            this.profileImage = `http://192.168.10.31:3000/api/users-files/${imageFileName}`;
                         } else {
                             // Usar una imagen por defecto si no hay imagen en la API
                             this.profileImage = "../assets/UserHombre.png";
@@ -366,7 +310,7 @@ export default {
         },
         async loadProveedores() {
             try {
-                const response = await axios.get('http://localhost:3000/api/proveedor');
+                const response = await api.get('/proveedor');
                 this.proveedor = response.data; // Asignar los datos obtenidos a la lista de proveedores
             } catch (error) {
                 console.error('Error al cargar los proveedores:', error);
@@ -427,7 +371,7 @@ export default {
         async confirmDelete() {
             try {
                 // Hacer la solicitud DELETE a la API
-                await axios.delete(`http://localhost:3000/api/proveedor/${this.deleteId}`);
+                await api.delete(`/proveedor/${this.deleteId}`);
 
                 // Si la eliminación es exitosa, eliminar el proveedor de la lista local
                 const index = this.proveedor.findIndex(proveedor => proveedor.id === this.deleteId);
@@ -480,8 +424,8 @@ export default {
                 const nameWithoutExtension = fileName.split('.').slice(0, -1).join('.'); // Quita la extensión
 
                 return {
-                    url: `http://localhost:3000/api/proveedores-files/${nameWithoutExtension}`, // URL sin extensión para visualización
-                    downloadUrl: `http://localhost:3000/api/proveedores-files/${fileName}`, // URL con extensión para descarga
+                    url: `http://192.168.10.31:3000/api/proveedores-files/${nameWithoutExtension}`, // URL sin extensión para visualización
+                    downloadUrl: `http://192.168.10.31:3000/api/proveedores-files/${fileName}`, // URL con extensión para descarga
                     name: nameWithoutExtension // Nombre sin extensión
                 };
             });
@@ -498,7 +442,7 @@ export default {
                 });
 
                 // Enviar los nombres de los archivos a la API de descarga ZIP
-                const response = await fetch('http://localhost:3000/api/proveedores/download-zip', {
+                const response = await api.get('/proveedores/download-zip', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -587,7 +531,7 @@ export default {
                 const proveedorId = this.currentProveedor.id;
 
                 // Enviar la solicitud DELETE al backend
-                await axios.delete(`http://localhost:3000/api/proveedor/${proveedorId}/archivos`, {
+                await api.delete(`/proveedor/${proveedorId}/archivos`, {
                     data: { fileName: fileName } // Enviar el nombre del archivo en el cuerpo
                 });
 
@@ -663,14 +607,14 @@ export default {
                 formData.append("cuenta_bancaria", this.currentProveedor.cuenta_bancaria);
 
                 // Enviar la solicitud PUT a la API para actualizar el proveedor
-                await axios.put(`http://localhost:3000/api/proveedor/${this.currentProveedor.id}`, formData, {
+                await api.put(`/proveedor/${this.currentProveedor.id}`, formData, {
                     headers: { "Content-Type": "multipart/form-data" }
                 });
 
                 // 2. Eliminar los archivos marcados para eliminación
                 if (this.archivosAEliminar.length > 0) {
                     for (const fileName of this.archivosAEliminar) {
-                        await axios.delete(`http://localhost:3000/api/proveedor/${this.currentProveedor.id}/archivos`, {
+                        await api.delete(`/proveedor/${this.currentProveedor.id}/archivos`, {
                             data: { fileName: fileName }
                         });
                     }
@@ -686,7 +630,7 @@ export default {
                     });
 
                     // Enviar los archivos nuevos al backend
-                    await axios.post(`http://localhost:3000/api/proveedor/${this.currentProveedor.id}/archivos`, archivosFormData, {
+                    await api.post(`/proveedor/${this.currentProveedor.id}/archivos`, archivosFormData, {
                         headers: { "Content-Type": "multipart/form-data" }
                     });
                 }
@@ -933,146 +877,19 @@ td ul li a:hover {
 
 }
 
-.titulo {
-    font-size: 30px;
-    font-weight: 100;
-    text-align: center;
+.page-wrapper {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    background-color: #f5f5f5;
 }
 
 .container {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    background: white;
-    flex-direction: column;
-    color: white;
-    overflow-x: hidden;
-}
-
-/* Menú de navegación */
-.navbar {
-    position: 0;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 30px 20px;
-    background: #691B31;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-}
-
-.navbar-left {
     flex: 1;
-    display: flex;
-    align-items: center;
-}
-
-.icon-back {
-    font-size: 24px;
-    cursor: pointer;
-    margin-right: 10px;
-    color: white;
-}
-
-.navbar-center {
-    flex: 3;
-    text-align: center;
-}
-
-.navbar-center h1 {
-    margin: 0;
-    font-size: 24px;
-}
-
-.navbar-center p {
-    margin: 0;
-    font-size: 18px;
-}
-
-
-.navbar-right {
-    flex: 1;
-    display: flex;
-    justify-content: flex-end;
-}
-
-.user-profile {
-    display: flex;
-    align-items: center;
-}
-
-.profile-pic {
-    border-radius: 50%;
-    width: 40px;
-    height: 40px;
-    margin-right: 10px;
-}
-
-.user-info p {
-    margin: 0;
-    font-weight: bold;
-}
-
-.user-info span {
-    font-size: 12px;
-    color: #ddd;
-}
-
-/* Barra de navegación amarilla */
-.sub-navbar {
-    display: flex;
-    justify-content: center;
-    background: linear-gradient(to right, #FFFFFF, #DDC9A3);
-    /* Degradado de izquierda a derecha */
-    padding: 10px 0;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-}
-
-.nav-item {
-    position: relative;
-    margin: 0 20px;
-    cursor: pointer;
-    font-size: 16px;
-    color: #691B31;
-}
-
-.nav-item:hover {
-    color: #590d22;
-}
-
-.dropdown-menu {
-    display: none;
-    position: absolute;
-    top: 100%;
-    left: 0;
-    background-color: #691B31;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    border-radius: 5px;
-    width: 150px;
-    z-index: 1000;
-
-    /* Asegurar que esté encima */
-}
-
-.dropdown-menu button {
     width: 100%;
-    padding: 10px;
-    border: none;
-    background: #691B31;
-    color: white;
-    text-align: left;
-    font-size: 14px;
-
-}
-
-.dropdown-menu button:hover {
-    background: #590d22;
-}
-
-.nav-item:hover .dropdown-menu {
-    display: block;
+    padding: 20px;
+    background-color: #f5f5f5;
+    min-height: calc(100vh - 140px);
 }
 
 button {
@@ -1126,32 +943,44 @@ label {
 a {
     text-decoration: none;
 }
-
 .proveedor-table {
-    width: 95%;
+    width: 100%;
+    /* Ocupa todo el ancho disponible */
+    max-width: 1200px;
+    /* Limita el ancho máximo */
     border-collapse: separate;
     border-spacing: 0;
     background-color: white;
     color: #691B31;
+    font-size: 14px;
     border-radius: 15px;
-    /* Redondear las esquinas de la tabla */
     overflow: hidden;
-    /* Para que los bordes no sobresalgan */
+    table-layout: auto;
+    /* Ajusta el ancho según el contenido */
+    margin: 0 auto;
 }
 
 .proveedor-table th,
 .proveedor-table td {
-    padding: 10px;
+    padding: 5px;
     text-align: center;
+    white-space: normal; /* Cambiar de nowrap a normal */
+    word-wrap: break-word; /* Permitir división de palabras */
+    min-width: 50px;
+    max-width: 100px; /* Agregar ancho máximo */
+    overflow-wrap: break-word; /* Para navegadores modernos */
+    hyphens: auto; /* Guiones automáticos */
 }
 
 .proveedor-table th {
     background-color: #BC955B;
     color: white;
-    width: auto;
-    height: auto;
+    position: sticky;
+    top: 0;
+    z-index: 3;
 }
 
+/* Efecto hover mejorado */
 .proveedor-table tr:hover {
     background-color: #70727265;
     color: #A02142;
@@ -1282,12 +1111,17 @@ a {
     position: fixed;
     top: 0;
     left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5);
+    right: 0; /* Agregar right: 0 */
+    bottom: 0; /* Agregar bottom: 0 */
+    width: 100%; /* Asegurar 100% de ancho */
+    height: 100%; /* Asegurar 100% de alto */
+    background: rgba(0, 0, 0, 0.7); /* Hacer el fondo más oscuro */
     display: flex;
     justify-content: center;
     align-items: center;
+    z-index: 9999; /* Z-index muy alto */
+    padding: 20px; /* Agregar padding */
+    overflow-y: auto; /* Permitir scroll si es necesario */
 }
 
 .modal-content {
@@ -1450,5 +1284,72 @@ button[type="button"]:hover {
     border-radius: 25px;
     background-color: #dcdcdc;
 
+}
+/* Correcciones para que aparezca la scroll bar horizontal */
+
+.table-horizontal-scroll {
+    overflow-x: auto; /* Scroll horizontal */
+    overflow-y: visible; /* Sin scroll vertical */
+    border-radius: 15px;
+    width: 100%; /* Asegurar que tenga un ancho definido */
+    max-width: 100%; /* Limitar el ancho máximo */
+    /* Agregar estas propiedades para forzar el scroll */
+    display: block;
+    white-space: nowrap; /* Evitar que el contenido se ajuste */
+}
+
+
+
+
+.contenedor-tabla {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    /* Agregar esto para controlar el desbordamiento */
+    overflow: hidden;
+    max-width: 100vw; /* No exceder el ancho de la ventana */
+}
+
+
+
+/* Media queries actualizadas */
+@media (max-width: 768px) {
+   
+    
+    .table-horizontal-scroll {
+        max-width: calc(100vw - 20px); /* Considerar el padding */
+    }
+    
+    .proveedor-table {
+        min-width: 1000px;
+    }
+    
+    .proveedor-table th,
+    .proveedor-table td {
+        padding: 8px 6px;
+        font-size: 14px;
+        min-width: 80px; /* Reducir un poco el ancho mínimo */
+    }
+}
+
+@media (max-width: 480px) {
+   
+    
+    .table-horizontal-scroll {
+        max-width: calc(100vw - 10px);
+    }
+    
+    .proveedor-table {
+        min-width: 900px;
+    }
+    
+    .proveedor-table th,
+    .proveedor-table td {
+        padding: 6px 4px;
+        font-size: 12px;
+        min-width: 70px;
+    }
 }
 </style>

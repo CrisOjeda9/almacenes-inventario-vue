@@ -1,184 +1,88 @@
 <template>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    <div class="page-wrapper">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+        <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+        <NavBarPage :pageTitle="'Nueva Poliza'" :showUserMenu="true" />
+        <div class="container">
+            <!-- Formulario -->
+            <div class="form-container">
+                <form @submit.prevent="registerPoliza">
+                    <div class="form-row">
+                        <!-- Descripción -->
+                        <div class="form-field">
+                            <label for="descripcion">Descripción</label>
+                            <input type="text" id="descripcion" v-model="form.descripcion" required />
+                        </div>
 
-    <div class="container">
-        <!-- Menú de navegación -->
-        <nav class="navbar">
-            <div class="navbar-left">
-                <img src="../assets/LOGOS DORADOS-02.png" alt="Icono" class="navbar-icon" @click="goHome" width="50%"
-                    height="auto" style="cursor: pointer;" />
-            </div>
-            <div class="navbar-center">
-                <h1>Nueva Poliza</h1>
-                <p>Sistema de Almacén e Inventarios de Radio y Televisión de Hidalgo</p>
-            </div>
-            <div class="navbar-right">
-                <div class="user-profile">
-                    <img :src="profileImage" alt="User Profile" class="profile-pic" />
-                    <div class="user-info">
-                        <p>{{ userName }}</p> <!-- Nombre dinámico del usuario -->
-                        <span><a href="profile" style="color: white;">Ver Perfil</a></span>
-                    </div>
-                </div>
-            </div>
-        </nav>
+                        <!-- Cobertura -->
+                        <div class="form-field">
+                            <label for="cobertura">Número de poliza</label>
+                            <input type="text" id="cobertura" v-model="form.cobertura" required />
+                        </div>
 
-        <!-- Barra de navegación amarilla -->
-        <div class="sub-navbar">
-            <a href="/home" class="nav-item">Inicio</a>
-            <a v-if="userRole === 'Administrador'" href="users" class="nav-item">Usuarios</a>
-            <div v-if="userRole === 'Almacenes' || userRole === 'Administrador'" class="nav-item" @mouseenter="showMenu('almacenMenu')"
-                @mouseleave="hideMenu('almacenMenu')">
-                Almacén
-                <span class="menu-icon">▼</span>
-                <div class="dropdown-menu" v-show="menus.almacenMenu">
-                    <button @click="navigateTo('proveedor')">Ver proveedores</button>
-                    <button @click="navigateTo('factura')">Facturas</button>
-                    <button @click="navigateTo('existencia')">Entrada de artículos</button>
-                    <button @click="navigateTo('solicitudmaterial')">Salida de material</button>
-                    <button @click="navigateTo('recepcionsolicitudes')">Recepción de solicitudes</button>
-                    <button @click="navigateTo('bieninventario')">Agregar un bien para inventario</button>
-                    <button @click="navigateTo('poliza')">Pólizas</button>
-                </div>
-            </div>
-
-            <div v-if="userRole === 'Inventario' || userRole === 'Administrador'" class="nav-item" @mouseenter="showMenu('homeMenu')"
-                @mouseleave="hideMenu('homeMenu')">
-                Inventario
-                <span class="menu-icon">▼</span>
-                <div class="dropdown-menu" v-show="menus.homeMenu">
-                    <button @click="navigateTo('historialbienes')">Historial de bienes</button>
-                    <button @click="navigateTo('resguardo')">Bienes sin resguardo</button>
-                    <button @click="navigateTo('listaalmacen')">Bienes nuevos</button>
-                    <button @click="navigateTo('bienesnuevos')">Asignar resguardo</button>
-                    <button @click="navigateTo('liberarbien')">Liberar Bien</button>
-                    <button @click="navigateTo('bajabien')">Baja de bienes</button>
-                    <button @click="navigateTo('bajas')">Historial de bajas</button>
-                    <button @click="navigateTo('reportes')">Generación de reportes</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Formulario -->
-        <div class="form-container">
-            <form @submit.prevent="registerPoliza">
-                <div class="form-row">
-                    <!-- Descripción -->
-                    <div class="form-field">
-                        <label for="descripcion">Descripción</label>
-                        <input type="text" id="descripcion" v-model="form.descripcion" required />
-                    </div>
-
-                    <!-- Cobertura -->
-                    <div class="form-field">
-                        <label for="cobertura">Cobertura</label>
-                        <input type="text" id="cobertura" v-model="form.cobertura" required />
-                    </div>
-
-                    <!-- Tipo de Póliza -->
-                    <div class="form-field">
-                        <label for="tipo">Tipo de Póliza</label>
-                        <select id="tipo" v-model="form.tipo" required>
-                            <option value="">Seleccione un tipo</option>
-                            <option value="Egresos">Egresos</option>
-                            <option value="Presupuestales">Presupuestales</option>
-                            <option value="Donaciones">Donaciones</option>
-                            <option value="Cheques">Cheques</option>
-                            <option value="Ingresos">Ingresos</option>
-                            <option value="Transferencias">Transferencias</option>
-                            <option value="Retenciones">Retenciones</option>
-                            <option value="Depositos">Depósitos</option>
-                        </select>
-                    </div>
-
-                    <!-- Calidad -->
-                    <div class="form-field">
-                        <label for="calidad">Calidad</label>
-                        <input type="text" id="calidad" v-model="form.calidad" required />
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <!-- Deducible -->
-                    <div class="form-field">
-                        <label for="deducible">Deducible</label>
-                        <input type="number" step="0.01" id="deducible" v-model="form.deducible" min="0" required />
-                    </div>
-
-                    <!-- Prima -->
-                    <div class="form-field">
-                        <label for="prima">Prima</label>
-                        <input type="number" step="0.01" id="prima" v-model="form.prima" min="0" required />
-                    </div>
-
-                    <!-- Cantidad -->
-                    <div class="form-field">
-                        <label for="cantidad">Cantidad</label>
-                        <input type="number" step="0.01" id="cantidad" v-model="form.cantidad" min="0" required />
-                    </div>
-
-                    <!-- Límite de indemnización -->
-                    <div class="form-field">
-                        <label for="limites_indemnizacion">Límite de indemnización</label>
-                        <input type="text" id="limites_indemnizacion" v-model="form.limites_indemnizacion" required />
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <!-- Periodo de Validación -->
-                    <div class="form-field">
-                        <label for="periodo_vigencia">Periodo de Validación</label>
-                        <input type="date" id="periodo_vigencia" v-model="form.periodo_vigencia" required />
-                    </div>
-
-                    <!-- Clausulas de exclusión -->
-                    <div class="form-field">
-                        <label for="clausulas_exclusion">Cláusulas de exclusión</label>
-                        <input type="text" id="clausulas_exclusion" v-model="form.clausulas_exclusion" required />
-                    </div>
-
-                    <!-- Fecha de Póliza -->
-                    <div class="form-field">
-                        <label for="fecha">Fecha de Póliza</label>
-                        <input type="date" id="fecha" v-model="form.fecha" required />
-                    </div>
-
-
-
-                    <!-- Documento de Poliza -->
-                    <div class="form-field">
-                        <label for="archivo">Documento de Poliza</label>
-                        <div class="dropzone" @drop.prevent="handleDrop" @dragover.prevent @click="triggerFileInput">
-                            <input type="file" id="archivo" ref="fileInput" @change="handleFileUpload" accept=".pdf" />
-                            <i class="fas fa-cloud-upload-alt"></i>
-                            <span v-if="!form.archivo">Arrastra o selecciona un archivo (PDF)</span>
-                            <span v-else>{{ form.archivo.name }}</span>
+                        <!-- Tipo de Póliza -->
+                        <div class="form-field">
+                            <label for="tipo">Tipo de Póliza</label>
+                            <select id="tipo" v-model="form.tipo" required>
+                                <option value="">Seleccione un tipo</option>
+                                <option value="Egresos">Egresos</option>
+                                <option value="Presupuestales">Presupuestales</option>
+                                <option value="Donaciones">Donaciones</option>
+                                <option value="Cheques">Cheques</option>
+                                <option value="Ingresos">Ingresos</option>
+                                <option value="Transferencias">Transferencias</option>
+                                <option value="Retenciones">Retenciones</option>
+                                <option value="Depositos">Depósitos</option>
+                            </select>
                         </div>
                     </div>
+                    <div class="form-row">
+                    
+                        <!-- Fecha de Póliza -->
+                        <div class="form-field">
+                            <label for="fecha">Fecha de Póliza</label>
+                            <input type="date" id="fecha" v-model="form.fecha" required />
+                        </div>
+
+
+
+                        <!-- Documento de Poliza -->
+                        <div class="form-field">
+                            <label for="archivo">Documento de Poliza</label>
+                            <div class="dropzone" @drop.prevent="handleDrop" @dragover.prevent @click="triggerFileInput">
+                                <input type="file" id="archivo" ref="fileInput" @change="handleFileUpload" accept=".pdf" />
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <span v-if="!form.archivo">Arrastra o selecciona un archivo (PDF)</span>
+                                <span v-else>{{ form.archivo.name }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="button-container">
+                        <button class="boton" type="submit">
+                            <i class="fas fa-plus"></i> Agregar Póliza
+                        </button>
+                    </div>
+                </form>
+            </div>
+            <!-- Modal -->
+            <div v-if="showModal" class="modal">
+                <div class="modal-content">
+                    <h2>Poliza registrada con éxito.</h2>
+                    <button @click="closeModal">Aceptar</button>
                 </div>
-                <div class="button-container">
-                    <button class="boton" type="submit">
-                        <i class="fas fa-plus"></i> Agregar Póliza
-                    </button>
-                </div>
-            </form>
-        </div>
-        <!-- Modal -->
-        <div v-if="showModal" class="modal">
-            <div class="modal-content">
-                <h2>Poliza registrada con éxito.</h2>
-                <button @click="closeModal">Aceptar</button>
             </div>
         </div>
     </div>
 </template>
 
 <script>
-import axios from "axios"; // Importar axios para hacer solicitudes HTTP
-
+import api from '../services/api';
+import NavBarPage from './NavBar.vue';
 export default {
     name: "newPolizaPage",
+    components: {
+        NavBarPage // Registrar el componente
+    },
     data() {
         return {
             userRole: localStorage.getItem('userRole') || '', // Obtener el rol desde el localStorage
@@ -202,6 +106,7 @@ export default {
                 homeMenu: false,
                 polizaMenu: false,
                 settingsMenu: false,
+                userMenu: false,
             },
             showModal: false, // Controla la visibilidad del modal de éxito
             errorMessage: "", // Mensaje de error
@@ -220,7 +125,7 @@ export default {
 
                 try {
                     // Obtener todos los usuarios de la API
-                    const response = await fetch('http://localhost:3000/api/personas');
+                    const response = await api.get('/personas');
                     const users = await response.json();
 
                     // Buscar el usuario logueado por email
@@ -244,7 +149,7 @@ export default {
 
                         if (imageFileName) {
                             // Construir la URL completa para la imagen
-                            this.profileImage = `http://localhost:3000/api/users-files/${imageFileName}`;
+                            this.profileImage = `http://192.168.10.31:3000/api/users-files/${imageFileName}`;
                         } else {
                             // Usar una imagen por defecto si no hay imagen en la API
                             this.profileImage = "../assets/UserHombre.png";
@@ -291,9 +196,7 @@ export default {
         async registerPoliza() {
             try {
                 // Validar que todos los campos obligatorios estén completos
-                if (!this.form.descripcion || !this.form.cobertura || !this.form.tipo || !this.form.calidad ||
-                    !this.form.deducible || !this.form.prima || !this.form.cantidad || !this.form.limites_indemnizacion ||
-                    !this.form.periodo_vigencia || !this.form.clausulas_exclusion || !this.form.fecha || !this.form.archivo) {
+                if (!this.form.descripcion || !this.form.cobertura || !this.form.tipo || !this.form.fecha || !this.form.archivo) {
                     this.errorMessage = "Por favor, completa todos los campos obligatorios.";
                     return;
                 }
@@ -301,15 +204,8 @@ export default {
                 // Crear un objeto FormData para enviar los datos del formulario
                 const formData = new FormData();
                 formData.append("descripcion", this.form.descripcion);
-                formData.append("cobertura", this.form.cobertura);
+                formData.append("numero_poliza", this.form.cobertura);
                 formData.append("tipo", this.form.tipo);
-                formData.append("calidad", this.form.calidad);
-                formData.append("deducible", this.form.deducible);
-                formData.append("prima", this.form.prima);
-                formData.append("cantidad", this.form.cantidad);
-                formData.append("limites_indemnizacion", this.form.limites_indemnizacion);
-                formData.append("periodo_vigencia", this.form.periodo_vigencia);
-                formData.append("clausulas_exclusion", this.form.clausulas_exclusion);
                 formData.append("fecha", this.form.fecha);
 
                 // Agregar el archivo al FormData si existe
@@ -318,7 +214,7 @@ export default {
                 }
 
                 // Enviar la solicitud POST a la API
-                const response = await axios.post("http://localhost:3000/api/polizas", formData, {
+                const response = await api.post("/polizas", formData, {
                     headers: {
                         "Content-Type": "multipart/form-data", // Especificar el tipo de contenido
                     },
@@ -387,134 +283,19 @@ export default {
     width: 500px;
 }
 
-.container {
-    position: fixed;
-    top: 0;
-    left: 0;
+.page-wrapper {
     width: 100%;
-    height: 100%;
     display: flex;
-    background: white;
     flex-direction: column;
-    color: white;
+    background-color: #f5f5f5;
 }
 
-/* Menú de navegación */
-.navbar {
-    position: 0;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 30px 20px;
-    background: #691B31;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-}
-
-.navbar-left {
+.container {
     flex: 1;
-    display: flex;
-    align-items: center;
-}
-
-.icon-back {
-    font-size: 24px;
-    cursor: pointer;
-    margin-right: 10px;
-    color: white;
-}
-
-.navbar-center {
-    flex: 3;
-    text-align: center;
-}
-
-.navbar-center h1 {
-    margin: 0;
-    font-size: 24px;
-}
-
-.navbar-center p {
-    margin: 0;
-    font-size: 18px;
-}
-
-.navbar-right {
-    flex: 1;
-    display: flex;
-    justify-content: flex-end;
-}
-
-.user-profile {
-    display: flex;
-    align-items: center;
-}
-
-.profile-pic {
-    border-radius: 50%;
-    width: 40px;
-    height: 40px;
-    margin-right: 10px;
-}
-
-.user-info p {
-    margin: 0;
-    font-weight: bold;
-}
-
-.user-info span {
-    font-size: 12px;
-    color: #ddd;
-}
-
-/* Barra de navegación amarilla */
-.sub-navbar {
-    display: flex;
-    justify-content: center;
-    background: linear-gradient(to right, #FFFFFF, #DDC9A3);
-    /* Degradado de izquierda a derecha */
-    padding: 10px 0;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-}
-
-.nav-item {
-    position: relative;
-    margin: 0 20px;
-    cursor: pointer;
-    font-size: 16px;
-    color: #691B31;
-}
-
-.nav-item:hover {
-    color: #590d22;
-}
-
-.dropdown-menu {
-    display: none;
-    position: absolute;
-    top: 100%;
-    left: 0;
-    background-color: #691B31;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    border-radius: 5px;
-    width: 150px;
-}
-
-.dropdown-menu button {
     width: 100%;
-    padding: 10px;
-    border: none;
-    background: #691B31;
-    color: white;
-    text-align: left;
-    font-size: 14px;
-}
-
-.dropdown-menu button:hover {
-    background: #590d22;
-}
-
-.nav-item:hover .dropdown-menu {
-    display: block;
+    padding: 20px;
+    background-color: #f5f5f5;
+    min-height: calc(100vh - 140px);
 }
 
 /* Formulario */

@@ -1,190 +1,151 @@
 <template>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    <div class="page-wrapper">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+        <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+        <NavBarPage :pageTitle="'Nueva Factura'" :showUserMenu="true" />
+        <div class="container">
+            <!-- Formulario -->
+            <div class="form-container">
+                <form @submit.prevent="submitFactura">
+                    <div class="form-row">
+                        <!-- Tipo de alta -->
+                        <div class="form-field">
+                            <label for="tipo_compra">Tipo de compra</label>
+                            <select id="tipo_compra" v-model="form.tipo_compra" required>
+                                <option value="" disabled>Selecciona una opción</option>
+                                <option value="Directa">Directa</option>
+                                <option value="Licitacion">Licitacion</option>
+                                <option value="Invitacion">Invitacion</option>
+                            </select>
+                        </div>
+                        <!-- Tipo de documento que ampara -->
+                        <!-- Documento de Factura -->
+                        <div class="form-field">
+                            <label for="contrato_compra">Contrato de compra</label>
+                            <div class="dropzone" @drop.prevent="handleDropContrato" @dragover.prevent
+                                @click="triggerFileInputContrato">
+                                <input type="file" id="contrato_compra" ref="fileInputContrato"
+                                    @change="handleFileUploadContrato" accept=".pdf" />
+                                <span v-if="!form.contrato_compra">Arrastra o selecciona un archivo (PDF)</span>
+                                <span v-else>{{ form.contrato_compra.name }}</span>
+                            </div>
+                        </div>
+                        <!-- Fecha de adquisición -->
+                        <div class="form-field">
+                            <label for="fechaAdquisicion">Fecha de Adquisición</label>
+                            <input type="date" id="fechaAdquisicion" v-model="form.fecha_adquisicion" required />
+                        </div>
 
-    <div class="container">
-        <!-- Menú de navegación -->
-        <nav class="navbar">
-            <div class="navbar-left">
-                <img src="../assets/LOGOS DORADOS-02.png" alt="Icono" class="navbar-icon" @click="goHome" width="50%"
-                    height="auto" style="cursor: pointer;" />
-            </div>
-            <div class="navbar-center">
-                <h1>Nueva Factura</h1>
-                <p>Sistema de Almacén e Inventarios de Radio y Televisión de Hidalgo</p>
-            </div>
-            <div class="navbar-right">
-                <div class="user-profile">
-                    <img :src="profileImage" alt="User Profile" class="profile-pic" />
-                    <div class="user-info">
-                        <p>{{ userName }}</p> <!-- Nombre dinámico del usuario -->
-                        <span><a href="profile" style="color: white;">Ver Perfil</a></span>
                     </div>
-                </div>
-            </div>
-        </nav>
 
-        <!-- Barra de navegación amarilla -->
-        <div class="sub-navbar">
-            <a href="/home" class="nav-item">Inicio</a>
-            <a v-if="userRole === 'Administrador'" href="users" class="nav-item">Usuarios</a>
-            <div v-if="userRole === 'Almacenes' || userRole === 'Administrador'" class="nav-item" @mouseenter="showMenu('almacenMenu')"
-                @mouseleave="hideMenu('almacenMenu')">
-                Almacén
-                <span class="menu-icon">▼</span>
-                <div class="dropdown-menu" v-show="menus.almacenMenu">
-                    <button @click="navigateTo('proveedor')">Ver proveedores</button>
-                    <button @click="navigateTo('factura')">Facturas</button>
-                    <button @click="navigateTo('existencia')">Entrada de artículos</button>
-                    <button @click="navigateTo('solicitudmaterial')">Salida de material</button>
-                    <button @click="navigateTo('recepcionsolicitudes')">Recepción de solicitudes</button>
-                    <button @click="navigateTo('bieninventario')">Agregar un bien para inventario</button>
-                    <button @click="navigateTo('poliza')">Pólizas</button>
-                </div>
-            </div>
+                    <div class="form-row">
+                        <!-- No. Factura -->
+                        <div class="form-field">
+                            <label for="numero_de_factura">No. Factura</label>
+                            <input type="number" min="0" id="numero_de_factura" placeholder=""
+                                v-model="form.numero_de_factura" required />
+                        </div>
+                        <!-- Tipo de Compra -->
+                        <div class="form-field">
+                            <label for="tipo_presupuesto">Tipo de Presupuesto</label>
+                            <select id="tipo_presupuesto" v-model="form.tipo_presupuesto" required>
+                                <option value="" disabled>Selecciona una opción</option>
+                                <option value="Ingresos Propios">Ingresos Propios</option>
+                                <option value="Recurso Estatal">Recurso Estatal</option>
+                            </select>
+                        </div>
 
-            <div v-if="userRole === 'Inventario' || userRole === 'Administrador'" class="nav-item" @mouseenter="showMenu('homeMenu')"
-                @mouseleave="hideMenu('homeMenu')">
-                Inventario
-                <span class="menu-icon">▼</span>
-                <div class="dropdown-menu" v-show="menus.homeMenu">
-                    <button @click="navigateTo('historialbienes')">Historial de bienes</button>
-                    <button @click="navigateTo('resguardo')">Bienes sin resguardo</button>
-                    <button @click="navigateTo('listaalmacen')">Bienes nuevos</button>
-                    <button @click="navigateTo('bienesnuevos')">Asignar resguardo</button>
-                    <button @click="navigateTo('liberarbien')">Liberar Bien</button>
-                    <button @click="navigateTo('bajabien')">Baja de bienes</button>
-                    <button @click="navigateTo('bajas')">Historial de bajas</button>
-                    <button @click="navigateTo('reportes')">Generación de reportes</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Formulario -->
-        <div class="form-container">
-            <form @submit.prevent="submitFactura">
-                <div class="form-row">
-                    <!-- Tipo de alta -->
-                    <div class="form-field">
-                        <label for="tipo_compra">Tipo de compra</label>
-                        <select id="tipo_compra" v-model="form.tipo_compra" required>
-                            <option value="" disabled>Selecciona una opción</option>
-                            <option value="Directa">Directa</option>
-                            <option value="Licitacion">Licitacion</option>
-                            <option value="Invitacion">Invitacion</option>
-                        </select>
-                    </div>
-                    <!-- Tipo de documento que ampara -->
-                    <!-- Documento de Factura -->
-                    <div class="form-field">
-                        <label for="contrato_compra">Contrato de compra</label>
-                        <div class="dropzone" @drop.prevent="handleDropContrato" @dragover.prevent
-                            @click="triggerFileInputContrato">
-                            <input type="file" id="contrato_compra" ref="fileInputContrato"
-                                @change="handleFileUploadContrato" accept=".pdf" />
-                            <span v-if="!form.contrato_compra">Arrastra o selecciona un archivo (PDF)</span>
-                            <span v-else>{{ form.contrato_compra.name }}</span>
+                        <!-- Cantidad -->
+                        <div class="form-field">
+                            <label for="cantidad">Cantidad</label>
+                            <input type="number" min="0" id="cantidad" placeholder="" v-model="form.cantidad" required />
                         </div>
                     </div>
-                    <!-- Fecha de adquisición -->
-                    <div class="form-field">
-                        <label for="fechaAdquisicion">Fecha de Adquisición</label>
-                        <input type="date" id="fechaAdquisicion" v-model="form.fecha_adquisicion" required />
-                    </div>
 
-                </div>
+                    <div class="form-row">
 
-                <div class="form-row">
-                    <!-- No. Factura -->
-                    <div class="form-field">
-                        <label for="numero_de_factura">No. Factura</label>
-                        <input type="number" min="0" id="numero_de_factura" placeholder=""
-                            v-model="form.numero_de_factura" required />
-                    </div>
-                    <!-- Tipo de Compra -->
-                    <div class="form-field">
-                        <label for="tipo_presupuesto">Tipo de Presupuesto</label>
-                        <select id="tipo_presupuesto" v-model="form.tipo_presupuesto" required>
-                            <option value="" disabled>Selecciona una opción</option>
-                            <option value="Ingresos Propios">Ingresos Propios</option>
-                            <option value="Recurso Estatal">Recurso Estatal</option>
-                        </select>
-                    </div>
-
-                    <!-- Cantidad -->
-                    <div class="form-field">
-                        <label for="cantidad">Cantidad</label>
-                        <input type="number" min="0" id="cantidad" placeholder="" v-model="form.cantidad" required />
-                    </div>
-                </div>
-
-                <div class="form-row">
-
-                    <!-- sub_total -->
-                    <div class="form-field">
-                        <label for="sub_total">Sub Total</label>
-                        <input type="number" id="sub_total" step="0.01" placeholder="" v-model="form.sub_total" min="0"
-                            required />
-                    </div>
-                    <!-- IVA -->
-                    <div class="form-field">
-                        <label for="iva">IVA (16%)</label>
-                        <input type="number" id="iva" step="0.01" placeholder="" v-model="form.iva" readonly min="0" style="background-color: #dcddcd;"
-                            required />
-                    </div>
-                    <!-- Total -->
-                    <div class="form-field">
-                        <label for="total">Total</label>
-                        <input type="number" id="total" step="0.01" placeholder="" v-model="form.total" readonly min="0" style="background-color: #dcddcd;"
-                            required />
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <!-- Proveedor -->
-                    <div class="form-field">
-                        <label for="id_proveedor">Proveedor</label>
-                        <select id="id_proveedor" v-model="form.id_proveedor" required>
-                            <option value="" disabled>Selecciona una opción</option>
-                            <option v-for="proveedor in proveedores" :key="proveedor.id" :value="proveedor.id">
-                                {{ proveedor.nombre }} {{ proveedor.apellidos }}
-                            </option>
-                        </select>
-                    </div>
-                    <!-- Documento de Factura -->
-
-                    <div class="form-field">
-                        <label for="archivo_pdf">Documento de Factura</label>
-                        <div class="dropzone" @drop.prevent="handleDropFactura" @dragover.prevent
-                            @click="triggerFileInputFactura">
-                            <input type="file" id="archivo_pdf" ref="fileInputFactura" @change="handleFileUploadFactura"
-                                accept=".pdf" />
-                            <span v-if="!form.archivo_pdf">Arrastra o selecciona un archivo (PDF)</span>
-                            <span v-else>{{ form.archivo_pdf.name }}</span>
+                        <!-- sub_total -->
+                        <div class="form-field">
+                            <label for="sub_total">Sub Total</label>
+                            <input type="number" id="sub_total" step="0.01" placeholder="" v-model="form.sub_total" min="0"
+                                required />
+                        </div>
+                        <!-- descuento -->
+                        <div class="form-field">
+                            <label for="descuento">Descuento</label>
+                            <input type="number" id="descuento" step="0.01" placeholder="" v-model="form.descuento" min="0"
+                                required />
+                        </div>
+                        <div class="form-field iva-field">
+                            <div class="iva-checkbox-container">
+                                <label for="iva_habilitado" class="checkbox-label">
+                                    <input type="checkbox" id="iva_habilitado" v-model="form.iva_habilitado" />
+                                    <span class="checkmark"></span>
+                                </label>
+                                <label for="iva">IVA (16%)</label>
+                            </div>
+                            <input type="number" id="iva" step="0.01" placeholder="" v-model="form.iva" readonly min="0" 
+                                :style="{ backgroundColor: form.iva_habilitado ? '#dcddcd' : '#f0f0f0' }" required />
                         </div>
                     </div>
-                </div>
 
-                <div class="button-container">
-                    <button class="boton" type="submit">
-                        <i class="fas fa-plus"></i> Agregar Factura
-                    </button>
+                    <div class="form-row">
+                        
+                        <!-- Total -->
+                        <div class="form-field">
+                            <label for="total">Total</label>
+                            <input type="number" id="total" step="0.01" placeholder="" v-model="form.total" readonly min="0" style="background-color: #dcddcd;"
+                                required />
+                        </div>
+                        <!-- Proveedor -->
+                        <div class="form-field">
+                            <label for="id_proveedor">Proveedor</label>
+                            <select id="id_proveedor" v-model="form.id_proveedor" required>
+                                <option value="" disabled>Selecciona una opción</option>
+                                <option v-for="proveedor in proveedores" :key="proveedor.id" :value="proveedor.id">
+                                    {{ proveedor.nombre }} {{ proveedor.apellidos }}
+                                </option>
+                            </select>
+                        </div>
+                        <!-- Documento de Factura -->
+                        <div class="form-field">
+                            <label for="archivo_pdf">Documento de Factura</label>
+                            <div class="dropzone" @drop.prevent="handleDropFactura" @dragover.prevent
+                                @click="triggerFileInputFactura">
+                                <input type="file" id="archivo_pdf" ref="fileInputFactura" @change="handleFileUploadFactura"
+                                    accept=".pdf" />
+                                <span v-if="!form.archivo_pdf">Arrastra o selecciona un archivo (PDF)</span>
+                                <span v-else>{{ form.archivo_pdf.name }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="button-container">
+                        <button class="boton" type="submit">
+                            <i class="fas fa-plus"></i> Agregar Factura
+                        </button>
+                    </div>
+                </form>
+            </div>
+            <!-- Modal -->
+            <div v-if="showModal" class="modal">
+                <div class="modal-content">
+                    <h2>Factura registrada con éxito.</h2>
+                    <button @click="closeModal">Aceptar</button>
                 </div>
-            </form>
-        </div>
-        <!-- Modal -->
-        <div v-if="showModal" class="modal">
-            <div class="modal-content">
-                <h2>Factura registrada con éxito.</h2>
-                <button @click="closeModal">Aceptar</button>
             </div>
         </div>
-    </div>
+    </div>    
 </template>
 
 <script>
+import api from '../services/api';
+import NavBarPage from './NavBar.vue';
 export default {
     name: "newFacturaPage",
+    components: {
+        NavBarPage // Registrar el componente
+    },
     data() {
         return {
             userRole: localStorage.getItem('userRole') || '', // Obtener el rol desde el localStorage
@@ -198,7 +159,9 @@ export default {
                 tipo_presupuesto: "", // Tipo de presupuesto
                 id_proveedor: "", // ID del proveedor
                 cantidad: "", // Cantidad
+                descuento: "", // Descuento
                 sub_total: "", // Subtotal
+                iva_habilitado: false, // Checkbox para habilitar IVA
                 iva: "", // IVA
                 total: "", // Total
                 archivo_pdf: null, // Archivo PDF de la factura
@@ -210,27 +173,22 @@ export default {
                 homeMenu: false,
                 existenciaMenu: false,
                 settingsMenu: false,
+                userMenu: false, 
             },
             showModal: false, // Modal de éxito
             proveedores: [], // Lista de proveedores
         };
     },
     watch: {
-        // Watcher para calcular el IVA y el Total cuando cambia el subtotal
-        "form.sub_total": function (newVal) {
-            if (newVal && !isNaN(newVal)) {
-                const subtotal = parseFloat(newVal);
-                const iva = subtotal * 0.16; // Calcular el IVA (16% del subtotal)
-                const total = subtotal + iva; // Calcular el Total (subtotal + IVA)
-
-                // Actualizar los campos de IVA y Total
-                this.form.iva = iva.toFixed(2); // Redondear a 2 decimales
-                this.form.total = total.toFixed(2); // Redondear a 2 decimales
-            } else {
-                // Si el subtotal no es válido, limpiar los campos de IVA y Total
-                this.form.iva = "";
-                this.form.total = "";
-            }
+        // Watcher para calcular el IVA y el Total cuando cambia el subtotal o el estado del IVA
+        "form.sub_total": function () {
+            this.calcularTotal();
+        },
+        "form.descuento": function () {
+            this.calcularTotal();
+        },
+        "form.iva_habilitado": function () {
+            this.calcularTotal();
         },
     },
     mounted() {
@@ -238,6 +196,31 @@ export default {
         this.fetchProveedores();
     },
     methods: {
+        // Método para calcular el total con o sin IVA
+        calcularTotal() {
+            const subtotal = parseFloat(this.form.sub_total) || 0;
+            const descuento = parseFloat(this.form.descuento) || 0;
+            
+            if (subtotal > 0) {
+                const subtotalConDescuento = subtotal - descuento;
+                
+                if (this.form.iva_habilitado) {
+                    const iva = subtotalConDescuento * 0.16; // Calcular el IVA (16% del subtotal con descuento)
+                    const total = subtotalConDescuento + iva; // Calcular el Total (subtotal con descuento + IVA)
+                    
+                    this.form.iva = iva.toFixed(2); // Redondear a 2 decimales
+                    this.form.total = total.toFixed(2); // Redondear a 2 decimales
+                } else {
+                    // Si el IVA no está habilitado, el total es igual al subtotal con descuento aplicado
+                    this.form.iva = "0.00";
+                    this.form.total = subtotalConDescuento.toFixed(2);
+                }
+            } else {
+                // Si el subtotal no es válido, limpiar los campos
+                this.form.iva = "";
+                this.form.total = "";
+            }
+        },
         
         navigateTo(page) {
             console.log(`Navegando a ${page}`);
@@ -259,7 +242,7 @@ export default {
 
                 try {
                     // Obtener todos los usuarios de la API
-                    const response = await fetch('http://localhost:3000/api/personas');
+                    const response = await api.get('/personas');
                     const users = await response.json();
 
                     // Buscar el usuario logueado por email
@@ -283,7 +266,7 @@ export default {
 
                         if (imageFileName) {
                             // Construir la URL completa para la imagen
-                            this.profileImage = `http://localhost:3000/api/users-files/${imageFileName}`;
+                            this.profileImage = `http://192.168.10.31:3000/api/users-files/${imageFileName}`;
                         } else {
                             // Usar una imagen por defecto si no hay imagen en la API
                             this.profileImage = "../assets/UserHombre.png";
@@ -304,7 +287,7 @@ export default {
         // Obtener lista de proveedores
         async fetchProveedores() {
             try {
-                const response = await fetch("http://localhost:3000/api/proveedor");
+                const response = await fetch("http://192.168.10.31:3000/api/proveedor");
                 if (!response.ok) {
                     throw new Error("Error ");
                 }
@@ -369,7 +352,9 @@ export default {
                 formData.append('tipo_presupuesto', this.form.tipo_presupuesto);
                 formData.append('id_proveedor', this.form.id_proveedor);
                 formData.append('cantidad', this.form.cantidad);
+                formData.append('descuento', this.form.descuento || '0');
                 formData.append('sub_total', this.form.sub_total);
+                formData.append('iva_habilitado', this.form.iva_habilitado);
                 formData.append('iva', this.form.iva);
                 formData.append('total', this.form.total);
 
@@ -384,7 +369,7 @@ export default {
                 }
 
                 // Enviar la solicitud a la API
-                const response = await fetch("http://localhost:3000/api/facturas", {
+                const response = await fetch("http://192.168.10.31:3000/api/facturas", {
                     method: "POST",
                     body: formData,
                 });
@@ -443,134 +428,19 @@ export default {
     width: 500px;
 }
 
-.container {
-    position: fixed;
-    top: 0;
-    left: 0;
+.page-wrapper {
     width: 100%;
-    height: 100%;
     display: flex;
-    background: white;
     flex-direction: column;
-    color: white;
+    background-color: #f5f5f5;
 }
 
-/* Menú de navegación */
-.navbar {
-    position: 0;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 30px 20px;
-    background: #691B31;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-}
-
-.navbar-left {
+.container {
     flex: 1;
-    display: flex;
-    align-items: center;
-}
-
-.icon-back {
-    font-size: 24px;
-    cursor: pointer;
-    margin-right: 10px;
-    color: white;
-}
-
-.navbar-center {
-    flex: 3;
-    text-align: center;
-}
-
-.navbar-center h1 {
-    margin: 0;
-    font-size: 24px;
-}
-
-.navbar-center p {
-    margin: 0;
-    font-size: 18px;
-}
-
-.navbar-right {
-    flex: 1;
-    display: flex;
-    justify-content: flex-end;
-}
-
-.user-profile {
-    display: flex;
-    align-items: center;
-}
-
-.profile-pic {
-    border-radius: 50%;
-    width: 40px;
-    height: 40px;
-    margin-right: 10px;
-}
-
-.user-info p {
-    margin: 0;
-    font-weight: bold;
-}
-
-.user-info span {
-    font-size: 12px;
-    color: #ddd;
-}
-
-/* Barra de navegación amarilla */
-.sub-navbar {
-    display: flex;
-    justify-content: center;
-    background: linear-gradient(to right, #FFFFFF, #DDC9A3);
-    /* Degradado de izquierda a derecha */
-    padding: 10px 0;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-}
-
-.nav-item {
-    position: relative;
-    margin: 0 20px;
-    cursor: pointer;
-    font-size: 16px;
-    color: #691B31;
-}
-
-.nav-item:hover {
-    color: #590d22;
-}
-
-.dropdown-menu {
-    display: none;
-    position: absolute;
-    top: 100%;
-    left: 0;
-    background-color: #691B31;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    border-radius: 5px;
-    width: 150px;
-}
-
-.dropdown-menu button {
     width: 100%;
-    padding: 10px;
-    border: none;
-    background: #691B31;
-    color: white;
-    text-align: left;
-    font-size: 14px;
-}
-
-.dropdown-menu button:hover {
-    background: #590d22;
-}
-
-.nav-item:hover .dropdown-menu {
-    display: block;
+    padding: 20px;
+    background-color: #f5f5f5;
+    min-height: calc(100vh - 140px);
 }
 
 /* Formulario */
@@ -722,4 +592,91 @@ a {
 .dropzone input[type="file"] {
     display: none;
 }
+
+.iva-field {
+        display: flex;
+        flex-direction: column;
+    }
+
+      .iva-checkbox-container {
+        display: flex;
+        align-items: center;
+        margin-bottom: -3px;
+    }
+
+    .checkbox-label {
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 500;
+        color: #333;
+        margin-right: 15px;
+    }
+
+    .checkbox-label input[type="checkbox"] {
+        display: none;
+    }
+
+    .checkmark {
+        height: 18px;
+        width: 18px;
+        background-color: #fff;
+        border: 2px solid #ddd;
+        border-radius: 4px;
+        margin-right: 8px;
+        position: relative;
+        transition: all 0.3s ease;
+    }
+
+    .checkbox-label:hover .checkmark {
+        border-color: #007bff;
+    }
+
+    .checkbox-label input:checked ~ .checkmark {
+        background-color: #007bff;
+        border-color: #007bff;
+    }
+
+    .checkmark:after {
+        content: "";
+        position: absolute;
+        display: none;
+    }
+
+    .checkbox-label input:checked ~ .checkmark:after {
+        display: block;
+    }
+
+    .checkbox-label .checkmark:after {
+        left: 5px;
+        top: 1px;
+        width: 5px;
+        height: 10px;
+        border: solid white;
+        border-width: 0 2px 2px 0;
+        transform: rotate(45deg);
+    }
+
+    .iva-checkbox-container label[for="iva"] {
+        font-size: 14px;
+        font-weight: 500;
+        color: #333;
+        margin: 0;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .iva-checkbox-container {
+            flex-direction: column;
+            align-items: flex-start;
+            margin-bottom: 10px;
+        }
+        
+        .checkbox-label {
+            margin-right: 0;
+            margin-bottom: 5px;
+            font-size: 13px;
+        }
+    }
 </style>

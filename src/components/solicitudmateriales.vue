@@ -1,235 +1,169 @@
 <template>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    <div class="page-wrapper">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+        <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+        <NavBarPage :pageTitle="'Salida de materiales'" :showUserMenu="true" />
+        <div class="container">
+            <div class="form-container">
+                <form @submit.prevent="submitForm">
+                    <div class="table-actions">
+                        <div class="solicitud-number">
+                            <label>Núm. Solicitud:</label>
+                            <input type="text" v-model="numeroSolicitud" readonly class="numero-solicitud-input" />
+                        </div>
+                    </div>
+                    <div class="contenedor-tabla">
 
-    <div class="container">
-        <!-- Menú de navegación -->
-        <nav class="navbar">
-            <div class="navbar-left">
-                <img src="../assets/LOGOS DORADOS-02.png" alt="Icono" class="navbar-icon" @click="goHome" width="50%"
-                    height="auto" style="cursor: pointer;" />
+                        <!-- Nuevos campos agregados aquí -->
+                        <div class="form-header">
+                            <div class="form-field">
+                                <label for="direccionSolicitante">Dirección Solicitante</label>
+                                <select v-model="direccionSolicitante" required>
+                                    <option value="" disabled>Seleccione una dirección</option>
+                                    <option v-for="direccion in direcciones" :key="direccion" :value="direccion">
+                                        {{ formatDireccion(direccion) }}
+                                    </option>
+                                </select>
+                            </div>
+                            <div class="form-field">
+                                <label for="area">Área</label>
+                                <input 
+                                    type="text" 
+                                    v-model="area" 
+                                    placeholder="Ingrese el área"
+                                    required
+                                    maxlength="100"
+                                />
+                            </div>
+                            <div class="form-field">
+                                <label for="fechaSolicitud">Fecha de Salida</label>
+                                <input type="text" v-model="fechaFormateada" required />
+                            </div>
+                        </div>
+                        <table class="solicitud-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 10%;">N° Partida</th>
+                                    <th style="width: 15%;">Unidad Medida</th>
+                                    <th style="width: 50%;">Descripción del Material</th>
+                                    <th style="width: 15%;">Cantidad Entregada</th>
+                                    <th style="width: 10%;">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="(item, index) in items" :key="index">
+                                    <td>
+                                        <input type="text" v-model="item.numeroPartida" readonly
+                                            style="background-color: #dcddcd;" />
+                                    </td>
+                                    <td>
+                                        <input type="text" v-model="item.unidadMedida" readonly
+                                            style="background-color: #dcddcd;" />
+                                    </td>
+                                    <td>
+                                        <select v-model="item.descripcionMaterial" @change="onMaterialSelected(index)"
+                                            required>
+                                            <option value="" disabled>Seleccione material</option>
+                                            <option v-for="articulo in materialesDisponibles" :key="articulo.id"
+                                                :value="articulo.value">
+                                                {{ articulo.value }}
+                                            </option>
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <input type="number" min="1" :max="item.cantidadDisponible"
+                                            v-model="item.cantidadEntregada" @change="validarCantidad(index)" required
+                                            :class="{ 'error-input': item.cantidadEntregada > item.cantidadDisponible }" />
+                                        <span class="stock-info">Disponible: {{ item.cantidadDisponible || 0 }}</span>
+                                    </td>
+                                    <td class="acciones">
+                                        <button v-if="index === items.length - 1 && isCurrentRowComplete(index)"
+                                            type="button" @click="addItem" class="btn-add"
+                                            :disabled="!isCurrentRowComplete(index)">
+                                            <i class="fas fa-plus"></i>
+                                        </button>
+                                        <button v-if="items.length > 1" type="button" @click="removeItem(index)"
+                                            class="btn-delete">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="button-container">
+                        <button class="boton" type="submit">
+                            <i class="fas fa-box-open"></i> Registrar Salida
+                        </button>
+                    </div>
+
+                    <!-- Modal de confirmación modificado -->
+                    <div v-if="showConfirmationModal" class="modal">
+                        <div class="modal-content" style="background-color: white; color: #691b31;">
+                            <h2>Salida Registrada</h2>
+                            <p>La salida de materiales ha sido registrada con éxito.</p>
+                            <button @click="resetAndClose">Aceptar</button>
+                        </div>
+                    </div>
+                </form>
             </div>
-            <div class="navbar-center">
-                <h1>Salida de materiales</h1>
-                <p>Sistema de Almacén e Inventarios de Radio y Televisión de Hidalgo</p>
+            <!-- Contenedor de notificaciones -->
+            <div v-if="alertMessage" :class="alertClass" class="notification">
+                <i :class="alertIcon"></i> {{ alertMessage }}
             </div>
-            <div class="navbar-right">
-                <div class="user-profile">
-                    <img :src="profileImage" alt="User Profile" class="profile-pic" />
-                    <div class="user-info">
-                        <p>{{ userName }}</p> <!-- Nombre dinámico del usuario -->
-                        <span><a href="profile" style="color: white;">Ver Perfil</a></span>
+            <!-- Modal para capturar nombres y cargos -->
+            <div v-if="showSignatureModal" class="modal2">
+                <div class="modal-content2" style="background-color: white; color: #691b31; width: 50%; max-width: 500px;">
+                    <h2>Información de Firmantes</h2>
+
+                    <div class="form-field2">
+                        <label for="solicitanteNombre">Nombre del Solicitante:</label>
+                        <input type="text" v-model="solicitanteNombre" required />
+                    </div>
+
+                    <div class="form-field2">
+                        <label for="solicitanteCargo">Cargo del Solicitante:</label>
+                        <input type="text" v-model="solicitanteCargo" required />
+                    </div>
+
+                    <div class="form-field2">
+                        <label for="receptorNombre">Nombre del Receptor:</label>
+                        <input type="text" v-model="receptorNombre" required />
+                    </div>
+
+                    <div class="form-field2">
+                        <label for="receptorCargo">Cargo del Receptor:</label>
+                        <input type="text" v-model="receptorCargo" required />
+                    </div>
+
+                    <div class="button-group" style="margin-top: 20px;">
+                        <button @click="confirmAndGeneratePDF" class="boton">
+                            Aceptar
+                        </button>
+                        <button @click="showSignatureModal = false" class="boton-cancelar">
+                            Cancelar
+                        </button>
                     </div>
                 </div>
             </div>
-        </nav>
-
-        <!-- Barra de navegación amarilla -->
-        <div class="sub-navbar">
-            <a href="/home" class="nav-item">Inicio</a>
-            <a v-if="userRole === 'Administrador'" href="users" class="nav-item">Usuarios</a>
-            <div v-if="userRole === 'Almacenes' || userRole === 'Administrador'" class="nav-item" @mouseenter="showMenu('almacenMenu')"
-                @mouseleave="hideMenu('almacenMenu')">
-                Almacén
-                <span class="menu-icon">▼</span>
-                <div class="dropdown-menu" v-show="menus.almacenMenu">
-                    <button @click="navigateTo('proveedor')">Ver proveedores</button>
-                    <button @click="navigateTo('factura')">Facturas</button>
-                    <button @click="navigateTo('existencia')">Entrada de artículos</button>
-                    <button @click="navigateTo('solicitudmaterial')">Salida de material</button>
-                    <button @click="navigateTo('recepcionsolicitudes')">Recepción de solicitudes</button>
-                    <button @click="navigateTo('bieninventario')">Agregar un bien para inventario</button>
-                    <button @click="navigateTo('poliza')">Pólizas</button>
-                </div>
-            </div>
-
-            <div v-if="userRole === 'Inventario' || userRole === 'Administrador'" class="nav-item" @mouseenter="showMenu('homeMenu')"
-                @mouseleave="hideMenu('homeMenu')">
-                Inventario
-                <span class="menu-icon">▼</span>
-                <div class="dropdown-menu" v-show="menus.homeMenu">
-                    <button @click="navigateTo('historialbienes')">Historial de bienes</button>
-                    <button @click="navigateTo('resguardo')">Bienes sin resguardo</button>
-                    <button @click="navigateTo('listaalmacen')">Bienes nuevos</button>
-                    <button @click="navigateTo('bienesnuevos')">Asignar resguardo</button>
-                    <button @click="navigateTo('liberarbien')">Liberar Bien</button>
-                    <button @click="navigateTo('bajabien')">Baja de bienes</button>
-                    <button @click="navigateTo('bajas')">Historial de bajas</button>
-                    <button @click="navigateTo('reportes')">Generación de reportes</button>
-                </div>
-            </div>
         </div>
-
-        <div class="form-container">
-            <form @submit.prevent="submitForm">
-                <div class="table-actions">
-                    <div class="solicitud-number">
-                        <label>Núm. Solicitud:</label>
-                        <input type="text" v-model="numeroSolicitud" readonly class="numero-solicitud-input" />
-                    </div>
-                    <button type="button" @click="goToSolicitudes" class="btn-ver-solicitudes">
-                        <i class="fas fa-list"></i> Ver Solicitudes
-                    </button>
-                </div>
-                <div class="contenedor-tabla">
-
-                    <!-- Nuevos campos agregados aquí -->
-                    <div class="form-header">
-                        <div class="form-field">
-                            <label for="direccionSolicitante">Dirección Solicitante</label>
-                            <select v-model="direccionSolicitante" required>
-                                <option value="" disabled>Seleccione una dirección</option>
-                                <option v-for="direccion in direcciones" :key="direccion" :value="direccion">
-                                    {{ formatDireccion(direccion) }}
-                                </option>
-                            </select>
-                        </div>
-                        <div class="form-field">
-                            <label for="area">Área</label>
-                            <input 
-                                type="text" 
-                                v-model="area" 
-                                placeholder="Ingrese el área"
-                                required
-                                maxlength="100"
-                            />
-                        </div>
-                        <div class="form-field">
-                            <label for="nombre">Nombre</label>
-                            <input 
-                                type="text" 
-                                v-model="nombre" 
-                                placeholder="Ingrese el nombre"
-                                required
-                                maxlength="100"
-                            />
-                        </div>
-                        <div class="form-field">
-                            <label for="fechaSolicitud">Fecha de Salida</label>
-                            <input type="text" v-model="fechaFormateada" required />
-                        </div>
-                    </div>
-                    <table class="solicitud-table">
-                        <thead>
-                            <tr>
-                                <th style="width: 10%;">N° Partida</th>
-                                <th style="width: 15%;">Unidad Medida</th>
-                                <th style="width: 50%;">Descripción del Material</th>
-                                <th style="width: 15%;">Cantidad Entregada</th>
-                                <th style="width: 10%;">Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr v-for="(item, index) in items" :key="index">
-                                <td>
-                                    <input type="text" v-model="item.numeroPartida" readonly
-                                        style="background-color: #dcddcd;" />
-                                </td>
-                                <td>
-                                    <input type="text" v-model="item.unidadMedida" readonly
-                                        style="background-color: #dcddcd;" />
-                                </td>
-                                <td>
-                                    <select v-model="item.descripcionMaterial" @change="onMaterialSelected(index)"
-                                        required>
-                                        <option value="" disabled>Seleccione material</option>
-                                        <option v-for="articulo in materialesDisponibles" :key="articulo.id"
-                                            :value="articulo.value">
-                                            {{ articulo.value }}
-                                        </option>
-                                    </select>
-                                </td>
-                                <td>
-                                    <input type="number" min="1" :max="item.cantidadDisponible"
-                                        v-model="item.cantidadEntregada" @change="validarCantidad(index)" required
-                                        :class="{ 'error-input': item.cantidadEntregada > item.cantidadDisponible }" />
-                                    <span class="stock-info">Disponible: {{ item.cantidadDisponible || 0 }}</span>
-                                </td>
-                                <td class="acciones">
-                                    <button v-if="index === items.length - 1 && isCurrentRowComplete(index)"
-                                        type="button" @click="addItem" class="btn-add"
-                                        :disabled="!isCurrentRowComplete(index)">
-                                        <i class="fas fa-plus"></i>
-                                    </button>
-                                    <button v-if="items.length > 1" type="button" @click="removeItem(index)"
-                                        class="btn-delete">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                <div class="button-container">
-                    <button class="boton" type="submit">
-                        <i class="fas fa-box-open"></i> Registrar Salida
-                    </button>
-                </div>
-
-                <!-- Modal de confirmación modificado -->
-                <div v-if="showConfirmationModal" class="modal">
-                    <div class="modal-content" style="background-color: white; color: #691b31;">
-                        <h2>Salida Registrada</h2>
-                        <p>La salida de materiales ha sido registrada con éxito.</p>
-                        <button @click="resetAndClose">Aceptar</button>
-                    </div>
-                </div>
-            </form>
-        </div>
-        <!-- Contenedor de notificaciones -->
-        <div v-if="alertMessage" :class="alertClass" class="notification">
-            <i :class="alertIcon"></i> {{ alertMessage }}
-        </div>
-        <!-- Modal para capturar nombres y cargos -->
-        <div v-if="showSignatureModal" class="modal2">
-            <div class="modal-content2" style="background-color: white; color: #691b31; width: 50%; max-width: 500px;">
-                <h2>Información de Firmantes</h2>
-
-                <div class="form-field2">
-                    <label for="solicitanteNombre">Nombre del Solicitante:</label>
-                    <input type="text" v-model="solicitanteNombre" required />
-                </div>
-
-                <div class="form-field2">
-                    <label for="solicitanteCargo">Cargo del Solicitante:</label>
-                    <input type="text" v-model="solicitanteCargo" required />
-                </div>
-
-                <div class="form-field2">
-                    <label for="receptorNombre">Nombre del Receptor:</label>
-                    <input type="text" v-model="receptorNombre" required />
-                </div>
-
-                <div class="form-field2">
-                    <label for="receptorCargo">Cargo del Receptor:</label>
-                    <input type="text" v-model="receptorCargo" required />
-                </div>
-
-                <div class="button-group" style="margin-top: 20px;">
-                    <button @click="confirmAndGeneratePDF" class="boton">
-                        <i class="fas fa-file-pdf"></i> Generar PDF
-                    </button>
-                    <button @click="showSignatureModal = false" class="boton-cancelar">
-                        Cancelar
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
+    </div>    
 </template>
 
 <script>
-import axios from 'axios';
-
+import api from '../services/api';
+import NavBarPage from './NavBar.vue';
 export default {
     name: "solicitudMaterialPage",
+    components: {
+        NavBarPage // Registrar el componente
+    },
     data() {
         return {
             numeroSolicitud: '', // Nuevo campo para el número de solicitud
             nextSolicitudNumber: 0, // Para llevar el control del siguiente número
             area: "",
-            nombre:"",
             alertMessage: "",  // Mensaje de la alerta
             alertClass: "",    // Clase de la alerta (ej. 'success' o 'error')
             alertIcon: "",     // Icono para la alerta
@@ -266,6 +200,7 @@ export default {
                 homeMenu: false,
                 solicitudMaterialMenu: false,
                 settingsMenu: false,
+                userMenu: false, 
             },
             
             showConfirmationModal: false,
@@ -540,7 +475,7 @@ export default {
         async obtenerNumeroSolicitud() {
             try {
                 // 1. Obtener todas las solicitudes existentes
-                const response = await axios.get('http://localhost:3000/api/solicitudes');
+                const response = await api.get('/solicitudes');
                 const solicitudes = response.data;
 
                 // 2. Extraer todos los números de solicitud
@@ -599,7 +534,7 @@ export default {
 
             try {
                 // Verificar que el número de solicitud no se haya usado
-                const checkResponse = await axios.get('http://localhost:3000/api/solicitudes');
+                const checkResponse = await api.get('/solicitudes');
                 const existeNumero = checkResponse.data.some(s => s.numero_solicitud === this.numeroSolicitud);
 
                 if (existeNumero) {
@@ -620,20 +555,19 @@ export default {
 
                 // Actualizar inventario y crear solicitudes
                 const updatePromises = this.items.map(item =>
-                    axios.put(`http://localhost:3000/api/articulos/${item.id_articulo}`, {
+                    api.put(`articulos/${item.id_articulo}`, {
                         cantidad: item.cantidadDisponible - item.cantidadEntregada
                     })
                 );
 
                 const solicitudPromises = solicitudes.map(solicitud =>
-                    axios.post('http://localhost:3000/api/solicitudes', solicitud)
+                    api.post('/solicitudes', solicitud)
                 );
 
                 // Ejecutar todas las promesas
                 await Promise.all([...updatePromises, ...solicitudPromises]);
 
-                // Generar PDF
-                await this.generarPDFSolicitud();
+                
 
                 // Actualizar datos locales
                 await this.cargarArticulos();
@@ -680,13 +614,9 @@ export default {
                 this.alertMessage = "";
             }, 3000);
         },
-        // Método para ir a solicitudes
-        goToSolicitudes() {
-            this.$router.push('/versolicitudes');
-        },
         async cargarArticulos() {
             try {
-                const response = await axios.get('http://localhost:3000/api/articulos');
+                const response = await api.get('/articulos');
                 this.articulos = response.data;
             } catch (error) {
                 console.error('Error al cargar artículos:', error);
@@ -799,6 +729,7 @@ export default {
         resetAndClose() {
             this.resetForm();
             this.showConfirmationModal = false;
+            this.$router.push('/versolicitudes');
         },
 
         async loadUserData() {
@@ -809,7 +740,7 @@ export default {
                 this.userName = storedUserName;
 
                 try {
-                    const response = await axios.get('http://localhost:3000/api/personas');
+                    const response = await api.get('/personas');
                     const users = response.data;
                     const user = users.find(u => u.email === storedUserEmail);
 
@@ -822,7 +753,7 @@ export default {
 
                         if (imageFileName) {
                             imageFileName = imageFileName.split('.').slice(0, -1).join('.');
-                            this.profileImage = `http://localhost:3000/api/users-files/${imageFileName}`;
+                            this.profileImage = `http://92.168.10.31:3000/api/users-files/${imageFileName}`;
                         } else {
                             this.profileImage = "../assets/UserHombre.png";
                         }
@@ -1217,125 +1148,19 @@ button {
     font-family: 'Montserrat', sans-serif;
 }
 
-.container {
-    position: fixed;
-    top: 0;
-    left: 0;
+.page-wrapper {
     width: 100%;
-    height: 100%;
     display: flex;
-    background: white;
     flex-direction: column;
-    color: white;
+    background-color: #f5f5f5;
 }
 
-.navbar {
-    position: 0;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 30px 20px;
-    background: #691B31;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-}
-
-.navbar-left {
+.container {
     flex: 1;
-    display: flex;
-    align-items: center;
-}
-
-.navbar-center {
-    flex: 3;
-    text-align: center;
-}
-
-.navbar-center h1 {
-    margin: 0;
-    font-size: 24px;
-}
-
-.navbar-center p {
-    margin: 0;
-    font-size: 18px;
-}
-
-.navbar-right {
-    flex: 1;
-    display: flex;
-    justify-content: flex-end;
-}
-
-.user-profile {
-    display: flex;
-    align-items: center;
-}
-
-.profile-pic {
-    border-radius: 50%;
-    width: 40px;
-    height: 40px;
-    margin-right: 10px;
-}
-
-.user-info p {
-    margin: 0;
-    font-weight: bold;
-}
-
-.user-info span {
-    font-size: 12px;
-    color: #ddd;
-}
-
-.sub-navbar {
-    display: flex;
-    justify-content: center;
-    background: linear-gradient(to right, #FFFFFF, #DDC9A3);
-    padding: 10px 0;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-}
-
-.nav-item {
-    position: relative;
-    margin: 0 20px;
-    cursor: pointer;
-    font-size: 16px;
-    color: #691B31;
-}
-
-.nav-item:hover {
-    color: #590d22;
-}
-
-.dropdown-menu {
-    display: none;
-    position: absolute;
-    top: 100%;
-    left: 0;
-    background-color: #691B31;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    border-radius: 5px;
-    width: 150px;
-    z-index: 1;
-}
-
-.dropdown-menu button {
     width: 100%;
-    padding: 10px;
-    border: none;
-    background: #691B31;
-    color: white;
-    text-align: left;
-    font-size: 14px;
-}
-
-.dropdown-menu button:hover {
-    background: #590d22;
-}
-
-.nav-item:hover .dropdown-menu {
-    display: block;
+    padding: 20px;
+    background-color: #f5f5f5;
+    min-height: calc(100vh - 140px);
 }
 
 .form-container {

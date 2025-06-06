@@ -1,280 +1,237 @@
 <template>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    <div class="page-wrapper">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+        <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+        <NavBarPage :pageTitle="'Artículos'" :showUserMenu="true" />
+        <div class="container">
+            <div class="search-bar">
+                <div class="input-wrapper">
+                    <input type="text" v-model="searchQuery" placeholder="Buscar..." />
+                    <i class="fas fa-search"></i> <!-- Icono de la lupa -->
+                </div>
 
-    <div class="container">
-        <!-- Menú de navegación -->
-        <nav class="navbar">
-            <div class="navbar-left">
-                <img src="../assets/LOGOS DORADOS-02.png" alt="Icono" class="navbar-icon" @click="goHome" width="50%"
-                    height="auto" style="cursor: pointer;" />
+                <!-- Botón para agregar nuevo usuario -->
+                <button class="add-existencia-btn" @click="redirectToAddExistencia">
+                    <i class="fas fa-file-invoice"></i> <i class="fas fa-plus"></i>
+                </button>
             </div>
 
-            <div class="navbar-center">
-                <h1>Artículos</h1>
-                <p>Sistema de Almacén e Inventarios de Radio y Televisión de Hidalgo</p>
-            </div>
-            <div class="navbar-right">
-                <div class="user-profile">
-                    <img :src="profileImage" alt="User Profile" class="profile-pic" />
-                    <div class="user-info">
-                        <p>{{ userName }}</p> <!-- Nombre dinámico del usuario -->
-                        <span><a href="profile" style="color: white;">Ver Perfil</a></span>
+            <div class="contenedor-tabla">
+                <div class="table-horizontal-scroll">
+                    <table class="existencia-table">
+                        <thead>
+                            <tr>
+                                <th>Núm. factura</th>
+                                <th>Núm. partida</th>
+                                <th>Descripcion</th>
+                                <th>Precio Unitario</th>
+                                <th>IVA</th>
+                                <th>Importe con IVA</th>
+                                <th>Cantidad</th>
+                                <th>Unidad de medida</th>
+                                <th>Total de ingreso</th>
+                                <th>Foto artículo</th>
+                                <th>Fecha de registro</th>
+                                <th>Acciones</th>
+                                <th>Agregar Inventario</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="existencia in paginatedExistencias" :key="existencia.id">
+
+                                <td>{{ getNumeroFactura(existencia.id_factura) }}</td>
+                                <td>{{ getNumeroPartida(existencia.id_objetogasto) }}</td>
+                                <td>{{ existencia.descripcion }}</td>
+                                <td>{{ existencia.precio_unitario }}</td>
+                                <td>{{ existencia.iva }}</td>
+                                <td>{{ existencia.importe_con_iva }}</td>
+                                <td>{{ existencia.cantidad }}</td>
+                                <td>{{ existencia.unidad_medida }}</td>
+                                <td>{{ existencia.total_ingreso }}</td>
+                                <td>
+                                    <button @click="openModal(existencia.foto_articulo)" class="btn-download">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </td>
+                                <td>{{ formatDate(existencia.createdAt) }}</td>
+                                <td>
+                                    <button @click="editExistencia(existencia)" class="btn-edit">Editar</button>
+                                    <button @click="showDeleteModal(existencia.id)" class="btn-delete">Eliminar</button>
+                                </td>
+                                <td> 
+                                    <button @click="addToInventario(existencia)" class="btn-inventario">
+                                        <i class="fas fa-plus"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>    
+
+                <!-- Modal de Edición -->
+                <div v-if="isEditing" class="edit-modal">
+                    <div class="modal-content">
+                        <h3>Editar Existencia</h3>
+                        <form @submit.prevent="saveChanges" class="edit-form">
+                            <div class="contenedorformulario">
+                                <!-- Primera columna -->
+                                <div class="form-column">
+                                    <div>
+                                        <label>Número de factura:</label>
+                                        <input v-model="currentExistencia.id_factura" type="text" />
+                                    </div>
+                                    <div>
+                                        <label>Número de partida:</label>
+                                        <input v-model="currentExistencia.id_objetogasto" type="text" />
+                                    </div>
+                                    <div>
+                                        <label>Descripcion:</label>
+                                        <input v-model="currentExistencia.descripcion" type="text" />
+                                    </div>
+                                </div>
+
+                                <!-- Segunda columna -->
+                                <div class="form-column">
+                                    <div>
+                                        <label>Precio Unitario:</label>
+                                        <input v-model="currentExistencia.precio_unitario" type="text" />
+                                    </div>
+                                    <div>
+                                        <label>IVA:</label>
+                                        <input v-model="currentExistencia.iva" type="text" />
+                                    </div>
+                                    <div>
+                                        <label>Importe con IVA:</label>
+                                        <input v-model="currentExistencia.importe_con_iva" type="text" />
+                                    </div>
+                                    <label for="foto_articulo">Foto artículo</label>
+                                    <div class="dropzone" @drop.prevent="handleDrop" @dragover.prevent
+                                        @click="triggerFileInput">
+                                        <input type="file" id="updatefoto_articulo" ref="fileInput"
+                                            @change="handleFileChange" accept="image/*" multiple style="display: none;" />
+                                        <i class="fas fa-cloud-upload-alt"></i>
+                                        <span v-if="currentExistencia.foto_articulo.length === 0">Arrastra o selecciona
+                                            imágenes (JPG, PNG)</span>
+                                        <span v-else>{{ currentExistencia.foto_articulo.length }} imágenes
+                                            seleccionadas</span>
+                                    </div>
+                                    <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
+                                    <button v-if="currentExistencia.foto_articulo.length > 0"
+                                        @click.prevent="openImageModal" class="view-images-btn">
+                                        Ver Imágenes
+                                    </button>
+                                </div>
+
+                                <!-- Tercera columna -->
+                                <div class="form-column">
+                                    <div>
+                                        <label>Cantidad:</label>
+                                        <input v-model="currentExistencia.cantidad" type="text" />
+                                    </div>
+                                    <div>
+                                        <label>Unidad de medida:</label>
+                                        <select v-model="currentExistencia.unidad_medida" class="form-input">
+                                            <option value="" disabled>Selecciona una opción</option>
+                                            <option value="piezas">Piezas</option>
+                                            <option value="paquetes">Paquetes</option>
+                                            <option value="cajas">Cajas</option>
+                                            <option value="kilogramos">Kilogramos</option>
+                                            <option value="litros">Litros</option>
+                                            <option value="metros">Metros</option>
+                                            <option value="rollos">Rollos</option>
+                                            <option value="bultos">Bultos</option>
+                                        </select>
+                                    </div>
+
+                                    <div>
+                                        <label>Total de ingreso:</label>
+                                        <input v-model="currentExistencia.total_ingreso" type="text" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Botones debajo del formulario -->
+                            <div class="form-buttons">
+                                <button type="submit" class="save-btn">Guardar cambios</button>
+                                <button @click="cancelEdit" type="button" class="cancel-btn">Cancelar</button>
+                            </div>
+                        </form>
                     </div>
                 </div>
-            </div>
-        </nav>
 
-        <!-- Barra de navegación amarilla -->
-        <div class="sub-navbar">
-            <a href="/home" class="nav-item">Inicio</a>
-            <a v-if="userRole === 'Administrador'" href="users" class="nav-item">Usuarios</a>
-            <div v-if="userRole === 'Almacenes' || userRole === 'Administrador'" class="nav-item" @mouseenter="showMenu('almacenMenu')"
-                @mouseleave="hideMenu('almacenMenu')">
-                Almacén
-                <span class="menu-icon">▼</span>
-                <div class="dropdown-menu" v-show="menus.almacenMenu">
-                    <button @click="navigateTo('proveedor')">Ver proveedores</button>
-                    <button @click="navigateTo('factura')">Facturas</button>
-                    <button @click="navigateTo('existencia')">Entrada de artículos</button>
-                    <button @click="navigateTo('solicitudmaterial')">Salida de material</button>
-                    <button @click="navigateTo('recepcionsolicitudes')">Recepción de solicitudes</button>
-                    <button @click="navigateTo('bieninventario')">Agregar un bien para inventario</button>
-                    <button @click="navigateTo('poliza')">Pólizas</button>
-                </div>
-            </div>
-
-            <div v-if="userRole === 'Inventario' || userRole === 'Administrador'" class="nav-item" @mouseenter="showMenu('homeMenu')"
-                @mouseleave="hideMenu('homeMenu')">
-                Inventario
-                <span class="menu-icon">▼</span>
-                <div class="dropdown-menu" v-show="menus.homeMenu">
-                    <button @click="navigateTo('historialbienes')">Historial de bienes</button>
-                    <button @click="navigateTo('resguardo')">Bienes sin resguardo</button>
-                    <button @click="navigateTo('listaalmacen')">Bienes nuevos</button>
-                    <button @click="navigateTo('bienesnuevos')">Asignar resguardo</button>
-                    <button @click="navigateTo('liberarbien')">Liberar Bien</button>
-                    <button @click="navigateTo('bajabien')">Baja de bienes</button>
-                    <button @click="navigateTo('bajas')">Historial de bajas</button>
-                    <button @click="navigateTo('reportes')">Generación de reportes</button>
-                </div>
-            </div>
-        </div>
-
-        <div class="search-bar">
-            <div class="input-wrapper">
-                <input type="text" v-model="searchQuery" placeholder="Buscar..." />
-                <i class="fas fa-search"></i> <!-- Icono de la lupa -->
-            </div>
-
-            <!-- Botón para agregar nuevo usuario -->
-            <button class="add-existencia-btn" @click="redirectToAddExistencia">
-                <i class="fas fa-file-invoice"></i> <i class="fas fa-plus"></i>
-            </button>
-        </div>
-
-        <div class="contenedor-tabla">
-            <table class="existencia-table">
-                <thead>
-                    <tr>
-                        <th>Núm. factura</th>
-                        <th>Núm. partida</th>
-                        <th>Descripcion</th>
-                        <th>Precio Unitario</th>
-                        <th>IVA</th>
-                        <th>Importe con IVA</th>
-                        <th>Cantidad</th>
-                        <th>Unidad de medida</th>
-                        <th>Total de ingreso</th>
-                        <th>Foto artículo</th>
-                        <th>Fecha de registro</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr v-for="existencia in paginatedExistencias" :key="existencia.id">
-
-                        <td>{{ getNumeroFactura(existencia.id_factura) }}</td>
-                        <td>{{ getNumeroPartida(existencia.id_objetogasto) }}</td>
-                        <td>{{ existencia.descripcion }}</td>
-                        <td>{{ existencia.precio_unitario }}</td>
-                        <td>{{ existencia.iva }}</td>
-                        <td>{{ existencia.importe_con_iva }}</td>
-                        <td>{{ existencia.cantidad }}</td>
-                        <td>{{ existencia.unidad_medida }}</td>
-                        <td>{{ existencia.total_ingreso }}</td>
-                        <td>
-                            <button @click="openModal(existencia.foto_articulo)" class="btn-download">
-                                <i class="fas fa-eye"></i>
-                            </button>
-                        </td>
-                        <td>{{ formatDate(existencia.createdAt) }}</td>
-                        <td>
-                            <button @click="editExistencia(existencia)" class="btn-edit">Editar</button>
-                            <button @click="showDeleteModal(existencia.id)" class="btn-delete">Eliminar</button>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-
-            <!-- Modal de Edición -->
-            <div v-if="isEditing" class="edit-modal">
-                <div class="modal-content">
-                    <h3>Editar Existencia</h3>
-                    <form @submit.prevent="saveChanges" class="edit-form">
-                        <div class="contenedorformulario">
-                            <!-- Primera columna -->
-                            <div class="form-column">
-                                <div>
-                                    <label>Número de factura:</label>
-                                    <input v-model="currentExistencia.id_factura" type="text" />
+                <!-- Modal para mostrar las imágenes seleccionadas -->
+                <div v-if="showImageModal" class="modal-overlay3">
+                    <div class="modal3">
+                        <h2>Imágenes seleccionadas</h2>
+                        <div class="image-preview-container3">
+                            <div v-for="(img, index) in currentExistencia.foto_articulo" :key="index"
+                                class="image-preview3">
+                                <div class="image-container3">
+                                    <img :src="getImageUrl(img)" :alt="img.name" class="image-preview-img3" />
+                                    <button @click="removeImage(index)" class="remove-btn">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
                                 </div>
-                                <div>
-                                    <label>Número de partida:</label>
-                                    <input v-model="currentExistencia.id_objetogasto" type="text" />
-                                </div>
-                                <div>
-                                    <label>Descripcion:</label>
-                                    <input v-model="currentExistencia.descripcion" type="text" />
-                                </div>
-                            </div>
-
-                            <!-- Segunda columna -->
-                            <div class="form-column">
-                                <div>
-                                    <label>Precio Unitario:</label>
-                                    <input v-model="currentExistencia.precio_unitario" type="text" />
-                                </div>
-                                <div>
-                                    <label>IVA:</label>
-                                    <input v-model="currentExistencia.iva" type="text" />
-                                </div>
-                                <div>
-                                    <label>Importe con IVA:</label>
-                                    <input v-model="currentExistencia.importe_con_iva" type="text" />
-                                </div>
-                                <label for="foto_articulo">Foto artículo</label>
-                                <div class="dropzone" @drop.prevent="handleDrop" @dragover.prevent
-                                    @click="triggerFileInput">
-                                    <input type="file" id="updatefoto_articulo" ref="fileInput"
-                                        @change="handleFileChange" accept="image/*" multiple style="display: none;" />
-                                    <i class="fas fa-cloud-upload-alt"></i>
-                                    <span v-if="currentExistencia.foto_articulo.length === 0">Arrastra o selecciona
-                                        imágenes (JPG, PNG)</span>
-                                    <span v-else>{{ currentExistencia.foto_articulo.length }} imágenes
-                                        seleccionadas</span>
-                                </div>
-                                <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
-                                <button v-if="currentExistencia.foto_articulo.length > 0"
-                                    @click.prevent="openImageModal" class="view-images-btn">
-                                    Ver Imágenes
-                                </button>
-                            </div>
-
-                            <!-- Tercera columna -->
-                            <div class="form-column">
-                                <div>
-                                    <label>Cantidad:</label>
-                                    <input v-model="currentExistencia.cantidad" type="text" />
-                                </div>
-                                <div>
-                                    <label>Unidad de medida:</label>
-                                    <select v-model="currentExistencia.unidad_medida" class="form-input">
-                                        <option value="" disabled>Selecciona una opción</option>
-                                        <option value="piezas">Piezas</option>
-                                        <option value="paquetes">Paquetes</option>
-                                        <option value="cajas">Cajas</option>
-                                        <option value="kilogramos">Kilogramos</option>
-                                        <option value="litros">Litros</option>
-                                        <option value="metros">Metros</option>
-                                        <option value="rollos">Rollos</option>
-                                        <option value="bultos">Bultos</option>
-                                    </select>
-                                </div>
-
-                                <div>
-                                    <label>Total de ingreso:</label>
-                                    <input v-model="currentExistencia.total_ingreso" type="text" />
-                                </div>
+                                <p class="image-name3">{{ img.name }}</p>
                             </div>
                         </div>
-
-                        <!-- Botones debajo del formulario -->
-                        <div class="form-buttons">
-                            <button type="submit" class="save-btn">Guardar cambios</button>
-                            <button @click="cancelEdit" type="button" class="cancel-btn">Cancelar</button>
-                        </div>
-                    </form>
+                        <button @click="closeImageModal">Cerrar</button>
+                    </div>
                 </div>
-            </div>
 
-            <!-- Modal para mostrar las imágenes seleccionadas -->
-            <div v-if="showImageModal" class="modal-overlay3">
-                <div class="modal3">
-                    <h2>Imágenes seleccionadas</h2>
-                    <div class="image-preview-container3">
-                        <div v-for="(img, index) in currentExistencia.foto_articulo" :key="index"
-                            class="image-preview3">
-                            <div class="image-container3">
-                                <img :src="getImageUrl(img)" :alt="img.name" class="image-preview-img3" />
-                                <button @click="removeImage(index)" class="remove-btn">
-                                    <i class="fas fa-trash-alt"></i>
-                                </button>
-                            </div>
-                            <p class="image-name3">{{ img.name }}</p>
+                <!-- Modal de Confirmación de Eliminación -->
+                <div v-if="isDeleteModalVisible" class="modal-overlay">
+                    <div class="modal-content-delete">
+                        <h3>¿Estás seguro de eliminar esta existencia?</h3>
+                        <div class="modal-buttons">
+                            <button @click="confirmDelete" class="btn-confirm">Confirmar</button>
+                            <button @click="cancelDelete" class="btn-cancel">Cancelar</button>
                         </div>
                     </div>
-                    <button @click="closeImageModal">Cerrar</button>
+                </div>
+
+
+                <!-- Paginación -->
+                <div class="pagination">
+                    <button @click="prevPage" :disabled="currentPage === 1">Anterior</button>
+                    <span>Pagina {{ currentPage }} de {{ totalPages }}</span>
+                    <button @click="nextPage" :disabled="currentPage === totalPages">Siguiente</button>
                 </div>
             </div>
 
-            <!-- Modal de Confirmación de Eliminación -->
-            <div v-if="isDeleteModalVisible" class="modal-overlay">
-                <div class="modal-content-delete">
-                    <h3>¿Estás seguro de eliminar esta existencia?</h3>
-                    <div class="modal-buttons">
-                        <button @click="confirmDelete" class="btn-confirm">Confirmar</button>
-                        <button @click="cancelDelete" class="btn-cancel">Cancelar</button>
+            <!-- Modal para mostrar imágenes -->
+            <div v-if="showModal" class="modal-overlay2" @click="closeModal">
+                <div class="modal2" @click.stop>
+                    <h2>Imágenes</h2>
+                    <hr>
+                    <div class="image-container2">
+                        <div v-for="(foto, i) in modalImages" :key="i" class="image-box">
+                            <a :href="getImageUrl(foto)" target="_blank">
+                                <img :src="getImageUrl(foto)" alt="Foto del bien recibido" class="modal-img2" />
+                            </a>
+                            <p class="image-name2">{{ foto }}</p>
+                        </div>
                     </div>
+                    <button @click="closeModal">Cerrar</button>
                 </div>
             </div>
-
-            <!-- Paginación -->
-            <div class="pagination">
-                <button @click="prevPage" :disabled="currentPage === 1">Anterior</button>
-                <span>Pagina {{ currentPage }} de {{ totalPages }}</span>
-                <button @click="nextPage" :disabled="currentPage === totalPages">Siguiente</button>
+            <!-- Contenedor de notificaciones -->
+            <div v-if="alertMessage" :class="alertClass" class="notification">
+                <i :class="alertIcon"></i> {{ alertMessage }}
             </div>
         </div>
-
-        <!-- Modal para mostrar imágenes -->
-        <div v-if="showModal" class="modal-overlay2" @click="closeModal">
-            <div class="modal2" @click.stop>
-                <h2>Imágenes</h2>
-                <hr>
-                <div class="image-container2">
-                    <div v-for="(foto, i) in modalImages" :key="i" class="image-box">
-                        <a :href="getImageUrl(foto)" target="_blank">
-                            <img :src="getImageUrl(foto)" alt="Foto del bien recibido" class="modal-img2" />
-                        </a>
-                        <p class="image-name2">{{ foto }}</p>
-                    </div>
-                </div>
-                <button @click="closeModal">Cerrar</button>
-            </div>
-        </div>
-        <!-- Contenedor de notificaciones -->
-        <div v-if="alertMessage" :class="alertClass" class="notification">
-            <i :class="alertIcon"></i> {{ alertMessage }}
-        </div>
-    </div>
+    </div>    
 </template>
 
 <script>
-import axios from 'axios'; // Importar Axios para hacer solicitudes HTTP
+import api from '../services/api';
+import NavBarPage from './NavBar.vue';
 
 export default {
     name: "existenciaPage",
+    components: {
+        NavBarPage // Registrar el componente
+    },
     data() {
         return {
             alertMessage: "",  // Mensaje de la alerta
@@ -284,10 +241,13 @@ export default {
             userName: "Cargando...", // Mensaje temporal
             profileImage: "",  // URL de la imagen del usuario
             isDeleteModalVisible: false,
+            selectedArticuloId: null,
+            inventario: [],
             menus: {
                 homeMenu: false,
                 existenciaMenu: false,
                 settingsMenu: false,
+                userMenu: false,
             },
             searchQuery: '',
             currentPage: 1,
@@ -339,7 +299,7 @@ export default {
     },
     mounted() {
         this.loadUserData();
-        this.loadExistencias(); // Cargar los artículos al montar el componente
+        this.initializeData();
         this.loadObjetosGasto();
         this.loadFacturas();
     },
@@ -369,23 +329,88 @@ export default {
             const date = new Date(dateString);
             return date.toLocaleDateString('es-MX', options); // Usando la configuración en español de México
         },
-        // Cargar los artículos desde la API
+        async initializeData() {
+            try {
+                await this.loadInventario(); // Esperar a que termine de cargar el inventario
+                await this.loadExistencias(); // Después cargar los artículos
+            } catch (error) {
+                console.error('Error al inicializar los datos:', error);
+                this.isLoading = false;
+            }
+        },
+
+        // Método loadInventario actualizado (asegúrate de que sea async)
+        async loadInventario() {
+            try {
+                const response = await api.get('/inventario');
+                this.inventario = response.data;
+                console.log('Inventario cargado:', this.inventario);
+            } catch (error) {
+                console.error('Error al cargar el inventario:', error);
+                this.inventario = []; // Asegurar que inventario sea un array vacío en caso de error
+            }
+        },
+
+        // Método loadExistencias actualizado
         async loadExistencias() {
             try {
-                const response = await axios.get('http://localhost:3000/api/articulos');
-                console.log('Datos cargados:', response.data); // Verificar los datos cargados
-                this.existencias = response.data
+                const response = await api.get('/articulos');
+                console.log('Datos cargados:', response.data);
+                
+                // Verificar que inventario esté cargado
+                console.log('Inventario disponible:', this.inventario);
+                
+                // Obtener los IDs de artículos que ya están en inventario
+                const articulosEnInventario = this.inventario.map(item => item.id_articulo);
+                console.log('Artículos en inventario (IDs):', articulosEnInventario);
+                
+                // Filtrar los artículos que NO están en inventario
+                const articulosFiltrados = response.data.filter(articulo => {
+                    const estaEnInventario = articulosEnInventario.includes(articulo.id);
+                    console.log(`Artículo ${articulo.id} - ${articulo.descripcion}: ${estaEnInventario ? 'EN INVENTARIO (filtrado)' : 'DISPONIBLE'}`);
+                    return !estaEnInventario;
+                });
+                
+                this.existencias = articulosFiltrados
                     .map(articulo => ({
                         ...articulo,
-                        foto_articulo: articulo.foto_articulo ? this.extractFileNames(articulo.foto_articulo) : [] // Extraer nombres de archivos
+                        foto_articulo: articulo.foto_articulo ? this.extractFileNames(articulo.foto_articulo) : []
                     }))
-                    .sort((a, b) => a.id_objetogasto - b.id_objetogasto); // Ordenar por id_objetogasto ascendente
-                console.log('Datos procesados:', this.existencias); // Verificar los datos procesados
+                    .sort((a, b) => a.id_objetogasto - b.id_objetogasto);
+                    
+                console.log('Total artículos filtrados (sin inventario):', this.existencias.length);
+                console.log('Artículos mostrados:', this.existencias);
             } catch (error) {
                 console.error('Error al cargar los artículos:', error);
             } finally {
-                this.isLoading = false; // Desactivar el indicador de carga
+                this.isLoading = false;
             }
+        },
+
+        // También actualizar el método addToInventario para refrescar la lista
+        async addToInventario(existencia) {
+            // Guardar el ID del artículo en localStorage para acceso posterior
+            localStorage.setItem('articuloId', existencia.id);
+            
+            // También puedes guardarlo en una variable del componente si lo necesitas
+            this.selectedArticuloId = existencia.id;
+            
+            console.log('ID del artículo seleccionado:', existencia.id);
+            
+            // Navegar a la página de inventario con los parámetros
+            this.$router.push({
+                name: 'bieninventario',
+                params: { 
+                    articuloId: existencia.id
+                }
+            });
+        },
+
+        // Agregar un método para refrescar los datos cuando regreses de otra página
+        async refreshData() {
+            this.isLoading = true;
+            await this.loadInventario();
+            await this.loadExistencias();
         },
         // Extraer nombres de archivos de las rutas completas y eliminar la extensión
         extractFileNames(filePaths) {
@@ -399,7 +424,7 @@ export default {
         // Cargar los objetos de gasto desde la API
         async loadObjetosGasto() {
             try {
-                const response = await axios.get('http://localhost:3000/api/objetoGastos');
+                const response = await api.get('/objetoGastos');
                 this.objetosGasto = response.data; // Guardar los objetos de gasto en la lista
             } catch (error) {
                 console.error('Error al cargar los objetos de gasto:', error);
@@ -407,7 +432,7 @@ export default {
         },
         async loadFacturas() {
             try {
-                const response = await axios.get('http://localhost:3000/api/facturas');
+                const response = await api.get('/facturas');
                 this.facturas = response.data; // Guardar las facturas en la lista
             } catch (error) {
                 console.error('Error al cargar las facturas:', error);
@@ -437,7 +462,7 @@ export default {
 
                 try {
                     // Obtener todos los usuarios de la API
-                    const response = await fetch('http://localhost:3000/api/personas');
+                    const response = await api.get('/personas');
                     const users = await response.json();
 
                     // Buscar el usuario logueado por email
@@ -461,7 +486,7 @@ export default {
 
                         if (imageFileName) {
                             // Construir la URL completa para la imagen
-                            this.profileImage = `http://localhost:3000/api/users-files/${imageFileName}`;
+                            this.profileImage = `http://192.168.10.31:3000/api/users-files/${imageFileName}`;
                         } else {
                             // Usar una imagen por defecto si no hay imagen en la API
                             this.profileImage = "../assets/UserHombre.png";
@@ -486,7 +511,7 @@ export default {
                 return URL.createObjectURL(fileName);
             }
             // Si fileName es una cadena, construir la URL completa con extensión
-            return `http://localhost:3000/api/articulos-files/${fileName}`;
+            return `http://192.168.10.31:3000/api/articulos-files/${fileName}`;
         },
         // Abrir el modal con las imágenes
         openModal(fotos) {
@@ -609,12 +634,13 @@ export default {
             // Recargar la lista de artículos (opcional)
             this.loadExistencias();
         },
+       
         async saveChanges() {
             try {
                 // 1. Eliminar las imágenes marcadas para eliminación
                 if (this.imagesToDelete.length > 0) {
                     for (const img of this.imagesToDelete) {
-                        await axios.delete(`http://localhost:3000/api/articulos/${this.currentExistencia.id}/archivo`, {
+                        await api.delete(`/articulos/${this.currentExistencia.id}/archivo`, {
                             data: { fileName: img.split('/').pop() } // Enviar el nombre del archivo
                         });
                     }
@@ -634,7 +660,7 @@ export default {
                 formData.append('total_ingreso', this.currentExistencia.total_ingreso);
 
                 // Enviar la solicitud PUT para actualizar el artículo
-                await axios.put(`http://localhost:3000/api/articulos/${this.currentExistencia.id}`, formData, {
+                await api.put(`/articulos/${this.currentExistencia.id}`, formData, {
                     headers: {
                         'Content-Type': 'multipart/form-data'
                     }
@@ -649,7 +675,7 @@ export default {
                     });
 
                     // Enviar la solicitud POST para agregar los archivos
-                    await axios.post(`http://localhost:3000/api/articulos/${this.currentExistencia.id}/archivo`, archivosFormData, {
+                    await api.post(`/articulos/${this.currentExistencia.id}/archivo`, archivosFormData, {
                         headers: {
                             'Content-Type': 'multipart/form-data'
                         }
@@ -673,10 +699,88 @@ export default {
             this.deleteId = id;
             this.isDeleteModalVisible = true;
         },
+
+        // Método para actualizar tanto la cantidad como el total de la factura
+        async updateFacturaData(facturaId, nuevaCantidad, nuevoTotal) {
+            try {
+                const response = await api.put(`facturas/${facturaId}`, {
+                    cantidad: nuevaCantidad,
+                    total: nuevoTotal
+                }, {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
+                
+                if (response.status === 200) {
+                    console.log('Datos de factura actualizados correctamente');
+                    return true;
+                }
+            } catch (error) {
+                console.error('Error al actualizar los datos de factura:', error);
+                return false;
+            }
+        },
+
+        // Método confirmDelete actualizado para incluir la resta del total
         async confirmDelete() {
             try {
+                // Encontrar el artículo que se va a eliminar
+                const articuloAEliminar = this.existencias.find(
+                    existencia => existencia.id === this.deleteId
+                );
+
+                if (!articuloAEliminar) {
+                    this.showAlert("No se encontró el artículo a eliminar", "error");
+                    return;
+                }
+
+                // Encontrar la factura correspondiente
+                const facturaId = articuloAEliminar.id_factura;
+                const factura = this.facturas.find(f => f.id === facturaId);
+
+                if (!factura) {
+                    this.showAlert("No se encontró la factura correspondiente", "error");
+                    return;
+                }
+
                 // Realizar la solicitud DELETE a la API
-                await axios.delete(`http://localhost:3000/api/articulos/${this.deleteId}`);
+                await api.delete(`/articulos/${this.deleteId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
+
+                // Calcular los nuevos valores para la factura
+                const cantidadArticuloEliminado = parseFloat(articuloAEliminar.cantidad) || 0;
+                const totalIngresoArticuloEliminado = parseFloat(articuloAEliminar.total_ingreso) || 0;
+                
+                const cantidadActualFactura = parseFloat(factura.cantidad) || 0;
+                const totalActualFactura = parseFloat(factura.total) || 0;
+                
+                const nuevaCantidadFactura = cantidadActualFactura + cantidadArticuloEliminado;
+                const nuevoTotalFactura = totalActualFactura + totalIngresoArticuloEliminado;
+
+                // Actualizar tanto la cantidad como el total en la factura
+                const facturaActualizada = await this.updateFacturaData(
+                    facturaId, 
+                    nuevaCantidadFactura, 
+                    nuevoTotalFactura
+                );
+
+                if (facturaActualizada) {
+                    // Actualizar la factura en el array local
+                    const facturaIndex = this.facturas.findIndex(f => f.id === facturaId);
+                    if (facturaIndex !== -1) {
+                        this.facturas[facturaIndex].cantidad = nuevaCantidadFactura;
+                        this.facturas[facturaIndex].total = nuevoTotalFactura;
+                        
+                        // Si tenía registrada_completa = true, cambiarla a false
+                        if (this.facturas[facturaIndex].registrada_completa) {
+                            this.facturas[facturaIndex].registrada_completa = false;
+                        }
+                    }
+                }
 
                 // Eliminar el artículo de la lista local
                 const index = this.existencias.findIndex(
@@ -690,7 +794,19 @@ export default {
                 this.isDeleteModalVisible = false;
                 this.deleteId = null;
 
-                // Mostrar un mensaje de éxito (opcional)
+                // Mostrar mensaje de éxito
+                if (facturaActualizada) {
+                    this.showAlert(
+                        `Artículo eliminado correctamente. Cantidad disponible: ${nuevaCantidadFactura}, Nuevo total: ${nuevoTotalFactura.toFixed(2)}`, 
+                        "success"
+                    );
+                } else {
+                    this.showAlert(
+                        "Artículo eliminado, pero hubo un error al actualizar la factura", 
+                        "warning"
+                    );
+                }
+
             } catch (error) {
                 console.error('Error al eliminar el artículo:', error);
                 this.showAlert("Hubo un error al eliminar el artículo. Inténtalo de nuevo.", "error");
@@ -703,6 +819,7 @@ export default {
         redirectToAddExistencia() {
             this.$router.push('/newexistencia');
         },
+       
     }
 };
 </script>
@@ -897,14 +1014,6 @@ input[type="date"] {
     background-color: #691B31;
 }
 
-
-
-
-
-
-
-
-
 .image-container2 {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
@@ -984,152 +1093,20 @@ input[type="date"] {
 }
 
 
-.titulo {
-    font-size: 30px;
-    font-weight: 100;
-    text-align: center;
+.page-wrapper {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    background-color: #f5f5f5;
 }
 
 .container {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    background: white;
-    flex-direction: column;
-    color: white;
-    overflow-x: hidden;
-}
-
-/* Menú de navegación */
-.navbar {
-    position: 0;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 30px 20px;
-    background: #691B31;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-}
-
-.navbar-left {
     flex: 1;
-    display: flex;
-    align-items: center;
-}
-
-.icon-back {
-    font-size: 24px;
-    cursor: pointer;
-    margin-right: 10px;
-    color: white;
-}
-
-.navbar-center {
-    flex: 3;
-    text-align: center;
-}
-
-.navbar-center h1 {
-    margin: 0;
-    font-size: 24px;
-}
-
-.navbar-center p {
-    margin: 0;
-    font-size: 18px;
-}
-
-
-.navbar-right {
-    flex: 1;
-    display: flex;
-    justify-content: flex-end;
-}
-
-.user-profile {
-    display: flex;
-    align-items: center;
-}
-
-.profile-pic {
-    border-radius: 50%;
-    width: 40px;
-    height: 40px;
-    margin-right: 10px;
-}
-
-.user-info p {
-    margin: 0;
-    font-weight: bold;
-}
-
-.user-info span {
-    font-size: 12px;
-    color: #ddd;
-}
-
-/* Barra de navegación amarilla */
-.sub-navbar {
-    display: flex;
-    justify-content: center;
-    background: linear-gradient(to right, #FFFFFF, #DDC9A3);
-    /* Degradado de izquierda a derecha */
-    padding: 10px 0;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-}
-
-.nav-item {
-    position: relative;
-    margin: 0 20px;
-    cursor: pointer;
-    font-size: 16px;
-    color: #691B31;
-}
-
-.nav-item:hover {
-    color: #590d22;
-}
-
-.dropdown-menu {
-    display: none;
-    position: absolute;
-    top: 100%;
-    left: 0;
-    background-color: #691B31;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    border-radius: 5px;
-    width: 150px;
-    z-index: 1000;
-
-    /* Asegurar que esté encima */
-}
-
-.dropdown-menu button {
     width: 100%;
-    padding: 10px;
-    border: none;
-    background: #691B31;
-    color: white;
-    text-align: left;
-    font-size: 14px;
-
+    padding: 20px;
+    background-color: #f5f5f5;
+    min-height: calc(100vh - 140px);
 }
-
-.dropdown-menu button:hover {
-    background: #590d22;
-}
-
-.nav-item:hover .dropdown-menu {
-    display: block;
-}
-
-
-
-
-
 
 button {
     width: 60%;
@@ -1184,15 +1161,19 @@ a {
 }
 
 .existencia-table {
-    width: 95%;
+     width: 100%;
+    /* Ocupa todo el ancho disponible */
+    max-width: 1200px;
+    /* Limita el ancho máximo */
     border-collapse: separate;
     border-spacing: 0;
     background-color: white;
     color: #691B31;
+    font-size: 14px;
     border-radius: 15px;
-    /* Redondear las esquinas de la tabla */
     overflow: hidden;
-    /* Para que los bordes no sobresalgan */
+    table-layout: auto;
+    /* Ajusta el ancho según el contenido */
 }
 
 .existencia-table th,
@@ -1537,4 +1518,50 @@ button[type="button"]:hover {
 .dropzone input[type="file"] {
     display: none;
 }
+.table-horizontal-scroll {
+    overflow-x: auto; /* Scroll horizontal */
+    overflow-y: visible; /* Sin scroll vertical */
+    border-radius: 15px;
+    /* Agregar estas propiedades para forzar el scroll */
+    display: block;
+    white-space: break-word; /* Evitar que el contenido se ajuste */
+}
+@media (max-width: 768px) {
+   
+    
+    .table-horizontal-scroll {
+        max-width: calc(100vw - 20px); /* Considerar el padding */
+    }
+    
+    .existencia-table {
+        min-width: 1000px;
+    }
+    
+    .existencia-table th,
+    .existencia-table td {
+        padding: 8px 6px;
+        font-size: 14px;
+        min-width: 80px; /* Reducir un poco el ancho mínimo */
+    }
+}
+
+@media (max-width: 480px) {
+   
+    
+    .table-horizontal-scroll {
+        max-width: calc(100vw - 10px);
+    }
+    
+    .existencia-table {
+        min-width: 900px;
+    }
+    
+    .existencia-table th,
+    .existencia-table td {
+        padding: 6px 4px;
+        font-size: 12px;
+        min-width: 70px;
+    }
+}
+
 </style>

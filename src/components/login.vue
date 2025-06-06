@@ -24,6 +24,8 @@
 </template>
 
 <script>
+import api from '../services/api'; // Importar la configuración de API
+
 export default {
   name: 'LoginPage',
   data() {
@@ -40,14 +42,16 @@ export default {
   methods: {
     async login() {
       try {
-        // Obtener las personas y los usuarios de las respectivas APIs
+        this.showAlert("Verificando credenciales...", "warning");
+        
+        // Obtener las personas y los usuarios de las respectivas APIs usando axios
         const [personasResponse, usuariosResponse] = await Promise.all([
-          fetch('http://localhost:3000/api/personas'),
-          fetch('http://localhost:3000/api/usuarios')
+          api.get('/personas'),
+          api.get('/usuarios')
         ]);
 
-        this.personas = await personasResponse.json();
-        this.usuarios = await usuariosResponse.json();
+        this.personas = personasResponse.data;
+        this.usuarios = usuariosResponse.data;
 
         // Buscar la persona que coincida con el email ingresado
         const persona = this.personas.find(p => p.email === this.email);
@@ -61,9 +65,14 @@ export default {
             localStorage.setItem('userRole', usuario.rol);
             localStorage.setItem('userName', persona.nombre);
             localStorage.setItem('userEmail', persona.email);
+            localStorage.setItem('userId', persona.id);
 
-            // Redirigir a home
-            this.$router.push('/home');
+            this.showAlert("¡Inicio de sesión exitoso!", "success");
+            
+            // Redirigir a home después de un breve delay
+            setTimeout(() => {
+              this.$router.push('/home');
+            }, 1500);
           } else {
             this.showAlert("Usuario o contraseña incorrectos", "error");
           }
@@ -71,8 +80,18 @@ export default {
           this.showAlert("El correo electrónico no está registrado", "error");
         }
       } catch (error) {
-        console.error('Error al conectar con la API', error);
-        this.showAlert('Error en el servidor: ' + error.message, 'error');
+        console.error('Error al conectar con la API:', error);
+        
+        // Manejo específico de errores
+        if (error.code === 'ECONNABORTED') {
+          this.showAlert('Error: La conexión tardó demasiado. Verifica que el servidor esté funcionando.', 'error');
+        } else if (error.response) {
+          this.showAlert(`Error del servidor: ${error.response.status}`, 'error');
+        } else if (error.request) {
+          this.showAlert('Error: No se puede conectar con el servidor. Verifica que esté ejecutándose en http://192.168.10.31:3000', 'error');
+        } else {
+          this.showAlert('Error inesperado: ' + error.message, 'error');
+        }
       }
     },
     showAlert(message, type) {
@@ -88,10 +107,12 @@ export default {
         this.alertIcon = "fa fa-exclamation-circle";
       }
 
-      // Ocultar la alerta después de 3 segundos
-      setTimeout(() => {
-        this.alertMessage = "";
-      }, 3000);
+      // Ocultar la alerta después de 3 segundos (excepto para success que se oculta al redirigir)
+      if (type !== "success") {
+        setTimeout(() => {
+          this.alertMessage = "";
+        }, 3000);
+      }
     },
   }
 };

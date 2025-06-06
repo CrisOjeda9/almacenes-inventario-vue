@@ -1,124 +1,63 @@
 <template>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    <div class="page-wrapper">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+        <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
 
+        <NavBarPage :pageTitle="'Almacen'" :showUserMenu="true" />
+        <div class="container">
 
-    <div class="container">
-        <!-- Menú de navegación -->
-        <nav class="navbar">
-            <div class="navbar-left">
-                <img src="../assets/LOGOS DORADOS-02.png" alt="Icono" class="navbar-icon" @click="goHome" width="50%"
-                    height="auto" style="cursor: pointer;" />
-            </div>
-            <div class="navbar-center">
-                <h1>Almacen</h1>
-                <p>Sistema de Almacén e Inventarios de Radio y Televisión de Hidalgo</p>
-            </div>
-            <div class="navbar-right">
-                <div class="user-profile">
-                    <img :src="profileImage" alt="User Profile" class="profile-pic" />
-                    <div class="user-info">
-                        <p>{{ userName }}</p> <!-- Nombre dinámico del usuario -->
-                        <span><a href="profile" style="color: white;">Ver Perfil</a></span>
-                    </div>
+            <div class="menu">
+                <!-- Fila 1 -->
+                <div class="button-card" @click="navigateTo2('proveedor')">
+                    <i class="fas fa-handshake"></i> <!-- Ícono de ver proveedores -->
+                    <span>Ver proveedores</span>
                 </div>
-            </div>
-        </nav>
-
-
-        <!-- Barra de navegación amarilla -->
-        <div class="sub-navbar">
-            <a href="/home" class="nav-item">Inicio</a>
-
-            <!-- Mostrar solo si el usuario NO es de Almacén -->
-            <a v-if="userRole === 'Administrador'" href="users" class="nav-item">Usuarios</a>
-
-            <!-- Solo mostrar "Almacén" si el usuario tiene el rol de Almacén -->
-            <div v-if="userRole === 'Almacenes' || userRole === 'Administrador'" class="nav-item" @mouseenter="showMenu('almacenMenu')"
-                @mouseleave="hideMenu('almacenMenu')">
-                Almacén
-                <span class="menu-icon">▼</span>
-                <div class="dropdown-menu" v-show="menus.almacenMenu">
-                    <button @click="navigateTo('proveedor')">Ver proveedores</button>
-                    <button @click="navigateTo('factura')">Facturas</button>
-                    <button @click="navigateTo('existencia')">Entrada de artículos</button>
-                    <button @click="navigateTo('solicitudmaterial')">Salida de material</button>
-                    <button @click="navigateTo('recepcionsolicitudes')">Recepción de solicitudes</button>
-                    <button @click="navigateTo('bieninventario')">Agregar un bien para inventario</button>
-                    <button @click="navigateTo('poliza')">Pólizas</button>
+                <div class="button-card" @click="navigateTo2('factura')">
+                    <i class="fas fa-file-invoice"></i>
+                    <span>Facturas</span>
                 </div>
-            </div>
-
-            <div v-if="userRole === 'Inventario' || userRole === 'Administrador'" class="nav-item" @mouseenter="showMenu('homeMenu')"
-                @mouseleave="hideMenu('homeMenu')">
-                Inventario
-                <span class="menu-icon">▼</span>
-                <div class="dropdown-menu" v-show="menus.homeMenu">
-                    <button @click="navigateTo('historialbienes')">Historial de bienes</button>
-                    <button @click="navigateTo('resguardo')">Bienes sin resguardo</button>
-                    <button @click="navigateTo('listaalmacen')">Bienes nuevos</button>
-                    <button @click="navigateTo('bienesnuevos')">Asignar resguardo</button>
-                    <button @click="navigateTo('liberarbien')">Liberar Bien</button>
-                    <button @click="navigateTo('bajabien')">Baja de bienes</button>
-                    <button @click="navigateTo('bajas')">Historial de bajas</button>
-                    <button @click="navigateTo('reportes')">Generación de reportes</button>
+                <div class="button-card" @click="navigateTo2('existencia')">
+                    <i class="fas fa-arrow-circle-down"></i> <!-- Ícono de entrada de existencias -->
+                    <span>Entrada de Artículos</span>
                 </div>
-            </div>
-
-            
-        </div>
-
-        <div class="menu">
-            <!-- Fila 1 -->
-             <div class="button-card" @click="navigateTo2('proveedor')">
-                <i class="fas fa-handshake"></i> <!-- Ícono de ver proveedores -->
-                <span>Ver proveedores</span>
-            </div>
-            <div class="button-card" @click="navigateTo2('factura')">
-                <i class="fas fa-file-invoice"></i>
-                <span>Facturas</span>
-            </div>
-             <div class="button-card" @click="navigateTo2('existencia')">
-                <i class="fas fa-arrow-circle-down"></i> <!-- Ícono de entrada de existencias -->
-                <span>Entrada de Artículos</span>
-            </div>
-            
-        </div>
-
-        <!-- Nueva fila de botones -->
-        <div class="menu">
                 
-            <div class="button-card" @click="navigateTo2('solicitudmaterial')">
-                <i class="fas fa-cart-plus"></i> <!-- Ícono de Salida de materiales -->
-                <span>Salida de materiales</span>
-            </div>
-            <div class="button-card" @click="navigateTo2('recepcionsolicitudes')">
-                <i class="fas fa-box"></i> <!-- Ícono de recepción de solicitudes -->
-                <span>Recepción de solicitudes</span>
             </div>
 
-            
-           <div class="button-card" @click="navigateTo2('bieninventario')">
-                <i class="fas fa-plus-circle"></i> <!-- Ícono de agregar un bien para inventario -->
-                <span>Agregar un bien para inventario</span>
-            </div>
+            <!-- Nueva fila de botones -->
+            <div class="menu">
+                    
+                <div class="button-card" @click="navigateTo2('solicitudmaterial')">
+                    <i class="fas fa-cart-plus"></i> <!-- Ícono de Salida de materiales -->
+                    <span>Salida de materiales</span>
+                </div>
+                <div class="button-card" @click="navigateTo2('recepcionsolicitudes')">
+                    <i class="fas fa-box"></i> <!-- Ícono de recepción de solicitudes -->
+                    <span>Recepción de solicitudes</span>
+                </div>
 
-            <div class="button-card" @click="navigateTo2('poliza')">
-                <i class="fas fa-file-contract"></i>
-                <span>Pólizas</span>
+                
+            <div class="button-card" @click="navigateTo2('bieninventario')">
+                    <i class="fas fa-plus-circle"></i> <!-- Ícono de agregar un bien para inventario -->
+                    <span>Agregar un bien para inventario</span>
+                </div>
+
+                <div class="button-card" @click="navigateTo2('poliza')">
+                    <i class="fas fa-file-contract"></i>
+                    <span>Pólizas</span>
+                </div>
             </div>
         </div>
-
-
-
-
-
-    </div>
+    </div>    
 </template>
 
 <script>
+import api from '../services/api';
+import NavBarPage from './NavBar.vue';
 export default {
     name: "almacenPage",
+    components: {
+        NavBarPage // Registrar el componente
+    },
     data() {
         return {
             userRole: localStorage.getItem('userRole') || '', // Obtener el rol desde el localStorage
@@ -131,6 +70,8 @@ export default {
                 homeMenu: false,
                 almacenMenu: false,
                 settingsMenu: false,
+                userMenu: false,
+
             },
         };
     },
@@ -148,8 +89,8 @@ export default {
 
                 try {
                     // Obtener todos los usuarios de la API
-                    const response = await fetch('http://localhost:3000/api/personas');
-                    const users = await response.json();
+                    const response = await api.get('/personas');
+                    const users = response.data; 
 
                     // Buscar el usuario logueado por email
                     const user = users.find(u => u.email === storedUserEmail);
@@ -172,7 +113,7 @@ export default {
 
                         if (imageFileName) {
                             // Construir la URL completa para la imagen
-                            this.profileImage = `http://localhost:3000/api/users-files/${imageFileName}`;
+                            this.profileImage = `http://192.168.10.31:3000/api/users-files/${imageFileName}`;
                         } else {
                             // Usar una imagen por defecto si no hay imagen en la API
                             this.profileImage = "../assets/UserHombre.png";
@@ -217,151 +158,20 @@ export default {
 * {
     font-family: 'Montserrat', sans-serif;
 }
-
-.titulo {
-    font-size: 30px;
-    font-weight: 100;
-    text-align: center;
+.page-wrapper {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    background-color: #f5f5f5;
 }
 
 .container {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    background: white;
-    flex-direction: column;
-    color: white;
-}
-
-/* Menú de navegación */
-.navbar {
-    position: 0;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 30px 20px;
-    background: #691B31;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-}
-
-.navbar-left {
     flex: 1;
-    display: flex;
-    align-items: center;
-}
-
-.icon-back {
-    font-size: 24px;
-    cursor: pointer;
-    margin-right: 10px;
-    color: white;
-}
-
-.navbar-center {
-    flex: 3;
-    text-align: center;
-}
-
-.navbar-center h1 {
-    margin: 0;
-    font-size: 24px;
-}
-
-.navbar-center p {
-    margin: 0;
-    font-size: 18px;
-}
-
-
-.navbar-right {
-    flex: 1;
-    display: flex;
-    justify-content: flex-end;
-}
-
-.user-profile {
-    display: flex;
-    align-items: center;
-}
-
-.profile-pic {
-    border-radius: 50%;
-    width: 40px;
-    height: 40px;
-    margin-right: 10px;
-}
-
-.user-info p {
-    margin: 0;
-    font-weight: bold;
-}
-
-.user-info span {
-    font-size: 12px;
-    color: #ddd;
-}
-
-/* Barra de navegación amarilla */
-.sub-navbar {
-    display: flex;
-    justify-content: center;
-    background: linear-gradient(to right, #FFFFFF, #DDC9A3);
-    /* Degradado de izquierda a derecha */
-    padding: 10px 0;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-}
-
-.nav-item {
-    position: relative;
-    margin: 0 20px;
-    cursor: pointer;
-    font-size: 16px;
-    color: #691B31;
-}
-
-.nav-item:hover {
-    color: #590d22;
-}
-
-.dropdown-menu {
-    display: none;
-    position: absolute;
-    top: 100%;
-    left: 0;
-    background-color: #691B31;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    border-radius: 5px;
-    width: 150px;
-    z-index: 1000;
-
-    /* Asegurar que esté encima */
-}
-
-.dropdown-menu button {
     width: 100%;
-    padding: 10px;
-    border: none;
-    background: #691B31;
-    color: white;
-    text-align: left;
-    font-size: 14px;
-
+    padding: 20px;
+    background-color: #f5f5f5;
+    min-height: calc(100vh - 140px);
 }
-
-.dropdown-menu button:hover {
-    background: #590d22;
-}
-
-.nav-item:hover .dropdown-menu {
-    display: block;
-}
-
-
-
-
 
 
 button {

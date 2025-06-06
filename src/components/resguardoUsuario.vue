@@ -2,10 +2,9 @@
     <div class="page-wrapper">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
         <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
-        <NavBarPage :pageTitle="'Recepcion de Solicitudes'" :showUserMenu="true" />
+        <NavBarPage :pageTitle="'Resguardo'" :showUserMenu="true" />
         <div class="container">
             <div class="search-bar">
-
                 <div class="input-wrapper">
                     <input type="text" v-model="searchQuery" placeholder="Buscar..." />
                     <i class="fas fa-search"></i> <!-- Icono de la lupa -->
@@ -13,30 +12,53 @@
             </div>
 
             <div class="contenedor-tabla">
-                <table class="solicitudes-table">
+                <table class="bienes-table">
                     <thead>
                         <tr>
-                            <th>Usuario Solicitante</th>
-                            <th>Fecha en que llego</th>
-                            <th>Acciones</th>
+                            <th>Descripción</th>
+                            <th>Marca</th>
+                            <th>Modelo</th>
+                            <th>Serie</th>
+                            <th>Foto del Bien</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr v-for="solicitudes in paginatedSolicitudes" :key="solicitudes.id">
-                            <td>{{ solicitudes.name }}</td>
-                            <td>{{ solicitudes.registrationDate }}</td>
+                        <tr v-for="bienes in paginatedBienes" :key="bienes.id">
+                            <td>{{ bienes.descripcion }}</td>
+                            <td>{{ bienes.marca }}</td>
+                            <td>{{ bienes.modelo }}</td>
+                            <td>{{ bienes.serie }}</td>
                             <td>
-                                <button @click="redirectToAddsolicitudes" class="btn-existencias">Salida de existencias</button>
+                                <button @click="openModal(bienes.fotoBien)" class="btn-download">
+                                    <i class="fas fa-eye"></i>
+                                </button>
                             </td>
+
                         </tr>
                     </tbody>
-
                 </table>
                 <!-- Paginador -->
                 <div class="pagination">
                     <button :disabled="currentPage === 1" @click="changePage(currentPage - 1)">Anterior</button>
                     <span>Página {{ currentPage }} de {{ totalPages }}</span>
                     <button :disabled="currentPage === totalPages" @click="changePage(currentPage + 1)">Siguiente</button>
+                </div>
+            </div>
+            <!-- Modal para mostrar imágenes -->
+            <div v-if="showModal" class="modal-overlay" @click="closeModal">
+                <div class="modal" @click.stop>
+                    <h2>Imágenes</h2>
+                    <hr>
+                    <div class="image-container">
+                        <div v-for="(foto, i) in modalImages" :key="i" class="image-box">
+                            <!-- Envolvemos la imagen con un enlace -->
+                            <a :href="getImageUrl(foto)" target="_blank">
+                                <img :src="getImageUrl(foto)" alt="Foto del bien recibido" class="modal-img" />
+                            </a>
+                            <p class="image-name">{{ foto }}</p>
+                        </div>
+                    </div>
+                    <button @click="closeModal">Cerrar</button>
                 </div>
             </div>
         </div>
@@ -46,7 +68,7 @@
 <script>
 import NavBarPage from './NavBar.vue';
 export default {
-    name: "recepcionSolicitudesPage",
+    name: "resguardoUsuarioPage",
     components: {
         NavBarPage // Registrar el componente
     },
@@ -57,37 +79,57 @@ export default {
             profileImage: "",  // URL de la imagen del usuario
             menus: {
                 homeMenu: false,
-                SolicitudMenu: false,
+                bienesMenu: false,
                 settingsMenu: false,
-                userMenu: false, 
+                userMenu: false,
             },
             searchQuery: '',
-            solicitudes: [
-                { name: "Cristian", registrationDate: "2024-01-15" },
-
-                // Agrega más usuarios aquí...
+            bienes: [
+                {
+                    descripcion: "Computadora de escritorio",
+                    marca: "HP",
+                    modelo: "Pavilion",
+                    serie: "123456789",
+                    fotoBien: ["laptop.jpeg"],
+                },
+                {
+                    descripcion: "Impresora láser",
+                    marca: "Epson",
+                    modelo: "L120",
+                    serie: "987654321",
+                    fotoBien: ["laptop.jpeg"]
+                },
+                // Agrega más bienes aquí...
             ],
             itemsPerPage: 10, // Cantidad de elementos por página
             currentPage: 1, // Página actual
+            filterTerm: '', // Variable para filtrar por término específico
+            showModal: false,
+            modalImages: [],
+            itemToRemove: null,
 
         };
     },
     computed: {
-        filteredSolicitudes() {
-            return this.solicitudes.filter(solicitudes => {
+        filteredBienes() {
+            return this.bienes.filter(bien => {
                 const query = this.searchQuery.toLowerCase();
-                return (solicitudes.name.toLowerCase().includes(query));
-
+                return (
+                    bien.descripcion.toLowerCase().includes(query) ||
+                    bien.marca.toLowerCase().includes(query) ||
+                    bien.modelo.toLowerCase().includes(query) ||
+                    bien.serie.toLowerCase().includes(query)
+                );
             });
         },
         // Número total de páginas
         totalPages() {
-            return Math.ceil(this.filteredSolicitudes.length / this.itemsPerPage);
+            return Math.ceil(this.filteredBienes.length / this.itemsPerPage);
         },
-        paginatedSolicitudes() {
+        paginatedBienes() {
             const start = (this.currentPage - 1) * this.itemsPerPage;
             const end = start + this.itemsPerPage;
-            return this.filteredSolicitudes.slice(start, end);
+            return this.filteredBienes.slice(start, end);
         },
     },
     mounted() {
@@ -144,6 +186,14 @@ export default {
                 this.profileImage = "../assets/UserHombre.png"; // Imagen por defecto
             }
         },
+        openModal(fotos) {
+            this.modalImages = fotos;
+            this.showModal = true;
+        },
+        closeModal() {
+            this.showModal = false;
+            this.modalImages = [];
+        },
         goHome() {
             this.$router.push('home'); // Redirige a la página principal ("/"). Cambia el path si es necesario.
         },
@@ -160,15 +210,18 @@ export default {
         hideMenu(menu) {
             this.menus[menu] = false;
         },
-        redirectToAddsolicitudes() {
+        redirectToAddbienes() {
             // Aquí defines la ruta a la que quieres redirigir al hacer clic en el botón
-            this.$router.push('/salidaExistencias');
+            this.$router.push('/register');
         },
         changePage(page) {
             if (page >= 1 && page <= this.totalPages) {
                 this.currentPage = page;
             }
         },
+        getImageUrl(image) {
+            return require(`@/assets/${image}`);
+        }
     },
 };
 </script>
@@ -179,7 +232,83 @@ export default {
     font-family: 'Montserrat', sans-serif;
 }
 
+.image-container {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    /* Muestra 5 imágenes por fila */
+    gap: 10px;
+    /* Espacio entre las imágenes */
+    margin-top: 20px;
+}
 
+.image-name {
+    font-size: 12px;
+    color: #333;
+    margin-top: 5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 200px;
+
+}
+
+
+.modal-img {
+    max-width: 300px;
+    border-radius: 8px;
+    width: auto;
+    height: 120px;
+
+}
+
+
+/* Efecto de zoom al pasar el cursor por encima de la imagen */
+.modal-img:hover {
+    transition: transform 0.3s ease-in-out;
+    transform: scale(1.1);
+    box-shadow: 0 4px 8px #6f7271;
+    /* Hace que la imagen crezca al 150% de su tamaño */
+}
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    /* Asegúrate de que el modal esté por encima de otros elementos */
+}
+
+.modal {
+    background: white;
+    color: #691B31;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+    width: 1100px;
+}
+
+.modal-overlay.show {
+    visibility: visible;
+}
+
+.modal button {
+    padding: 10px 20px;
+    background-color: #BC955B;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.modal button:hover {
+    background-color: #691B31;
+}
 
 .pagination {
     display: flex;
@@ -260,8 +389,8 @@ a {
     text-decoration: none;
 }
 
-.solicitudes-table {
-    width: 50%;
+.bienes-table {
+    width: 80%;
     border-collapse: separate;
     border-spacing: 0;
     background-color: white;
@@ -272,25 +401,25 @@ a {
     /* Para que los bordes no sobresalgan */
 }
 
-.solicitudes-table th,
-.solicitudes-table td {
+.bienes-table th,
+.bienes-table td {
     padding: 10px;
     text-align: center;
 }
 
-.solicitudes-table th {
+.bienes-table th {
     background-color: #BC955B;
     color: white;
 }
 
-.solicitudes-table tr:hover {
+.bienes-table tr:hover {
     background-color: #70727265;
     color: #A02142;
     transition: background-color 0.3s ease;
 }
 
-.btn-existencias{
-    width: 120px;
+.btn-edit,
+.btn-delete {
     text-align: center;
     padding-top: 2px;
     padding-bottom: 2px;
@@ -300,25 +429,30 @@ a {
     cursor: pointer;
 }
 
-.btn-existencias {
-    background-color: #BC955B;
+.btn-edit {
+    background-color: #4CAF50;
     color: white;
     margin-bottom: 4px;
 }
 
+.btn-delete {
+    background-color: #f44336;
+    color: white;
 
-
-.btn-existencias:hover {
-    background-color: #DDC9A3;
 }
 
+.btn-edit:hover {
+    background-color: #45a049;
+}
 
+.btn-delete:hover {
+    background-color: #e41f1f;
+}
 
 .contenedor-tabla {
     display: flex;
     flex-direction: column;
     width: 100%;
-    height: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -357,5 +491,16 @@ a {
 
 .input-wrapper input::placeholder {
     color: #691B31;
+}
+
+.search-bar select {
+    padding: 10px;
+    border-radius: 10px;
+    justify-content: space-between;
+    margin-right: 15px;
+}
+
+.btn-download {
+    width: 50px;
 }
 </style>

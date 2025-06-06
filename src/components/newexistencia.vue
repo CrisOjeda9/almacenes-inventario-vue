@@ -1,271 +1,231 @@
 <template>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
-
-    <div class="container">
-        <!-- Menú de navegación -->
-        <nav class="navbar">
-            <div class="navbar-left">
-                <img src="../assets/LOGOS DORADOS-02.png" alt="Icono" class="navbar-icon" @click="goHome" width="50%"
-                    height="auto" style="cursor: pointer;" />
-            </div>
-            <div class="navbar-center">
-                <h1>Entrada de Artículos</h1>
-                <p>Sistema de Almacén e Inventarios de Radio y Televisión de Hidalgo</p>
-            </div>
-            <div class="navbar-right">
-                <div class="user-profile">
-                    <img :src="profileImage" alt="User Profile" class="profile-pic" />
-                    <div class="user-info">
-                        <p>{{ userName }}</p>
-                        <span><a href="profile" style="color: white;">Ver Perfil</a></span>
-                    </div>
-                </div>
-            </div>
-        </nav>
-
-        <!-- Barra de navegación amarilla -->
-        <div class="sub-navbar">
-            <a href="/home" class="nav-item">Inicio</a>
-            <a v-if="userRole === 'Administrador'" href="users" class="nav-item">Usuarios</a>
-            <div v-if="userRole === 'Almacenes' || userRole === 'Administrador'" class="nav-item" @mouseenter="showMenu('almacenMenu')"
-                @mouseleave="hideMenu('almacenMenu')">
-                Almacén
-                <span class="menu-icon">▼</span>
-                <div class="dropdown-menu" v-show="menus.almacenMenu">
-                    <button @click="navigateTo('proveedor')">Ver proveedores</button>
-                    <button @click="navigateTo('factura')">Facturas</button>
-                    <button @click="navigateTo('existencia')">Entrada de artículos</button>
-                    <button @click="navigateTo('solicitudmaterial')">Salida de material</button>
-                    <button @click="navigateTo('recepcionsolicitudes')">Recepción de solicitudes</button>
-                    <button @click="navigateTo('bieninventario')">Agregar un bien para inventario</button>
-                    <button @click="navigateTo('poliza')">Pólizas</button>
-                </div>
-            </div>
-
-            <div v-if="userRole === 'Inventario' || userRole === 'Administrador'" class="nav-item" @mouseenter="showMenu('homeMenu')"
-                @mouseleave="hideMenu('homeMenu')">
-                Inventario
-                <span class="menu-icon">▼</span>
-                <div class="dropdown-menu" v-show="menus.homeMenu">
-                    <button @click="navigateTo('historialbienes')">Historial de bienes</button>
-                    <button @click="navigateTo('resguardo')">Bienes sin resguardo</button>
-                    <button @click="navigateTo('listaalmacen')">Bienes nuevos</button>
-                    <button @click="navigateTo('bienesnuevos')">Asignar resguardo</button>
-                    <button @click="navigateTo('liberarbien')">Liberar Bien</button>
-                    <button @click="navigateTo('bajabien')">Baja de bienes</button>
-                    <button @click="navigateTo('bajas')">Historial de bajas</button>
-                    <button @click="navigateTo('reportes')">Generación de reportes</button>
-                </div>
-            </div>
-        </div>
-
-        <div class="content-wrapper">
-            <div class="form-table-container">
-                <div class="form-section">
-                    <form @submit.prevent="addToTable">
-                        <!-- Primera fila (3 campos) -->
-                        <div class="form-row triple">
-                            <div class="form-field">
-                                <label for="id_objetogasto">Número de partida</label>
-                                <input type="number" min="0" id="id_objetogasto" v-model="form.numero_partida"
-                                    @input="validarNumeroPartida" required />
-                            </div>
-                            <div class="form-field">
-                                <label for="id_factura">Número de factura</label>
-                                <input type="text" id="id_factura" v-model="form.numero_de_factura"
-                                    @blur="validarNumeroFactura" :disabled="facturaBloqueada !== null" required />
-                                <span v-if="facturaBloqueada !== null" class="factura-bloqueada-nota">
-                                </span>
-                            </div>
-                            <div class="form-field">
-                                <label for="cantidad">Cantidad</label>
-                                <input type="number" min="0" id="cantidad" v-model="form.cantidad" required />
-                            </div>
-
-                        </div>
-
-                        <!-- Descripción (fila completa) -->
-                        <div class="form-row single">
-                            <div class="form-field full-width">
-                                <label for="descripcion">Descripción</label>
-                                <input type="text" id="descripcion" v-model="form.descripcion" required />
-                            </div>
-                        </div>
-
-                        <div class="form-row triple">
-                            <div class="form-field">
-                                <label for="precio_unitario">Precio Unitario (Sin IVA)</label>
-                                <input type="number" step="0.01" min="0" id="precio_unitario"
-                                    v-model="form.precio_unitario" @input="calcularTotales" required />
-                            </div>
-                            <div class="form-field">
-                                <label for="iva">IVA (16%)</label>
-                                <input type="number" step="0.01" min="0" id="iva" v-model="form.iva" readonly
-                                    style="background-color: #dcddcd;" />
-                            </div>
-                            <div class="form-field">
-                                <label for="importe_con_iva">Importe (Con IVA)</label>
-                                <input type="number" step="0.01" min="0" id="importe_con_iva"
-                                    v-model="form.importe_con_iva" readonly required
-                                    style="background-color: #dcddcd;" />
-                            </div>
-                        </div>
-
-                        <div class="form-row ">
-                            <div class="form-field">
-                                <label for="unidad_medida">Unidad de medida</label>
-                                <select id="unidad_medida" v-model="form.unidad_medida" required>
-                                    <option value="" disabled>Selecciona una opción</option>
-                                    <option value="Piezas">Piezas</option>
-                                    <option value="Paquetes">Paquetes</option>
-                                    <option value="Cajas">Cajas</option>
-                                    <option value="Kilogramos">Kilogramos</option>
-                                    <option value="Litros">Litros</option>
-                                    <option value="Metros">Metros</option>
-                                    <option value="Rollos">Rollos</option>
-                                    <option value="Bultos">Bultos</option>
-                                </select>
-                            </div>
-                            <div class="form-field">
-                                <label for="total_ingreso">Total de ingreso</label>
-                                <input type="number" step="0.01" min="0" id="total_ingreso" v-model="form.total_ingreso"
-                                    style="background-color: #dcddcd;" readonly required />
-                            </div>
-                            <div class="form-field"></div>
-                        </div>
-
-                        <!-- Foto artículo (fila completa) -->
-                        <div class="form-row single">
-                            <div class="form-field full-width">
-                                <label for="foto_articulo">Foto artículo</label>
-                                <div class="dropzone" @drop.prevent="handleDrop" @dragover.prevent
-                                    @click="triggerFileInput">
-                                    <input type="file" id="foto_articulo" ref="fileInputExistencia" multiple
-                                        @change="handleFileUpload" accept="image/*" />
-                                    <i class="fas fa-cloud-upload-alt"></i>
-                                    <span v-if="form.foto_articulo.length === 0">Arrastra o selecciona imágenes (JPG,
-                                        PNG)</span>
-                                    <span v-else>{{ form.foto_articulo.length }} imágenes seleccionadas</span>
+    <div class="page-wrapper">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+        <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+        <NavBarPage :pageTitle="'Entrada de Artículos'" :showUserMenu="true" />
+        <div class="container">
+            <div class="content-wrapper">
+                <div class="form-table-container">
+                    <div class="form-section">
+                        <form @submit.prevent="addToTable">
+                            <!-- Primera fila (3 campos) -->
+                            <div class="form-row triple">
+                                <div class="form-field">
+                                    <label for="id_objetogasto">Número de partida</label>
+                                    <input type="number" min="0" id="id_objetogasto" v-model="form.numero_partida"
+                                        @input="validarNumeroPartida" required />
                                 </div>
-                                <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
+                                <div class="form-field">
+                                    <label for="id_factura">Número de factura</label>
+                                    <input type="text" id="id_factura" v-model="form.numero_de_factura"
+                                        @blur="validarNumeroFactura" :disabled="facturaBloqueada !== null" required />
+                                    <span v-if="facturaBloqueada !== null" class="factura-bloqueada-nota">
+                                    </span>
+                                </div>
+                                <div class="form-field">
+                                    <label for="cantidad">Cantidad</label>
+                                    <input type="number" min="0" id="cantidad" v-model="form.cantidad" required />
+                                </div>
 
-                                <button v-if="form.foto_articulo.length > 0" @click.prevent="openImageModal"
-                                    class="view-images-btn">
-                                    Ver Imágenes
+                            </div>
+
+                            <!-- Descripción (fila completa) -->
+                            <div class="form-row single">
+                                <div class="form-field full-width">
+                                    <label for="descripcion">Descripción</label>
+                                    <input type="text" id="descripcion" v-model="form.descripcion" required />
+                                </div>
+                            </div>
+
+                            <div class="form-row triple">
+                                <div class="form-field">
+                                    <label for="precio_unitario">Precio Unitario (Sin IVA)</label>
+                                    <input type="number" step="0.01" min="0" id="precio_unitario"
+                                        v-model="form.precio_unitario" @input="calcularTotales" required />
+                                </div>
+                                <!-- descuento -->
+                                <div class="form-field">
+                                    <label for="descuento">Descuento</label>
+                                    <input type="number" id="descuento" step="0.01" placeholder="" v-model="form.descuento" min="0"
+                                        required />
+                                </div>
+                                <div class="form-field iva-field">
+                                    <div class="iva-checkbox-container">
+                                        <label for="iva_habilitado" class="checkbox-label">
+                                            <input type="checkbox" id="iva_habilitado" v-model="form.iva_habilitado" />
+                                            <span class="checkmark"></span>
+                                        </label>
+                                        <label for="iva">IVA (16%)</label>
+                                    </div>
+                                    <input type="number" id="iva" step="0.01" placeholder="" v-model="form.iva" readonly min="0" 
+                                        :style="{ backgroundColor: form.iva_habilitado ? '#dcddcd' : '#f0f0f0' }" required />
+                                </div>
+                            </div>
+
+                            <div class="form-row ">
+                                <div class="form-field">
+                                    <label for="importe_con_iva">Importe (Con IVA)</label>
+                                    <input type="number" step="0.01" min="0" id="importe_con_iva"
+                                        v-model="form.importe_con_iva" readonly required
+                                        style="background-color: #dcddcd;" />
+                                </div>
+                                <div class="form-field">
+                                    <label for="unidad_medida">Unidad de medida</label>
+                                    <select id="unidad_medida" v-model="form.unidad_medida" required>
+                                        <option value="" disabled>Selecciona una opción</option>
+                                        <option value="Piezas">Piezas</option>
+                                        <option value="Paquetes">Paquetes</option>
+                                        <option value="Cajas">Cajas</option>
+                                        <option value="Kilogramos">Kilogramos</option>
+                                        <option value="Litros">Litros</option>
+                                        <option value="Metros">Metros</option>
+                                        <option value="Rollos">Rollos</option>
+                                        <option value="Bultos">Bultos</option>
+                                    </select>
+                                </div>
+                                <div class="form-field">
+                                    <label for="total_ingreso">Total de ingreso</label>
+                                    <input type="number" step="0.01" min="0" id="total_ingreso" v-model="form.total_ingreso"
+                                        style="background-color: #dcddcd;" readonly required />
+                                </div>
+                                <div class="form-field"></div>
+                            </div>
+
+                            <!-- Foto artículo (fila completa) -->
+                            <div class="form-row single">
+                                <div class="form-field full-width">
+                                    <label for="foto_articulo">Foto artículo</label>
+                                    <div class="dropzone" @drop.prevent="handleDrop" @dragover.prevent
+                                        @click="triggerFileInput">
+                                        <input type="file" id="foto_articulo" ref="fileInputExistencia" multiple
+                                            @change="handleFileUpload" accept="image/*" />
+                                        <i class="fas fa-cloud-upload-alt"></i>
+                                        <span v-if="form.foto_articulo.length === 0">Arrastra o selecciona imágenes (JPG,
+                                            PNG)</span>
+                                        <span v-else>{{ form.foto_articulo.length }} imágenes seleccionadas</span>
+                                    </div>
+                                    <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
+
+                                    <button v-if="form.foto_articulo.length > 0" @click.prevent="openImageModal"
+                                        class="view-images-btn">
+                                        Ver Imágenes
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="button-container">
+                                <button class="boton" type="submit">
+                                    <i class="fas fa-plus-square"></i> Agregar a Tabla
                                 </button>
                             </div>
-                        </div>
+                        </form>
+                    </div>
 
-                        <div class="button-container">
-                            <button class="boton" type="submit">
-                                <i class="fas fa-plus-square"></i> Agregar a Tabla
+                    <!-- Tabla (derecha) -->
+                    <div class="table-section">
+                        <h2>Artículos a Registrar</h2>
+                        <div class="table-wrapper">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>No. Partida</th>
+                                        <th>Descripción</th>
+                                        <th>Cantidad</th>
+                                        <th>Unidad</th>
+                                        <th>Total</th>
+                                        <th>Eliminar</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="(articulo, index) in articulosTabla" :key="index">
+                                        <td>{{ articulo.numero_partida }}</td>
+                                        <td>{{ articulo.descripcion }}</td>
+                                        <td>{{ articulo.cantidad }}</td>
+                                        <td>{{ articulo.unidad_medida }}</td>
+                                        <td>${{ formatCurrency(articulo.total_ingreso) }}</td>
+
+                                        <td>
+                                            <button @click="showDeleteModal(index)" class="delete-btn">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+
+                                <tfoot>
+                                    <tr class="total-row">
+                                        <td colspan="4" class="text-right"><strong>Total General:</strong></td>
+                                        <td><strong>${{ formatCurrency(totalGeneral) }}</strong></td>
+                                    </tr>
+                                </tfoot>
+
+                            </table>
+
+                        </div>
+                        <div class="table-actions">
+                            <button @click="registerAllArticles" class="register-btn"
+                                :disabled="articulosTabla.length === 0">
+                                <i class="fas fa-save"></i> Registrar Artículos
                             </button>
                         </div>
-                    </form>
-                </div>
-
-                <!-- Tabla (derecha) -->
-                <div class="table-section">
-                    <h2>Artículos a Registrar</h2>
-                    <div class="table-wrapper">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>No. Partida</th>
-                                    <th>Descripción</th>
-                                    <th>Cantidad</th>
-                                    <th>Unidad</th>
-                                    <th>Total</th>
-                                    <th>Eliminar</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr v-for="(articulo, index) in articulosTabla" :key="index">
-                                    <td>{{ articulo.numero_partida }}</td>
-                                    <td>{{ articulo.descripcion }}</td>
-                                    <td>{{ articulo.cantidad }}</td>
-                                    <td>{{ articulo.unidad_medida }}</td>
-                                    <td>${{ formatCurrency(articulo.total_ingreso) }}</td>
-
-                                    <td>
-                                        <button @click="showDeleteModal(index)" class="delete-btn">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-                            </tbody>
-
-                            <tfoot>
-                                <tr class="total-row">
-                                    <td colspan="4" class="text-right"><strong>Total General:</strong></td>
-                                    <td><strong>${{ formatCurrency(totalGeneral) }}</strong></td>
-                                </tr>
-                            </tfoot>
-
-                        </table>
-
-                    </div>
-                    <div class="table-actions">
-                        <button @click="registerAllArticles" class="register-btn"
-                            :disabled="articulosTabla.length === 0">
-                            <i class="fas fa-save"></i> Registrar Artículos
-                        </button>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Modal para mostrar las imágenes -->
-        <div v-if="showImageModal" class="modal-overlay2">
-            <div class="modal2">
-                <h2>Imágenes seleccionadas</h2>
-                <div class="image-preview-container">
-                    <div v-for="(img, index) in form.foto_articulo" :key="index" class="image-preview">
-                        <div class="image-container">
-                            <img :src="getImageUrl(img)" :alt="img.name" class="image-preview-img" />
-                            <button @click="removeImage(index)" class="remove-btn">
-                                <i class="fas fa-trash-alt"></i>
-                            </button>
+            <!-- Modal para mostrar las imágenes -->
+            <div v-if="showImageModal" class="modal-overlay2">
+                <div class="modal2">
+                    <h2>Imágenes seleccionadas</h2>
+                    <div class="image-preview-container">
+                        <div v-for="(img, index) in form.foto_articulo" :key="index" class="image-preview">
+                            <div class="image-container">
+                                <img :src="getImageUrl(img)" :alt="img.name" class="image-preview-img" />
+                                <button @click="removeImage(index)" class="remove-btn">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </div>
+                            <p class="image-name">{{ img.name }}</p>
                         </div>
-                        <p class="image-name">{{ img.name }}</p>
+                    </div>
+                    <button @click="closeImageModal">Cerrar</button>
+                </div>
+            </div>
+
+            <!-- Modal de Éxito -->
+            <div v-if="modalVisible" class="modal">
+                <div class="modal-content">
+                    <span class="close" @click="cerrarModal">&times;</span>
+                    <h2>¡Registro Exitoso!</h2>
+                    <p>Los artículos han sido registrados correctamente.</p>
+                    <button @click="redirigirPagina">Aceptar</button>
+                </div>
+            </div>
+            <!-- Contenedor de notificaciones -->
+            <div v-if="alertMessage" :class="alertClass" class="notification">
+                <i :class="alertIcon"></i> {{ alertMessage }}
+            </div>
+            <!-- Modal de Confirmación de Eliminación -->
+            <div v-if="isDeleteModalVisible" class="modal-overlay">
+                <div class="modal-content-delete">
+                    <h3>¿Estás seguro de eliminar este artículo?</h3>
+                    <div class="modal-buttons">
+                        <button @click="confirmDelete" class="btn-confirm">Confirmar</button>
+                        <button @click="cancelDelete" class="btn-cancel">Cancelar</button>
                     </div>
                 </div>
-                <button @click="closeImageModal">Cerrar</button>
             </div>
         </div>
-
-        <!-- Modal de Éxito -->
-        <div v-if="modalVisible" class="modal">
-            <div class="modal-content">
-                <span class="close" @click="cerrarModal">&times;</span>
-                <h2>¡Registro Exitoso!</h2>
-                <p>Los artículos han sido registrados correctamente.</p>
-                <button @click="redirigirPagina">Aceptar</button>
-            </div>
-        </div>
-        <!-- Contenedor de notificaciones -->
-        <div v-if="alertMessage" :class="alertClass" class="notification">
-            <i :class="alertIcon"></i> {{ alertMessage }}
-        </div>
-        <!-- Modal de Confirmación de Eliminación -->
-        <div v-if="isDeleteModalVisible" class="modal-overlay">
-            <div class="modal-content-delete">
-                <h3>¿Estás seguro de eliminar este artículo?</h3>
-                <div class="modal-buttons">
-                    <button @click="confirmDelete" class="btn-confirm">Confirmar</button>
-                    <button @click="cancelDelete" class="btn-cancel">Cancelar</button>
-                </div>
-            </div>
-        </div>
-    </div>
+    </div>    
 </template>
 
 <script>
-import axios from 'axios';
-
+import api from '../services/api';
+import NavBarPage from './NavBar.vue';
 export default {
     name: "newExistenciaPage",
+    components: {
+        NavBarPage // Registrar el componente
+    },
     data() {
         return {
 
@@ -284,6 +244,8 @@ export default {
                 numero_de_factura: "",
                 descripcion: "",
                 precio_unitario: "",
+                descuento: "",
+                iva_habilitado: false, // Checkbox para habilitar IVA
                 iva: "",
                 importe_con_iva: "",
                 cantidad: "",
@@ -297,6 +259,7 @@ export default {
                 homeMenu: false,
                 existenciaMenu: false,
                 settingsMenu: false,
+                userMenu: false,
             },
             modalVisible: false,
             buttonType: "",
@@ -313,6 +276,28 @@ export default {
 
         };
     },
+    watch: {
+        // Recalcular totales cuando cambia el precio unitario
+        "form.precio_unitario": function () {
+            this.calcularTotales();
+        },
+        // Recalcular totales cuando cambia el descuento
+        "form.descuento": function () {
+            this.calcularTotales();
+        },
+        // Recalcular totales cuando se habilita/deshabilita el IVA
+        "form.iva_habilitado": function () {
+            this.calcularTotales();
+        },
+        // Recalcular total de ingreso cuando cambia la cantidad
+        "form.cantidad": function () {
+            this.calcularTotalIngreso();
+        },
+        // Recalcular total de ingreso cuando cambia el importe con IVA
+        "form.importe_con_iva": function () {
+            this.calcularTotalIngreso();
+        }
+    },
     mounted() {
         this.loadUserData();
         this.loadObjetosGasto();
@@ -328,13 +313,30 @@ export default {
     methods: {
 
         calcularTotales() {
-            // Cálculo de IVA y Importe con IVA (como antes)
-            if (this.form.precio_unitario) {
-                const precio = parseFloat(this.form.precio_unitario);
-                this.form.iva = (precio * 0.16).toFixed(2);
-                this.form.importe_con_iva = (precio * 1.16).toFixed(2);
-                this.calcularTotalIngreso(); // Actualizar total ingreso si cambia el precio
+            const precioUnitario = parseFloat(this.form.precio_unitario) || 0;
+            const descuento = parseFloat(this.form.descuento) || 0;
+            
+            if (precioUnitario > 0) {
+                // Aplicar descuento al precio unitario
+                const precioConDescuento = precioUnitario - descuento;
+                
+                if (this.form.iva_habilitado) {
+                    // Calcular IVA sobre el precio con descuento
+                    const iva = precioConDescuento * 0.16;
+                    const importeConIva = precioConDescuento + iva;
+                    
+                    this.form.iva = iva.toFixed(2);
+                    this.form.importe_con_iva = importeConIva.toFixed(2);
+                } else {
+                    // Sin IVA
+                    this.form.iva = "0.00";
+                    this.form.importe_con_iva = precioConDescuento.toFixed(2);
+                }
+                
+                // Actualizar total ingreso
+                this.calcularTotalIngreso();
             } else {
+                // Limpiar campos si no hay precio unitario
                 this.form.iva = '';
                 this.form.importe_con_iva = '';
                 this.form.total_ingreso = '';
@@ -342,10 +344,11 @@ export default {
         },
 
         calcularTotalIngreso() {
-            if (this.form.cantidad && this.form.importe_con_iva) {
-                const cantidad = parseFloat(this.form.cantidad);
-                const importe = parseFloat(this.form.importe_con_iva);
-                this.form.total_ingreso = (cantidad * importe).toFixed(2);
+            const cantidad = parseFloat(this.form.cantidad) || 0;
+            const importeConIva = parseFloat(this.form.importe_con_iva) || 0;
+            
+            if (cantidad > 0 && importeConIva > 0) {
+                this.form.total_ingreso = (cantidad * importeConIva).toFixed(2);
             } else {
                 this.form.total_ingreso = '';
             }
@@ -458,6 +461,170 @@ export default {
             this.resetForm(true);
         },
 
+       // Método para actualizar la cantidad y total de la factura
+        async updateFacturaCantidad(facturaId, nuevaCantidad, nuevoTotal = null) {
+            try {
+                const updateData = {
+                    cantidad: nuevaCantidad
+                };
+                
+                // Si se proporciona un nuevo total, incluirlo en la actualización
+                if (nuevoTotal !== null) {
+                    updateData.total = nuevoTotal;
+                }
+
+                const response = await api.put(`/facturas/${facturaId}`, updateData, {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
+                
+                if (response.status === 200) {
+                    console.log('Factura actualizada correctamente');
+                    return true;
+                }
+            } catch (error) {
+                console.error('Error al actualizar la factura:', error);
+                return false;
+            }
+        },
+
+        // Método registerExistencia actualizado
+        async registerExistencia(tipo) {
+            // Validar campos obligatorios
+            const camposObligatorios = [
+                { campo: 'numero_partida', mensaje: 'Número de partida' },
+                { campo: 'numero_de_factura', mensaje: 'Número de factura' },
+                { campo: 'descripcion', mensaje: 'Descripción del artículo' },
+                { campo: 'precio_unitario', mensaje: 'Importe sin IVA' },
+                { campo: 'iva', mensaje: 'IVA' },
+                { campo: 'importe_con_iva', mensaje: 'Importe con IVA' },
+                { campo: 'cantidad', mensaje: 'Cantidad' },
+                { campo: 'unidad_medida', mensaje: 'Unidad de medida' },
+                { campo: 'total_ingreso', mensaje: 'Total de ingreso' }
+            ];
+
+            for (const { campo, mensaje } of camposObligatorios) {
+                if (!this.form[campo]) {
+                    this.showAlert(`Por favor, completa el campo: ${mensaje}`, "error");
+                    return;
+                }
+            }
+
+            // Validar que el número de partida sea válido
+            if (!this.validarNumeroPartida()) {
+                this.showAlert(this.errorNumeroPartida || "El número de partida no es válido.", "error");
+                return;
+            }
+
+            // Validar que el número de factura sea válido
+            if (!await this.validarNumeroFactura()) {
+                this.showAlert(this.errorNumeroFactura || "El número de factura no es válido.", "error");
+                return;
+            }
+
+            if (this.form.foto_articulo.length === 0) {
+                this.showAlert("Por favor, agrega una foto del artículo.", "error");
+                return;
+            }
+
+            // Obtener la factura actual para calcular la nueva cantidad
+            const facturaActual = this.facturas.find(f => f.id == this.form.id_factura);
+            if (!facturaActual) {
+                this.showAlert("No se encontró la factura correspondiente", "error");
+                return;
+            }
+
+            // Crear FormData para enviar archivos y datos
+            const formData = new FormData();
+            formData.append('id_objetogasto', this.form.id_objetogasto);
+            formData.append('id_factura', this.form.id_factura);
+            formData.append('numero_de_factura', this.form.numero_de_factura);
+            formData.append('numero_partida', this.form.numero_partida);
+            formData.append('descripcion', this.form.descripcion);
+            formData.append('precio_unitario', this.form.precio_unitario);
+            formData.append('iva', this.form.iva);
+            formData.append('importe_con_iva', this.form.importe_con_iva);
+            formData.append('cantidad', this.form.cantidad);
+            formData.append('unidad_medida', this.form.unidad_medida);
+            formData.append('total_ingreso', this.form.total_ingreso);
+
+            // Agregar archivos al FormData
+            this.form.foto_articulo.forEach((file) => {
+                formData.append('foto_articulo', file);
+            });
+
+            try {
+                // Registrar el artículo
+                const response = await api.post('/articulos', formData, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
+
+                if (response.status === 201) {
+                    // Calcular nueva cantidad y total de la factura
+                    const cantidadUsada = parseFloat(this.form.cantidad);
+                    const totalUsado = parseFloat(this.form.total_ingreso);
+                    const cantidadActual = parseFloat(facturaActual.cantidad);
+                    const totalActual = parseFloat(facturaActual.total);
+                    
+                    const nuevaCantidad = Math.max(0, cantidadActual - cantidadUsada);
+                    const nuevoTotal = Math.max(0, totalActual - totalUsado);
+
+                    // Actualizar la cantidad y total en la factura
+                    const facturaActualizada = await this.updateFacturaCantidad(
+                        this.form.id_factura, 
+                        nuevaCantidad, 
+                        nuevoTotal
+                    );
+                    this.showModal = true;
+                    this.mostrarModal();
+                    this.buttonType = tipo;
+
+                    if (facturaActualizada) {
+                        // Actualizar la factura en el array local
+                        const index = this.facturas.findIndex(f => f.id == this.form.id_factura);
+                        if (index !== -1) {
+                            this.facturas[index].cantidad = nuevaCantidad;
+                            this.facturas[index].total = nuevoTotal;
+                            
+                            // Si la cantidad llega a 0, marcar como completamente registrada
+                            if (nuevaCantidad === 0) {
+                                this.facturas[index].registrada_completa = true;
+                            }
+                        }
+                        
+                        this.showAlert(
+                            `Artículo registrado exitosamente. Cantidad restante: ${nuevaCantidad}, Total restante: $${nuevoTotal.toFixed(2)}`, 
+                            "success"
+                        );
+                    } else {
+                        this.showAlert("Artículo registrado, pero hubo un error al actualizar la factura", "warning");
+                    }
+
+                    // Mostrar modal y configurar redirección
+                    this.showModal = true;
+                    this.mostrarModal();
+                    this.buttonType = tipo;
+                    
+                    // Limpiar formulario
+                    this.resetForm();
+                }
+            } catch (error) {
+                console.error('Error al enviar el formulario:', error);
+                if (error.response) {
+                    this.showAlert(`Error: ${error.response.data.message || 'Hubo un error al enviar el formulario.'}`, "error");
+                } else if (error.request) {
+                    this.showAlert('No se recibió respuesta del servidor. Por favor, verifica tu conexión a internet.', 'error');
+                } else {
+                    this.showAlert('Hubo un error al configurar la solicitud. Por favor, intenta nuevamente.', "error");
+                }
+            }
+        },
+
+        // Método registerAllArticles actualizado
         async registerAllArticles() {
             try {
                 if (this.articulosTabla.length === 0) {
@@ -497,8 +664,6 @@ export default {
                     return;
                 }
 
-               
-
                 // Enviar artículos
                 const requests = this.articulosTabla.map(articulo => {
                     const formData = new FormData();
@@ -513,7 +678,7 @@ export default {
                         }
                     });
 
-                    return axios.post('http://localhost:3000/api/articulos', formData, {
+                    return api.post('/articulos', formData, {
                         headers: {
                             'Content-Type': 'multipart/form-data',
                             'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -524,18 +689,30 @@ export default {
                 const responses = await Promise.all(requests);
 
                 if (responses.every(r => r.status === 201)) {
+                    // Actualizar la cantidad y total de la factura a 0 (ya que se registraron todos los artículos)
+                    const facturaActualizada = await this.updateFacturaCantidad(factura.id, 0, 0);
+                    
+                    if (facturaActualizada) {
+                        // Actualizar la factura en el array local
+                        const index = this.facturas.findIndex(f => f.id == factura.id);
+                        if (index !== -1) {
+                            this.facturas[index].cantidad = 0;
+                            this.facturas[index].total = 0;
+                            this.facturas[index].registrada_completa = true; // Marcar como completamente registrada
+                        }
+                    }
+
                     this.mostrarModal();
                     this.articulosTabla = [];
                     this.facturaBloqueada = null;
                     this.resetForm();
-                    this.showAlert("Artículos registrados exitosamente", "success");
+                    this.showAlert("Artículos registrados exitosamente. Factura completamente procesada.", "success");
                 }
             } catch (error) {
                 console.error('Error:', error);
                 this.showAlert('Error al registrar artículos', "error");
             }
         },
-
         resetForm(keepFactura = false) {
             this.form = {
                 id_objetogasto: "",
@@ -604,7 +781,7 @@ export default {
 
                 try {
                     // Obtener todos los usuarios de la API
-                    const response = await fetch('http://localhost:3000/api/personas');
+                    const response = await api.get('/personas');
                     const users = await response.json();
 
                     // Buscar el usuario logueado por email
@@ -628,7 +805,7 @@ export default {
 
                         if (imageFileName) {
                             // Construir la URL completa para la imagen
-                            this.profileImage = `http://localhost:3000/api/users-files/${imageFileName}`;
+                            this.profileImage = `http://192.168.10.31:3000/api/users-files/${imageFileName}`;
                         } else {
                             // Usar una imagen por defecto si no hay imagen en la API
                             this.profileImage = "../assets/UserHombre.png";
@@ -647,7 +824,7 @@ export default {
         },
         async loadObjetosGasto() {
             try {
-                const response = await axios.get('http://localhost:3000/api/objetoGastos');
+                const response = await api.get('/objetoGastos');
                 this.objetosGasto = response.data.map(objeto => {
                     if (!objeto.numero_partida) {
                         console.warn('Objeto de gasto sin número de partida:', objeto);
@@ -661,7 +838,7 @@ export default {
         },
         async loadFacturas() {
             try {
-                const response = await axios.get('http://localhost:3000/api/facturas');
+                const response = await api.get('/facturas');
                 this.facturas = response.data.map(factura => {
                     if (!factura.numero_de_factura) {
                         console.warn('Factura sin número de factura:', factura);
@@ -803,86 +980,7 @@ export default {
                 !f.registrada_completa
             );
         },
-        async registerExistencia(tipo) {
-            // Validar campos obligatorios
-            const camposObligatorios = [
-                { campo: 'numero_partida', mensaje: 'Número de partida' },
-                { campo: 'numero_de_factura', mensaje: 'Número de factura' },
-                { campo: 'descripcion', mensaje: 'Descripción del artículo' },
-                { campo: 'precio_unitario', mensaje: 'Importe sin IVA' },
-                { campo: 'iva', mensaje: 'IVA' },
-                { campo: 'importe_con_iva', mensaje: 'Importe con IVA' },
-                { campo: 'cantidad', mensaje: 'Cantidad' },
-                { campo: 'unidad_medida', mensaje: 'Unidad de medida' },
-                { campo: 'total_ingreso', mensaje: 'Total de ingreso' }
-            ];
-
-            for (const { campo, mensaje } of camposObligatorios) {
-                if (!this.form[campo]) {
-                    this.showAlert(`Por favor, completa el campo: ${mensaje}`, "error");
-                    return;
-                }
-            }
-
-            // Validar que el número de partida sea válido
-            if (!this.validarNumeroPartida()) {
-                this.showAlert(this.errorNumeroPartida || "El número de partida no es válido.", "error");
-                return;
-            }
-
-            // Validar que el número de factura sea válido
-            if (!await this.validarNumeroFactura()) {
-                this.showAlert(this.errorNumeroFactura || "El número de factura no es válido.", "error");
-                return;
-            }
-
-            if (this.form.foto_articulo.length === 0) {
-                this.showAlert("Por favor, agrega una foto del artículo.", "error");
-                return;
-            }
-
-            // Crear FormData para enviar archivos y datos
-            const formData = new FormData();
-            formData.append('id_objetogasto', this.form.id_objetogasto);
-            formData.append('id_factura', this.form.id_factura);
-            formData.append('numero_de_factura', this.form.numero_de_factura);
-            formData.append('numero_partida', this.form.numero_partida);
-            formData.append('descripcion', this.form.descripcion);
-            formData.append('precio_unitario', this.form.precio_unitario);
-            formData.append('iva', this.form.iva);
-            formData.append('importe_con_iva', this.form.importe_con_iva);
-            formData.append('cantidad', this.form.cantidad);
-            formData.append('unidad_medida', this.form.unidad_medida);
-            formData.append('total_ingreso', this.form.total_ingreso);
-
-            // Agregar archivos al FormData
-            this.form.foto_articulo.forEach((file) => {
-                formData.append('foto_articulo', file);
-            });
-
-            try {
-                const response = await axios.post('http://localhost:3000/api/articulos', formData, {
-                    headers: {
-                        'Content-Type': 'multipart/form-data'
-                    }
-                });
-
-                if (response.status === 201) {
-                    this.showModal = true;
-                    this.mostrarModal();
-                    this.buttonType = tipo;
-                }
-            } catch (error) {
-                console.error('Error al enviar el formulario:', error);
-                if (error.response) {
-                    this.showAlert(`Error: ${error.response.data.message || 'Hubo un error al enviar el formulario.'}`, "error");
-                } else if (error.request) {
-                    this.showAlert('No se recibió respuesta del servidor. Por favor, verifica tu conexión a internet.', 'error');
-                } else {
-                    this.showAlert('Hubo un error al configurar la solicitud. Por favor, intenta nuevamente.', "error");
-                }
-            }
-        },
+        
         navigateTo(page) {
             console.log(`Navegando a ${page}`);
             this.$router.push({ name: page }); // Asegúrate de que las rutas estén definidas con `name`.
@@ -902,12 +1000,17 @@ export default {
                 this.$router.push({ name: 'existencia' });
             } else if (this.buttonType === 'bien') {
                 this.$router.push({ name: 'listaalmacen' });
-            }
+            } 
+            this.cerrarModal();
         },
+            
+           
         closeModal() {
             this.showModal = false;
             this.$router.push('/existencia'); // Redirigir a la página de pólizas
         },
+        
+
     },
 };
 </script>
@@ -1375,136 +1478,19 @@ tr:hover {
     cursor: pointer;
 }
 
+.page-wrapper {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    background-color: #f5f5f5;
+}
 
 .container {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    background: white;
-    flex-direction: column;
-    color: white;
-}
-
-/* Menú de navegación */
-.navbar {
-    position: 0;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 30px 20px;
-    background: #691B31;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-}
-
-.navbar-left {
     flex: 1;
-    display: flex;
-    align-items: center;
-}
-
-.icon-back {
-    font-size: 24px;
-    cursor: pointer;
-    margin-right: 10px;
-    color: white;
-}
-
-.navbar-center {
-    flex: 3;
-    text-align: center;
-}
-
-.navbar-center h1 {
-    margin: 0;
-    font-size: 24px;
-}
-
-.navbar-center p {
-    margin: 0;
-    font-size: 18px;
-}
-
-.navbar-right {
-    flex: 1;
-    display: flex;
-    justify-content: flex-end;
-}
-
-.user-profile {
-    display: flex;
-    align-items: center;
-}
-
-.profile-pic {
-    border-radius: 50%;
-    width: 40px;
-    height: 40px;
-    margin-right: 10px;
-}
-
-.user-info p {
-    margin: 0;
-    font-weight: bold;
-}
-
-.user-info span {
-    font-size: 12px;
-    color: #ddd;
-}
-
-/* Barra de navegación amarilla */
-.sub-navbar {
-    display: flex;
-    justify-content: center;
-    background: linear-gradient(to right, #FFFFFF, #DDC9A3);
-    /* Degradado de izquierda a derecha */
-    padding: 10px 0;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-}
-
-.nav-item {
-    position: relative;
-    margin: 0 20px;
-    cursor: pointer;
-    font-size: 16px;
-    color: #691B31;
-}
-
-.nav-item:hover {
-    color: #590d22;
-}
-
-.dropdown-menu {
-    display: none;
-    position: absolute;
-    top: 100%;
-    left: 0;
-    background-color: #691B31;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    border-radius: 5px;
-    width: 150px;
-    z-index: 1;
-}
-
-.dropdown-menu button {
     width: 100%;
-    padding: 10px;
-    border: none;
-    background: #691B31;
-    color: white;
-    text-align: left;
-    font-size: 14px;
-}
-
-.dropdown-menu button:hover {
-    background: #590d22;
-}
-
-.nav-item:hover .dropdown-menu {
-    display: block;
+    padding: 20px;
+    background-color: #f5f5f5;
+    min-height: calc(100vh - 140px);
 }
 
 /* Formulario */
@@ -1556,7 +1542,6 @@ button:hover {
     justify-content: center;
 }
 
-
 label {
     display: block;
     margin-bottom: 5px;
@@ -1583,7 +1568,7 @@ a {
 .form-field {
     flex: 1;
     /* Cada campo ocupa un 100% del ancho disponible dentro de la fila */
-    min-width: 200px;
+    min-width: 150px;
     /* Establece un ancho mínimo para que no se colapse */
 
 }
@@ -1647,4 +1632,90 @@ a {
 .dropzone input[type="file"] {
     display: none;
 }
+.iva-field {
+        display: flex;
+        flex-direction: column;
+    }
+
+      .iva-checkbox-container {
+        display: flex;
+        align-items: center;
+        margin-bottom: -3px;
+    }
+
+    .checkbox-label {
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 500;
+        color: #333;
+        margin-right: 15px;
+    }
+
+    .checkbox-label input[type="checkbox"] {
+        display: none;
+    }
+
+    .checkmark {
+        height: 18px;
+        width: 18px;
+        background-color: #fff;
+        border: 2px solid #ddd;
+        border-radius: 4px;
+        margin-right: 8px;
+        position: relative;
+        transition: all 0.3s ease;
+    }
+
+    .checkbox-label:hover .checkmark {
+        border-color: #007bff;
+    }
+
+    .checkbox-label input:checked ~ .checkmark {
+        background-color: #007bff;
+        border-color: #007bff;
+    }
+
+    .checkmark:after {
+        content: "";
+        position: absolute;
+        display: none;
+    }
+
+    .checkbox-label input:checked ~ .checkmark:after {
+        display: block;
+    }
+
+    .checkbox-label .checkmark:after {
+        left: 5px;
+        top: 1px;
+        width: 5px;
+        height: 10px;
+        border: solid white;
+        border-width: 0 2px 2px 0;
+        transform: rotate(45deg);
+    }
+
+    .iva-checkbox-container label[for="iva"] {
+        font-size: 14px;
+        font-weight: 500;
+        color: #333;
+        margin: 0;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .iva-checkbox-container {
+            flex-direction: column;
+            align-items: flex-start;
+            margin-bottom: 10px;
+        }
+        
+        .checkbox-label {
+            margin-right: 0;
+            margin-bottom: 5px;
+            font-size: 13px;
+        }
+    }
 </style>
